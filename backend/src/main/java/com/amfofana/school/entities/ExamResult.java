@@ -1,5 +1,6 @@
 package com.amfofana.school.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,10 +19,12 @@ public class ExamResult {
 
     @ManyToOne
     @JoinColumn(name = "exam_id", nullable = false)
+    @JsonIgnoreProperties({"classe", "teacher"})
     private Exam exam;
 
     @ManyToOne
     @JoinColumn(name = "student_id", nullable = false)
+    @JsonIgnoreProperties({"teachingClasses", "enrolledClasses", "password"})
     private User student;
 
     @Column(nullable = false)
@@ -35,6 +38,8 @@ public class ExamResult {
     private Status status = Status.DRAFT; // Default to DRAFT
 
     public enum Status {
-        DRAFT, SUBMITTED
+        DRAFT, SUBMITTED, GRADED
     }
+
+    private String letterGrade;
 }

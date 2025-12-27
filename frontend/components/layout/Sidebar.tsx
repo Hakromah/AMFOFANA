@@ -30,6 +30,7 @@ export default function Sidebar({ menuItems }: SidebarProps) {
       window.location.href = '/login';
     } catch (error) {
       toast.error('Logout failed. Please try again.');
+      console.log(error)
     }
   };
 

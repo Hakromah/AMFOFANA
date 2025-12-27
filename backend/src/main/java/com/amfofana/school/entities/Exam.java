@@ -1,9 +1,10 @@
 package com.amfofana.school.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -23,11 +24,23 @@ public class Exam {
     private String name;
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE) // ADD THIS HERE
     @JoinColumn(name = "class_id", nullable = false)
+    @ToString.Exclude // ADD THIS
+    @EqualsAndHashCode.Exclude // ADD THIS
+    @JsonIgnoreProperties({"teachers", "students"})
     private Classe classe;
 
     @ManyToOne
+    @JoinColumn(name = "teacher_id") // The specific teacher who created it
+    @JsonIgnoreProperties({"teachingClasses", "enrolledClasses", "password"})
+    private User teacher;
+
+    @ManyToOne
     @JoinColumn(name = "subject_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE) // ADD THIS HERE
+    @ToString.Exclude // ADD THIS
+    @EqualsAndHashCode.Exclude // ADD THIS
     private Subject subject;
 
     @Column(nullable = false)
@@ -37,5 +50,5 @@ public class Exam {
     private LocalTime startTime; // Added start time
 
     @Column(nullable = false)
-    private LocalTime endTime;   // Added end time
+    private LocalTime endTime;    // Added end time
 }

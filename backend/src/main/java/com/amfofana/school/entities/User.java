@@ -3,9 +3,7 @@ package com.amfofana.school.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -55,12 +53,16 @@ public class User {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "teacher")
+    @ManyToMany(mappedBy = "teachers") // Must match the field name in Classe
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @JsonIgnore
     private Set<Classe> teachingClasses = new HashSet<>();
 
     @ManyToMany(mappedBy = "students")
     @OnDelete(action = OnDeleteAction.CASCADE) // ADD THIS HERE
     @JsonIgnore
+    @ToString.Exclude // ADD THIS
+    @EqualsAndHashCode.Exclude // ADD THIS
     private Set<Classe> enrolledClasses = new HashSet<>();
 }

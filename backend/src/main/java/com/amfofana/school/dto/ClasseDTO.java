@@ -9,6 +9,6 @@ public class ClasseDTO {
     private Long id;
     private String name;
     private String grade;
-    private UserDTO teacher;
+    private Set<UserDTO> teachers;
     private Set<UserDTO> students;
 }

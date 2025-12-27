@@ -66,7 +66,7 @@ export default function TeacherProfilePage() {
     fetchUserData();
   }, [profileForm]);
 
-  const onProfileSubmit = async (values: z.infer<typeof profileFormSchema>) => { 
+  const onProfileSubmit = async (values: z.infer<typeof profileFormSchema>) => {
     try {
       await api.put('/teacher/profile', values);
       toast.success('Profile updated successfully');

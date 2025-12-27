@@ -185,9 +185,13 @@ public class AdminController {
         return ResponseEntity.ok().build();
     }
 
-    // Results Filtering
+
+    // Centralized Administrative Filtering
     @GetMapping("/results/filter")
-    public ResponseEntity<List<ExamResult>> filterResults(@RequestParam(required = false) Long studentId) {
-        return ResponseEntity.ok(adminService.filterResults(studentId));
+    public ResponseEntity<List<Map<String, Object>>> filterResults(
+            @RequestParam(required = false) String studentQuery, // Matches frontend key
+            @RequestParam(required = false) Long classId) {
+
+        return ResponseEntity.ok(adminService.filterResultsForAdmin(studentQuery, classId));
     }
 }

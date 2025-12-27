@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/student")
@@ -44,10 +45,15 @@ public class StudentController {
         return ResponseEntity.ok(studentService.getAttendanceByStudent(user.getId()));
     }
 
+    //    @GetMapping("/results")
+//    public ResponseEntity<List<ExamResult>> getStudentResults(@AuthenticationPrincipal UserDetails userDetails) {
+//        User user = getAuthenticatedUser(userDetails);
+//        return ResponseEntity.ok(studentService.getResultsByStudent(user.getId()));
+//    }
     @GetMapping("/results")
-    public ResponseEntity<List<ExamResult>> getStudentResults(@AuthenticationPrincipal UserDetails userDetails) {
-        User user = getAuthenticatedUser(userDetails);
-        return ResponseEntity.ok(studentService.getResultsByStudent(user.getId()));
+    public List<Map<String, Object>> getResultsByStudent(@AuthenticationPrincipal UserDetails userDetails) {
+        User student = getAuthenticatedUser(userDetails);
+        return studentService.getResultsByStudent(student.getId());
     }
 
     @GetMapping("/exams")

@@ -6,13 +6,11 @@ import com.amfofana.school.dto.UserDTO;
 import com.amfofana.school.entities.*;
 import com.amfofana.school.repositories.*;
 import jakarta.transaction.Transactional;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,12 +28,13 @@ public class AdminService {
     private final PasswordEncoder passwordEncoder;
     private final ExamResultRepository examResultRepository;
 
+
     public AdminService(UserRepository userRepository, ClasseRepository classeRepository,
                         TeacherProfileRepository teacherProfileRepository, StudentProfileRepository studentProfileRepository,
                         AttendanceRepository attendanceRepository, ExamRepository examRepository,
                         SubjectRepository subjectRepository, LearningMaterialRepository learningMaterialRepository,
                         TimetableRepository timetableRepository, PasswordEncoder passwordEncoder,
-                        ExamResultRepository examResultRepository) {
+                        @Lazy ExamResultRepository examResultRepository) {
         this.userRepository = userRepository;
         this.classeRepository = classeRepository;
         this.teacherProfileRepository = teacherProfileRepository;
@@ -93,7 +92,7 @@ public class AdminService {
             // IMPORTANT: Unset this teacher from classes they lead
             // This avoids the "referenced from table classes" error
             for (Classe classe : user.getTeachingClasses()) {
-                classe.setTeacher(null);
+                classe.setTeachers(null);
             }
         } else if (user.getRole() == Role.STUDENT) {
             studentProfileRepository.findByUser(user).ifPresent(studentProfileRepository::delete);
@@ -135,13 +134,15 @@ public class AdminService {
     // Exam Management
     public List<Exam> getExams(Long teacherId, Long classId) {
         if (teacherId != null) {
-            User teacher = userRepository.findById(teacherId).orElseThrow(() -> new RuntimeException("Teacher not found"));
-            return examRepository.findByClasse_Teacher(teacher);
+            return examRepository.findExamsByTeacherId(teacherId);
         }
+
         if (classId != null) {
-            Classe classe = classeRepository.findById(classId).orElseThrow(() -> new RuntimeException("Class not found"));
+            Classe classe = classeRepository.findById(classId)
+                    .orElseThrow(() -> new RuntimeException("Class not found"));
             return examRepository.findByClasse(classe);
         }
+
         return examRepository.findAll();
     }
 
@@ -201,18 +202,23 @@ public class AdminService {
     }
 
     // Assignments
+    //ASSIGN TEACHER TO A CLASS
     public void assignTeacherToClass(Long teacherId, Long classId) {
-        User teacher = userRepository.findById(teacherId).orElseThrow(() -> new RuntimeException("Teacher not found"));
-        Classe classe = classeRepository.findById(classId).orElseThrow(() -> new RuntimeException("Class not found"));
+        User teacher = userRepository.findById(teacherId)
+                .orElseThrow(() -> new RuntimeException("Teacher not found"));
+        Classe classe = classeRepository.findById(classId)
+                .orElseThrow(() -> new RuntimeException("Class not found"));
 
-        if (classe.getTeacher() != null && classe.getTeacher().getId().equals(teacherId)) {
-            throw new RuntimeException("Teacher is already assigned to this class");
-        }
+        // Add to the collection instead of overwriting
+        classe.getTeachers().add(teacher);
 
-        classe.setTeacher(teacher);
+        // Maintain bidirectional link
+        teacher.getTeachingClasses().add(classe);
+
         classeRepository.save(classe);
     }
 
+    @Transactional
     public void assignStudentToClass(Long studentId, Long classId) {
         User student = userRepository.findById(studentId).orElseThrow(() -> new RuntimeException("Student not found"));
         Classe classe = classeRepository.findById(classId).orElseThrow(() -> new RuntimeException("Class not found"));
@@ -221,7 +227,10 @@ public class AdminService {
             throw new RuntimeException("Student is already assigned to this class");
         }
 
+        // Update both sides!
         classe.getStudents().add(student);
+        student.getEnrolledClasses().add(classe);
+
         classeRepository.save(classe);
     }
 
@@ -260,12 +269,34 @@ public class AdminService {
         userRepository.save(user);
     }
 
-    // Results Filtering
-    public List<ExamResult> filterResults(Long studentId) {
-        if (studentId != null) {
-            return examResultRepository.findByStudent_Id(studentId);
-        }
-        return examResultRepository.findAll();
+    // Inside your AdminService.java
+    public List<Map<String, Object>> filterResultsForAdmin(String studentQuery, Long classId) {
+        // 1. Fetch results using the native query
+        List<ExamResult> rawResults = examResultRepository.findByAdminFilters(studentQuery, classId);
+
+        return rawResults.stream().map(result -> {
+            Map<String, Object> dto = new HashMap<>();
+            dto.put("id", result.getId());
+            dto.put("marks", result.getMarks());
+            dto.put("status", result.getStatus());
+            dto.put("grade", result.getLetterGrade() != null ? result.getLetterGrade() : "N/A");
+
+            // Use Map.of to prevent any remaining bytea/lazy loading issues
+            dto.put("student", Map.of(
+                    "name", result.getStudent().getName(),
+                    "userId", result.getStudent().getUserId()
+            ));
+
+            dto.put("exam", Map.of(
+                    "name", result.getExam().getName(),
+                    "subject", Map.of("name", result.getExam().getSubject().getName())
+            ));
+
+            Double avg = examResultRepository.getAverageByExamId(result.getExam().getId());
+            dto.put("classAverage", avg != null ? Math.round(avg * 100.0) / 100.0 : 0.0);
+
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     // DTO Converters
@@ -289,16 +320,29 @@ public class AdminService {
 
     private ClasseDTO convertToClasseDTO(Classe classe) {
         if (classe == null) return null;
+
         ClasseDTO classeDTO = new ClasseDTO();
         classeDTO.setId(classe.getId());
         classeDTO.setName(classe.getName());
         classeDTO.setGrade(classe.getGrade());
-        classeDTO.setTeacher(convertToUserDTO(classe.getTeacher()));
+        // 1. Map the Set of Teachers
+        if (classe.getTeachers() != null) {
+            classeDTO.setTeachers(classe.getTeachers().stream()
+                    .map(this::convertToUserDTO)
+                    .collect(Collectors.toSet()));
+        } else {
+            classeDTO.setTeachers(Collections.emptySet());
+        }
+
+        // 2. Map the Set of Students
         if (classe.getStudents() != null) {
-            classeDTO.setStudents(classe.getStudents().stream().map(this::convertToUserDTO).collect(Collectors.toSet()));
+            classeDTO.setStudents(classe.getStudents().stream()
+                    .map(this::convertToUserDTO)
+                    .collect(Collectors.toSet()));
         } else {
             classeDTO.setStudents(Collections.emptySet());
         }
+
         return classeDTO;
     }
 }

@@ -3,6 +3,8 @@ package com.amfofana.school.entities;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -22,36 +24,30 @@ public class Classe {
 
     private String grade;
 
-//    @ManyToOne
-//    @JoinColumn(name = "teacher_id")
-//    @OnDelete(action = OnDeleteAction.SET_NULL)
-//    @JsonIgnoreProperties({"teachingClasses", "enrolledClasses"})
-//    private User teacher;
-//
-//    @ManyToMany
-//    @JoinTable(
-//            name = "classe_students",
-//            joinColumns = @JoinColumn(name = "classe_id", referencedColumnName = "id"),
-//            inverseJoinColumns = @JoinColumn(name = "student_id", referencedColumnName = "id")
-//    )
-//    @JsonIgnoreProperties({"teachingClasses", "enrolledClasses"})
-//    private Set<User> students = new HashSet<>();
 
-    // For the Teacher (ManyToOne)
-    @ManyToOne
-    @JoinColumn(name = "teacher_id")
-    @OnDelete(action = OnDeleteAction.SET_NULL)
-    private User teacher;
+    // CHANGE: Changed from @ManyToOne to @ManyToMany
+    @ManyToMany
+    @JoinTable(
+            name = "classe_teachers", // New join table for teachers
+            joinColumns = @JoinColumn(name = "classe_id"),
+            inverseJoinColumns = @JoinColumn(name = "teacher_id")
+    )
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnoreProperties({"teachingClasses", "enrolledClasses", "password"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<User> teachers = new HashSet<>(); // Changed to a Set
 
-    // For the Students (ManyToMany)
+    // Students remains the same
     @ManyToMany
     @JoinTable(
             name = "classe_students",
             joinColumns = @JoinColumn(name = "classe_id"),
             inverseJoinColumns = @JoinColumn(name = "student_id")
     )
-    // ADD THIS: Hibernate will now handle the join table cleanup
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonIgnoreProperties({"teachingClasses", "enrolledClasses"})
+    @JsonIgnoreProperties({"enrolledClasses", "teachingClasses", "password"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<User> students = new HashSet<>();
 }

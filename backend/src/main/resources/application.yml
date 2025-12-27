@@ -6,7 +6,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update # Reverted back to update
+      ddl-auto: update  # Reverted back to update
     show-sql: true
 
 jwt:
