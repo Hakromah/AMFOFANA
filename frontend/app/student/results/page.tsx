@@ -151,7 +151,7 @@ export default function StudentResultsPage() {
       doc.setFont("helvetica", "bold");
       doc.text("Examination Detailed Record", 14, (doc as any).lastAutoTable.finalY + 15);
 
-      autoTable(doc, {
+      autoTable(doc, { 
          startY: (doc as any).lastAutoTable.finalY + 20,
          head: [["Subject", "Classroom", "Score", "Result"]],
          body: results.map(r => [

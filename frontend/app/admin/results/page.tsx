@@ -89,7 +89,7 @@ export default function AdminResultsPage() {
     fetchResults();
   }, [fetchResults]);
 
-  // --- TRANSCRIPT GENERATOR ---
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   const generateTranscriptPDF = () => {
     if (results.length === 0) {
       toast.error("No data found to generate transcript.");
@@ -100,50 +100,172 @@ export default function AdminResultsPage() {
     const student = firstResult.student;
     const doc = new jsPDF();
     const date = new Date().toLocaleDateString();
+    const schoolFullName = "AMF INTERNATIONAL EXCELLENCE SCHOOL";
 
-    // 1. Header & Official Branding
-    doc.setFillColor(30, 41, 59); // Dark Slate
-    doc.rect(0, 0, 210, 40, 'F');
+    // Calculate Overview Statistics for the Summary Section
+    const totalScore = results.reduce((acc, curr) => acc + (curr.marks || 0), 0);
+    const averageScore = results.length > 0 ? (totalScore / results.length).toFixed(1) : '0';
+    const isPassingOverall = parseFloat(averageScore) >= 50;
+
+    // 1. Header & Official Branding (Matched to Student Style)
+    doc.setFillColor(37, 99, 235); // Primary Blue
+    doc.rect(14, 12, 25, 25, 'F');
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(22);
-    doc.text("OFFICIAL ACADEMIC TRANSCRIPT", 105, 20, { align: 'center' });
     doc.setFontSize(10);
-    doc.text("AMF INTERNATIONAL EXCELLENCE SCHOOL - ADMINISTRATIVE RECORD", 105, 30, { align: 'center' });
+    doc.text("AMF", 21, 22);
+    doc.text("ACADEMIC", 16, 28);
 
-    // 2. Student Info
     doc.setTextColor(30, 41, 59);
-    doc.setFontSize(12);
+    doc.setFontSize(18);
     doc.setFont("helvetica", "bold");
-    doc.text("STUDENT INFORMATION", 14, 50);
+    doc.text(schoolFullName, 45, 20);
+
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100);
+    doc.text("Official Academic Transcript | Administrative Record", 45, 26);
+    doc.text(`Generated on: ${date}`, 45, 31);
+
+    doc.setDrawColor(226, 232, 240);
+    doc.line(14, 42, 196, 42);
+
+    // 2. Student Info Section (Dynamic Data)
+    doc.setFontSize(12);
+    doc.setTextColor(30, 41, 59);
+    doc.setFont("helvetica", "bold");
+    doc.text("OFFICIAL STUDENT TRANSCRIPT", 14, 52);
 
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.text(`Name: ${student.name?.toUpperCase() || 'N/A'}`, 14, 58);
-    doc.text(`Student ID: ${student.userId || student.id || 'N/A'}`, 14, 64);
-    doc.text(`Report Date: ${date}`, 130, 58);
+    doc.text(`Full Name:`, 14, 62);
+    doc.setFont("helvetica", "bold");
+    doc.text(student.name?.toUpperCase() || 'N/A', 45, 62);
 
-    // 3. Results Table
+    doc.setFont("helvetica", "normal");
+    doc.text(`Student ID:`, 14, 68);
+    doc.setFont("helvetica", "bold");
+    doc.text(String(student.userId || student.id || 'N/A'), 45, 68);
+
+    doc.setFont("helvetica", "normal");
+    doc.text(`Cumulative Avg:`, 130, 62);
+    doc.text(`${averageScore}%`, 165, 62);
+    doc.text(`Academic Status:`, 130, 68);
+
+    // Color-coded Status
+    doc.setTextColor(isPassingOverall ? 22 : 220, isPassingOverall ? 163 : 38, 74);
+    doc.text(isPassingOverall ? 'GOOD STANDING' : 'PROBATION', 165, 68);
+
+    // 3. Performance Summary Table
     autoTable(doc, {
-      startY: 75,
-      head: [["Exam/Subject", "Score", "Class Avg", "Grade", "Status"]],
-      body: results.map(r => [
-        r.exam?.name || 'N/A',
-        `${r.marks}%`,
-        r.classAverage ? `${Number(r.classAverage).toFixed(2)}%` : 'N/A',
-        r.grade || calculateLetterGrade(r.marks),
-        r.status
-      ]),
-      theme: 'striped',
-      headStyles: { fillColor: [41, 128, 185] },
-      styles: { fontSize: 9 }
+      startY: 78,
+      head: [["Total Examinations", "Cumulative Average", "Final Letter Grade"]],
+      body: [[
+        results.length,
+        `${averageScore}%`,
+        calculateLetterGrade(parseFloat(averageScore))
+      ]],
+      theme: 'grid',
+      headStyles: { fillColor: [30, 41, 59] },
+      styles: { halign: 'center', fontSize: 11 }
     });
 
-    const finalY = (doc as any).lastAutoTable.finalY + 20;
-    doc.text("__________________________", 14, finalY);
+    // 4. Detailed Results Record (With PASSED/FAILED colors)
+    doc.setTextColor(30, 41, 59);
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Examination Detailed Record", 14, (doc as any).lastAutoTable.finalY + 15);
+
+    autoTable(doc, {
+      startY: (doc as any).lastAutoTable.finalY + 20,
+      head: [["Subject", "Score", "Class Avg", "Grade", "Outcome"]],
+      body: results.map(r => [
+        r.exam?.name || 'N/A',
+        `${r.marks}`,
+        r.classAverage ? `${Number(r.classAverage).toFixed(1)}%` : 'N/A',
+        r.grade || calculateLetterGrade(r.marks),
+        r.marks >= 50 ? "PASSED" : "FAILED"
+      ]),
+      headStyles: { fillColor: [37, 99, 235] },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      didParseCell: (data) => {
+        if (data.section === 'body' && data.column.index === 4) {
+          const text = data.cell.raw as string;
+          if (text === "FAILED") data.cell.styles.textColor = [220, 38, 38];
+          if (text === "PASSED") data.cell.styles.textColor = [22, 163, 74];
+        }
+      }
+    });
+
+    // 5. Verification Footer (Administrator Version)
+    const finalY = (doc as any).lastAutoTable.finalY + 35;
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.line(14, finalY, 70, finalY);
     doc.text("Authorized Administrator", 14, finalY + 5);
+    doc.text("Official Seal of AMF International Excellence School", 14, finalY + 10);
+
+    doc.text("This is an official administrative record generated by the school management system.", 14, doc.internal.pageSize.height - 10);
 
     doc.save(`Admin_Transcript_${student.name || 'Student'}.pdf`);
+    toast.success("Professional Transcript Generated");
   };
+
+  // // --- TRANSCRIPT GENERATOR ---
+  // const generateTranscriptPDF = () => {
+  //   if (results.length === 0) {
+  //     toast.error("No data found to generate transcript.");
+  //     return;
+  //   }
+
+  //   const firstResult = results[0];
+  //   const student = firstResult.student;
+  //   const doc = new jsPDF();
+  //   const date = new Date().toLocaleDateString();
+
+  //   // 1. Header & Official Branding
+  //   doc.setFillColor(30, 41, 59); // Dark Slate
+  //   doc.rect(0, 0, 210, 40, 'F');
+  //   doc.setTextColor(255, 255, 255);
+  //   doc.setFontSize(22);
+  //   doc.text("OFFICIAL ACADEMIC TRANSCRIPT", 105, 20, { align: 'center' });
+  //   doc.setFontSize(10);
+  //   doc.text("AMF INTERNATIONAL EXCELLENCE SCHOOL - ADMINISTRATIVE RECORD", 105, 30, { align: 'center' });
+
+  //   // 2. Student Info
+  //   doc.setTextColor(30, 41, 59);
+  //   doc.setFontSize(12);
+  //   doc.setFont("helvetica", "bold");
+  //   doc.text("STUDENT INFORMATION", 14, 50);
+
+  //   doc.setFontSize(10);
+  //   doc.setFont("helvetica", "normal");
+  //   doc.text(`Name: ${student.name?.toUpperCase() || 'N/A'}`, 14, 58);
+  //   doc.text(`Student ID: ${student.userId || student.id || 'N/A'}`, 14, 64);
+  //   doc.text(`Report Date: ${date}`, 130, 58);
+
+  //   // 3. Results Table
+  //   autoTable(doc, {
+  //     startY: 75,
+  //     head: [["Exam/Subject", "Score", "Class Avg", "Grade", "Status"]],
+  //     body: results.map(r => [
+  //       r.exam?.name || 'N/A',
+  //       `${r.marks}%`,
+  //       r.classAverage ? `${Number(r.classAverage).toFixed(2)}%` : 'N/A',
+  //       r.grade || calculateLetterGrade(r.marks),
+  //       r.marks >= 50 ? 'PASSED' : 'FAILED',
+  //       // r.status
+  //     ]),
+  //     theme: 'striped',
+  //     headStyles: { fillColor: [41, 128, 185] },
+  //     styles: { fontSize: 9 }
+  //   });
+
+  //   const finalY = (doc as any).lastAutoTable.finalY + 20;
+  //   doc.text("__________________________", 14, finalY);
+  //   doc.text("Authorized Administrator", 14, finalY + 5);
+
+  //   doc.save(`Admin_Transcript_${student.name || 'Student'}.pdf`);
+  // };
 
   return (
     <div className="p-8 space-y-6">
@@ -160,7 +282,7 @@ export default function AdminResultsPage() {
           variant="outline"
           className="gap-2"
         >
-          <Download className="w-4 h-4" /> Export Student Transcript
+          <Download className="w-4 h-4 text-green-800" /> Export Student Transcript
         </Button>
       </div>
 
@@ -242,7 +364,7 @@ export default function AdminResultsPage() {
                   </div>
                 </TableCell>
                 <TableCell className="text-center font-medium text-slate-400">
-                  {r.classAverage ? `${Number(r.classAverage).toFixed(1)}%` : '—'}
+                  {r.classAverage ? `${Number(r.classAverage).toFixed(2)}%` : '—'}
                 </TableCell>
                 <TableCell className="text-center">
                   <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs border">

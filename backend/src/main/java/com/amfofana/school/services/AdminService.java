@@ -16,6 +16,19 @@ import java.util.stream.Collectors;
 @Service
 public class AdminService {
 
+    // Helper method to calculate grade if missing in DB
+    private String calculateGrade(Double marks) {
+        if (marks == null) return "N/A";
+        if (marks >= 90) return "AA";
+        if (marks >= 85) return "BA";
+        if (marks >= 80) return "BB";
+        if (marks >= 75) return "CB";
+        if (marks >= 70) return "CC";
+        if (marks >= 60) return "DC";
+        if (marks >= 50) return "DD";
+        return "FF";
+    }
+
     private final UserRepository userRepository;
     private final ClasseRepository classeRepository;
     private final TeacherProfileRepository teacherProfileRepository;
@@ -47,6 +60,7 @@ public class AdminService {
         this.passwordEncoder = passwordEncoder;
         this.examResultRepository = examResultRepository;
     }
+
 
     // User CRUD
     public User createUser(User user) {
@@ -269,9 +283,37 @@ public class AdminService {
         userRepository.save(user);
     }
 
-    // Inside your AdminService.java
+
+//    public List<Map<String, Object>> filterResultsForAdmin(String studentQuery, Long classId) {
+//        // 1. Fetch results using the native query
+//        List<ExamResult> rawResults = examResultRepository.findByAdminFilters(studentQuery, classId);
+//
+//        return rawResults.stream().map(result -> {
+//            Map<String, Object> dto = new HashMap<>();
+//            dto.put("id", result.getId());
+//            dto.put("marks", result.getMarks());
+//            dto.put("status", result.getStatus());
+//            dto.put("grade", result.getLetterGrade() != null ? result.getLetterGrade() : "N/A");
+//
+//            // Use Map.of to prevent any remaining bytea/lazy loading issues
+//            dto.put("student", Map.of(
+//                    "name", result.getStudent().getName(),
+//                    "userId", result.getStudent().getUserId()
+//            ));
+//
+//            dto.put("exam", Map.of(
+//                    "name", result.getExam().getName(),
+//                    "subject", Map.of("name", result.getExam().getSubject().getName())
+//            ));
+//
+//            Double avg = examResultRepository.getAverageByExamId(result.getExam().getId());
+//            dto.put("classAverage", avg != null ? Math.round(avg * 100.0) / 100.0 : 0.0);
+//
+//            return dto;
+//        }).collect(Collectors.toList());
+//    }
+
     public List<Map<String, Object>> filterResultsForAdmin(String studentQuery, Long classId) {
-        // 1. Fetch results using the native query
         List<ExamResult> rawResults = examResultRepository.findByAdminFilters(studentQuery, classId);
 
         return rawResults.stream().map(result -> {
@@ -279,17 +321,30 @@ public class AdminService {
             dto.put("id", result.getId());
             dto.put("marks", result.getMarks());
             dto.put("status", result.getStatus());
-            dto.put("grade", result.getLetterGrade() != null ? result.getLetterGrade() : "N/A");
 
-            // Use Map.of to prevent any remaining bytea/lazy loading issues
+            // --- IMPROVED GRADE LOGIC ---
+            // 1. Try to get the grade from the database
+            String grade = result.getLetterGrade();
+            // 2. If DB grade is null/empty, calculate it on the fly from the marks
+            if (grade == null || grade.trim().isEmpty()) {
+                grade = calculateGrade(result.getMarks());
+            }
+            dto.put("grade", grade);
+            // -----------------------------
+
             dto.put("student", Map.of(
                     "name", result.getStudent().getName(),
                     "userId", result.getStudent().getUserId()
             ));
 
+            // Ensure we handle potential null subject safely
+            String subjectName = (result.getExam().getSubject() != null)
+                    ? result.getExam().getSubject().getName()
+                    : "General";
+
             dto.put("exam", Map.of(
                     "name", result.getExam().getName(),
-                    "subject", Map.of("name", result.getExam().getSubject().getName())
+                    "subject", Map.of("name", subjectName)
             ));
 
             Double avg = examResultRepository.getAverageByExamId(result.getExam().getId());
@@ -298,7 +353,6 @@ public class AdminService {
             return dto;
         }).collect(Collectors.toList());
     }
-
     // DTO Converters
     private UserDTO convertToUserDTO(User user) {
         if (user == null) return null;
