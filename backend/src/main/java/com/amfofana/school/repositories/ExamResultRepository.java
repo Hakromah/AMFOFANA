@@ -46,6 +46,7 @@ public interface ExamResultRepository extends JpaRepository<ExamResult, Long> {
     @Query("SELECT AVG(r.marks) FROM ExamResult r WHERE r.exam.id = :examId AND r.status = 'SUBMITTED' OR r.status = 'CREDITED'")
     Double getAverageByExamId(@Param("examId") Long examId);
 
-    List<ExamResult> findByStudentIdAndStatus(Long studentId, ExamResult.Status status);
+    // Searches for exam results where the student's unique ID contains the search string
+    List<ExamResult> findByStudent_UserIdContainingIgnoreCase(Long userId);
 
 }
