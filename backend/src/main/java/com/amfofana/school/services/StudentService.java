@@ -12,6 +12,19 @@ import java.util.stream.Collectors;
 @Service
 public class StudentService {
 
+    // Helper method to calculate grade if missing in DB
+    private String calculateGrade(Double marks) {
+        if (marks == null) return "N/A";
+        if (marks >= 90) return "AA";
+        if (marks >= 85) return "BA";
+        if (marks >= 80) return "BB";
+        if (marks >= 75) return "CB";
+        if (marks >= 70) return "CC";
+        if (marks >= 60) return "DC";
+        if (marks >= 50) return "DD";
+        return "FF";
+    }
+
     private final ClasseRepository classeRepository;
     private final AttendanceRepository attendanceRepository;
     private final ExamResultRepository examResultRepository;
@@ -100,6 +113,32 @@ public class StudentService {
                     return dto;
                 })
                 .collect(Collectors.toList());
+    }
+
+    // Inside StudentService.java
+
+    public List<Map<String, Object>> getSemesterTranscript(Long studentId, String semester) {
+        List<ExamResult> results = examResultRepository.findByStudentIdAndSemester(studentId, semester);
+
+        // Filter only submitted results (don't show drafts to students)
+        Map<Long, List<ExamResult>> groupedBySubject = results.stream()
+                .filter(r -> r.getStatus() == ExamResult.Status.SUBMITTED)
+                .collect(Collectors.groupingBy(r -> r.getExam().getSubject().getId()));
+
+        return groupedBySubject.values().stream().map(subjectResults -> {
+            double finalScore = 0;
+            String name = subjectResults.get(0).getExam().getSubject().getName();
+
+            for (ExamResult r : subjectResults) {
+                finalScore += (r.getMarks() * (r.getExam().getWeight() / 100.0));
+            }
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("courseName", name);
+            map.put("finalScore", Math.round(finalScore * 100.0) / 100.0);
+            map.put("grade", calculateGrade(finalScore));
+            return map;
+        }).collect(Collectors.toList());
     }
 
     public List<Exam> getExamsByStudent(Long studentId) {

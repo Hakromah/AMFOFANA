@@ -22,4 +22,7 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
             "WHERE t.id = :teacherId")
     List<Exam> findExamsByTeacherId(@Param("teacherId") Long teacherId);
 
+    List<Exam> findBySemester(String semester);
+
+
 }

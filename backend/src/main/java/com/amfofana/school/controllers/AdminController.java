@@ -194,4 +194,25 @@ public class AdminController {
 
         return ResponseEntity.ok(adminService.filterResultsForAdmin(studentQuery, classId));
     }
+
+    // Semester-wide GPA and Aggregated Course Results
+    @GetMapping("/reports/semester-summary")
+    public ResponseEntity<Map<String, Object>> getStudentSemesterGPA(
+            @RequestParam Long studentId,
+            @RequestParam String semester) {
+        return ResponseEntity.ok(adminService.calculateSemesterGPA(studentId, semester));
+    }
+
+    @PutMapping("/semester/finalize")
+    public ResponseEntity<?> finalizeSemester(@RequestParam String semester) {
+        adminService.lockSemesterResults(semester);
+        return ResponseEntity.ok(Map.of("message", "Semester " + semester + " has been officially closed."));
+    }
+
+    // Close/Lock a semester to prevent further teacher edits
+    @PutMapping("/semester/lock")
+    public ResponseEntity<?> lockSemester(@RequestParam String semester) {
+        adminService.lockSemesterResults(semester);
+        return ResponseEntity.ok().build();
+    }
 }

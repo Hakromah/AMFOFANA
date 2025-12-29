@@ -283,36 +283,6 @@ public class AdminService {
         userRepository.save(user);
     }
 
-
-//    public List<Map<String, Object>> filterResultsForAdmin(String studentQuery, Long classId) {
-//        // 1. Fetch results using the native query
-//        List<ExamResult> rawResults = examResultRepository.findByAdminFilters(studentQuery, classId);
-//
-//        return rawResults.stream().map(result -> {
-//            Map<String, Object> dto = new HashMap<>();
-//            dto.put("id", result.getId());
-//            dto.put("marks", result.getMarks());
-//            dto.put("status", result.getStatus());
-//            dto.put("grade", result.getLetterGrade() != null ? result.getLetterGrade() : "N/A");
-//
-//            // Use Map.of to prevent any remaining bytea/lazy loading issues
-//            dto.put("student", Map.of(
-//                    "name", result.getStudent().getName(),
-//                    "userId", result.getStudent().getUserId()
-//            ));
-//
-//            dto.put("exam", Map.of(
-//                    "name", result.getExam().getName(),
-//                    "subject", Map.of("name", result.getExam().getSubject().getName())
-//            ));
-//
-//            Double avg = examResultRepository.getAverageByExamId(result.getExam().getId());
-//            dto.put("classAverage", avg != null ? Math.round(avg * 100.0) / 100.0 : 0.0);
-//
-//            return dto;
-//        }).collect(Collectors.toList());
-//    }
-
     public List<Map<String, Object>> filterResultsForAdmin(String studentQuery, Long classId) {
         List<ExamResult> rawResults = examResultRepository.findByAdminFilters(studentQuery, classId);
 
@@ -322,30 +292,33 @@ public class AdminService {
             dto.put("marks", result.getMarks());
             dto.put("status", result.getStatus());
 
-            // --- IMPROVED GRADE LOGIC ---
-            // 1. Try to get the grade from the database
+            // Calculate Grade Fallback
             String grade = result.getLetterGrade();
-            // 2. If DB grade is null/empty, calculate it on the fly from the marks
             if (grade == null || grade.trim().isEmpty()) {
                 grade = calculateGrade(result.getMarks());
             }
             dto.put("grade", grade);
-            // -----------------------------
 
             dto.put("student", Map.of(
                     "name", result.getStudent().getName(),
                     "userId", result.getStudent().getUserId()
             ));
 
-            // Ensure we handle potential null subject safely
+            // --- FIX: Put academic details INSIDE the exam map ---
+            Map<String, Object> examMap = new HashMap<>();
+            examMap.put("name", result.getExam().getName());
+            examMap.put("term", result.getExam().getTerm());
+            examMap.put("weight", result.getExam().getWeight());
+            examMap.put("semester", result.getExam().getSemester()); // Uncommented and fixed
+            examMap.put("locked", result.getExam().isLocked());
+
             String subjectName = (result.getExam().getSubject() != null)
                     ? result.getExam().getSubject().getName()
                     : "General";
+            examMap.put("subject", Map.of("name", subjectName));
 
-            dto.put("exam", Map.of(
-                    "name", result.getExam().getName(),
-                    "subject", Map.of("name", subjectName)
-            ));
+            dto.put("exam", examMap);
+            // ----------------------------------------------------
 
             Double avg = examResultRepository.getAverageByExamId(result.getExam().getId());
             dto.put("classAverage", avg != null ? Math.round(avg * 100.0) / 100.0 : 0.0);
@@ -353,6 +326,140 @@ public class AdminService {
             return dto;
         }).collect(Collectors.toList());
     }
+
+//    public List<Map<String, Object>> filterResultsForAdmin(String studentQuery, Long classId) {
+//        List<ExamResult> rawResults = examResultRepository.findByAdminFilters(studentQuery, classId);
+//
+//        return rawResults.stream().map(result -> {
+//            Map<String, Object> dto = new HashMap<>();
+//            dto.put("id", result.getId());
+//            dto.put("marks", result.getMarks());
+//            dto.put("status", result.getStatus());
+//
+//            // --- ADD THESE TWO LINES ---
+//            dto.put("term", result.getExam().getTerm());     // Matches r.exam.term
+//            dto.put("weight", result.getExam().getWeight()); // Matches r.exam.weight
+//            dto.put("locked", result.getExam().isLocked());
+////            dto.put("semester",result).getExam().getSemester();// Needed for UI Lock icons
+//            // ---------------------------
+//
+//            // --- IMPROVED GRADE LOGIC ---
+//            // 1. Try to get the grade from the database
+//            String grade = result.getLetterGrade();
+//            // 2. If DB grade is null/empty, calculate it on the fly from the marks
+//            if (grade == null || grade.trim().isEmpty()) {
+//                grade = calculateGrade(result.getMarks());
+//            }
+//            dto.put("grade", grade);
+//            // -----------------------------
+//
+//            dto.put("student", Map.of(
+//                    "name", result.getStudent().getName(),
+//                    "userId", result.getStudent().getUserId()
+//            ));
+//
+//            // Ensure we handle potential null subject safely
+//            String subjectName = (result.getExam().getSubject() != null)
+//                    ? result.getExam().getSubject().getName()
+//                    : "General";
+//
+//            dto.put("exam", Map.of(
+//                    "name", result.getExam().getName(),
+//                    "subject", Map.of("name", subjectName)
+//            ));
+//
+//            Double avg = examResultRepository.getAverageByExamId(result.getExam().getId());
+//            dto.put("classAverage", avg != null ? Math.round(avg * 100.0) / 100.0 : 0.0);
+//
+//            return dto;
+//        }).collect(Collectors.toList());
+//    }
+
+    // Calculate SEMESTER GPA
+    public Map<String, Object> calculateSemesterGPA(Long studentId, String semester) {
+        List<ExamResult> results = examResultRepository.findByStudentIdAndSemester(studentId, semester);
+
+        // Group by Subject to handle Midterms, Finals, and Quizzes together
+        Map<Long, List<ExamResult>> subjectGroups = results.stream()
+                .collect(Collectors.groupingBy(r -> r.getExam().getSubject().getId()));
+
+        List<Map<String, Object>> courses = new ArrayList<>();
+        double totalWeightedScore = 0;
+        int courseCount = 0;
+
+        for (Map.Entry<Long, List<ExamResult>> entry : subjectGroups.entrySet()) {
+            double subjectFinalScore = 0;
+            String subjectName = entry.getValue().get(0).getExam().getSubject().getName();
+
+            for (ExamResult r : entry.getValue()) {
+                // Apply weighting (e.g., marks 80 * weight 30% = 24 points)
+                double weight = r.getExam().getWeight() / 100.0;
+                subjectFinalScore += (r.getMarks() * weight);
+            }
+
+            totalWeightedScore += subjectFinalScore;
+            courseCount++;
+
+            courses.add(Map.of(
+                    "subject", subjectName,
+                    "finalScore", Math.round(subjectFinalScore * 100.0) / 100.0,
+                    "grade", calculateGrade(subjectFinalScore)
+            ));
+        }
+
+        double gpa = courseCount > 0 ? totalWeightedScore / courseCount : 0;
+
+        return Map.of(
+                "studentId", studentId,
+                "semester", semester,
+                "courses", courses,
+                "gpa", Math.round(gpa * 100.0) / 100.0
+        );
+    }
+
+    // Inside AdminService.java
+
+    @Transactional
+    public void lockSemesterResults(String semester) {
+        // 1. Fetch all exams belonging to that semester
+        List<Exam> exams = examRepository.findBySemester(semester);
+
+        if (exams.isEmpty()) {
+            throw new RuntimeException("No exams found for the semester: " + semester);
+        }
+
+        // 2. Set the isLocked flag to true for every exam found
+        exams.forEach(exam -> {
+            exam.setLocked(true);
+        });
+
+        // 3. Save the changes back to the database
+        examRepository.saveAll(exams);
+    }
+
+    //    public List<Map<String, Object>> getSemesterTranscript(Long studentId, String semester) {
+//        List<ExamResult> results = examResultRepository.findByStudentIdAndSemester(studentId, semester);
+//
+//        // Group by Subject ID to aggregate Midterm/Final/Quiz
+//        Map<Long, List<ExamResult>> groupedBySubject = results.stream()
+//                .collect(Collectors.groupingBy(r -> r.getExam().getSubject().getId()));
+//
+//        return groupedBySubject.values().stream().map(subjectResults -> {
+//            double finalSemesterScore = 0;
+//            String subjectName = subjectResults.get(0).getExam().getSubject().getName();
+//
+//            for (ExamResult r : subjectResults) {
+//                double weightDecimal = r.getExam().getWeight() / 100.0;
+//                finalSemesterScore += (r.getMarks() * weightDecimal);
+//            }
+//
+//            Map<String, Object> courseData = new HashMap<>();
+//            courseData.put("subject", subjectName);
+//            courseData.put("finalScore", Math.round(finalSemesterScore * 100.0) / 100.0);
+//            courseData.put("grade", calculateGrade(finalSemesterScore));
+//            return courseData;
+//        }).collect(Collectors.toList());
+//    }
     // DTO Converters
     private UserDTO convertToUserDTO(User user) {
         if (user == null) return null;

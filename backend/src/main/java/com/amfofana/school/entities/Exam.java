@@ -50,5 +50,17 @@ public class Exam {
     private LocalTime startTime; // Added start time
 
     @Column(nullable = false)
-    private LocalTime endTime;    // Added end time
+    private LocalTime endTime;
+
+    @Enumerated(EnumType.STRING)
+    private Term term; // MIDTERM, FINAL, QUIZ_1, QUIZ_2
+
+    @Column(nullable = false)
+    private String semester; // e.g., "Fall 2025"
+
+    private Integer weight; // e.g., 30 for midterm, 70 for final
+
+    private boolean isLocked = false; // To prevent edits after semester closure// Added end time
+
+
 }

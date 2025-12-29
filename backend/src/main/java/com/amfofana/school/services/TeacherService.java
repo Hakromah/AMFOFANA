@@ -263,6 +263,7 @@ public class TeacherService {
 
     @Transactional
     public ExamResult saveResult(Long teacherId, ExamResult result) {
+
         // 1. Check if result already exists for this Student + Exam combination
         Optional<ExamResult> existing = examResultRepository.findByStudentIdAndExamId(
                 result.getStudent().getId(),
@@ -276,6 +277,11 @@ public class TeacherService {
         // 2. Fetch Exam for security check
         Exam exam = examRepository.findById(result.getExam().getId())
                 .orElseThrow(() -> new RuntimeException("Exam not found"));
+
+        // NEW CHECK: Prevent editing if the semester is locked
+        if (exam.isLocked()) {
+            throw new RuntimeException("This semester has been closed. You cannot modify results.");
+        }
 
         // 3. Security Check: Is the current teacher assigned to this exam's class?
         boolean isAuthorized = exam.getClasse().getTeachers().stream()
@@ -314,7 +320,6 @@ public class TeacherService {
                 .collect(Collectors.toList());
     }
 
-
     public List<Map<String, Object>> filterResults(Long classId, Long studentId) {
         List<ExamResult> rawResults;
         if (classId != null) {
@@ -332,22 +337,29 @@ public class TeacherService {
             dto.put("status", result.getStatus());
             dto.put("grade", result.getLetterGrade());
 
-            // Explicitly include Student
+            // Student Mapping
             Map<String, Object> studentMap = new HashMap<>();
             studentMap.put("name", result.getStudent().getName());
             studentMap.put("userId", result.getStudent().getUserId());
             dto.put("student", studentMap);
 
-            // Explicitly include Exam AND Classe
+            // Exam Mapping - ADDING TERM AND WEIGHT HERE
             Map<String, Object> examMap = new HashMap<>();
             examMap.put("id", result.getExam().getId());
             examMap.put("name", result.getExam().getName());
 
-            // This is the CRITICAL part for your frontend
+            // --- ADD THESE TWO LINES ---
+            examMap.put("term", result.getExam().getTerm());     // Matches r.exam.term
+            examMap.put("weight", result.getExam().getWeight()); // Matches r.exam.weight
+            examMap.put("locked", result.getExam().isLocked());   // Needed for UI Lock icons
+            // ---------------------------
+
+            // Class Mapping
             Map<String, Object> classeMap = new HashMap<>();
             classeMap.put("name", result.getExam().getClasse().getName());
             examMap.put("classe", classeMap);
 
+            // Subject Mapping
             if (result.getExam().getSubject() != null) {
                 Map<String, Object> subMap = new HashMap<>();
                 subMap.put("name", result.getExam().getSubject().getName());

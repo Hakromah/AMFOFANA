@@ -7,10 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -45,11 +42,14 @@ public class StudentController {
         return ResponseEntity.ok(studentService.getAttendanceByStudent(user.getId()));
     }
 
-    //    @GetMapping("/results")
-//    public ResponseEntity<List<ExamResult>> getStudentResults(@AuthenticationPrincipal UserDetails userDetails) {
-//        User user = getAuthenticatedUser(userDetails);
-//        return ResponseEntity.ok(studentService.getResultsByStudent(user.getId()));
-//    }
+    // Aggregated Semester Transcript (Finalized Course Grades)
+    @GetMapping("/academic/semester-transcript")
+    public ResponseEntity<List<Map<String, Object>>> getMySemesterTranscript(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam String semester) {
+        User student = getAuthenticatedUser(userDetails);
+        return ResponseEntity.ok(studentService.getSemesterTranscript(student.getId(), semester));
+    }
     @GetMapping("/results")
     public List<Map<String, Object>> getResultsByStudent(@AuthenticationPrincipal UserDetails userDetails) {
         User student = getAuthenticatedUser(userDetails);

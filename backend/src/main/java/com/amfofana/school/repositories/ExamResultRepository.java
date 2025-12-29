@@ -20,6 +20,9 @@ public interface ExamResultRepository extends JpaRepository<ExamResult, Long> {
 
     Optional<ExamResult> findByStudentIdAndExamId(Long studentId, Long examId);
 
+    @Query("SELECT r FROM ExamResult r JOIN r.exam e WHERE r.student.id = :studentId AND e.semester = :semester")
+    List<ExamResult> findByStudentIdAndSemester(@Param("studentId") Long studentId, @Param("semester") String semester);
+
     @Query("SELECT r FROM ExamResult r " +
             "JOIN FETCH r.student s " +
             "JOIN FETCH r.exam e " +
@@ -42,5 +45,7 @@ public interface ExamResultRepository extends JpaRepository<ExamResult, Long> {
 
     @Query("SELECT AVG(r.marks) FROM ExamResult r WHERE r.exam.id = :examId AND r.status = 'SUBMITTED' OR r.status = 'CREDITED'")
     Double getAverageByExamId(@Param("examId") Long examId);
+
+    List<ExamResult> findByStudentIdAndStatus(Long studentId, ExamResult.Status status);
 
 }
