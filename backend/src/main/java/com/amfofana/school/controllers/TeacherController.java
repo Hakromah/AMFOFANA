@@ -235,7 +235,7 @@ public class TeacherController {
     @GetMapping("/results/filter")
     public ResponseEntity<List<Map<String, Object>>> filterResults(
             @RequestParam(required = false) Long classId,
-            @RequestParam(required = false) Long studentId) {
+            @RequestParam(required = false) String studentId) {
         return ResponseEntity.ok(teacherService.filterResults(classId, studentId));
     }
 }

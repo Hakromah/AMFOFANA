@@ -320,13 +320,21 @@ public class TeacherService {
                 .collect(Collectors.toList());
     }
 
-    public List<Map<String, Object>> filterResults(Long classId, Long studentId) {
+    // Change the parameter type to String to handle "AMF-2025-001" etc.
+    public List<Map<String, Object>> filterResults(Long classId, String studentId) {
         List<ExamResult> rawResults;
-        if (classId != null) {
+
+        // 1. Logic for searching by the public User ID String
+        if (studentId != null && !studentId.trim().isEmpty()) {
+            // We search by the public userId instead of the private database id
+            rawResults = examResultRepository.findByStudent_UserIdContainingIgnoreCase(studentId);
+        }
+        // 2. Logic for filtering by Class
+        else if (classId != null) {
             rawResults = examResultRepository.findByExam_Classe_Id(classId);
-        } else if (studentId != null) {
-            rawResults = examResultRepository.findByStudent_Id(studentId);
-        } else {
+        }
+        // 3. Default: Find all
+        else {
             rawResults = examResultRepository.findAll();
         }
 
@@ -340,26 +348,22 @@ public class TeacherService {
             // Student Mapping
             Map<String, Object> studentMap = new HashMap<>();
             studentMap.put("name", result.getStudent().getName());
-            studentMap.put("userId", result.getStudent().getUserId());
+            studentMap.put("userId", result.getStudent().getUserId()); // This is what the frontend displays
             dto.put("student", studentMap);
 
-            // Exam Mapping - ADDING TERM AND WEIGHT HERE
+            // Exam Mapping
             Map<String, Object> examMap = new HashMap<>();
             examMap.put("id", result.getExam().getId());
             examMap.put("name", result.getExam().getName());
-
-            // --- ADD THESE TWO LINES ---
-            examMap.put("term", result.getExam().getTerm());     // Matches r.exam.term
-            examMap.put("weight", result.getExam().getWeight()); // Matches r.exam.weight
-            examMap.put("locked", result.getExam().isLocked());   // Needed for UI Lock icons
-            // ---------------------------
+            examMap.put("term", result.getExam().getTerm());
+            examMap.put("weight", result.getExam().getWeight());
+            examMap.put("locked", result.getExam().isLocked());
 
             // Class Mapping
             Map<String, Object> classeMap = new HashMap<>();
             classeMap.put("name", result.getExam().getClasse().getName());
             examMap.put("classe", classeMap);
 
-            // Subject Mapping
             if (result.getExam().getSubject() != null) {
                 Map<String, Object> subMap = new HashMap<>();
                 subMap.put("name", result.getExam().getSubject().getName());
@@ -370,4 +374,56 @@ public class TeacherService {
             return dto;
         }).collect(Collectors.toList());
     }
+
+
+//    public List<Map<String, Object>> filterResults(Long classId, Long studentId) {
+//        List<ExamResult> rawResults;
+//        if (classId != null) {
+//            rawResults = examResultRepository.findByExam_Classe_Id(classId);
+//        } else if (studentId != null) {
+//            rawResults = examResultRepository.findByStudent_Id(studentId);
+//        } else {
+//            rawResults = examResultRepository.findAll();
+//        }
+//
+//        return rawResults.stream().map(result -> {
+//            Map<String, Object> dto = new HashMap<>();
+//            dto.put("id", result.getId());
+//            dto.put("marks", result.getMarks());
+//            dto.put("status", result.getStatus());
+//            dto.put("grade", result.getLetterGrade());
+//
+//            // Student Mapping
+//            Map<String, Object> studentMap = new HashMap<>();
+//            studentMap.put("name", result.getStudent().getName());
+//            studentMap.put("userId", result.getStudent().getUserId());
+//            dto.put("student", studentMap);
+//
+//            // Exam Mapping - ADDING TERM AND WEIGHT HERE
+//            Map<String, Object> examMap = new HashMap<>();
+//            examMap.put("id", result.getExam().getId());
+//            examMap.put("name", result.getExam().getName());
+//
+//            // --- ADD THESE TWO LINES ---
+//            examMap.put("term", result.getExam().getTerm());     // Matches r.exam.term
+//            examMap.put("weight", result.getExam().getWeight()); // Matches r.exam.weight
+//            examMap.put("locked", result.getExam().isLocked());   // Needed for UI Lock icons
+//            // ---------------------------
+//
+//            // Class Mapping
+//            Map<String, Object> classeMap = new HashMap<>();
+//            classeMap.put("name", result.getExam().getClasse().getName());
+//            examMap.put("classe", classeMap);
+//
+//            // Subject Mapping
+//            if (result.getExam().getSubject() != null) {
+//                Map<String, Object> subMap = new HashMap<>();
+//                subMap.put("name", result.getExam().getSubject().getName());
+//                examMap.put("subject", subMap);
+//            }
+//
+//            dto.put("exam", examMap);
+//            return dto;
+//        }).collect(Collectors.toList());
+//    }
 }

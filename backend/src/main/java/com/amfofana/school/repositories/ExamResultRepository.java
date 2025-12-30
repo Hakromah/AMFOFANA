@@ -47,6 +47,6 @@ public interface ExamResultRepository extends JpaRepository<ExamResult, Long> {
     Double getAverageByExamId(@Param("examId") Long examId);
 
     // Searches for exam results where the student's unique ID contains the search string
-    List<ExamResult> findByStudent_UserIdContainingIgnoreCase(Long userId);
+    List<ExamResult> findByStudent_UserIdContainingIgnoreCase(String userId);
 
 }

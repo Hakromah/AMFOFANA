@@ -1,21 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
-import { Download, Save, Edit3, X, FileSpreadsheet, ListFilter, LayoutGrid, UserSearch, TrendingUp, Send, Lock, BadgeCheck, Search } from 'lucide-react';
-import api from '@/lib/api';
 import ResultForm from '@/components/forms/ResultForm';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import api from '@/lib/api';
+import { BadgeCheck, Download, Edit3, FileSpreadsheet, LayoutGrid, ListFilter, Lock, Save, Search, Send, TrendingUp, X } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { toast } from 'sonner';
 
 const calculateLetterGrade = (marks: number | string): string => {
   const score = typeof marks === 'string' ? parseFloat(marks) : marks;
@@ -47,22 +45,24 @@ export default function TeacherResultsPage() {
     try {
       const response = await api.get('/teacher/classes');
       setClasses(response.data);
-    } catch (error) { toast.error('Failed to fetch classes'); }
+    } catch (error) { toast.error('Failed to fetch classes'); console.log(error)}
   };
 
   const fetchResultsList = useCallback(async () => {
     const params = new URLSearchParams();
     if (selectedClassId !== 'all') params.append('classId', selectedClassId);
+
+    // This sends the string from the input to the 'studentId' param in Java
     if (filterStudentId.trim()) params.append('studentId', filterStudentId.trim());
 
     try {
       const response = await api.get(`/teacher/results/filter?${params.toString()}`);
-      setResults(response.data);
+      setResults(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
-      console.error(error);
-      toast.error('Failed to fetch results');
+      setResults([]);
+      console.log(error)
     }
-  }, [selectedClassId, filterStudentId]);
+}, [selectedClassId, filterStudentId]);
 
   const fetchGradebookData = useCallback(async () => {
     if (selectedClassId === 'all') return;
@@ -253,10 +253,12 @@ export default function TeacherResultsPage() {
                     </TableCell>
                     <TableCell>
                       <div className="font-medium">{r.exam?.name}</div>
-                      <div className="text-[10px] text-primary font-bold uppercase">{r.exam?.term}</div>
+                      <div className="text-[10px] font-bold uppercase text-blue-700">
+                        <span className="bg-blue-100">{r.exam?.term}</span>
+                        </div>
                     </TableCell>
                     <TableCell className="text-center font-bold text-slate-500">{r.exam?.weight}%</TableCell>
-                    <TableCell className="text-center font-bold text-base">{r.marks}%</TableCell>
+                    <TableCell className="text-center font-bold text-base">{r.marks}</TableCell>
                     <TableCell className="text-center">
                       <span className="bg-slate-100 px-2 py-1 rounded text-xs font-black">{calculateLetterGrade(r.marks)}</span>
                     </TableCell>

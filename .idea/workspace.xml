@@ -6,7 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="3d520211-0a2a-4a96-b5c3-809f60418961" name="Changes" comment="modified for new user details">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/controllers/TeacherController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/controllers/TeacherController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/repositories/ExamResultRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/repositories/ExamResultRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/services/TeacherService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/services/TeacherService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -114,7 +117,7 @@
       <workItem from="1766164980626" duration="7406000" />
       <workItem from="1766231167355" duration="818000" />
       <workItem from="1766259199266" duration="74000" />
-      <workItem from="1766291075084" duration="108166000" />
+      <workItem from="1766291075084" duration="112969000" />
     </task>
     <servers />
   </component>
