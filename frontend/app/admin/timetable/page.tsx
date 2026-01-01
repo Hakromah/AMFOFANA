@@ -1,33 +1,42 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+  Calendar as CalendarIcon,
+  Plus,
+  Trash2,
+  Edit3,
+  Clock,
+  BookOpen,
+  Layers,
+  MoreVertical,
+  Filter
+} from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import api from '@/lib/api';
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -35,306 +44,275 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { toast } from 'sonner';
-import api from '@/lib/api';
+
+const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
 
 const formSchema = z.object({
-  classId: z.string().min(1, { message: 'Class is required' }),
-  subjectId: z.string().min(1, { message: 'Subject is required' }),
-  dayOfWeek: z.string().min(1, { message: 'Day is required' }),
-  startTime: z.string().min(1, { message: 'Start time is required' }),
-  endTime: z.string().min(1, { message: 'End time is required' }),
+  classId: z.string().min(1, "Class required"),
+  subjectId: z.string().min(1, "Subject required"),
+  dayOfWeek: z.string().min(1, "Day required"),
+  startTime: z.string().min(1, "Start time required"),
+  endTime: z.string().min(1, "End time required"),
 });
 
-interface Timetable {
-  id: number;
-  classe: { id: number; name: string };
-  subject: { id: number; name: string };
-  dayOfWeek: string;
-  startTime: string;
-  endTime: string;
-}
-
-interface Classe {
-  id: number;
-  name: string;
-}
-
-interface Subject {
-  id: number;
-  name: string;
-}
-
-export default function TimetablePage() {
-  const [timetable, setTimetable] = useState<Timetable[]>([]);
-  const [classes, setClasses] = useState<Classe[]>([]);
-  const [subjects, setSubjects] = useState<Subject[]>([]);
+export default function TimetableManagement() {
+  const [timetable, setTimetable] = useState<any[]>([]);
+  const [classes, setClasses] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<any[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingEntry, setEditingEntry] = useState<Timetable | null>(null);
+  const [editingEntry, setEditingEntry] = useState<any>(null);
+  const [selectedDay, setSelectedDay] = useState<string>('MONDAY');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      classId: '',
-      subjectId: '',
-      dayOfWeek: '',
-      startTime: '', // Initialize with empty string to avoid uncontrolled input error
-      endTime: '',   // Initialize with empty string
-    },
+    defaultValues: { classId: '', subjectId: '', dayOfWeek: '', startTime: '', endTime: '' }
   });
 
-  const fetchTimetable = async () => {
+  const fetchData = async () => {
     try {
-      const response = await api.get('/admin/timetables');
-      setTimetable(response.data);
-    } catch (error) {
-      toast.error('Failed to fetch timetable');
-      console.log(error);
-    }
-  };
-
-  const fetchInitialData = async () => {
-    try {
-      const [classesRes, subjectsRes] = await Promise.all([
+      const [tRes, cRes, sRes] = await Promise.all([
+        api.get('/admin/timetables'),
         api.get('/admin/classes'),
         api.get('/admin/subjects'),
       ]);
-      setClasses(classesRes.data);
-      setSubjects(subjectsRes.data);
+      setTimetable(tRes.data);
+      setClasses(cRes.data);
+      setSubjects(sRes.data);
     } catch (error) {
-      toast.error('Failed to fetch initial data');
-      console.log(error);
+      toast.error("Failed to sync registry");
+      console.log(error)
     }
   };
 
   useEffect(() => {
-    const loadData = async () => {
-      fetchTimetable();
-      fetchInitialData();
+    const loadInitial = async () => {
+      await fetchData()
     };
-
-    loadData();
+    loadInitial();
   }, []);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const isEditing = !!editingEntry;
-    const toastId = toast.loading(isEditing ? 'Updating entry...' : 'Creating entry...');
+    const payload = {
+      classe: { id: parseInt(values.classId) },
+      subject: { id: parseInt(values.subjectId) },
+      dayOfWeek: values.dayOfWeek,
+      startTime: values.startTime,
+      endTime: values.endTime,
+    };
 
     try {
-      const payload = {
-        classe: { id: parseInt(values.classId) },
-        subject: { id: parseInt(values.subjectId) },
-        dayOfWeek: values.dayOfWeek,
-        startTime: values.startTime,
-        endTime: values.endTime,
-      };
-
-      if (isEditing) {
+      if (editingEntry) {
         await api.put(`/admin/timetables/${editingEntry.id}`, payload);
-        toast.success('Entry updated successfully', { id: toastId });
+        toast.success("Entry updated");
       } else {
         await api.post('/admin/timetables', payload);
-        toast.success('Entry created successfully', { id: toastId });
+        toast.success("Entry added to schedule");
       }
-      fetchTimetable();
+      fetchData();
       setIsDialogOpen(false);
-      setEditingEntry(null);
-      form.reset({
-        classId: '',
-        subjectId: '',
-        dayOfWeek: '',
-        startTime: '',
-        endTime: '',
-      });
-    } catch (error) {
-      toast.error(isEditing ? 'Failed to update entry' : 'Failed to create entry', { id: toastId });
-      console.log(error);
-    }
-  };
-
-  const openDialog = (entry: Timetable | null = null) => {
-    setEditingEntry(entry);
-    if (entry) {
-      form.reset({
-        classId: String(entry.classe.id),
-        subjectId: String(entry.subject.id),
-        dayOfWeek: entry.dayOfWeek,
-        startTime: entry.startTime,
-        endTime: entry.endTime,
-      });
-    } else {
-      form.reset({
-        classId: '',
-        subjectId: '',
-        dayOfWeek: '',
-        startTime: '',
-        endTime: '',
-      });
-    }
-    setIsDialogOpen(true);
-  };
-
-  const handleDelete = async (id: number) => {
-    const toastId = toast.loading('Deleting entry...');
-    try {
-      await api.delete(`/admin/timetables/${id}`);
-      toast.success('Entry deleted successfully', { id: toastId });
-      fetchTimetable();
-    } catch (error) {
-      toast.error('Failed to delete entry', { id: toastId });
-      console.log(error);
+    } catch (e) {
+      toast.error("Schedule conflict or server error");
+      console.log(e);
     }
   };
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Timetable Management</h1>
-        <Button onClick={() => openDialog()}>Add Entry</Button>
+    <div className="min-h-screen bg-[#fcfcfd] p-6 lg:p-10 space-y-8">
+      {/* Header */}
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic">
+            Weekly <span className="text-blue-600">Schedule</span>
+          </h1>
+          <p className="text-slate-500 font-bold text-[10px] uppercase tracking-[0.3em] mt-2">
+            Admin Management Portal • Term 2 2026
+          </p>
+        </div>
+        <Button
+          onClick={() => { setEditingEntry(null); form.reset(); setIsDialogOpen(true); }}
+          className="bg-slate-900 hover:bg-blue-600 text-white rounded-2xl px-6 h-12 font-black transition-all shadow-lg shadow-blue-500/10"
+        >
+          <Plus size={18} className="mr-2" /> CREATE ENTRY
+        </Button>
+      </header>
+
+      {/* Day Selector Tabs */}
+      <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-hide">
+        {DAYS.map((day) => (
+          <button
+            key={day}
+            onClick={() => setSelectedDay(day)}
+            className={`px-8 py-3 rounded-2xl font-black text-[11px] tracking-widest transition-all ${selectedDay === day
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
+              : 'bg-white text-slate-400 hover:text-slate-600'
+              }`}
+          >
+            {day}
+          </button>
+        ))}
       </div>
 
+      {/* Timetable Grid */}
+      <div className="grid gap-6">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selectedDay}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="grid gap-4"
+          >
+            {timetable
+              .filter(item => item.dayOfWeek === selectedDay)
+              .sort((a, b) => a.startTime.localeCompare(b.startTime))
+              .map((entry) => (
+                <Card key={entry.id} className="border-none shadow-sm rounded-3xl bg-white overflow-hidden group hover:shadow-md transition-all border border-slate-100/50">
+                  <CardContent className="p-0">
+                    <div className="flex flex-col md:flex-row md:items-center">
+                      {/* Time Block */}
+                      <div className="bg-slate-50 p-6 md:w-48 flex flex-col justify-center items-center border-r border-slate-100">
+                        <Clock className="text-blue-600 mb-2" size={18} />
+                        <span className="font-black text-slate-900 text-sm tracking-tighter">{entry.startTime}</span>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">to {entry.endTime}</span>
+                      </div>
+
+                      {/* Content Block */}
+                      <div className="p-6 flex-1 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600">
+                            <BookOpen size={20} />
+                          </div>
+                          <div>
+                            <h3 className="font-black text-slate-900 uppercase italic tracking-tight">{entry.subject.name}</h3>
+                            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                              <Layers size={12} className="text-slate-300" />
+                              {entry.classe.name}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-xl hover:bg-blue-50 hover:text-blue-600"
+                            onClick={() => {
+                              setEditingEntry(entry);
+                              form.reset({
+                                classId: String(entry.classe.id),
+                                subjectId: String(entry.subject.id),
+                                dayOfWeek: entry.dayOfWeek,
+                                startTime: entry.startTime,
+                                endTime: entry.endTime,
+                              });
+                              setIsDialogOpen(true);
+                            }}
+                          >
+                            <Edit3 size={18} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-xl hover:bg-rose-50 hover:text-rose-600"
+                            onClick={async () => {
+                              await api.delete(`/admin/timetables/${entry.id}`);
+                              fetchData();
+                              toast.success("Removed from schedule");
+                            }}
+                          >
+                            <Trash2 size={18} />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+
+            {timetable.filter(item => item.dayOfWeek === selectedDay).length === 0 && (
+              <div className="h-64 flex flex-col items-center justify-center border-2 border-dashed border-slate-100 rounded-[3rem] text-slate-300">
+                <CalendarIcon size={48} className="mb-4 opacity-20" />
+                <p className="font-black uppercase text-xs tracking-widest">No classes scheduled for {selectedDay}</p>
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Dialog remains similar but with updated styling for inputs */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
+        <DialogContent className="rounded-[2.5rem] border-none shadow-2xl p-8 max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editingEntry ? 'Edit Entry' : 'Add Timetable Entry'}</DialogTitle>
+            <DialogTitle className="text-2xl font-black italic tracking-tighter">
+              {editingEntry ? 'Modify' : 'New'} <span className="text-blue-600">Entry</span>
+            </DialogTitle>
+            <DialogDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">
+              Configure session parameters for the school schedule.
+            </DialogDescription>
           </DialogHeader>
+
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="classId"
-                render={({ field }) => (
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField control={form.control} name="classId" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Class</FormLabel>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Class</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a class" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {classes.map((c) => (
-                          <SelectItem key={c.id} value={String(c.id)}>
-                            {c.name}
-                          </SelectItem>
-                        ))}
+                      <FormControl><SelectTrigger className="rounded-xl border-slate-100 bg-slate-50 font-bold"><SelectValue placeholder="Select class" /></SelectTrigger></FormControl>
+                      <SelectContent className="rounded-xl border-none shadow-xl">
+                        {classes.map(c => <SelectItem key={c.id} value={String(c.id)} className="font-bold">{c.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
-                    <FormMessage />
                   </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="subjectId"
-                render={({ field }) => (
+                )} />
+                <FormField control={form.control} name="subjectId" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Subject</FormLabel>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Subject</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a subject" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {subjects.map((s) => (
-                          <SelectItem key={s.id} value={String(s.id)}>
-                            {s.name}
-                          </SelectItem>
-                        ))}
+                      <FormControl><SelectTrigger className="rounded-xl border-slate-100 bg-slate-50 font-bold"><SelectValue placeholder="Select subject" /></SelectTrigger></FormControl>
+                      <SelectContent className="rounded-xl border-none shadow-xl">
+                        {subjects.map(s => <SelectItem key={s.id} value={String(s.id)} className="font-bold">{s.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
-                    <FormMessage />
                   </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="dayOfWeek"
-                render={({ field }) => (
+                )} />
+              </div>
+
+              <FormField control={form.control} name="dayOfWeek" render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Day of Week</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl><SelectTrigger className="rounded-xl border-slate-100 bg-slate-50 font-bold"><SelectValue placeholder="Select day" /></SelectTrigger></FormControl>
+                    <SelectContent className="rounded-xl border-none shadow-xl">
+                      {DAYS.map(day => <SelectItem key={day} value={day} className="font-bold">{day}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )} />
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField control={form.control} name="startTime" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Day of Week</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a day" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'].map((day) => (
-                          <SelectItem key={day} value={day}>
-                            {day}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Starts At</FormLabel>
+                    <FormControl><Input type="time" {...field} className="rounded-xl border-slate-100 bg-slate-50 font-bold" /></FormControl>
                   </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="startTime"
-                render={({ field }) => (
+                )} />
+                <FormField control={form.control} name="endTime" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Start Time</FormLabel>
-                    <FormControl>
-                      <Input type="time" {...field} />
-                    </FormControl>
-                    <FormMessage />
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Ends At</FormLabel>
+                    <FormControl><Input type="time" {...field} className="rounded-xl border-slate-100 bg-slate-50 font-bold" /></FormControl>
                   </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="endTime"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>End Time</FormLabel>
-                    <FormControl>
-                      <Input type="time" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit">{editingEntry ? 'Save Changes' : 'Add'}</Button>
+                )} />
+              </div>
+
+              <Button type="submit" className="w-full h-14 bg-blue-600 hover:bg-slate-900 text-white font-black rounded-2xl shadow-lg shadow-blue-500/20 transition-all uppercase tracking-widest text-xs">
+                {editingEntry ? 'Update Registry' : 'Confirm Entry'}
+              </Button>
             </form>
           </Form>
         </DialogContent>
       </Dialog>
-
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Class</TableHead>
-            <TableHead>Subject</TableHead>
-            <TableHead>Day</TableHead>
-            <TableHead>Start Time</TableHead>
-            <TableHead>End Time</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {timetable.map((entry) => (
-            <TableRow key={entry.id}>
-              <TableCell>{entry.classe.name}</TableCell>
-              <TableCell>{entry.subject.name}</TableCell>
-              <TableCell>{entry.dayOfWeek}</TableCell>
-              <TableCell>{entry.startTime}</TableCell>
-              <TableCell>{entry.endTime}</TableCell>
-              <TableCell>
-                <Button variant="outline" size="sm" className="mr-2" onClick={() => openDialog(entry)}>
-                  Edit
-                </Button>
-                <Button variant="destructive" size="sm" onClick={() => handleDelete(entry.id)}>
-                  Delete
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
     </div>
   );
 }
+

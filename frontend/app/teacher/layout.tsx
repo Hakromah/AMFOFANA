@@ -10,6 +10,7 @@ export default function TeacherLayout({
     { name: 'My Classes', href: '/teacher/classes' },
     { name: 'Students', href: '/teacher/students' },
     { name: 'Attendance', href: '/teacher/attendance' },
+    { name: 'Timetable', href: '/teacher/timetable' },
     { name: 'Exams', href: '/teacher/exams' },
     { name: 'Results Management', href: '/teacher/results' }, // Added
     { name: 'Upload Materials', href: '/teacher/materials' },
