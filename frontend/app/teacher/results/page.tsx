@@ -120,34 +120,81 @@ export default function TeacherResultsPage() {
     } catch (error) { toast.error('Submission failed', { id: toastId }); console.log(error) }
   };
 
+  // const saveBulk = async () => {
+  //   const payload = Object.entries(pendingChanges).map(([key, val]) => {
+  //     const [studentId, examId] = key.split('-');
+  //     return {
+  //       student: { id: parseInt(studentId) },
+  //       exam: { id: parseInt(examId) },
+  //       marks: parseFloat(val as string)
+  //     };
+  //   });
+
+  //   if (payload.length === 0) {
+  //     setIsEditMode(false);
+  //     return;
+  //   }
+
+  //   const tid = toast.loading("Saving changes...");
+  //   try {
+  //     await api.post('/teacher/results/bulk', payload);
+  //     toast.success("Drafts Saved successfully!", { id: tid });
+  //     setIsEditMode(false);
+  //     setPendingChanges({});
+  //     fetchResultsList();
+  //     fetchGradebookData();
+  //   } catch (error) {
+  //     toast.error("Bulk save failed", { id: tid });
+  //     console.log(error);
+  //   }
+  // };
+
   const saveBulk = async () => {
-    const payload = Object.entries(pendingChanges).map(([key, val]) => {
-      const [studentId, examId] = key.split('-');
-      return {
-        student: { id: parseInt(studentId) },
-        exam: { id: parseInt(examId) },
-        marks: parseFloat(val as string)
-      };
-    });
+  // 1. Prepare the payload from pendingChanges
+  const payload = Object.entries(pendingChanges).map(([key, val]) => {
+    const [studentId, examId] = key.split('-');
+    return {
+      student: { id: parseInt(studentId) },
+      exam: { id: parseInt(examId) },
+      marks: parseFloat(val as string)
+    };
+  });
 
-    if (payload.length === 0) {
-      setIsEditMode(false);
-      return;
-    }
+  if (payload.length === 0) {
+    setIsEditMode(false);
+    return;
+  }
 
-    const tid = toast.loading("Saving changes...");
-    try {
-      await api.post('/teacher/results/bulk', payload);
-      toast.success("Drafts Saved successfully!", { id: tid });
-      setIsEditMode(false);
-      setPendingChanges({});
-      fetchResultsList();
-      fetchGradebookData();
-    } catch (error) {
-      toast.error("Bulk save failed", { id: tid });
-      console.log(error);
-    }
-  };
+  // 2. Start the loading state
+  const tid = toast.loading("Syncing marks with registry...");
+
+  try {
+    // 3. Make the API call
+    // Note: Ensure the URL matches your backend @PostMapping ("/results/bulk")
+    const response = await api.post('/teacher/results/bulk', payload);
+
+    // 4. Destructure the summary map returned by the Java Map<String, Object>
+    const { created, updated } = response.data;
+
+    // 5. Show the specific success message
+    toast.success(
+      `Ledger Updated: ${created} new entries, ${updated} modifications saved.`,
+      { id: tid }
+    );
+
+    // 6. Reset UI states
+    setIsEditMode(false);
+    setPendingChanges({});
+
+    // 7. Refresh data to show new Letter Grades and Statuses
+    fetchResultsList();
+    fetchGradebookData();
+
+  } catch (error) {
+    toast.error("Bulk entry failed. Please check authorization.", { id: tid });
+    console.error("Bulk save error:", error);
+  }
+};
 
   const getChartData = (student: any) => {
     return exams.map((exam) => {
