@@ -5,591 +5,345 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import {
+   Pencil, Trash2, Calendar, Clock, BookOpen,
+   Lock, CheckCircle2, AlertCircle, ChevronLeft,
+   ChevronRight, MoreHorizontal, Power, Loader2, Plus
+} from 'lucide-react';
+import { toast } from 'sonner';
+import api from '@/lib/api';
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from 'sonner';
-import { Pencil, Trash2, Calendar, Clock, BookOpen, Lock, ShieldCheck } from 'lucide-react';
-import api from '@/lib/api';
-import DeleteExamAlert from '@/components/forms/DeleteExamAlert';
+import { Badge } from '@/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
-// --- UPDATED SCHEMA FOR SEMESTER MODEL ---
+// --- SCHEMA ---
 const formSchema = z.object({
-  subjectId: z.string().min(1, 'Subject is required'),
-  classId: z.string().min(1, 'Class is required'),
-  date: z.string().min(1, 'Date is required'),
-  startTime: z.string().min(1, 'Start time is required'),
-  endTime: z.string().min(1, 'End time is required'),
-  semester: z.string().min(1, 'Semester is required'),
-  term: z.string().min(1, 'Term is required'),
-  weight: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-    message: 'Weight must be a positive number',
-  }),
+   subjectId: z.string().min(1, 'Subject is required'),
+   classId: z.string().min(1, 'Class is required'),
+   date: z.string().min(1, 'Date is required'),
+   startTime: z.string().min(1, 'Start time is required'),
+   endTime: z.string().min(1, 'End time is required'),
+   semester: z.string().min(1, 'Semester is required'),
+   term: z.string().min(1, 'Term is required'),
+   weight: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
+      message: 'Weight must be a positive number',
+   }),
 });
 
 export default function TeacherExamsPage() {
-  const [exams, setExams] = useState<any[]>([]);
-  const [subjects, setSubjects] = useState<any[]>([]);
-  const [classes, setClasses] = useState<any[]>([]);
-  const [currentTeacherId, setCurrentTeacherId] = useState<number | null>(null);
+   // --- STATES ---
+   const [exams, setExams] = useState<any[]>([]);
+   const [subjects, setSubjects] = useState<any[]>([]);
+   const [classes, setClasses] = useState<any[]>([]);
+   const [currentTeacherId, setCurrentTeacherId] = useState<number | null>(null);
+   const [loading, setLoading] = useState(true);
+   const [isDialogOpen, setIsDialogOpen] = useState(false);
+   const [editingExam, setEditingExam] = useState<any | null>(null);
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingExam, setEditingExam] = useState<any | null>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [examToDelete, setExamToDelete] = useState<any | null>(null);
+   // Pagination State
+   const [currentPage, setCurrentPage] = useState(1);
+   const itemsPerPage = 10;
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      subjectId: '', classId: '', date: '', startTime: '', endTime: '',
-      semester: 'Fall 2025', term: 'MIDTERM', weight: '30'
-    },
-  });
+   const form = useForm<z.infer<typeof formSchema>>({
+      resolver: zodResolver(formSchema),
+      defaultValues: {
+         subjectId: '', classId: '', date: '', startTime: '', endTime: '',
+         semester: 'Fall 2025', term: 'MIDTERM', weight: '30'
+      },
+   });
 
-  const loadAllData = async () => {
-    try {
-      const [examsRes, subjectsRes, classesRes, userRes] = await Promise.all([
-        api.get('/teacher/exams'),
-        api.get('/teacher/subjects'),
-        api.get('/teacher/classes'),
-        api.get('/auth/me'),
-      ]);
-      setExams(examsRes.data);
-      setSubjects(subjectsRes.data);
-      setClasses(classesRes.data);
-      setCurrentTeacherId(userRes.data.id);
-    } catch (error) {
-      toast.error('Failed to synchronize academic data');
-      console.log(error);
-    }
-  };
+   useEffect(() => { loadAllData(); }, []);
 
-    useEffect(() => {
-      const loadInitial = async () => {
-        await loadAllData();
-      };
-      loadInitial();
-    }, []);
+   const loadAllData = async () => {
+      setLoading(true);
+      try {
+         // Using individual awaits helps identify exactly which line triggers the 400
+         const examsRes = await api.get('/teacher/exams');
+         const subjectsRes = await api.get('/teacher/subjects');
+         const classesRes = await api.get('/teacher/classes');
+         const userRes = await api.get('/auth/me');
 
-  const onOpenEdit = (exam: any) => {
-    if (exam.locked) {
-      toast.error("This exam is locked by Admin and cannot be modified.");
-      return;
-    }
-    setEditingExam(exam);
-    form.reset({
-      subjectId: String(exam.subject.id),
-      classId: String(exam.classe.id),
-      date: exam.date,
-      startTime: exam.startTime,
-      endTime: exam.endTime,
-      semester: exam.semester,
-      term: exam.term,
-      weight: String(exam.weight),
-    });
-    setIsDialogOpen(true);
-  };
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const selectedSubject = subjects.find(s => String(s.id) === values.subjectId);
-
-    // PAYLOAD MATCHING THE NEW SEMESTER-BASED BACKEND ENTITY
-    const payload = {
-      name: selectedSubject?.name || 'Exam',
-      date: values.date,
-      startTime: values.startTime,
-      endTime: values.endTime,
-      semester: values.semester,
-      term: values.term,
-      weight: parseInt(values.weight),
-      classe: { id: parseInt(values.classId) },
-      subject: { id: parseInt(values.subjectId) },
-    };
-
-    try {
-      if (editingExam) {
-        await api.put(`/teacher/exams/${editingExam.id}`, payload);
-        toast.success('Exam updated successfully');
-      } else {
-        await api.post('/teacher/exams', payload);
-        toast.success('Exam scheduled for ' + values.semester);
+         setExams(examsRes.data);
+         setSubjects(subjectsRes.data);
+         setClasses(classesRes.data);
+         setCurrentTeacherId(userRes.data.id);
+      } catch (error: any) {
+         console.error("400 Error Source:", error.response?.config.url); // This tells you which URL failed
+         toast.error('Sync Error', {
+            description: `Check console: ${error.response?.config.url} returned 400`
+         });
+      } finally {
+         setLoading(false);
       }
-      loadAllData();
-      setIsDialogOpen(false);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Could not save exam schedule');
-    }
-  };
+   };
 
-  return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
-      <div className="flex justify-between items-end">
-        <div>
-          <h1 className="text-4xl font-black tracking-tight text-slate-900">Exam Center</h1>
-          <p className="text-muted-foreground mt-2 font-medium">Define weights and terms for your assessments.</p>
-        </div>
-        <Button onClick={() => { setEditingExam(null); form.reset(); setIsDialogOpen(true); }} className="gap-2">
-          <BookOpen className="w-4 h-4" /> Schedule Assessment
-        </Button>
+
+   // --- CRUD ACTIONS ---
+   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+      const selectedSubject = subjects.find(s => String(s.id) === values.subjectId);
+      const payload = {
+         name: selectedSubject?.name || 'Exam',
+         date: values.date,
+         startTime: values.startTime,
+         endTime: values.endTime,
+         semester: values.semester,
+         term: values.term,
+         weight: parseInt(values.weight),
+         classe: { id: parseInt(values.classId) },
+         subject: { id: parseInt(values.subjectId) },
+      };
+
+      try {
+         if (editingExam) {
+            await api.put(`/teacher/exams/${editingExam.id}`, payload);
+            toast.success('Exam details updated');
+         } else {
+            await api.post('/teacher/exams', payload);
+            toast.success('Exam created successfully');
+         }
+         loadAllData();
+         setIsDialogOpen(false);
+      } catch (error: any) {
+         toast.error(error.response?.data?.message || 'Action failed');
+      }
+   };
+
+   const handleDelete = async (id: number) => {
+      if (!confirm("Are you sure you want to delete this assessment?")) return;
+      try {
+         await api.delete(`/teacher/exams/${id}`);
+         toast.success("Exam deleted");
+         loadAllData();
+      } catch (e) {
+         toast.error("Deletion failed");
+         console.log(e)
+      }
+   };
+
+   const toggleStatus = async (exam: any) => {
+
+      try {
+         const newStatus = !exam.closed;
+         console.log("Sending status update:", { closed: newStatus }); // Debugging line
+
+         await api.patch(`/teacher/exams/${exam.id}/toggle-status`, { closed: newStatus });
+
+         toast.success(newStatus ? "Exam Marked as Closed" : "Exam Re-opened");
+         loadAllData();
+      } catch (e: any) {
+         console.error("Status Toggle Error Details:", e.response?.data); // See the actual Java error
+         toast.error("Status update failed");
+      }
+
+      // try {
+      //    const newStatus = !exam.closed;
+      //    console.log("Sending status update:", { closed: newStatus }); // Debugging line
+
+      //    await api.patch(`/teacher/exams/${exam.id}/toggle-status`, { closed: !exam.closed });
+      //    toast.success(exam.closed ? "Exam Re-opened" : "Exam Marked as Closed");
+      //    loadAllData();
+      // } catch (e) {
+      //    toast.error("Status update failed");
+      //    console.log(e)
+      // }
+
+   };
+
+   const onOpenEdit = (exam: any) => {
+      setEditingExam(exam);
+      form.reset({
+         subjectId: String(exam.subject.id),
+         classId: String(exam.classe.id),
+         date: exam.date,
+         startTime: exam.startTime,
+         endTime: exam.endTime,
+         semester: exam.semester,
+         term: exam.term,
+         weight: String(exam.weight),
+      });
+      setIsDialogOpen(true);
+   };
+
+   // --- PAGINATION LOGIC ---
+   const totalPages = Math.ceil(exams.length / itemsPerPage);
+   const currentExams = exams.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+   if (loading) return (
+      <div className="h-screen flex flex-col items-center justify-center gap-4">
+         <Loader2 className="animate-spin text-blue-600" size={40} />
+         <p className="text-xs font-black uppercase tracking-widest text-slate-400">Loading Exam Center...</p>
       </div>
+   );
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>{editingExam ? 'Edit Assessment' : 'New Assessment Period'}</DialogTitle>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField control={form.control} name="semester" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Academic Semester</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                      <SelectContent>
-                        <SelectItem value="Fall 2025">Fall 2025</SelectItem>
-                        <SelectItem value="Spring 2026">Spring 2026</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="term" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Term/Type</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                      <SelectContent>
-                        <SelectItem value="QUIZ_1">Quiz 1</SelectItem>
-                        <SelectItem value="MIDTERM">Midterm</SelectItem>
-                        <SelectItem value="FINAL_EXAM">Final Exam</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )} />
-              </div>
+   return (
+      <div className="p-6 lg:p-10 bg-[#f8fafc] min-h-screen space-y-8">
+         {/* Header */}
+         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 max-w-7xl mx-auto">
+            <div>
+               <h1 className="text-5xl font-black text-slate-900 tracking-tighter italic">Exam <span className="text-blue-600">Center.</span></h1>
+               <p className="text-slate-500 font-bold text-sm mt-2 uppercase tracking-widest text-[10px]">Registry & Assessments • 2026</p>
+            </div>
+            <Button onClick={() => { setEditingExam(null); form.reset(); setIsDialogOpen(true); }} className="bg-slate-900 hover:bg-blue-600 rounded-2xl h-14 px-8 font-black transition-all shadow-xl">
+               <Plus className="mr-2 h-5 w-5" /> NEW ASSESSMENT
+            </Button>
+         </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <FormField control={form.control} name="subjectId" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Subject</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl><SelectTrigger><SelectValue placeholder="Subject" /></SelectTrigger></FormControl>
-                      <SelectContent>{subjects.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}</SelectContent>
-                    </Select>
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="weight" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Weight (%)</FormLabel>
-                    <FormControl><Input type="number" placeholder="e.g. 30" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-              </div>
+         {/* Table Card */}
+         <div className="bg-white rounded-[3rem] shadow-sm border border-slate-100 overflow-hidden max-w-7xl mx-auto">
+            <Table>
+               <TableHeader className="bg-slate-50/50">
+                  <TableRow className="border-none">
+                     <TableHead className="py-8 pl-10 font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Exam Details</TableHead>
+                     <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 text-center">Weight</TableHead>
+                     <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Schedule</TableHead>
+                     <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Status</TableHead>
+                     <TableHead className="text-right pr-10 font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Actions</TableHead>
+                  </TableRow>
+               </TableHeader>
+               <TableBody>
+                  {currentExams.map((exam) => (
+                     <TableRow key={exam.id} className="hover:bg-blue-50/10 transition-colors border-slate-50">
+                        <TableCell className="pl-10 py-6">
+                           <div className="font-black text-slate-900 italic uppercase text-sm">{exam.name}</div>
+                           <div className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mt-1">{exam.classe.name}</div>
+                        </TableCell>
+                        <TableCell className="text-center">
+                           <span className="inline-block px-4 py-1.5 bg-slate-900 text-white rounded-xl font-black text-[10px] italic">
+                              {exam.weight}%
+                           </span>
+                        </TableCell>
+                        <TableCell>
+                           <div className="flex flex-col gap-1 text-[11px] font-bold text-slate-600">
+                              <span className="flex items-center gap-1.5"><Calendar size={12} className="text-blue-500" /> {exam.date}</span>
+                              <span className="flex items-center gap-1.5 uppercase text-slate-400 tracking-tighter"><Clock size={12} /> {exam.startTime} - {exam.endTime}</span>
+                           </div>
+                        </TableCell>
+                        <TableCell>
+                           <Badge className={`rounded-lg px-3 py-1 font-black text-[9px] tracking-widest border-none ${exam.closed ? 'bg-slate-100 text-slate-400' : 'bg-emerald-100 text-emerald-600'}`}>
+                              {exam.closed ? 'CLOSED' : 'ACTIVE'}
+                           </Badge>
+                        </TableCell>
+                        <TableCell className="text-right pr-10">
+                           <DropdownMenu>
+                              <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="rounded-xl"><MoreHorizontal size={20} /></Button></DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="rounded-2xl p-2 border-slate-100 shadow-2xl">
+                                 <DropdownMenuItem onClick={() => toggleStatus(exam)} className="rounded-xl font-black text-[10px] p-3 uppercase tracking-widest">
+                                    <Power size={14} className="mr-2 text-blue-600" /> {exam.closed ? "Re-open" : "Close Exam"}
+                                 </DropdownMenuItem>
+                                 <DropdownMenuItem disabled={exam.locked} onClick={() => onOpenEdit(exam)} className="rounded-xl font-black text-[10px] p-3 uppercase tracking-widest">
+                                    <Pencil size={14} className="mr-2 text-amber-500" /> Edit
+                                 </DropdownMenuItem>
+                                 <DropdownMenuItem disabled={exam.locked} onClick={() => handleDelete(exam.id)} className="rounded-xl font-black text-[10px] p-3 uppercase tracking-widest text-rose-600">
+                                    <Trash2 size={14} className="mr-2" /> Delete
+                                 </DropdownMenuItem>
+                              </DropdownMenuContent>
+                           </DropdownMenu>
+                        </TableCell>
+                     </TableRow>
+                  ))}
+               </TableBody>
+            </Table>
 
-              <FormField control={form.control} name="classId" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Classroom</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl><SelectTrigger><SelectValue placeholder="Select class" /></SelectTrigger></FormControl>
-                    <SelectContent>{classes.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}</SelectContent>
-                  </Select>
-                </FormItem>
-              )} />
+            {/* Pagination */}
+            <div className="p-8 bg-slate-50/50 flex items-center justify-between border-t border-slate-100">
+               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Page {currentPage} of {totalPages}</p>
+               <div className="flex gap-2">
+                  <Button variant="outline" className="rounded-xl h-10 w-10 p-0" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}><ChevronLeft size={16} /></Button>
+                  <Button variant="outline" className="rounded-xl h-10 w-10 p-0" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}><ChevronRight size={16} /></Button>
+               </div>
+            </div>
+         </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-1"><FormField control={form.control} name="date" render={({ field }) => (
-                  <FormItem><FormLabel>Date</FormLabel><FormControl><Input type="date" {...field} /></FormControl></FormItem>
-                )} /></div>
-                <FormField control={form.control} name="startTime" render={({ field }) => (
-                  <FormItem><FormLabel>Start</FormLabel><FormControl><Input type="time" {...field} /></FormControl></FormItem>
-                )} />
-                <FormField control={form.control} name="endTime" render={({ field }) => (
-                  <FormItem><FormLabel>End</FormLabel><FormControl><Input type="time" {...field} /></FormControl></FormItem>
-                )} />
-              </div>
+         {/* Dialog for Edit/Create */}
+         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogContent className="sm:max-w-[550px] rounded-[3rem] p-10 border-none shadow-2xl">
+               <DialogHeader>
+                  <DialogTitle className="text-3xl font-black italic tracking-tighter">
+                     {editingExam ? 'Edit' : 'Create'} <span className="text-blue-600">Assessment.</span>
+                  </DialogTitle>
+                  <DialogDescription className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-2">Configure weight and timing for the assessment.</DialogDescription>
+               </DialogHeader>
 
-              <Button type="submit" className="w-full">Save Assessment Config</Button>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+               <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-6">
+                     <div className="grid grid-cols-2 gap-4">
+                        <FormField control={form.control} name="semester" render={({ field }) => (
+                           <FormItem>
+                              <FormLabel className="text-[10px] font-black uppercase text-slate-400">Semester</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger className="rounded-xl bg-slate-50 border-none font-bold"><SelectValue /></SelectTrigger></FormControl>
+                                 <SelectContent className="rounded-xl border-none shadow-xl">
+                                    <SelectItem value="Fall 2025" className="font-bold">Fall 2025</SelectItem>
+                                    <SelectItem value="Spring 2026" className="font-bold">Spring 2026</SelectItem>
+                                 </SelectContent></Select>
+                           </FormItem>
+                        )} />
+                        <FormField control={form.control} name="term" render={({ field }) => (
+                           <FormItem>
+                              <FormLabel className="text-[10px] font-black uppercase text-slate-400">Term</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger className="rounded-xl bg-slate-50 border-none font-bold"><SelectValue /></SelectTrigger></FormControl>
+                                 <SelectContent className="rounded-xl border-none shadow-xl">
+                                    <SelectItem value="QUIZ_1" className="font-bold">Quiz 1</SelectItem>
+                                    <SelectItem value="MIDTERM" className="font-bold">Midterm</SelectItem>
+                                    <SelectItem value="FINAL_EXAM" className="font-bold">Final Exam</SelectItem>
+                                 </SelectContent></Select>
+                           </FormItem>
+                        )} />
+                     </div>
 
-      <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
-        <Table>
-          <TableHeader className="bg-slate-50">
-            <TableRow>
-              <TableHead>Assessment Details</TableHead>
-              <TableHead>Semester & Term</TableHead>
-              <TableHead className="text-center">Weight</TableHead>
-              <TableHead>Time Window</TableHead>
-              <TableHead className="text-right">Management</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {exams.map((exam) => {
-              const isOwner = exam.teacher?.id === currentTeacherId;
-              return (
-                <TableRow key={exam.id} className="hover:bg-slate-50/50">
-                  <TableCell>
-                    <div className="font-bold text-slate-800">{exam.name}</div>
-                    <div className="text-[10px] text-muted-foreground font-bold uppercase">{exam.classe.name}</div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm font-medium">{exam.semester}</div>
-                    <div className="text-[10px] text-primary font-black uppercase">{exam.term}</div>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-md text-xs font-black border border-blue-100">{exam.weight}%</span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-xs font-medium flex items-center gap-1"><Calendar className="w-3 h-3"/> {exam.date}</div>
-                    <div className="text-[10px] text-muted-foreground flex items-center gap-1 mt-1"><Clock className="w-3 h-3"/> {exam.startTime} - {exam.endTime}</div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {exam.locked ? (
-                      <div className="flex justify-end items-center gap-2 text-slate-400 font-bold text-[10px]">
-                        <Lock className="w-4 h-4" /> LOCKED
-                      </div>
-                    ) : isOwner ? (
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => onOpenEdit(exam)}><Pencil className="w-4 h-4" /></Button>
-                        <Button variant="ghost" size="icon" className="text-destructive" onClick={() => { setExamToDelete(exam); setIsDeleteDialogOpen(true); }}><Trash2 className="w-4 h-4" /></Button>
-                      </div>
-                    ) : (
-                      <span className="text-[10px] bg-slate-100 px-2 py-1 rounded font-bold text-slate-400">READ-ONLY</span>
-                    )}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+                     <div className="grid grid-cols-2 gap-4">
+                        <FormField control={form.control} name="subjectId" render={({ field }) => (
+                           <FormItem>
+                              <FormLabel className="text-[10px] font-black uppercase text-slate-400">Subject</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger className="rounded-xl bg-slate-50 border-none font-bold"><SelectValue /></SelectTrigger></FormControl>
+                                 <SelectContent className="rounded-xl border-none shadow-xl">
+                                    {subjects.map(s => <SelectItem key={s.id} value={String(s.id)} className="font-bold">{s.name}</SelectItem>)}
+                                 </SelectContent></Select>
+                           </FormItem>
+                        )} />
+                        <FormField control={form.control} name="weight" render={({ field }) => (
+                           <FormItem>
+                              <FormLabel className="text-[10px] font-black uppercase text-slate-400">Weight (%)</FormLabel>
+                              <FormControl><Input type="number" {...field} className="rounded-xl bg-slate-50 border-none font-bold" /></FormControl>
+                              <FormMessage />
+                           </FormItem>
+                        )} />
+                     </div>
+
+                     <FormField control={form.control} name="classId" render={({ field }) => (
+                        <FormItem>
+                           <FormLabel className="text-[10px] font-black uppercase text-slate-400">Classroom</FormLabel>
+                           <Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger className="rounded-xl bg-slate-50 border-none font-bold"><SelectValue /></SelectTrigger></FormControl>
+                              <SelectContent className="rounded-xl border-none shadow-xl">
+                                 {classes.map(c => <SelectItem key={c.id} value={String(c.id)} className="font-bold">{c.name}</SelectItem>)}
+                              </SelectContent></Select>
+                        </FormItem>
+                     )} />
+
+                     <div className="grid grid-cols-3 gap-4">
+                        <FormField control={form.control} name="date" render={({ field }) => (
+                           <FormItem><FormLabel className="text-[10px] font-black uppercase text-slate-400">Date</FormLabel><FormControl><Input type="date" {...field} className="rounded-xl bg-slate-50 border-none font-bold" /></FormControl></FormItem>
+                        )} />
+                        <FormField control={form.control} name="startTime" render={({ field }) => (
+                           <FormItem><FormLabel className="text-[10px] font-black uppercase text-slate-400">Start</FormLabel><FormControl><Input type="time" {...field} className="rounded-xl bg-slate-50 border-none font-bold" /></FormControl></FormItem>
+                        )} />
+                        <FormField control={form.control} name="endTime" render={({ field }) => (
+                           <FormItem><FormLabel className="text-[10px] font-black uppercase text-slate-400">End</FormLabel><FormControl><Input type="time" {...field} className="rounded-xl bg-slate-50 border-none font-bold" /></FormControl></FormItem>
+                        )} />
+                     </div>
+
+                     <Button type="submit" className="w-full h-14 bg-blue-600 hover:bg-slate-900 text-white font-black rounded-2xl transition-all uppercase text-[10px] tracking-[0.2em] shadow-xl shadow-blue-500/20">
+                        Confirm Academic Record
+                     </Button>
+                  </form>
+               </Form>
+            </DialogContent>
+         </Dialog>
       </div>
-
-      {examToDelete && (
-        <DeleteExamAlert examId={examToDelete.id} examName={examToDelete.name} open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen} onFinished={loadAllData} />
-      )}
-    </div>
-  );
+   );
 }
-
-
-// /* eslint-disable @typescript-eslint/no-explicit-any */
-// 'use client';
-
-// import { useEffect, useState } from 'react';
-// import {
-//   Table,
-//   TableBody,
-//   TableCell,
-//   TableHead,
-//   TableHeader,
-//   TableRow,
-// } from '@/components/ui/table';
-// import { Button } from '@/components/ui/button';
-// import {
-//   Dialog,
-//   DialogContent,
-//   DialogHeader,
-//   DialogTitle,
-// } from '@/components/ui/dialog';
-// import { useForm } from 'react-hook-form';
-// import { zodResolver } from '@hookform/resolvers/zod';
-// import * as z from 'zod';
-// import {
-//   Form,
-//   FormControl,
-//   FormField,
-//   FormItem,
-//   FormLabel,
-//   FormMessage,
-// } from '@/components/ui/form';
-// import { Input } from '@/components/ui/input';
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from '@/components/ui/select';
-// import { toast } from 'sonner';
-// import { Pencil, Trash2, Calendar, Clock, BookOpen } from 'lucide-react';
-// import api from '@/lib/api';
-// import DeleteExamAlert from '@/components/forms/DeleteExamAlert';
-
-// // --- SCHEMA & INTERFACES ---
-// const formSchema = z.object({
-//   subjectId: z.string().min(1, { message: 'Subject is required' }),
-//   classId: z.string().min(1, { message: 'Class is required' }),
-//   date: z.string().min(1, { message: 'Date is required' }),
-//   startTime: z.string().min(1, { message: 'Start time is required' }),
-//   endTime: z.string().min(1, { message: 'End time is required' }),
-// });
-
-// interface Exam {
-//   id: number;
-//   name: string;
-//   date: string;
-//   startTime: string;
-//   endTime: string;
-//   classe: { id: number; name: string };
-//   subject: { id: number; name: string };
-//   teacher: { id: number; name: string };
-// }
-
-// export default function TeacherExamsPage() {
-//   const [exams, setExams] = useState<Exam[]>([]);
-//   const [subjects, setSubjects] = useState<any[]>([]);
-//   const [classes, setClasses] = useState<any[]>([]);
-//   const [currentTeacherId, setCurrentTeacherId] = useState<number | null>(null);
-
-//   // Dialog States
-//   const [isDialogOpen, setIsDialogOpen] = useState(false);
-//   const [editingExam, setEditingExam] = useState<Exam | null>(null);
-//   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-//   const [examToDelete, setExamToDelete] = useState<Exam | null>(null);
-
-//   const form = useForm<z.infer<typeof formSchema>>({
-//     resolver: zodResolver(formSchema),
-//     defaultValues: { subjectId: '', classId: '', date: '', startTime: '', endTime: '' },
-//   });
-
-//   // --- DATA FETCHING ---
-//   const loadAllData = async () => {
-//     try {
-//       const [examsRes, subjectsRes, classesRes, userRes] = await Promise.all([
-//         api.get('/teacher/exams'),
-//         api.get('/teacher/subjects'),
-//         api.get('/teacher/classes'),
-//         api.get('/auth/me'), // Endpoint to get the logged-in user's profile
-//       ]);
-//       setExams(examsRes.data);
-//       setSubjects(subjectsRes.data);
-//       setClasses(classesRes.data);
-//       setCurrentTeacherId(userRes.data.id);
-//     } catch (error) {
-//       toast.error('Failed to synchronize data');
-//       console.log(error)
-//     }
-//   };
-
-//   useEffect(() => {
-//     const loadData = async () => {
-//       await loadAllData();
-//     };
-
-//     loadData();
-//   }, []);
-
-//   // --- FORM HANDLERS ---
-//   const onOpenCreate = () => {
-//     setEditingExam(null);
-//     form.reset({ subjectId: '', classId: '', date: '', startTime: '', endTime: '' });
-//     setIsDialogOpen(true);
-//   };
-
-//   const onOpenEdit = (exam: Exam) => {
-//     setEditingExam(exam);
-//     form.reset({
-//       subjectId: String(exam.subject.id),
-//       classId: String(exam.classe.id),
-//       date: exam.date,
-//       startTime: exam.startTime,
-//       endTime: exam.endTime,
-//     });
-//     setIsDialogOpen(true);
-//   };
-
-//   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-//     const isEditing = !!editingExam;
-//     const selectedSubject = subjects.find(s => String(s.id) === values.subjectId);
-
-//     const payload = {
-//       name: selectedSubject?.name || 'Exam',
-//       date: values.date,
-//       startTime: values.startTime,
-//       endTime: values.endTime,
-//       classe: { id: parseInt(values.classId) },
-//       subject: { id: parseInt(values.subjectId) },
-//     };
-
-//     try {
-//       if (isEditing) {
-//         await api.put(`/teacher/exams/${editingExam.id}`, payload);
-//         toast.success('Exam updated');
-//       } else {
-//         await api.post('/teacher/exams', payload);
-//         toast.success('Exam scheduled');
-//       }
-//       loadAllData();
-//       setIsDialogOpen(false);
-//     } catch (error) {
-//       toast.error('Could not save exam');
-//       console.log(error);
-//     }
-//   };
-
-//   return (
-//     <div className="p-8 max-w-7xl mx-auto">
-//       <div className="flex justify-between items-end mb-8">
-//         <div>
-//           <h1 className="text-4xl font-extrabold tracking-tight">Exam Schedule</h1>
-//           <p className="text-muted-foreground mt-2">Manage assessments for your assigned classes.</p>
-//         </div>
-//         <Button onClick={onOpenCreate} className="gap-2">
-//           <BookOpen className="w-4 h-4" /> Schedule New Exam
-//         </Button>
-//       </div>
-
-//       {/* --- DELETE CONFIRMATION --- */}
-//       {examToDelete && (
-//         <DeleteExamAlert
-//           examId={examToDelete.id}
-//           examName={examToDelete.name}
-//           open={isDeleteDialogOpen}
-//           onOpenChange={setIsDeleteDialogOpen}
-//           onFinished={loadAllData}
-//         />
-//       )}
-
-//       {/* --- CREATE/EDIT DIALOG --- */}
-//       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-//         <DialogContent className="sm:max-w-[425px]">
-//           <DialogHeader>
-//             <DialogTitle>{editingExam ? 'Modify Exam' : 'Schedule Assessment'}</DialogTitle>
-//           </DialogHeader>
-//           <Form {...form}>
-//             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
-//               <FormField
-//                 control={form.control}
-//                 name="subjectId"
-//                 render={({ field }) => (
-//                   <FormItem>
-//                     <FormLabel>Subject</FormLabel>
-//                     <Select onValueChange={field.onChange} value={field.value}>
-//                       <FormControl><SelectTrigger><SelectValue placeholder="Select subject" /></SelectTrigger></FormControl>
-//                       <SelectContent>
-//                         {subjects.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
-//                       </SelectContent>
-//                     </Select>
-//                     <FormMessage />
-//                   </FormItem>
-//                 )}
-//               />
-//               <FormField
-//                 control={form.control}
-//                 name="classId"
-//                 render={({ field }) => (
-//                   <FormItem>
-//                     <FormLabel>Class</FormLabel>
-//                     <Select onValueChange={field.onChange} value={field.value}>
-//                       <FormControl><SelectTrigger><SelectValue placeholder="Select class" /></SelectTrigger></FormControl>
-//                       <SelectContent>
-//                         {classes.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
-//                       </SelectContent>
-//                     </Select>
-//                     <FormMessage />
-//                   </FormItem>
-//                 )}
-//               />
-//               <FormField
-//                 control={form.control}
-//                 name="date"
-//                 render={({ field }) => (
-//                   <FormItem>
-//                     <FormLabel>Date</FormLabel>
-//                     <FormControl><Input type="date" {...field} /></FormControl>
-//                     <FormMessage />
-//                   </FormItem>
-//                 )}
-//               />
-//               <div className="grid grid-cols-2 gap-4">
-//                 <FormField
-//                   control={form.control}
-//                   name="startTime"
-//                   render={({ field }) => (
-//                     <FormItem>
-//                       <FormLabel>Starts</FormLabel>
-//                       <FormControl><Input type="time" {...field} /></FormControl>
-//                     </FormItem>
-//                   )}
-//                 />
-//                 <FormField
-//                   control={form.control}
-//                   name="endTime"
-//                   render={({ field }) => (
-//                     <FormItem>
-//                       <FormLabel>Ends</FormLabel>
-//                       <FormControl><Input type="time" {...field} /></FormControl>
-//                     </FormItem>
-//                   )}
-//                 />
-//               </div>
-//               <Button type="submit" className="w-full mt-4">
-//                 {editingExam ? 'Update Schedule' : 'Confirm Exam'}
-//               </Button>
-//             </form>
-//           </Form>
-//         </DialogContent>
-//       </Dialog>
-
-//       {/* --- EXAMS TABLE --- */}
-//       <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
-//         <Table>
-//           <TableHeader className="bg-muted/50">
-//             <TableRow>
-//               <TableHead className="w-[200px]">Exam Name</TableHead>
-//               <TableHead>Class</TableHead>
-//               <TableHead>Instructor (Owner)</TableHead>
-//               <TableHead>Date</TableHead>
-//               <TableHead>Time Window</TableHead>
-//               <TableHead className="text-right">Manage</TableHead>
-//             </TableRow>
-//           </TableHeader>
-//           <TableBody>
-//             {exams.length > 0 ? (
-//               exams.map((exam) => {
-//                 const isOwner = exam.teacher?.id === currentTeacherId;
-//                 return (
-//                   <TableRow key={exam.id} className="hover:bg-muted/30 transition-colors">
-//                     <TableCell className="font-semibold">{exam.name}</TableCell>
-//                     <TableCell>{exam.classe.name}</TableCell>
-//                     <TableCell>
-//                       <span className={isOwner ? "text-primary font-medium" : "text-muted-foreground"}>
-//                         {isOwner ? "You" : (exam.teacher?.name || 'Unknown')}
-//                       </span>
-//                     </TableCell>
-//                     <TableCell>
-//                       <div className="flex items-center gap-2"><Calendar className="w-3 h-3" />{exam.date}</div>
-//                     </TableCell>
-//                     <TableCell>
-//                       <div className="flex items-center gap-2"><Clock className="w-3 h-3" />{exam.startTime} - {exam.endTime}</div>
-//                     </TableCell>
-//                     <TableCell className="text-right">
-//                       {isOwner ? (
-//                         <div className="flex justify-end gap-2">
-//                           <Button variant="ghost" size="icon" onClick={() => onOpenEdit(exam)}><Pencil className="w-4 h-4" /></Button>
-//                           <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => { setExamToDelete(exam); setIsDeleteDialogOpen(true); }}>
-//                             <Trash2 className="w-4 h-4" />
-//                           </Button>
-//                         </div>
-//                       ) : (
-//                         <span className="text-xs bg-muted px-2 py-1 rounded text-muted-foreground">ReadOnly</span>
-//                       )}
-//                     </TableCell>
-//                   </TableRow>
-//                 );
-//               })
-//             ) : (
-//               <TableRow><TableCell colSpan={6} className="text-center py-12 text-muted-foreground">No exams scheduled for your classes.</TableCell></TableRow>
-//             )}
-//           </TableBody>
-//         </Table>
-//       </div>
-//     </div>
-//   );
-// }

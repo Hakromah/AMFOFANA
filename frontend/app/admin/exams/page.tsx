@@ -1,196 +1,189 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useEffect, useState } from 'react';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  ShieldCheck,
+  Lock,
+  Unlock,
+  Search,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  AlertTriangle,
+  Download
+} from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/lib/api';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
-interface User {
-  id: number;
-  name: string;
-}
-
-interface Classe {
-  id: number;
-  name: string;
-}
-
-interface Exam {
-  id: number;
-  name: string;
-  classe: Classe;
-  subject: { id: number; name: string };
-  date: string;
-  startTime: string;
-  endTime: string;
-}
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 export default function AdminExamsPage() {
-  const [exams, setExams] = useState<Exam[]>([]);
-  const [teachers, setTeachers] = useState<User[]>([]);
-  const [classes, setClasses] = useState<Classe[]>([]);
-  const [filterType, setFilterType] = useState<string>('all');
-  const [selectedId, setSelectedId] = useState<string>('');
+  const [exams, setExams] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-  const fetchInitialData = async () => {
+  useEffect(() => { loadExams(); }, []);
+
+  const loadExams = async () => {
     try {
-      const [teachersRes, classesRes] = await Promise.all([
-        api.get('/admin/users?role=TEACHER'),
-        api.get('/admin/classes'),
-      ]);
-      setTeachers(teachersRes.data);
-      setClasses(classesRes.data);
-    } catch (error) {
-      toast.error('Failed to fetch initial data');
-      console.log(error);
-    }
-  };
-
-  // const fetchExams = async () => {
-  //   let url = '/admin/exams';
-  //   if (filterType === 'teacher' && selectedId) {
-  //     url = `/admin/exams?teacherId=${selectedId}`;
-  //   } else if (filterType === 'class' && selectedId) {
-  //     url = `/admin/exams?classId=${selectedId}`;
-  //   }
-
-  //   try {
-  //     const response = await api.get(url);
-  //     setExams(response.data);
-  //   } catch (error) {
-  //     toast.error('Failed to fetch exams');
-  //     console.log(error);
-  //   }
-  // };
-
-  const fetchExams = async (type = filterType, id = selectedId) => {
-    let url = '/admin/exams';
-    if (type === 'teacher' && id) {
-      url = `/admin/exams?teacherId=${id}`;
-    } else if (type === 'class' && id) {
-      url = `/admin/exams?classId=${id}`; 
-    }
-
-    try {
-      const response = await api.get(url);
+      const response = await api.get('/admin/exams');
       setExams(response.data);
     } catch (error) {
-      toast.error('Failed to fetch exams');
-      console.log(error)
-    }
-  };
-  useEffect(() => {
-    const loadInitial = async () => {
-      await fetchInitialData();
-      await fetchExams(); // Load all exams once on mount
-    };
-    loadInitial();
-  }, []);
-
-  // 2. Create a handler for when the Filter Type changes
-  const handleFilterTypeChange = (value: string) => {
-    setFilterType(value);
-    setSelectedId('');
-
-    // If they switch back to 'all', fetch everything immediately
-    if (value === 'all') {
-      fetchExams('all');
+      toast.error('Failed to load global exam registry');
+      console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // 3. Create a handler for when a specific ID (Teacher/Class) is selected
-  const handleIdChange = (id: string) => {
-    setSelectedId(id);
-    fetchExams(filterType, id);
+  const handleLockSemester = async () => {
+    if (!confirm("CRITICAL: Locking this semester will prevent ALL teachers from editing their exams. Proceed?")) return;
+
+    try {
+      await api.patch('/admin/exams/lock-semester', { semester: "Fall 2025" });
+      toast.success("Semester records finalized and locked.");
+      loadExams();
+    } catch (e) {
+      toast.error("Lock operation failed");
+      console.log(e);
+    }
   };
+
+  // Filter Logic: Search by subject, teacher, or class
+  const filteredExams = exams.filter(exam =>
+    exam.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    exam.teacher?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    exam.classe?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredExams.length / itemsPerPage);
+  const currentExams = filteredExams.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  if (loading) return (
+    <div className="h-screen flex flex-col items-center justify-center gap-4">
+      <Loader2 className="animate-spin text-blue-600" size={40} />
+      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Loading Master Registry...</p>
+    </div>
+  );
 
   return (
-    <div className="p-8">
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Exam Filter</CardTitle>
-        </CardHeader>
-        <CardContent className="flex gap-4">
-          <Select value={filterType} onValueChange={handleFilterTypeChange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Exams</SelectItem>
-              <SelectItem value="teacher">By Teacher</SelectItem>
-              <SelectItem value="class">By Class</SelectItem>
-            </SelectContent>
-          </Select>
+    <div className="p-6 lg:p-10 bg-[#f8fafc] min-h-screen space-y-8">
+      {/* Admin Header */}
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <ShieldCheck className="text-blue-600" size={20} />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-600">Authority Access</span>
+          </div>
+          <h1 className="text-5xl font-black text-slate-900 tracking-tighter italic">Global <span className="text-blue-600">Exams.</span></h1>
+        </div>
 
-          {filterType === 'teacher' && (
-            <Select onValueChange={handleIdChange}>
-              <SelectTrigger className="w-[280px]">
-                <SelectValue placeholder="Select a teacher" />
-              </SelectTrigger>
-              <SelectContent>
-                {teachers.map((teacher) => (
-                  <SelectItem key={teacher.id} value={String(teacher.id)}>
-                    {teacher.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+        <div className="flex gap-3">
+          <Button variant="outline" className="rounded-2xl border-slate-200 font-bold h-12 px-6">
+            <Download size={18} className="mr-2" /> EXPORT PDF
+          </Button>
+          <Button onClick={handleLockSemester} className="bg-rose-600 hover:bg-rose-700 text-white rounded-2xl h-12 px-6 font-black shadow-lg shadow-rose-200">
+            <Lock size={18} className="mr-2" /> FINALIZE SEMESTER
+          </Button>
+        </div>
+      </div>
 
-          {filterType === 'class' && (
-            <Select onValueChange={handleIdChange}>
-              <SelectTrigger className="w-[280px]">
-                <SelectValue placeholder="Select a class" />
-              </SelectTrigger>
-              <SelectContent>
-                {classes.map((c) => (
-                  <SelectItem key={c.id} value={String(c.id)}>
-                    {c.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </CardContent>
-      </Card>
+      {/* Search & Filter Bar */}
+      <div className="max-w-7xl mx-auto relative group">
+        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={20} />
+        <Input
+          placeholder="Search by subject, teacher, or classroom..."
+          className="h-16 pl-16 pr-8 rounded-4xl border-none shadow-sm bg-white font-bold text-slate-600 placeholder:text-slate-300 focus-visible:ring-blue-600"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Exam Name</TableHead>
-            <TableHead>Class</TableHead>
-            <TableHead>Subject</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Time</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {exams.map((exam) => (
-            <TableRow key={exam.id}>
-              <TableCell>{exam.name}</TableCell>
-              <TableCell>{exam.classe.name}</TableCell>
-              <TableCell>{exam.subject.name}</TableCell>
-              <TableCell>{new Date(exam.date).toLocaleDateString()}</TableCell>
-              <TableCell>{exam.startTime} - {exam.endTime}</TableCell>
+      {/* Master Registry Table */}
+      <div className="bg-white rounded-[3rem] shadow-sm border border-slate-100 overflow-hidden max-w-7xl mx-auto">
+        <Table>
+          <TableHeader className="bg-slate-50/50">
+            <TableRow className="border-none">
+              <TableHead className="py-8 pl-10 font-black text-[10px] uppercase tracking-widest text-slate-400">Exam & Class</TableHead>
+              <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-400">Instructor</TableHead>
+              <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-400 text-center">Weight</TableHead>
+              <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-400">Status</TableHead>
+              <TableHead className="text-right pr-10 font-black text-[10px] uppercase tracking-widest text-slate-400">Control</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {currentExams.map((exam) => (
+              <TableRow key={exam.id} className="hover:bg-blue-50/10 transition-colors border-slate-50">
+                <TableCell className="pl-10 py-6">
+                  <div className="font-black text-slate-900 italic uppercase text-sm">{exam.name}</div>
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{exam.classe.name}</div>
+                </TableCell>
+
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-[10px] font-black text-slate-500">
+                      {exam.teacher?.name?.[0]}{exam.teacher?.name?.[0]}
+                    </div>
+                    <span className="font-bold text-xs text-slate-700">{exam.teacher?.name}</span>
+                  </div>
+                </TableCell>
+
+                <TableCell className="text-center">
+                  <span className="bg-slate-900 text-white px-3 py-1 rounded-lg font-black text-[10px] italic">
+                    {exam.weight}%
+                  </span>
+                </TableCell>
+
+                <TableCell>
+                  <Badge className={`rounded-lg px-3 py-1 font-black text-[9px] tracking-widest border-none ${exam.closed ? 'bg-slate-100 text-slate-400' : 'bg-blue-100 text-blue-600'}`}>
+                    {exam.closed ? 'FINISHED' : 'PENDING'}
+                  </Badge>
+                </TableCell>
+
+                <TableCell className="text-right pr-10">
+                  {exam.locked ? (
+                    <Badge className="bg-rose-50 text-rose-600 border-rose-100 font-black text-[9px] px-3">
+                      <Lock size={10} className="mr-1" /> RECORDS LOCKED
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-emerald-50 text-emerald-600 border-emerald-100 font-black text-[9px] px-3">
+                      <Unlock size={10} className="mr-1" /> MODIFIABLE
+                    </Badge>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+
+        {/* Admin Pagination */}
+        <div className="p-8 bg-slate-50/30 flex items-center justify-between border-t border-slate-100">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+            Displaying {currentExams.length} results of {filteredExams.length} in registry
+          </p>
+          <div className="flex gap-2">
+            <Button variant="outline" className="rounded-xl h-10 w-10 p-0" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}><ChevronLeft size={16} /></Button>
+            <Button variant="outline" className="rounded-xl h-10 w-10 p-0" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}><ChevronRight size={16} /></Button>
+          </div>
+        </div>
+      </div>
+
+      {/* System Warning */}
+      {!exams.some(e => e.locked) && (
+        <div className="max-w-7xl mx-auto flex items-center gap-4 bg-amber-50 border border-amber-100 p-6 rounded-4xl text-amber-700">
+          <AlertTriangle size={24} className="shrink-0" />
+          <p className="text-xs font-bold leading-relaxed">
+            <span className="font-black uppercase tracking-wider block mb-1 underline">Security Notice:</span>
+            All assessment records are currently modifiable by teachers. It is recommended to lock records after the final exam period to ensure data integrity for report cards.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
