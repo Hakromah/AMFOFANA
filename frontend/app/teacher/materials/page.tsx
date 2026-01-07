@@ -1,212 +1,228 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  FileUp, FileText, Trash2, Layers, BookOpen,
+  Loader2, Plus, X, Monitor, Download, Calendar
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import api from '@/lib/api';
 
-const formSchema = z.object({
-  classId: z.string().min(1),
-  url: z.string().url({ message: 'Please enter a valid URL.' }),
-});
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import {
+  Dialog, DialogContent, DialogHeader,
+  DialogTitle, DialogDescription, DialogFooter
+} from '@/components/ui/dialog';
 
-interface LearningMaterial {
-  id: number;
-  url: string;
-  classe: { id: number; name: string };
-}
+export default function TeacherMaterialsPage() {
+  const [materials, setMaterials] = useState<any[]>([]);
+  const [classes, setClasses] = useState<any[]>([]);
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
 
-interface Classe {
-  id: number;
-  name: string;
-}
+  // Form State
+  const [file, setFile] = useState<File | null>(null);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [selectedClasses, setSelectedClasses] = useState<number[]>([]);
 
-export default function UploadMaterialsPage() {
-  const [materials, setMaterials] = useState<LearningMaterial[]>([]);
-  const [classes, setClasses] = useState<Classe[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      classId: '',
-      url: '',
-    },
-  });
-
-  const fetchMaterials = async () => {
+  const fetchData = async () => {
     try {
-      const response = await api.get('/teacher/materials');
-      setMaterials(response.data);
-    } catch (error) {
-      toast.error('Failed to fetch materials');
-      console.log(error);
+      const [matRes, classRes] = await Promise.all([
+        api.get('/api/teacher/materials'),             // ADDED /api
+        api.get('/api/teacher/materials/my-classes')  // New authorized endpoint for teachers
+      ]);
+      setMaterials(matRes.data);
+      setClasses(classRes.data);
+    } catch (e: any) {
+      // Log the specific error to help with debugging
+      console.error("Sync Error Status:", e.response?.status);
+      console.error("Sync Error Data:", e.response?.data);
+      toast.error("Failed to sync classroom resources");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const fetchClasses = async () => {
-    try {
-      const response = await api.get('/teacher/classes');
-      setClasses(response.data);
-    } catch (error) {
-      toast.error('Failed to fetch classes');
-      console.log(error);
+  useEffect(() => { fetchData(); }, []);
+
+  const handleUpload = async () => {
+    if (!file || !title || selectedClasses.length === 0) {
+      return toast.error("Please complete all required fields");
     }
-  };
 
-  useEffect(() => {
-    const loadData = async () => {
-      await fetchMaterials();
-      await fetchClasses();
-    };
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('title', title);
+    formData.append('description', description);
+    selectedClasses.forEach(id => formData.append('classIds', String(id)));
 
-    loadData();
-  }, []);
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setUploading(true);
     try {
-      await api.post('/teacher/materials', {
-        classe: { id: parseInt(values.classId) },
-        url: values.url,
+      // FIX: Add /api to the path
+      await api.post('/api/teacher/materials/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
-      toast.success('Material uploaded successfully');
-      fetchMaterials();
-      setIsDialogOpen(false);
-      form.reset();
-    } catch (error) {
-      toast.error('Failed to upload material');
-      console.log(error);
+
+      toast.success("Material Published Successfully");
+      setIsUploadOpen(false);
+      resetForm();
+      fetchData(); // Refresh the list
+    } catch (e: any) {
+      console.error("Upload Error:", e.response?.data);
+      toast.error("Upload failed. Check console for details.");
+    } finally {
+      setUploading(false);
     }
+  };
+
+  const resetForm = () => {
+    setFile(null);
+    setTitle('');
+    setDescription('');
+    setSelectedClasses([]);
+  };
+
+  const formatBytes = (bytes: number | null | undefined) => {
+    if (bytes === undefined || bytes === null || bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   const handleDelete = async (id: number) => {
-    toast.loading('Deleting material...');
+    const tid = toast.loading("Removing resource...");
     try {
-      await api.delete(`/teacher/materials/${id}`);
-      toast.success('Material deleted successfully');
-      fetchMaterials();
-    } catch (error) {
-      toast.error('Failed to delete material');
-      console.log(error);
+      await api.delete(`/api/teacher/materials/${id}`);
+      toast.success("Resource deleted", { id: tid });
+      fetchData();
+    } catch (e) {
+      toast.error("Action denied", { id: tid });
+      console.log(e);
     }
   };
 
-  return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Upload Materials</h1>
-        <Button onClick={() => setIsDialogOpen(true)}>Upload Material</Button>
-      </div>
+  if (loading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-blue-600" size={40} /></div>;
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
+  return (
+    <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10 space-y-10">
+      <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-blue-600 font-black text-[10px] uppercase tracking-[0.4em]">
+            <Monitor size={14} /> Curriculum Management
+          </div>
+          <h1 className="text-5xl font-black text-slate-900 tracking-tighter sm:text-7xl italic uppercase">
+            Learning <span className="text-blue-600">Assets.</span>
+          </h1>
+        </div>
+        <Button onClick={() => setIsUploadOpen(true)} className="bg-slate-900 hover:bg-blue-600 text-white rounded-3xl h-14 px-8 font-black shadow-xl">
+          <Plus size={20} className="mr-2" /> PUBLISH RESOURCE
+        </Button>
+      </header>
+
+      {/* Materials Grid */}
+      <main className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <AnimatePresence mode="popLayout">
+          {materials.map((mat) => (
+            <motion.div key={mat.id} layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}>
+              <Card className="rounded-[2.5rem] border-none shadow-sm bg-white p-8 hover:shadow-2xl transition-all h-full flex flex-col justify-between group">
+                <div>
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="h-14 w-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                      <FileText size={24} />
+                    </div>
+                    <Button onClick={() => handleDelete(mat.id)} variant="ghost" size="icon" className="text-slate-300 hover:text-rose-500 rounded-full transition-colors">
+                      <Trash2 size={18} />
+                    </Button>
+                  </div>
+                  <h3 className="text-2xl font-black italic tracking-tight uppercase text-slate-900 leading-none mb-3 truncate">{mat.title}</h3>
+                  <p className="text-slate-400 text-xs font-bold leading-relaxed line-clamp-2 mb-6">{mat.description}</p>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex flex-wrap gap-2">
+                    {mat.targetClasses.map((c: any) => (
+                      <Badge key={c.id} className="bg-slate-100 text-slate-500 hover:bg-slate-100 border-none font-black text-[9px] tracking-tighter italic px-2">
+                        {c.name}
+                      </Badge>
+                    ))}
+                  </div>
+
+                  {/* The Footer Section */}
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-50 text-[10px] font-black text-slate-300 uppercase tracking-widest">
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-1.5">
+                        <Calendar size={12} /> {new Date(mat.createdAt).toLocaleDateString()}
+                      </div>
+                      {/* DISPLAYING THE FILE SIZE */}
+                      <div className="flex items-center gap-1.5 text-blue-500/60">
+                        <FileText size={12} /> {formatBytes(mat.fileSize)}
+                      </div>
+                    </div>
+                    <a href={mat.fileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">SOURCE FILE</a>
+
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </main>
+
+      {/* Upload Modal */}
+      <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
+        <DialogContent className="rounded-[3rem] p-10 sm:max-w-[500px] border-none shadow-2xl">
           <DialogHeader>
-            <DialogTitle>Upload New Material</DialogTitle>
+            <DialogTitle className="text-3xl font-black italic tracking-tighter uppercase">Upload <span className="text-blue-600">Resource.</span></DialogTitle>
+            <DialogDescription className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-2 italic">Select files for classroom deployment.</DialogDescription>
           </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <FormField
-                control={form.control}
-                name="classId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Class</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a class" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {classes.map((c) => (
-                          <SelectItem key={c.id} value={String(c.id)}>
-                            {c.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Material URL</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://example.com/material.pdf" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit">Upload</Button>
-            </form>
-          </Form>
+
+          <div className="space-y-6 mt-6">
+            <Input placeholder="Resource Title" value={title} onChange={(e) => setTitle(e.target.value)} className="h-14 rounded-2xl bg-slate-50 border-none font-bold" />
+            <textarea placeholder="Instructional details..." value={description} onChange={(e) => setDescription(e.target.value)} className="w-full rounded-2xl bg-slate-50 border-none p-4 font-bold text-sm min-h-[100px]" />
+
+            <div className="space-y-3">
+              <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Deploy to Classes</p>
+              <div className="flex flex-wrap gap-2">
+                {classes.map(c => (
+                  <Badge
+                    key={c.id}
+                    onClick={() => setSelectedClasses(prev => prev.includes(c.id) ? prev.filter(id => id !== c.id) : [...prev, c.id])}
+                    className={`cursor-pointer h-10 px-4 rounded-xl font-bold transition-all border-none ${selectedClasses.includes(c.id) ? 'bg-blue-600 text-white' : 'bg-slate-50 text-slate-400'}`}
+                  >
+                    {c.name}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-slate-100 rounded-[2.5rem] cursor-pointer hover:bg-slate-50 transition-all group">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                <FileUp className={`w-10 h-10 mb-2 ${file ? 'text-blue-600' : 'text-slate-200 group-hover:text-blue-600'}`} />
+                <p className="text-[11px] font-black uppercase text-slate-400 tracking-tighter italic">
+                  {file ? file.name : 'Select PDF, DOCX, or Image'}
+                </p>
+              </div>
+              <input type="file" className="hidden" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+            </label>
+          </div>
+
+          <DialogFooter className="mt-8">
+            <Button disabled={uploading} onClick={handleUpload} className="w-full h-16 bg-blue-600 hover:bg-slate-900 text-white font-black rounded-3xl transition-all shadow-xl uppercase text-[11px] tracking-[0.2em]">
+              {uploading ? <Loader2 className="animate-spin" /> : 'AUTHORIZE PUBLICATION'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Class</TableHead>
-            <TableHead>URL</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {materials.map((material) => (
-            <TableRow key={material.id}>
-              <TableCell>{material.classe.name}</TableCell>
-              <TableCell>
-                <a href={material.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                  {material.url}
-                </a>
-              </TableCell>
-              <TableCell>
-                <Button variant="destructive" size="sm" onClick={() => handleDelete(material.id)}>
-                  Delete
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
     </div>
   );
 }

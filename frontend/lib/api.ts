@@ -11,7 +11,4 @@ const api = axios.create({
   withCredentials: true, // Send cookies with every request
 });
 
-// The request interceptor for adding the Authorization header is no longer needed,
-// as authentication is handled by HttpOnly cookies.
-
 export default api;
