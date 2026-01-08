@@ -4,7 +4,8 @@
 import { useState, useEffect } from 'react';
 import {
   FileUp, FileText, Trash2, Layers, BookOpen,
-  Loader2, Plus, X, Monitor, Download, Calendar
+  Loader2, Plus, X, Monitor, Download, Calendar,
+  Eye
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -111,6 +112,14 @@ export default function TeacherMaterialsPage() {
     }
   };
 
+  const downloadFile = (material: any) => {
+    const filename = encodeURIComponent(material.fileName || material.title);
+    window.open(
+      `${material.fileUrl}?fl_attachment=true&attachment_filename=${filename}`,
+      "_blank"
+    );
+  };
+
   if (loading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-blue-600" size={40} /></div>;
 
   return (
@@ -168,8 +177,19 @@ export default function TeacherMaterialsPage() {
                         <FileText size={12} /> {formatBytes(mat.fileSize)}
                       </div>
                     </div>
-                    <a href={mat.fileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">SOURCE FILE</a>
-
+                    <button className="text-blue-500 hover:underline" onClick={() => downloadFile(mat)}>
+                      Download
+                    </button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => window.open(`${mat.fileUrl}?fl_attachment=true&attachment_filename=${mat.fileName}`,
+                          "_blank", 'noopener,noreferrer')}
+                        className="rounded-2xl border-slate-100 text-slate-400 hover:text-indigo-600 font-black text-[10px] tracking-widest h-12 px-5 uppercase"
+                      >
+                        <Eye size={16} className="mr-2" /> Preview
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </Card>

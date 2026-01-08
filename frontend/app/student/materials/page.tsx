@@ -85,6 +85,10 @@ export default function StudentMaterialsPage() {
     </div>
   );
 
+  //   const downloadFile = (material: any) => {
+  //   window.open(`${material.fileUrl}?fl_attachment`, "_blank");
+  // };
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10 space-y-10">
       {/* Header Section */}
@@ -99,7 +103,7 @@ export default function StudentMaterialsPage() {
         </div>
 
         <Select onValueChange={handleClassChange}>
-          <SelectTrigger className="w-72 h-16 rounded-[2rem] bg-white border-none shadow-xl font-black italic uppercase text-xs px-8 ring-offset-indigo-600 focus:ring-indigo-600 transition-all">
+          <SelectTrigger className="w-72 h-16 rounded-4xl bg-white border-none shadow-xl font-black italic uppercase text-xs px-8 ring-offset-indigo-600 focus:ring-indigo-600 transition-all">
             <SelectValue placeholder="SELECT SUBJECT GROUP" />
           </SelectTrigger>
           <SelectContent className="rounded-2xl border-none shadow-2xl">
@@ -158,7 +162,8 @@ export default function StudentMaterialsPage() {
                         <div className="flex gap-2">
                           <Button
                             variant="outline"
-                            onClick={() => window.open(mat.fileUrl, '_blank', 'noopener,noreferrer')}
+                            onClick={() => window.open(`${mat.fileUrl}?fl_attachment=true&attachment_filename=${mat.fileName}`,
+                              "_blank", 'noopener,noreferrer')}
                             className="rounded-2xl border-slate-100 text-slate-400 hover:text-indigo-600 font-black text-[10px] tracking-widest h-12 px-5 uppercase"
                           >
                             <Eye size={16} className="mr-2" /> Preview
@@ -169,6 +174,11 @@ export default function StudentMaterialsPage() {
                               <Download size={16} className="mr-2" /> Get File
                             </Button>
                           </a>
+
+                          {/* <button className="text-blue-500 hover:underline" onClick={() => downloadFile(mat)}>
+                            Download
+                          </button>
+                          <a href={mat.fileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">SOURCE FILE</a> */}
                         </div>
                       </div>
 
