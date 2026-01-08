@@ -5,11 +5,47 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3d520211-0a2a-4a96-b5c3-809f60418961" name="Changes" comment="modified for new user details">
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/runners/CloudinaryUrlMigrationRunner.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/b2c269f4-6704-44a1-a992-3354cda1a985.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/b2c269f4-6704-44a1-a992-3354cda1a985.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/b2c269f4-6704-44a1-a992-3354cda1a985/storage_v2/_src_/database/amfofana_school.EIjL9Q/schema/public.abK9xQ.meta" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/b2c269f4-6704-44a1-a992-3354cda1a985/storage_v2/_src_/database/amfofana_school.EIjL9Q/schema/public.abK9xQ.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/.env" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/config/CloudinaryConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/config/CloudinaryConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/config/WebConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/config/WebConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/controllers/AdminController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/controllers/AdminController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/controllers/AdminMaterialController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/controllers/AdminMaterialController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/controllers/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/controllers/AuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/controllers/StudentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/controllers/StudentController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/controllers/StudentMaterialController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/controllers/StudentMaterialController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/controllers/TeacherController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/controllers/TeacherController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/controllers/TeacherMaterialController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/controllers/TeacherMaterialController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/dto/AttendanceDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/dto/AttendanceDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/dto/UserDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/dto/UserDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/entities/Attendance.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/entities/Attendance.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/entities/AttendanceRecord.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/entities/AttendanceRecord.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/entities/Exam.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/entities/Exam.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/entities/LearningMaterial.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/entities/LearningMaterial.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/entities/Timetable.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/entities/Timetable.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/entities/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/entities/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/exception/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/exception/GlobalExceptionHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/repositories/AttendanceRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/repositories/AttendanceRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/repositories/ExamRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/repositories/ExamRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/repositories/ExamResultRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/repositories/ExamResultRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/repositories/LearningMaterialRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/repositories/LearningMaterialRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/repositories/TimetableRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/repositories/TimetableRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/repositories/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/repositories/UserRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/services/AdminMaterialService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/services/AdminMaterialService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/services/AdminService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/services/AdminService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/services/CloudStorageService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/services/CloudStorageService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/services/FileStorageService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/services/FileStorageService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/services/StudentMaterialService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/services/StudentMaterialService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/services/StudentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/services/StudentService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/services/TeacherMaterialService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/services/TeacherMaterialService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/services/TeacherService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/amfofana/school/services/TeacherService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,12 +69,12 @@
     &quot;assignee&quot;: &quot;Hakromah&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Hakromah/AMFOFANA.git",
-    "accountId": "abcd644d-5299-475b-b286-20d5719d09fb"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Hakromah/AMFOFANA.git&quot;,
+    &quot;accountId&quot;: &quot;abcd644d-5299-475b-b286-20d5719d09fb&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 6
@@ -51,37 +87,43 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "Spring Boot.BackendApplication.executor": "Run",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings",
-    "ts.external.directory.path": "D:\\AMFOFANA\\frontend\\node_modules\\typescript\\lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Spring Boot.BackendApplication.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.DirectoryMappings&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;D:\\AMFOFANA\\frontend\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "postgresql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;postgresql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="BackendApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="envFilePaths">
+        <option value="$PROJECT_DIR$/backend/.env" />
+      </option>
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
       <module name="backend" />
+      <selectedOptions>
+        <option name="environmentVariables" />
+      </selectedOptions>
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.amfofana.school.BackendApplication" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -117,11 +159,14 @@
       <workItem from="1766164980626" duration="7406000" />
       <workItem from="1766231167355" duration="818000" />
       <workItem from="1766259199266" duration="74000" />
-      <workItem from="1766291075084" duration="112969000" />
+      <workItem from="1766291075084" duration="223445000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName=".env" />
   </component>
 </project>

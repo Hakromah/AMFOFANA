@@ -14,7 +14,9 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "timetables")
+@Table(name = "timetables", indexes = {
+        @Index(name = "idx_timetable_class", columnList = "class_id")
+})
 public class Timetable {
 
     @Id

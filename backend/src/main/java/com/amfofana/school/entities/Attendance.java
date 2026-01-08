@@ -1,11 +1,14 @@
 package com.amfofana.school.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -20,15 +23,14 @@ public class Attendance {
 
     @ManyToOne
     @JoinColumn(name = "class_id", nullable = false)
-    private Classe classe; // Changed from SchoolClass to Classe
-
-    @ManyToOne
-    @JoinColumn(name = "student_id", nullable = false)
-    private User student;
-
-    @Column(nullable = false)
-    private boolean status;
+    private Classe classe;
 
     @Column(nullable = false)
     private LocalDate date;
+
+    // This is the only place student data should live now
+    @OneToMany(mappedBy = "attendance", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<AttendanceRecord> records = new ArrayList<>();
+
 }

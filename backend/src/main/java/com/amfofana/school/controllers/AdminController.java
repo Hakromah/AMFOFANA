@@ -6,6 +6,7 @@ import com.amfofana.school.dto.UserDTO;
 import com.amfofana.school.entities.*;
 import com.amfofana.school.repositories.UserRepository;
 import com.amfofana.school.services.AdminService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -44,6 +45,18 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getAllUsers(role));
     }
 
+    @PostMapping("/users/bulk")
+    public ResponseEntity<Map<String, Object>> bulkCreateUsers(
+            @RequestBody @Valid List<UserDTO> users) {
+
+        // Execute the service logic we built
+        Map<String, Object> summary = adminService.saveAll(users);
+
+        // Return 200 OK with the imported/skipped counts
+        return ResponseEntity.ok(summary);
+    }
+
+
     @PutMapping("/users/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
         return ResponseEntity.ok(adminService.updateUser(id, user));
@@ -75,14 +88,6 @@ public class AdminController {
     public ResponseEntity<?> deleteClass(@PathVariable Long id) {
         adminService.deleteClass(id);
         return ResponseEntity.ok().build();
-    }
-
-    // Exam Management
-    @GetMapping("/exams")
-    public ResponseEntity<List<Exam>> getAllExams(
-            @RequestParam(required = false) Long teacherId,
-            @RequestParam(required = false) Long classId) {
-        return ResponseEntity.ok(adminService.getExams(teacherId, classId));
     }
 
     // Subject Management
@@ -213,6 +218,21 @@ public class AdminController {
     @PutMapping("/semester/lock")
     public ResponseEntity<?> lockSemester(@RequestParam String semester) {
         adminService.lockSemesterResults(semester);
+        return ResponseEntity.ok().build();
+    }
+
+
+    @GetMapping("/exams")
+    public ResponseEntity<List<Exam>> getExams(
+            @RequestParam(required = false) Long teacherId,
+            @RequestParam(required = false) Long classId) {
+        return ResponseEntity.ok(adminService.getExams(teacherId, classId));
+    }
+
+    @PatchMapping("/exams/lock-semester")
+    public ResponseEntity<?> lockSemester(@RequestBody Map<String, String> request) {
+        String semester = request.get("semester");
+        adminService.lockAllExamsInSemester(semester);
         return ResponseEntity.ok().build();
     }
 }

@@ -6,8 +6,28 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update  # Reverted back to update
+      ddl-auto: update
     show-sql: true
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+        generate_statistics: false # Set to true only for debugging performance
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+cloudinary:
+  cloud_name: ${CLOUDINARY_NAME}
+  api_key: ${CLOUDINARY_KEY}
+  api_secret: ${CLOUDINARY_SECRET}
 
 jwt:
   secret: yZnsCIqXIOcX9uI1elv9Yg1U+dPYipDtI4FtEC2E5R7WZCXk1X7nDxISM/hJmXzEFw53kzNAxP7ILsmfVLfZjQ==

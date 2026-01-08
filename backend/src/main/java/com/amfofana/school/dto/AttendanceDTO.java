@@ -13,6 +13,6 @@ public class AttendanceDTO {
     @Data
     public static class AttendanceRecordDTO {
         private Long studentId;
-        private boolean present;
+        private boolean isPresent;
     }
 }

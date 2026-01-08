@@ -3,7 +3,7 @@
   <database-model serializer="dbm" dbms="POSTGRES" family-id="POSTGRES" format-version="4.53">
     <root id="1">
       <DateStyle>mdy</DateStyle>
-      <IntrospectionStateNumber>3568</IntrospectionStateNumber>
+      <IntrospectionStateNumber>4126</IntrospectionStateNumber>
       <ServerVersion>18.1</ServerVersion>
       <StartupTime>1766259582</StartupTime>
       <TimeZones>true ACDT
@@ -801,7 +801,7 @@ false Zulu
 14814||10|C|G
 14814||-9223372036854775808|U|G
 14814||10|U|G</Grants>
-      <IntrospectionStateNumber>3568</IntrospectionStateNumber>
+      <IntrospectionStateNumber>4126</IntrospectionStateNumber>
       <ObjectId>19121</ObjectId>
       <OwnerName>postgres</OwnerName>
     </database>
@@ -4321,1058 +4321,1290 @@ false Zulu
     <schema id="272" parent="2" name="public">
       <Comment>standard public schema</Comment>
       <Current>1</Current>
-      <IntrospectionStateNumber>3568</IntrospectionStateNumber>
-      <LastIntrospectionLocalTimestamp>2025-12-28.15:01:17</LastIntrospectionLocalTimestamp>
+      <IntrospectionStateNumber>4126</IntrospectionStateNumber>
+      <LastIntrospectionLocalTimestamp>2026-01-08.18:03:31</LastIntrospectionLocalTimestamp>
       <ObjectId>2200</ObjectId>
       <StateNumber>546</StateNumber>
       <OwnerName>pg_database_owner</OwnerName>
     </schema>
     <sequence id="273" parent="272" name="attendance_id_seq">
-      <ObjectId>23760</ObjectId>
+      <ObjectId>25216</ObjectId>
       <SequenceIdentity>1</SequenceIdentity>
       <StartValue>1</StartValue>
-      <StateNumber>3462</StateNumber>
+      <StateNumber>4032</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <OwnerName>postgres</OwnerName>
     </sequence>
-    <sequence id="274" parent="272" name="classes_id_seq">
-      <ObjectId>23786</ObjectId>
+    <sequence id="274" parent="272" name="attendance_record_id_seq">
+      <ObjectId>25226</ObjectId>
       <SequenceIdentity>1</SequenceIdentity>
       <StartValue>1</StartValue>
-      <StateNumber>3465</StateNumber>
+      <StateNumber>4033</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <OwnerName>postgres</OwnerName>
     </sequence>
-    <sequence id="275" parent="272" name="exam_results_id_seq">
-      <ObjectId>23796</ObjectId>
+    <sequence id="275" parent="272" name="classes_id_seq">
+      <ObjectId>24814</ObjectId>
       <SequenceIdentity>1</SequenceIdentity>
       <StartValue>1</StartValue>
-      <StateNumber>3466</StateNumber>
+      <StateNumber>3873</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <OwnerName>postgres</OwnerName>
     </sequence>
-    <sequence id="276" parent="272" name="exams_id_seq">
-      <ObjectId>23812</ObjectId>
+    <sequence id="276" parent="272" name="exam_results_id_seq">
+      <ObjectId>24824</ObjectId>
       <SequenceIdentity>1</SequenceIdentity>
       <StartValue>1</StartValue>
-      <StateNumber>3467</StateNumber>
+      <StateNumber>3874</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <OwnerName>postgres</OwnerName>
     </sequence>
-    <sequence id="277" parent="272" name="learning_materials_id_seq">
-      <ObjectId>23827</ObjectId>
+    <sequence id="277" parent="272" name="exams_id_seq">
+      <ObjectId>24840</ObjectId>
       <SequenceIdentity>1</SequenceIdentity>
       <StartValue>1</StartValue>
-      <StateNumber>3468</StateNumber>
+      <StateNumber>3875</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <OwnerName>postgres</OwnerName>
     </sequence>
-    <sequence id="278" parent="272" name="student_profiles_id_seq">
-      <ObjectId>23838</ObjectId>
+    <sequence id="278" parent="272" name="learning_materials_id_seq">
+      <ObjectId>24860</ObjectId>
       <SequenceIdentity>1</SequenceIdentity>
       <StartValue>1</StartValue>
-      <StateNumber>3469</StateNumber>
+      <StateNumber>3876</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <OwnerName>postgres</OwnerName>
     </sequence>
-    <sequence id="279" parent="272" name="subjects_id_seq">
-      <ObjectId>23846</ObjectId>
+    <sequence id="279" parent="272" name="student_profiles_id_seq">
+      <ObjectId>24871</ObjectId>
       <SequenceIdentity>1</SequenceIdentity>
       <StartValue>1</StartValue>
-      <StateNumber>3470</StateNumber>
+      <StateNumber>3877</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <OwnerName>postgres</OwnerName>
     </sequence>
-    <sequence id="280" parent="272" name="teacher_profiles_id_seq">
-      <ObjectId>23855</ObjectId>
+    <sequence id="280" parent="272" name="subjects_id_seq">
+      <ObjectId>24879</ObjectId>
       <SequenceIdentity>1</SequenceIdentity>
       <StartValue>1</StartValue>
-      <StateNumber>3471</StateNumber>
+      <StateNumber>3878</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <OwnerName>postgres</OwnerName>
     </sequence>
-    <sequence id="281" parent="272" name="timetables_id_seq">
-      <ObjectId>23870</ObjectId>
+    <sequence id="281" parent="272" name="teacher_profiles_id_seq">
+      <ObjectId>24888</ObjectId>
       <SequenceIdentity>1</SequenceIdentity>
       <StartValue>1</StartValue>
-      <StateNumber>3473</StateNumber>
+      <StateNumber>3879</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <OwnerName>postgres</OwnerName>
     </sequence>
-    <sequence id="282" parent="272" name="users_id_seq">
-      <ObjectId>23884</ObjectId>
+    <sequence id="282" parent="272" name="timetables_id_seq">
+      <ObjectId>24903</ObjectId>
       <SequenceIdentity>1</SequenceIdentity>
       <StartValue>1</StartValue>
-      <StateNumber>3474</StateNumber>
+      <StateNumber>3881</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <OwnerName>postgres</OwnerName>
     </sequence>
-    <table id="283" parent="272" name="attendance">
-      <ObjectId>23761</ObjectId>
-      <StateNumber>3485</StateNumber>
+    <sequence id="283" parent="272" name="user_seq">
+      <ObjectId>25044</ObjectId>
+      <SequenceIdentity>1+50</SequenceIdentity>
+      <StartValue>100</StartValue>
+      <StateNumber>3967</StateNumber>
+      <StoredType>bigint|0s</StoredType>
+      <OwnerName>postgres</OwnerName>
+    </sequence>
+    <sequence id="284" parent="272" name="users_id_seq">
+      <ObjectId>24917</ObjectId>
+      <SequenceIdentity>1</SequenceIdentity>
+      <StartValue>1</StartValue>
+      <StateNumber>3882</StateNumber>
+      <StoredType>bigint|0s</StoredType>
+      <OwnerName>postgres</OwnerName>
+    </sequence>
+    <table id="285" parent="272" name="attendance">
+      <ObjectId>25217</ObjectId>
+      <StateNumber>4034</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
-    <table id="284" parent="272" name="classe_students">
-      <ObjectId>23772</ObjectId>
-      <StateNumber>3487</StateNumber>
+    <table id="286" parent="272" name="attendance_record">
+      <ObjectId>25227</ObjectId>
+      <StateNumber>4035</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
-    <table id="285" parent="272" name="classe_teachers">
-      <ObjectId>23779</ObjectId>
-      <StateNumber>3489</StateNumber>
+    <table id="287" parent="272" name="classe_students">
+      <ObjectId>24800</ObjectId>
+      <StateNumber>3895</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
-    <table id="286" parent="272" name="classes">
-      <ObjectId>23787</ObjectId>
-      <StateNumber>3485</StateNumber>
+    <table id="288" parent="272" name="classe_teachers">
+      <ObjectId>24807</ObjectId>
+      <StateNumber>3897</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
-    <table id="287" parent="272" name="exam_results">
-      <ObjectId>23797</ObjectId>
-      <StateNumber>3492</StateNumber>
+    <table id="289" parent="272" name="classes">
+      <ObjectId>24815</ObjectId>
+      <StateNumber>3893</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
-    <table id="288" parent="272" name="exams">
-      <ObjectId>23813</ObjectId>
-      <StateNumber>3492</StateNumber>
+    <table id="290" parent="272" name="exam_results">
+      <ObjectId>24825</ObjectId>
+      <StateNumber>3900</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
-    <table id="289" parent="272" name="learning_materials">
-      <ObjectId>23828</ObjectId>
-      <StateNumber>3497</StateNumber>
+    <table id="291" parent="272" name="exams">
+      <ObjectId>24841</ObjectId>
+      <StateNumber>4055</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
-    <table id="290" parent="272" name="student_profiles">
-      <ObjectId>23839</ObjectId>
-      <StateNumber>3498</StateNumber>
+    <table id="292" parent="272" name="learning_materials">
+      <ObjectId>24861</ObjectId>
+      <StateNumber>4125</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
-    <table id="291" parent="272" name="subjects">
-      <ObjectId>23847</ObjectId>
-      <StateNumber>3495</StateNumber>
+    <table id="293" parent="272" name="material_classes">
+      <ObjectId>25260</ObjectId>
+      <StateNumber>4091</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
-    <table id="292" parent="272" name="teacher_profiles">
-      <ObjectId>23856</ObjectId>
-      <StateNumber>3491</StateNumber>
+    <table id="294" parent="272" name="student_classes">
+      <ObjectId>25283</ObjectId>
+      <StateNumber>4115</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
-    <table id="293" parent="272" name="teacher_subjects">
-      <ObjectId>23863</ObjectId>
-      <StateNumber>3501</StateNumber>
+    <table id="295" parent="272" name="student_profiles">
+      <ObjectId>24872</ObjectId>
+      <StateNumber>3906</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
-    <table id="294" parent="272" name="timetables">
-      <ObjectId>23871</ObjectId>
-      <StateNumber>3503</StateNumber>
+    <table id="296" parent="272" name="subjects">
+      <ObjectId>24880</ObjectId>
+      <StateNumber>3903</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
-    <table id="295" parent="272" name="users">
-      <ObjectId>23885</ObjectId>
-      <StateNumber>3486</StateNumber>
+    <table id="297" parent="272" name="teacher_profiles">
+      <ObjectId>24889</ObjectId>
+      <StateNumber>3899</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
-    <column id="296" parent="283" name="id">
+    <table id="298" parent="272" name="teacher_subjects">
+      <ObjectId>24896</ObjectId>
+      <StateNumber>3909</StateNumber>
+      <AccessMethodId>2</AccessMethodId>
+      <OwnerName>postgres</OwnerName>
+    </table>
+    <table id="299" parent="272" name="timetables">
+      <ObjectId>24904</ObjectId>
+      <StateNumber>3911</StateNumber>
+      <AccessMethodId>2</AccessMethodId>
+      <OwnerName>postgres</OwnerName>
+    </table>
+    <table id="300" parent="272" name="users">
+      <ObjectId>24918</ObjectId>
+      <StateNumber>3894</StateNumber>
+      <AccessMethodId>2</AccessMethodId>
+      <OwnerName>postgres</OwnerName>
+    </table>
+    <column id="301" parent="285" name="id">
       <DefaultExpression>nextval(&apos;attendance_id_seq&apos;::regclass)</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>1</Position>
-      <StateNumber>3462</StateNumber>
+      <StateNumber>4032</StateNumber>
       <StoredType>bigint|0s</StoredType>
-      <SequenceId>23760</SequenceId>
+      <SequenceId>25216</SequenceId>
       <TypeId>20</TypeId>
     </column>
-    <column id="297" parent="283" name="date">
+    <column id="302" parent="285" name="date">
       <NotNull>1</NotNull>
       <Position>2</Position>
-      <StateNumber>3462</StateNumber>
+      <StateNumber>4032</StateNumber>
       <StoredType>date|0s</StoredType>
       <TypeId>1082</TypeId>
     </column>
-    <column id="298" parent="283" name="status">
+    <column id="303" parent="285" name="class_id">
       <NotNull>1</NotNull>
       <Position>3</Position>
-      <StateNumber>3462</StateNumber>
+      <StateNumber>4032</StateNumber>
+      <StoredType>bigint|0s</StoredType>
+      <TypeId>20</TypeId>
+    </column>
+    <foreign-key id="304" parent="285" name="fkrx58locko31i5sa3goghxssli">
+      <ColNames>class_id</ColNames>
+      <ObjectId>25235</ObjectId>
+      <StateNumber>4034</StateNumber>
+      <RefKeyColPositions>1</RefKeyColPositions>
+      <RefTableId>24815</RefTableId>
+    </foreign-key>
+    <index id="305" parent="285" name="attendance_pkey">
+      <ColNames>id</ColNames>
+      <NameSurrogate>1</NameSurrogate>
+      <ObjectId>25224</ObjectId>
+      <Primary>1</Primary>
+      <StateNumber>4032</StateNumber>
+      <Unique>1</Unique>
+      <AccessMethodId>403</AccessMethodId>
+    </index>
+    <key id="306" parent="285" name="attendance_pkey">
+      <NameSurrogate>1</NameSurrogate>
+      <ObjectId>25225</ObjectId>
+      <Primary>1</Primary>
+      <StateNumber>4032</StateNumber>
+      <UnderlyingIndexId>25224</UnderlyingIndexId>
+    </key>
+    <column id="307" parent="286" name="id">
+      <DefaultExpression>nextval(&apos;attendance_record_id_seq&apos;::regclass)</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StateNumber>4033</StateNumber>
+      <StoredType>bigint|0s</StoredType>
+      <SequenceId>25226</SequenceId>
+      <TypeId>20</TypeId>
+    </column>
+    <column id="308" parent="286" name="present">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StateNumber>4033</StateNumber>
       <StoredType>boolean|0s</StoredType>
       <TypeId>16</TypeId>
     </column>
-    <column id="299" parent="283" name="class_id">
-      <NotNull>1</NotNull>
+    <column id="309" parent="286" name="attendance_id">
+      <Position>3</Position>
+      <StateNumber>4033</StateNumber>
+      <StoredType>bigint|0s</StoredType>
+      <TypeId>20</TypeId>
+    </column>
+    <column id="310" parent="286" name="user_id">
       <Position>4</Position>
-      <StateNumber>3462</StateNumber>
+      <StateNumber>4033</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <column id="300" parent="283" name="student_id">
-      <NotNull>1</NotNull>
-      <Position>5</Position>
-      <StateNumber>3462</StateNumber>
-      <StoredType>bigint|0s</StoredType>
-      <TypeId>20</TypeId>
-    </column>
-    <foreign-key id="301" parent="283" name="fkrx58locko31i5sa3goghxssli">
-      <ColNames>class_id</ColNames>
-      <ObjectId>23910</ObjectId>
-      <StateNumber>3485</StateNumber>
+    <foreign-key id="311" parent="286" name="fk5pghlne17m4tenhiv7trlji7e">
+      <ColNames>attendance_id</ColNames>
+      <ObjectId>25240</ObjectId>
+      <StateNumber>4035</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>23787</RefTableId>
+      <RefTableId>25217</RefTableId>
     </foreign-key>
-    <foreign-key id="302" parent="283" name="fk80qpvlsg0xpmw80bnk64avvou">
-      <ColNames>student_id</ColNames>
-      <ObjectId>23915</ObjectId>
-      <StateNumber>3486</StateNumber>
+    <foreign-key id="312" parent="286" name="fkjmsqarjpu79244gy6ydbv02vl">
+      <ColNames>user_id</ColNames>
+      <ObjectId>25245</ObjectId>
+      <OnDelete>cascade</OnDelete>
+      <StateNumber>4036</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>23885</RefTableId>
+      <RefTableId>24918</RefTableId>
     </foreign-key>
-    <index id="303" parent="283" name="attendance_pkey">
+    <index id="313" parent="286" name="attendance_record_pkey">
       <ColNames>id</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23770</ObjectId>
+      <ObjectId>25233</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3462</StateNumber>
+      <StateNumber>4033</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <key id="304" parent="283" name="attendance_pkey">
+    <key id="314" parent="286" name="attendance_record_pkey">
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23771</ObjectId>
+      <ObjectId>25234</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3462</StateNumber>
-      <UnderlyingIndexId>23770</UnderlyingIndexId>
+      <StateNumber>4033</StateNumber>
+      <UnderlyingIndexId>25233</UnderlyingIndexId>
     </key>
-    <column id="305" parent="284" name="classe_id">
+    <column id="315" parent="287" name="classe_id">
       <NotNull>1</NotNull>
       <Position>1</Position>
-      <StateNumber>3463</StateNumber>
+      <StateNumber>3871</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <column id="306" parent="284" name="student_id">
+    <column id="316" parent="287" name="student_id">
       <NotNull>1</NotNull>
       <Position>2</Position>
-      <StateNumber>3463</StateNumber>
+      <StateNumber>3871</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <foreign-key id="307" parent="284" name="fkg7j47u3i24mtbk5bvk1tt1jwb">
+    <foreign-key id="317" parent="287" name="fkg7j47u3i24mtbk5bvk1tt1jwb">
       <ColNames>classe_id</ColNames>
-      <ObjectId>23925</ObjectId>
-      <StateNumber>3488</StateNumber>
+      <ObjectId>24958</ObjectId>
+      <StateNumber>3896</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>23787</RefTableId>
+      <RefTableId>24815</RefTableId>
     </foreign-key>
-    <foreign-key id="308" parent="284" name="fklmrlwvpdk201apa6iamk45dw7">
+    <foreign-key id="318" parent="287" name="fklmrlwvpdk201apa6iamk45dw7">
       <ColNames>student_id</ColNames>
-      <ObjectId>23920</ObjectId>
+      <ObjectId>24953</ObjectId>
       <OnDelete>cascade</OnDelete>
-      <StateNumber>3487</StateNumber>
+      <StateNumber>3895</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>23885</RefTableId>
+      <RefTableId>24918</RefTableId>
     </foreign-key>
-    <index id="309" parent="284" name="classe_students_pkey">
+    <index id="319" parent="287" name="classe_students_pkey">
       <ColNames>classe_id
 student_id</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23777</ObjectId>
+      <ObjectId>24805</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3463</StateNumber>
+      <StateNumber>3871</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <key id="310" parent="284" name="classe_students_pkey">
+    <key id="320" parent="287" name="classe_students_pkey">
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23778</ObjectId>
+      <ObjectId>24806</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3463</StateNumber>
-      <UnderlyingIndexId>23777</UnderlyingIndexId>
+      <StateNumber>3871</StateNumber>
+      <UnderlyingIndexId>24805</UnderlyingIndexId>
     </key>
-    <column id="311" parent="285" name="classe_id">
+    <column id="321" parent="288" name="classe_id">
       <NotNull>1</NotNull>
       <Position>1</Position>
-      <StateNumber>3464</StateNumber>
+      <StateNumber>3872</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <column id="312" parent="285" name="teacher_id">
+    <column id="322" parent="288" name="teacher_id">
       <NotNull>1</NotNull>
       <Position>2</Position>
-      <StateNumber>3464</StateNumber>
+      <StateNumber>3872</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <foreign-key id="313" parent="285" name="fkmns0oc6afajyt0u2aies9av5n">
+    <foreign-key id="323" parent="288" name="fkmns0oc6afajyt0u2aies9av5n">
       <ColNames>classe_id</ColNames>
-      <ObjectId>23935</ObjectId>
-      <StateNumber>3490</StateNumber>
+      <ObjectId>24968</ObjectId>
+      <StateNumber>3898</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>23787</RefTableId>
+      <RefTableId>24815</RefTableId>
     </foreign-key>
-    <foreign-key id="314" parent="285" name="fkoaardivd151ciarw5rt2qffij">
+    <foreign-key id="324" parent="288" name="fkoaardivd151ciarw5rt2qffij">
       <ColNames>teacher_id</ColNames>
-      <ObjectId>23930</ObjectId>
-      <StateNumber>3489</StateNumber>
+      <ObjectId>24963</ObjectId>
+      <StateNumber>3897</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>23885</RefTableId>
+      <RefTableId>24918</RefTableId>
     </foreign-key>
-    <index id="315" parent="285" name="classe_teachers_pkey">
+    <index id="325" parent="288" name="classe_teachers_pkey">
       <ColNames>classe_id
 teacher_id</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23784</ObjectId>
+      <ObjectId>24812</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3464</StateNumber>
+      <StateNumber>3872</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <key id="316" parent="285" name="classe_teachers_pkey">
+    <key id="326" parent="288" name="classe_teachers_pkey">
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23785</ObjectId>
+      <ObjectId>24813</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3464</StateNumber>
-      <UnderlyingIndexId>23784</UnderlyingIndexId>
+      <StateNumber>3872</StateNumber>
+      <UnderlyingIndexId>24812</UnderlyingIndexId>
     </key>
-    <column id="317" parent="286" name="id">
+    <column id="327" parent="289" name="id">
       <DefaultExpression>nextval(&apos;classes_id_seq&apos;::regclass)</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>1</Position>
-      <StateNumber>3465</StateNumber>
+      <StateNumber>3873</StateNumber>
       <StoredType>bigint|0s</StoredType>
-      <SequenceId>23786</SequenceId>
+      <SequenceId>24814</SequenceId>
       <TypeId>20</TypeId>
     </column>
-    <column id="318" parent="286" name="grade">
+    <column id="328" parent="289" name="grade">
       <Position>2</Position>
-      <StateNumber>3465</StateNumber>
+      <StateNumber>3873</StateNumber>
       <StoredType>varchar(255)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <column id="319" parent="286" name="name">
+    <column id="329" parent="289" name="name">
       <Position>3</Position>
-      <StateNumber>3465</StateNumber>
+      <StateNumber>3873</StateNumber>
       <StoredType>varchar(255)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <column id="320" parent="286" name="teacher_id">
+    <column id="330" parent="289" name="teacher_id">
       <Position>4</Position>
-      <StateNumber>3465</StateNumber>
+      <StateNumber>3873</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <foreign-key id="321" parent="286" name="fk6549icyuckl240ulqicftl07m">
+    <foreign-key id="331" parent="289" name="fk6549icyuckl240ulqicftl07m">
       <ColNames>teacher_id</ColNames>
-      <ObjectId>23940</ObjectId>
-      <StateNumber>3491</StateNumber>
+      <ObjectId>24973</ObjectId>
+      <StateNumber>3899</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>23856</RefTableId>
+      <RefTableId>24889</RefTableId>
     </foreign-key>
-    <index id="322" parent="286" name="classes_pkey">
+    <index id="332" parent="289" name="classes_pkey">
       <ColNames>id</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23794</ObjectId>
+      <ObjectId>24822</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3465</StateNumber>
+      <StateNumber>3873</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <key id="323" parent="286" name="classes_pkey">
+    <key id="333" parent="289" name="classes_pkey">
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23795</ObjectId>
+      <ObjectId>24823</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3465</StateNumber>
-      <UnderlyingIndexId>23794</UnderlyingIndexId>
+      <StateNumber>3873</StateNumber>
+      <UnderlyingIndexId>24822</UnderlyingIndexId>
     </key>
-    <check id="324" parent="287" name="exam_results_grade_check">
+    <check id="334" parent="290" name="exam_results_grade_check">
       <ColNames>grade</ColNames>
-      <ObjectId>23801</ObjectId>
+      <ObjectId>24829</ObjectId>
       <Predicate>(grade)::text = ANY ((ARRAY[&apos;AA&apos;::character varying, &apos;BA&apos;::character varying, &apos;BB&apos;::character varying, &apos;CB&apos;::character varying, &apos;CC&apos;::character varying, &apos;DC&apos;::character varying, &apos;DD&apos;::character varying, &apos;FF&apos;::character varying])::text[])</Predicate>
-      <StateNumber>3466</StateNumber>
+      <StateNumber>3874</StateNumber>
     </check>
-    <check id="325" parent="287" name="exam_results_status_check">
+    <check id="335" parent="290" name="exam_results_status_check">
       <ColNames>status</ColNames>
-      <ObjectId>23802</ObjectId>
+      <ObjectId>24830</ObjectId>
       <Predicate>(status)::text = ANY ((ARRAY[&apos;DRAFT&apos;::character varying, &apos;SUBMITTED&apos;::character varying, &apos;GRADED&apos;::character varying])::text[])</Predicate>
-      <StateNumber>3466</StateNumber>
+      <StateNumber>3874</StateNumber>
     </check>
-    <column id="326" parent="287" name="id">
+    <column id="336" parent="290" name="id">
       <DefaultExpression>nextval(&apos;exam_results_id_seq&apos;::regclass)</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>1</Position>
-      <StateNumber>3466</StateNumber>
+      <StateNumber>3874</StateNumber>
       <StoredType>bigint|0s</StoredType>
-      <SequenceId>23796</SequenceId>
+      <SequenceId>24824</SequenceId>
       <TypeId>20</TypeId>
     </column>
-    <column id="327" parent="287" name="grade">
+    <column id="337" parent="290" name="grade">
       <Position>2</Position>
-      <StateNumber>3466</StateNumber>
+      <StateNumber>3874</StateNumber>
       <StoredType>varchar(255)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <column id="328" parent="287" name="letter_grade">
+    <column id="338" parent="290" name="letter_grade">
       <Position>3</Position>
-      <StateNumber>3466</StateNumber>
+      <StateNumber>3874</StateNumber>
       <StoredType>varchar(255)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <column id="329" parent="287" name="marks">
+    <column id="339" parent="290" name="marks">
       <NotNull>1</NotNull>
       <Position>4</Position>
-      <StateNumber>3466</StateNumber>
+      <StateNumber>3874</StateNumber>
       <StoredType>double precision|0s</StoredType>
       <TypeId>701</TypeId>
     </column>
-    <column id="330" parent="287" name="status">
+    <column id="340" parent="290" name="status">
       <NotNull>1</NotNull>
       <Position>5</Position>
-      <StateNumber>3466</StateNumber>
+      <StateNumber>3874</StateNumber>
       <StoredType>varchar(255)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <column id="331" parent="287" name="exam_id">
+    <column id="341" parent="290" name="exam_id">
       <NotNull>1</NotNull>
       <Position>6</Position>
-      <StateNumber>3466</StateNumber>
+      <StateNumber>3874</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <column id="332" parent="287" name="student_id">
+    <column id="342" parent="290" name="student_id">
       <NotNull>1</NotNull>
       <Position>7</Position>
-      <StateNumber>3466</StateNumber>
+      <StateNumber>3874</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <foreign-key id="333" parent="287" name="fktf85ht7yquiorwjx2xbdx3fxw">
+    <foreign-key id="343" parent="290" name="fktf85ht7yquiorwjx2xbdx3fxw">
       <ColNames>exam_id</ColNames>
-      <ObjectId>23945</ObjectId>
-      <StateNumber>3492</StateNumber>
+      <ObjectId>24978</ObjectId>
+      <StateNumber>3900</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>23813</RefTableId>
+      <RefTableId>24841</RefTableId>
     </foreign-key>
-    <foreign-key id="334" parent="287" name="fkgli13rnrn9yosbms9vhyujclo">
+    <foreign-key id="344" parent="290" name="fkgli13rnrn9yosbms9vhyujclo">
       <ColNames>student_id</ColNames>
-      <ObjectId>23950</ObjectId>
-      <StateNumber>3493</StateNumber>
+      <ObjectId>24983</ObjectId>
+      <StateNumber>3901</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>23885</RefTableId>
+      <RefTableId>24918</RefTableId>
     </foreign-key>
-    <index id="335" parent="287" name="exam_results_pkey">
+    <index id="345" parent="290" name="exam_results_pkey">
       <ColNames>id</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23810</ObjectId>
+      <ObjectId>24838</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3466</StateNumber>
+      <StateNumber>3874</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <index id="336" parent="287" name="unique_student_course_term_semester">
-      <ColNames>student_id
-exam_id</ColNames>
-      <ObjectId>24011</ObjectId>
-      <StateNumber>3563</StateNumber>
-      <Unique>1</Unique>
-      <AccessMethodId>403</AccessMethodId>
-    </index>
-    <key id="337" parent="287" name="exam_results_pkey">
+    <key id="346" parent="290" name="exam_results_pkey">
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23811</ObjectId>
+      <ObjectId>24839</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3466</StateNumber>
-      <UnderlyingIndexId>23810</UnderlyingIndexId>
+      <StateNumber>3874</StateNumber>
+      <UnderlyingIndexId>24838</UnderlyingIndexId>
     </key>
-    <key id="338" parent="287" name="unique_student_course_term_semester">
-      <ObjectId>24012</ObjectId>
-      <StateNumber>3563</StateNumber>
-      <UnderlyingIndexId>24011</UnderlyingIndexId>
-    </key>
-    <column id="339" parent="288" name="id">
+    <check id="347" parent="291" name="exams_term_check">
+      <ColNames>term</ColNames>
+      <ObjectId>24846</ObjectId>
+      <Predicate>(term)::text = ANY ((ARRAY[&apos;QUIZ_1&apos;::character varying, &apos;QUIZ_2&apos;::character varying, &apos;MIDTERM&apos;::character varying, &apos;FINAL_EXAM&apos;::character varying, &apos;CONTINUOUS_ASSESSMENT&apos;::character varying, &apos;PROJECT&apos;::character varying])::text[])</Predicate>
+      <StateNumber>3875</StateNumber>
+    </check>
+    <column id="348" parent="291" name="id">
       <DefaultExpression>nextval(&apos;exams_id_seq&apos;::regclass)</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>1</Position>
-      <StateNumber>3467</StateNumber>
+      <StateNumber>3875</StateNumber>
       <StoredType>bigint|0s</StoredType>
-      <SequenceId>23812</SequenceId>
+      <SequenceId>24840</SequenceId>
       <TypeId>20</TypeId>
     </column>
-    <column id="340" parent="288" name="date">
+    <column id="349" parent="291" name="date">
       <NotNull>1</NotNull>
       <Position>2</Position>
-      <StateNumber>3467</StateNumber>
+      <StateNumber>3875</StateNumber>
       <StoredType>date|0s</StoredType>
       <TypeId>1082</TypeId>
     </column>
-    <column id="341" parent="288" name="end_time">
+    <column id="350" parent="291" name="end_time">
       <NotNull>1</NotNull>
       <Position>3</Position>
-      <StateNumber>3467</StateNumber>
+      <StateNumber>3875</StateNumber>
       <StoredType>time(6)|0s</StoredType>
       <TypeId>1083</TypeId>
     </column>
-    <column id="342" parent="288" name="name">
-      <DefaultExpression>&apos;Exam&apos;::character varying</DefaultExpression>
+    <column id="351" parent="291" name="is_locked">
       <NotNull>1</NotNull>
       <Position>4</Position>
-      <StateNumber>3467</StateNumber>
+      <StateNumber>3875</StateNumber>
+      <StoredType>boolean|0s</StoredType>
+      <TypeId>16</TypeId>
+    </column>
+    <column id="352" parent="291" name="name">
+      <DefaultExpression>&apos;Exam&apos;::character varying</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>5</Position>
+      <StateNumber>3875</StateNumber>
       <StoredType>varchar(255)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <column id="343" parent="288" name="start_time">
+    <column id="353" parent="291" name="semester">
       <NotNull>1</NotNull>
-      <Position>5</Position>
-      <StateNumber>3467</StateNumber>
+      <Position>6</Position>
+      <StateNumber>3875</StateNumber>
+      <StoredType>varchar(255)|0s</StoredType>
+      <TypeId>1043</TypeId>
+    </column>
+    <column id="354" parent="291" name="start_time">
+      <NotNull>1</NotNull>
+      <Position>7</Position>
+      <StateNumber>3875</StateNumber>
       <StoredType>time(6)|0s</StoredType>
       <TypeId>1083</TypeId>
     </column>
-    <column id="344" parent="288" name="class_id">
-      <NotNull>1</NotNull>
-      <Position>6</Position>
-      <StateNumber>3467</StateNumber>
-      <StoredType>bigint|0s</StoredType>
-      <TypeId>20</TypeId>
-    </column>
-    <column id="345" parent="288" name="subject_id">
-      <NotNull>1</NotNull>
-      <Position>7</Position>
-      <StateNumber>3467</StateNumber>
-      <StoredType>bigint|0s</StoredType>
-      <TypeId>20</TypeId>
-    </column>
-    <column id="346" parent="288" name="teacher_id">
+    <column id="355" parent="291" name="term">
       <Position>8</Position>
-      <StateNumber>3467</StateNumber>
+      <StateNumber>3875</StateNumber>
+      <StoredType>varchar(255)|0s</StoredType>
+      <TypeId>1043</TypeId>
+    </column>
+    <column id="356" parent="291" name="weight">
+      <Position>9</Position>
+      <StateNumber>3875</StateNumber>
+      <StoredType>integer|0s</StoredType>
+      <TypeId>23</TypeId>
+    </column>
+    <column id="357" parent="291" name="class_id">
+      <NotNull>1</NotNull>
+      <Position>10</Position>
+      <StateNumber>3875</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <foreign-key id="347" parent="288" name="fkkq9895f263nw6qxibikek0t40">
+    <column id="358" parent="291" name="subject_id">
+      <NotNull>1</NotNull>
+      <Position>11</Position>
+      <StateNumber>3875</StateNumber>
+      <StoredType>bigint|0s</StoredType>
+      <TypeId>20</TypeId>
+    </column>
+    <column id="359" parent="291" name="teacher_id">
+      <Position>12</Position>
+      <StateNumber>3875</StateNumber>
+      <StoredType>bigint|0s</StoredType>
+      <TypeId>20</TypeId>
+    </column>
+    <column id="360" parent="291" name="is_closed">
+      <DefaultExpression>false</DefaultExpression>
+      <Position>13</Position>
+      <StateNumber>4055</StateNumber>
+      <StoredType>boolean|0s</StoredType>
+      <TypeId>16</TypeId>
+    </column>
+    <foreign-key id="361" parent="291" name="fkkq9895f263nw6qxibikek0t40">
       <ColNames>class_id</ColNames>
-      <ObjectId>23955</ObjectId>
+      <ObjectId>24988</ObjectId>
       <OnDelete>cascade</OnDelete>
-      <StateNumber>3494</StateNumber>
+      <StateNumber>3902</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>23787</RefTableId>
+      <RefTableId>24815</RefTableId>
     </foreign-key>
-    <foreign-key id="348" parent="288" name="fkopre4n7j7fpxqbtbwpv8ywn1y">
+    <foreign-key id="362" parent="291" name="fkopre4n7j7fpxqbtbwpv8ywn1y">
       <ColNames>subject_id</ColNames>
-      <ObjectId>23960</ObjectId>
+      <ObjectId>24993</ObjectId>
       <OnDelete>cascade</OnDelete>
-      <StateNumber>3495</StateNumber>
+      <StateNumber>3903</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>23847</RefTableId>
+      <RefTableId>24880</RefTableId>
     </foreign-key>
-    <foreign-key id="349" parent="288" name="fk117eri39phjq7foats1uesdgp">
+    <foreign-key id="363" parent="291" name="fk117eri39phjq7foats1uesdgp">
       <ColNames>teacher_id</ColNames>
-      <ObjectId>23965</ObjectId>
-      <StateNumber>3496</StateNumber>
+      <ObjectId>24998</ObjectId>
+      <StateNumber>3904</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>23885</RefTableId>
+      <RefTableId>24918</RefTableId>
     </foreign-key>
-    <index id="350" parent="288" name="exams_pkey">
+    <index id="364" parent="291" name="exams_pkey">
       <ColNames>id</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23825</ObjectId>
+      <ObjectId>24858</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3467</StateNumber>
+      <StateNumber>3875</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <key id="351" parent="288" name="exams_pkey">
+    <key id="365" parent="291" name="exams_pkey">
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23826</ObjectId>
+      <ObjectId>24859</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3467</StateNumber>
-      <UnderlyingIndexId>23825</UnderlyingIndexId>
+      <StateNumber>3875</StateNumber>
+      <UnderlyingIndexId>24858</UnderlyingIndexId>
     </key>
-    <column id="352" parent="289" name="id">
+    <column id="366" parent="292" name="id">
       <DefaultExpression>nextval(&apos;learning_materials_id_seq&apos;::regclass)</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>1</Position>
-      <StateNumber>3468</StateNumber>
+      <StateNumber>3876</StateNumber>
       <StoredType>bigint|0s</StoredType>
-      <SequenceId>23827</SequenceId>
+      <SequenceId>24860</SequenceId>
       <TypeId>20</TypeId>
     </column>
-    <column id="353" parent="289" name="timestamp">
-      <NotNull>1</NotNull>
-      <Position>2</Position>
-      <StateNumber>3468</StateNumber>
+    <column id="367" parent="292" name="created_at">
+      <Position>5</Position>
+      <StateNumber>4081</StateNumber>
       <StoredType>timestamp(6)|0s</StoredType>
       <TypeId>1114</TypeId>
     </column>
-    <column id="354" parent="289" name="url">
+    <column id="368" parent="292" name="description">
+      <Position>6</Position>
+      <StateNumber>4082</StateNumber>
+      <StoredType>text|0s</StoredType>
+      <TypeId>25</TypeId>
+    </column>
+    <column id="369" parent="292" name="file_name">
       <NotNull>1</NotNull>
-      <Position>3</Position>
-      <StateNumber>3468</StateNumber>
+      <Position>7</Position>
+      <StateNumber>4083</StateNumber>
       <StoredType>varchar(255)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <column id="355" parent="289" name="class_id">
-      <NotNull>1</NotNull>
-      <Position>4</Position>
-      <StateNumber>3468</StateNumber>
+    <column id="370" parent="292" name="file_size">
+      <Position>8</Position>
+      <StateNumber>4084</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <foreign-key id="356" parent="289" name="fk3b8scp2kqhys3157l2i9j22lk">
-      <ColNames>class_id</ColNames>
-      <ObjectId>23970</ObjectId>
-      <StateNumber>3497</StateNumber>
+    <column id="371" parent="292" name="file_type">
+      <Position>9</Position>
+      <StateNumber>4085</StateNumber>
+      <StoredType>varchar(255)|0s</StoredType>
+      <TypeId>1043</TypeId>
+    </column>
+    <column id="372" parent="292" name="file_url">
+      <NotNull>1</NotNull>
+      <Position>10</Position>
+      <StateNumber>4086</StateNumber>
+      <StoredType>varchar(255)|0s</StoredType>
+      <TypeId>1043</TypeId>
+    </column>
+    <column id="373" parent="292" name="title">
+      <NotNull>1</NotNull>
+      <Position>11</Position>
+      <StateNumber>4087</StateNumber>
+      <StoredType>varchar(255)|0s</StoredType>
+      <TypeId>1043</TypeId>
+    </column>
+    <column id="374" parent="292" name="teacher_id">
+      <Position>12</Position>
+      <StateNumber>4088</StateNumber>
+      <StoredType>bigint|0s</StoredType>
+      <TypeId>20</TypeId>
+    </column>
+    <column id="375" parent="292" name="public_id">
+      <Position>13</Position>
+      <StateNumber>4125</StateNumber>
+      <StoredType>varchar(255)|0s</StoredType>
+      <TypeId>1043</TypeId>
+    </column>
+    <foreign-key id="376" parent="292" name="fklxjv2nvd8vyt0fqxriprg2bka">
+      <ColNames>teacher_id</ColNames>
+      <ObjectId>25267</ObjectId>
+      <StateNumber>4090</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>23787</RefTableId>
+      <RefTableId>24918</RefTableId>
     </foreign-key>
-    <index id="357" parent="289" name="learning_materials_pkey">
+    <index id="377" parent="292" name="learning_materials_pkey">
       <ColNames>id</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23836</ObjectId>
+      <ObjectId>24869</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3468</StateNumber>
+      <StateNumber>3876</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <key id="358" parent="289" name="learning_materials_pkey">
+    <key id="378" parent="292" name="learning_materials_pkey">
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23837</ObjectId>
+      <ObjectId>24870</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3468</StateNumber>
-      <UnderlyingIndexId>23836</UnderlyingIndexId>
+      <StateNumber>3876</StateNumber>
+      <UnderlyingIndexId>24869</UnderlyingIndexId>
     </key>
-    <column id="359" parent="290" name="id">
+    <column id="379" parent="293" name="material_id">
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StateNumber>4089</StateNumber>
+      <StoredType>bigint|0s</StoredType>
+      <TypeId>20</TypeId>
+    </column>
+    <column id="380" parent="293" name="class_id">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StateNumber>4089</StateNumber>
+      <StoredType>bigint|0s</StoredType>
+      <TypeId>20</TypeId>
+    </column>
+    <foreign-key id="381" parent="293" name="fk13p4pbayr8duwf2ehh5hmgb23">
+      <ColNames>material_id</ColNames>
+      <ObjectId>25277</ObjectId>
+      <StateNumber>4092</StateNumber>
+      <RefKeyColPositions>1</RefKeyColPositions>
+      <RefTableId>24861</RefTableId>
+    </foreign-key>
+    <foreign-key id="382" parent="293" name="fkp1mn47iie4ne4te8xmmelgq60">
+      <ColNames>class_id</ColNames>
+      <ObjectId>25272</ObjectId>
+      <StateNumber>4091</StateNumber>
+      <RefKeyColPositions>1</RefKeyColPositions>
+      <RefTableId>24815</RefTableId>
+    </foreign-key>
+    <index id="383" parent="293" name="material_classes_pkey">
+      <ColNames>material_id
+class_id</ColNames>
+      <NameSurrogate>1</NameSurrogate>
+      <ObjectId>25265</ObjectId>
+      <Primary>1</Primary>
+      <StateNumber>4089</StateNumber>
+      <Unique>1</Unique>
+      <AccessMethodId>403</AccessMethodId>
+    </index>
+    <key id="384" parent="293" name="material_classes_pkey">
+      <NameSurrogate>1</NameSurrogate>
+      <ObjectId>25266</ObjectId>
+      <Primary>1</Primary>
+      <StateNumber>4089</StateNumber>
+      <UnderlyingIndexId>25265</UnderlyingIndexId>
+    </key>
+    <column id="385" parent="294" name="student_id">
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StateNumber>4115</StateNumber>
+      <StoredType>bigint|0s</StoredType>
+      <TypeId>20</TypeId>
+    </column>
+    <column id="386" parent="294" name="class_id">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StateNumber>4115</StateNumber>
+      <StoredType>bigint|0s</StoredType>
+      <TypeId>20</TypeId>
+    </column>
+    <foreign-key id="387" parent="294" name="fk_student">
+      <ColNames>student_id</ColNames>
+      <ObjectId>25290</ObjectId>
+      <OnDelete>cascade</OnDelete>
+      <StateNumber>4115</StateNumber>
+      <RefKeyColPositions>1</RefKeyColPositions>
+      <RefTableId>24918</RefTableId>
+    </foreign-key>
+    <foreign-key id="388" parent="294" name="fk_class">
+      <ColNames>class_id</ColNames>
+      <ObjectId>25295</ObjectId>
+      <OnDelete>cascade</OnDelete>
+      <StateNumber>4115</StateNumber>
+      <RefKeyColPositions>1</RefKeyColPositions>
+      <RefTableId>24815</RefTableId>
+    </foreign-key>
+    <index id="389" parent="294" name="student_classes_pkey">
+      <ColNames>student_id
+class_id</ColNames>
+      <NameSurrogate>1</NameSurrogate>
+      <ObjectId>25288</ObjectId>
+      <Primary>1</Primary>
+      <StateNumber>4115</StateNumber>
+      <Unique>1</Unique>
+      <AccessMethodId>403</AccessMethodId>
+    </index>
+    <key id="390" parent="294" name="student_classes_pkey">
+      <NameSurrogate>1</NameSurrogate>
+      <ObjectId>25289</ObjectId>
+      <Primary>1</Primary>
+      <StateNumber>4115</StateNumber>
+      <UnderlyingIndexId>25288</UnderlyingIndexId>
+    </key>
+    <column id="391" parent="295" name="id">
       <DefaultExpression>nextval(&apos;student_profiles_id_seq&apos;::regclass)</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>1</Position>
-      <StateNumber>3469</StateNumber>
+      <StateNumber>3877</StateNumber>
       <StoredType>bigint|0s</StoredType>
-      <SequenceId>23838</SequenceId>
+      <SequenceId>24871</SequenceId>
       <TypeId>20</TypeId>
     </column>
-    <column id="360" parent="290" name="class_id">
+    <column id="392" parent="295" name="class_id">
       <Position>2</Position>
-      <StateNumber>3469</StateNumber>
+      <StateNumber>3877</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <column id="361" parent="290" name="user_id">
+    <column id="393" parent="295" name="user_id">
       <Position>3</Position>
-      <StateNumber>3469</StateNumber>
+      <StateNumber>3877</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <foreign-key id="362" parent="290" name="fkhb5nv7ojm3ngf1q404d6i43gd">
+    <foreign-key id="394" parent="295" name="fkhb5nv7ojm3ngf1q404d6i43gd">
       <ColNames>class_id</ColNames>
-      <ObjectId>23975</ObjectId>
-      <StateNumber>3498</StateNumber>
+      <ObjectId>25008</ObjectId>
+      <StateNumber>3906</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>23787</RefTableId>
+      <RefTableId>24815</RefTableId>
     </foreign-key>
-    <foreign-key id="363" parent="290" name="fk32koy3tgqtaujxhfsn0b9pel2">
+    <foreign-key id="395" parent="295" name="fk32koy3tgqtaujxhfsn0b9pel2">
       <ColNames>user_id</ColNames>
-      <ObjectId>23980</ObjectId>
+      <ObjectId>25013</ObjectId>
       <OnDelete>cascade</OnDelete>
-      <StateNumber>3499</StateNumber>
+      <StateNumber>3907</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>23885</RefTableId>
+      <RefTableId>24918</RefTableId>
     </foreign-key>
-    <index id="364" parent="290" name="student_profiles_pkey">
+    <index id="396" parent="295" name="student_profiles_pkey">
       <ColNames>id</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23844</ObjectId>
+      <ObjectId>24877</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3469</StateNumber>
+      <StateNumber>3877</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <index id="365" parent="290" name="uk_hlcwb2egnj8mj3e0mouse1lgy">
+    <index id="397" parent="295" name="uk_hlcwb2egnj8mj3e0mouse1lgy">
       <ColNames>user_id</ColNames>
-      <ObjectId>23900</ObjectId>
-      <StateNumber>3476</StateNumber>
+      <ObjectId>24933</ObjectId>
+      <StateNumber>3884</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <key id="366" parent="290" name="student_profiles_pkey">
+    <key id="398" parent="295" name="student_profiles_pkey">
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23845</ObjectId>
+      <ObjectId>24878</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3469</StateNumber>
-      <UnderlyingIndexId>23844</UnderlyingIndexId>
+      <StateNumber>3877</StateNumber>
+      <UnderlyingIndexId>24877</UnderlyingIndexId>
     </key>
-    <key id="367" parent="290" name="uk_hlcwb2egnj8mj3e0mouse1lgy">
-      <ObjectId>23901</ObjectId>
-      <StateNumber>3476</StateNumber>
-      <UnderlyingIndexId>23900</UnderlyingIndexId>
+    <key id="399" parent="295" name="uk_hlcwb2egnj8mj3e0mouse1lgy">
+      <ObjectId>24934</ObjectId>
+      <StateNumber>3884</StateNumber>
+      <UnderlyingIndexId>24933</UnderlyingIndexId>
     </key>
-    <column id="368" parent="291" name="id">
+    <column id="400" parent="296" name="id">
       <DefaultExpression>nextval(&apos;subjects_id_seq&apos;::regclass)</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>1</Position>
-      <StateNumber>3470</StateNumber>
+      <StateNumber>3878</StateNumber>
       <StoredType>bigint|0s</StoredType>
-      <SequenceId>23846</SequenceId>
+      <SequenceId>24879</SequenceId>
       <TypeId>20</TypeId>
     </column>
-    <column id="369" parent="291" name="name">
+    <column id="401" parent="296" name="name">
       <NotNull>1</NotNull>
       <Position>2</Position>
-      <StateNumber>3470</StateNumber>
+      <StateNumber>3878</StateNumber>
       <StoredType>varchar(255)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <index id="370" parent="291" name="subjects_pkey">
+    <index id="402" parent="296" name="subjects_pkey">
       <ColNames>id</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23853</ObjectId>
+      <ObjectId>24886</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3470</StateNumber>
+      <StateNumber>3878</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <index id="371" parent="291" name="uk_aodt3utnw0lsov4k9ta88dbpr">
+    <index id="403" parent="296" name="uk_aodt3utnw0lsov4k9ta88dbpr">
       <ColNames>name</ColNames>
-      <ObjectId>23902</ObjectId>
-      <StateNumber>3478</StateNumber>
+      <ObjectId>24935</ObjectId>
+      <StateNumber>3886</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
       <CollationNames>default</CollationNames>
       <CollationIds>100</CollationIds>
       <CollationParentNames>pg_catalog</CollationParentNames>
     </index>
-    <key id="372" parent="291" name="subjects_pkey">
+    <key id="404" parent="296" name="subjects_pkey">
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23854</ObjectId>
+      <ObjectId>24887</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3470</StateNumber>
-      <UnderlyingIndexId>23853</UnderlyingIndexId>
+      <StateNumber>3878</StateNumber>
+      <UnderlyingIndexId>24886</UnderlyingIndexId>
     </key>
-    <key id="373" parent="291" name="uk_aodt3utnw0lsov4k9ta88dbpr">
-      <ObjectId>23903</ObjectId>
-      <StateNumber>3478</StateNumber>
-      <UnderlyingIndexId>23902</UnderlyingIndexId>
+    <key id="405" parent="296" name="uk_aodt3utnw0lsov4k9ta88dbpr">
+      <ObjectId>24936</ObjectId>
+      <StateNumber>3886</StateNumber>
+      <UnderlyingIndexId>24935</UnderlyingIndexId>
     </key>
-    <column id="374" parent="292" name="id">
+    <column id="406" parent="297" name="id">
       <DefaultExpression>nextval(&apos;teacher_profiles_id_seq&apos;::regclass)</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>1</Position>
-      <StateNumber>3471</StateNumber>
+      <StateNumber>3879</StateNumber>
       <StoredType>bigint|0s</StoredType>
-      <SequenceId>23855</SequenceId>
+      <SequenceId>24888</SequenceId>
       <TypeId>20</TypeId>
     </column>
-    <column id="375" parent="292" name="user_id">
+    <column id="407" parent="297" name="user_id">
       <Position>2</Position>
-      <StateNumber>3471</StateNumber>
+      <StateNumber>3879</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <foreign-key id="376" parent="292" name="fk38hlnhfrimybow0wdfwnsfhew">
+    <foreign-key id="408" parent="297" name="fk38hlnhfrimybow0wdfwnsfhew">
       <ColNames>user_id</ColNames>
-      <ObjectId>23985</ObjectId>
+      <ObjectId>25018</ObjectId>
       <OnDelete>cascade</OnDelete>
-      <StateNumber>3500</StateNumber>
+      <StateNumber>3908</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>23885</RefTableId>
+      <RefTableId>24918</RefTableId>
     </foreign-key>
-    <index id="377" parent="292" name="teacher_profiles_pkey">
+    <index id="409" parent="297" name="teacher_profiles_pkey">
       <ColNames>id</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23861</ObjectId>
+      <ObjectId>24894</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3471</StateNumber>
+      <StateNumber>3879</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <index id="378" parent="292" name="uk_85e2atxgeqqdc1ntgmupd4sia">
+    <index id="410" parent="297" name="uk_85e2atxgeqqdc1ntgmupd4sia">
       <ColNames>user_id</ColNames>
-      <ObjectId>23904</ObjectId>
-      <StateNumber>3480</StateNumber>
+      <ObjectId>24937</ObjectId>
+      <StateNumber>3888</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <key id="379" parent="292" name="teacher_profiles_pkey">
+    <key id="411" parent="297" name="teacher_profiles_pkey">
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23862</ObjectId>
+      <ObjectId>24895</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3471</StateNumber>
-      <UnderlyingIndexId>23861</UnderlyingIndexId>
+      <StateNumber>3879</StateNumber>
+      <UnderlyingIndexId>24894</UnderlyingIndexId>
     </key>
-    <key id="380" parent="292" name="uk_85e2atxgeqqdc1ntgmupd4sia">
-      <ObjectId>23905</ObjectId>
-      <StateNumber>3480</StateNumber>
-      <UnderlyingIndexId>23904</UnderlyingIndexId>
+    <key id="412" parent="297" name="uk_85e2atxgeqqdc1ntgmupd4sia">
+      <ObjectId>24938</ObjectId>
+      <StateNumber>3888</StateNumber>
+      <UnderlyingIndexId>24937</UnderlyingIndexId>
     </key>
-    <column id="381" parent="293" name="teacher_profile_id">
+    <column id="413" parent="298" name="teacher_profile_id">
       <NotNull>1</NotNull>
       <Position>1</Position>
-      <StateNumber>3472</StateNumber>
+      <StateNumber>3880</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <column id="382" parent="293" name="subject_id">
+    <column id="414" parent="298" name="subject_id">
       <NotNull>1</NotNull>
       <Position>2</Position>
-      <StateNumber>3472</StateNumber>
+      <StateNumber>3880</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <foreign-key id="383" parent="293" name="fkj8ayfsj8egwd4kaorneu5k8vb">
+    <foreign-key id="415" parent="298" name="fkj8ayfsj8egwd4kaorneu5k8vb">
       <ColNames>teacher_profile_id</ColNames>
-      <ObjectId>23995</ObjectId>
+      <ObjectId>25028</ObjectId>
       <OnDelete>cascade</OnDelete>
-      <StateNumber>3502</StateNumber>
+      <StateNumber>3910</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>23856</RefTableId>
+      <RefTableId>24889</RefTableId>
     </foreign-key>
-    <foreign-key id="384" parent="293" name="fkdweqkwxroox2u7pbmksehx04i">
+    <foreign-key id="416" parent="298" name="fkdweqkwxroox2u7pbmksehx04i">
       <ColNames>subject_id</ColNames>
-      <ObjectId>23990</ObjectId>
-      <StateNumber>3501</StateNumber>
+      <ObjectId>25023</ObjectId>
+      <StateNumber>3909</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>23847</RefTableId>
+      <RefTableId>24880</RefTableId>
     </foreign-key>
-    <index id="385" parent="293" name="teacher_subjects_pkey">
+    <index id="417" parent="298" name="teacher_subjects_pkey">
       <ColNames>teacher_profile_id
 subject_id</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23868</ObjectId>
+      <ObjectId>24901</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3472</StateNumber>
+      <StateNumber>3880</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <key id="386" parent="293" name="teacher_subjects_pkey">
+    <key id="418" parent="298" name="teacher_subjects_pkey">
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23869</ObjectId>
+      <ObjectId>24902</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3472</StateNumber>
-      <UnderlyingIndexId>23868</UnderlyingIndexId>
+      <StateNumber>3880</StateNumber>
+      <UnderlyingIndexId>24901</UnderlyingIndexId>
     </key>
-    <check id="387" parent="294" name="timetables_day_of_week_check">
+    <check id="419" parent="299" name="timetables_day_of_week_check">
       <ColNames>day_of_week</ColNames>
-      <ObjectId>23875</ObjectId>
+      <ObjectId>24908</ObjectId>
       <Predicate>(day_of_week)::text = ANY ((ARRAY[&apos;MONDAY&apos;::character varying, &apos;TUESDAY&apos;::character varying, &apos;WEDNESDAY&apos;::character varying, &apos;THURSDAY&apos;::character varying, &apos;FRIDAY&apos;::character varying, &apos;SATURDAY&apos;::character varying, &apos;SUNDAY&apos;::character varying])::text[])</Predicate>
-      <StateNumber>3473</StateNumber>
+      <StateNumber>3881</StateNumber>
     </check>
-    <column id="388" parent="294" name="id">
+    <column id="420" parent="299" name="id">
       <DefaultExpression>nextval(&apos;timetables_id_seq&apos;::regclass)</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>1</Position>
-      <StateNumber>3473</StateNumber>
+      <StateNumber>3881</StateNumber>
       <StoredType>bigint|0s</StoredType>
-      <SequenceId>23870</SequenceId>
+      <SequenceId>24903</SequenceId>
       <TypeId>20</TypeId>
     </column>
-    <column id="389" parent="294" name="day_of_week">
+    <column id="421" parent="299" name="day_of_week">
       <NotNull>1</NotNull>
       <Position>2</Position>
-      <StateNumber>3473</StateNumber>
+      <StateNumber>3881</StateNumber>
       <StoredType>varchar(255)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <column id="390" parent="294" name="end_time">
+    <column id="422" parent="299" name="end_time">
       <NotNull>1</NotNull>
       <Position>3</Position>
-      <StateNumber>3473</StateNumber>
+      <StateNumber>3881</StateNumber>
       <StoredType>time(6)|0s</StoredType>
       <TypeId>1083</TypeId>
     </column>
-    <column id="391" parent="294" name="start_time">
+    <column id="423" parent="299" name="start_time">
       <NotNull>1</NotNull>
       <Position>4</Position>
-      <StateNumber>3473</StateNumber>
+      <StateNumber>3881</StateNumber>
       <StoredType>time(6)|0s</StoredType>
       <TypeId>1083</TypeId>
     </column>
-    <column id="392" parent="294" name="class_id">
+    <column id="424" parent="299" name="class_id">
       <NotNull>1</NotNull>
       <Position>5</Position>
-      <StateNumber>3473</StateNumber>
+      <StateNumber>3881</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <column id="393" parent="294" name="subject_id">
+    <column id="425" parent="299" name="subject_id">
       <NotNull>1</NotNull>
       <Position>6</Position>
-      <StateNumber>3473</StateNumber>
+      <StateNumber>3881</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <foreign-key id="394" parent="294" name="fkkxq2wdv8anfrbu9wasnl4h1h2">
+    <foreign-key id="426" parent="299" name="fkkxq2wdv8anfrbu9wasnl4h1h2">
       <ColNames>class_id</ColNames>
-      <ObjectId>24000</ObjectId>
+      <ObjectId>25033</ObjectId>
       <OnDelete>cascade</OnDelete>
-      <StateNumber>3503</StateNumber>
+      <StateNumber>3911</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>23787</RefTableId>
+      <RefTableId>24815</RefTableId>
     </foreign-key>
-    <foreign-key id="395" parent="294" name="fkgud9rcaxdpwxad8k1ubijyfem">
+    <foreign-key id="427" parent="299" name="fkgud9rcaxdpwxad8k1ubijyfem">
       <ColNames>subject_id</ColNames>
-      <ObjectId>24005</ObjectId>
-      <StateNumber>3504</StateNumber>
+      <ObjectId>25038</ObjectId>
+      <StateNumber>3912</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>23847</RefTableId>
+      <RefTableId>24880</RefTableId>
     </foreign-key>
-    <index id="396" parent="294" name="timetables_pkey">
+    <index id="428" parent="299" name="timetables_pkey">
       <ColNames>id</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23882</ObjectId>
+      <ObjectId>24915</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3473</StateNumber>
+      <StateNumber>3881</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <key id="397" parent="294" name="timetables_pkey">
+    <index id="429" parent="299" name="idx_timetable_class">
+      <ColNames>class_id</ColNames>
+      <ObjectId>25250</ObjectId>
+      <StateNumber>4040</StateNumber>
+      <AccessMethodId>403</AccessMethodId>
+    </index>
+    <key id="430" parent="299" name="timetables_pkey">
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23883</ObjectId>
+      <ObjectId>24916</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3473</StateNumber>
-      <UnderlyingIndexId>23882</UnderlyingIndexId>
+      <StateNumber>3881</StateNumber>
+      <UnderlyingIndexId>24915</UnderlyingIndexId>
     </key>
-    <check id="398" parent="295" name="users_role_check">
+    <check id="431" parent="300" name="users_role_check">
       <ColNames>role</ColNames>
-      <ObjectId>23889</ObjectId>
+      <ObjectId>24922</ObjectId>
       <Predicate>(role)::text = ANY ((ARRAY[&apos;ADMIN&apos;::character varying, &apos;TEACHER&apos;::character varying, &apos;STUDENT&apos;::character varying])::text[])</Predicate>
-      <StateNumber>3474</StateNumber>
+      <StateNumber>3882</StateNumber>
     </check>
-    <column id="399" parent="295" name="id">
+    <column id="432" parent="300" name="id">
       <DefaultExpression>nextval(&apos;users_id_seq&apos;::regclass)</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>1</Position>
-      <StateNumber>3474</StateNumber>
+      <StateNumber>3882</StateNumber>
       <StoredType>bigint|0s</StoredType>
-      <SequenceId>23884</SequenceId>
+      <SequenceId>24917</SequenceId>
       <TypeId>20</TypeId>
     </column>
-    <column id="400" parent="295" name="address">
+    <column id="433" parent="300" name="address">
       <Position>2</Position>
-      <StateNumber>3474</StateNumber>
+      <StateNumber>3882</StateNumber>
       <StoredType>varchar(255)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <column id="401" parent="295" name="birth_city">
+    <column id="434" parent="300" name="birth_city">
       <Position>3</Position>
-      <StateNumber>3474</StateNumber>
+      <StateNumber>3882</StateNumber>
       <StoredType>varchar(255)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <column id="402" parent="295" name="birth_country">
+    <column id="435" parent="300" name="birth_country">
       <Position>4</Position>
-      <StateNumber>3474</StateNumber>
+      <StateNumber>3882</StateNumber>
       <StoredType>varchar(255)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <column id="403" parent="295" name="birth_date">
+    <column id="436" parent="300" name="birth_date">
       <Position>5</Position>
-      <StateNumber>3474</StateNumber>
+      <StateNumber>3882</StateNumber>
       <StoredType>date|0s</StoredType>
       <TypeId>1082</TypeId>
     </column>
-    <column id="404" parent="295" name="created_at">
+    <column id="437" parent="300" name="created_at">
       <NotNull>1</NotNull>
       <Position>6</Position>
-      <StateNumber>3474</StateNumber>
+      <StateNumber>3882</StateNumber>
       <StoredType>timestamp(6)|0s</StoredType>
       <TypeId>1114</TypeId>
     </column>
-    <column id="405" parent="295" name="email">
+    <column id="438" parent="300" name="email">
       <NotNull>1</NotNull>
       <Position>7</Position>
-      <StateNumber>3474</StateNumber>
+      <StateNumber>3882</StateNumber>
       <StoredType>varchar(255)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <column id="406" parent="295" name="gender">
+    <column id="439" parent="300" name="gender">
       <Position>8</Position>
-      <StateNumber>3474</StateNumber>
+      <StateNumber>3882</StateNumber>
       <StoredType>varchar(255)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <column id="407" parent="295" name="name">
+    <column id="440" parent="300" name="name">
       <NotNull>1</NotNull>
       <Position>9</Position>
-      <StateNumber>3474</StateNumber>
+      <StateNumber>3882</StateNumber>
       <StoredType>varchar(255)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <column id="408" parent="295" name="password">
+    <column id="441" parent="300" name="password">
       <NotNull>1</NotNull>
       <Position>10</Position>
-      <StateNumber>3474</StateNumber>
+      <StateNumber>3882</StateNumber>
       <StoredType>varchar(255)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <column id="409" parent="295" name="phone_number">
+    <column id="442" parent="300" name="phone_number">
       <Position>11</Position>
-      <StateNumber>3474</StateNumber>
+      <StateNumber>3882</StateNumber>
       <StoredType>varchar(255)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <column id="410" parent="295" name="role">
+    <column id="443" parent="300" name="role">
       <NotNull>1</NotNull>
       <Position>12</Position>
-      <StateNumber>3474</StateNumber>
+      <StateNumber>3882</StateNumber>
       <StoredType>varchar(255)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <column id="411" parent="295" name="user_id">
+    <column id="444" parent="300" name="user_id">
       <Position>13</Position>
-      <StateNumber>3474</StateNumber>
+      <StateNumber>3882</StateNumber>
       <StoredType>varchar(12)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <index id="412" parent="295" name="users_pkey">
+    <index id="445" parent="300" name="users_pkey">
       <ColNames>id</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23898</ObjectId>
+      <ObjectId>24931</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3474</StateNumber>
+      <StateNumber>3882</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <index id="413" parent="295" name="uk_6dotkott2kjsp8vw4d0m25fb7">
+    <index id="446" parent="300" name="uk_6dotkott2kjsp8vw4d0m25fb7">
       <ColNames>email</ColNames>
-      <ObjectId>23906</ObjectId>
-      <StateNumber>3482</StateNumber>
+      <ObjectId>24939</ObjectId>
+      <StateNumber>3890</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
       <CollationNames>default</CollationNames>
       <CollationIds>100</CollationIds>
       <CollationParentNames>pg_catalog</CollationParentNames>
     </index>
-    <index id="414" parent="295" name="uk_6efs5vmce86ymf5q7lmvn2uuf">
+    <index id="447" parent="300" name="uk_6efs5vmce86ymf5q7lmvn2uuf">
       <ColNames>user_id</ColNames>
-      <ObjectId>23908</ObjectId>
-      <StateNumber>3484</StateNumber>
+      <ObjectId>24941</ObjectId>
+      <StateNumber>3892</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
       <CollationNames>default</CollationNames>
       <CollationIds>100</CollationIds>
       <CollationParentNames>pg_catalog</CollationParentNames>
     </index>
-    <key id="415" parent="295" name="users_pkey">
+    <key id="448" parent="300" name="users_pkey">
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>23899</ObjectId>
+      <ObjectId>24932</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3474</StateNumber>
-      <UnderlyingIndexId>23898</UnderlyingIndexId>
+      <StateNumber>3882</StateNumber>
+      <UnderlyingIndexId>24931</UnderlyingIndexId>
     </key>
-    <key id="416" parent="295" name="uk_6dotkott2kjsp8vw4d0m25fb7">
-      <ObjectId>23907</ObjectId>
-      <StateNumber>3482</StateNumber>
-      <UnderlyingIndexId>23906</UnderlyingIndexId>
+    <key id="449" parent="300" name="uk_6dotkott2kjsp8vw4d0m25fb7">
+      <ObjectId>24940</ObjectId>
+      <StateNumber>3890</StateNumber>
+      <UnderlyingIndexId>24939</UnderlyingIndexId>
     </key>
-    <key id="417" parent="295" name="uk_6efs5vmce86ymf5q7lmvn2uuf">
-      <ObjectId>23909</ObjectId>
-      <StateNumber>3484</StateNumber>
-      <UnderlyingIndexId>23908</UnderlyingIndexId>
+    <key id="450" parent="300" name="uk_6efs5vmce86ymf5q7lmvn2uuf">
+      <ObjectId>24942</ObjectId>
+      <StateNumber>3892</StateNumber>
+      <UnderlyingIndexId>24941</UnderlyingIndexId>
     </key>
   </database-model>
 </dataSource>

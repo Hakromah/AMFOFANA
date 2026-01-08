@@ -21,7 +21,8 @@ import java.util.Set;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
+    @SequenceGenerator(name = "user_seq", allocationSize = 50) // Matches batch_size
     private Long id;
 
     @Column(unique = true, length = 12)
@@ -58,6 +59,7 @@ public class User {
     @EqualsAndHashCode.Exclude
     @JsonIgnore
     private Set<Classe> teachingClasses = new HashSet<>();
+
 
     @ManyToMany(mappedBy = "students")
     @OnDelete(action = OnDeleteAction.CASCADE) // ADD THIS HERE

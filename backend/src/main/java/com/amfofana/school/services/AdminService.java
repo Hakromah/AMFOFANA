@@ -5,10 +5,11 @@ import com.amfofana.school.dto.ReportDTO;
 import com.amfofana.school.dto.UserDTO;
 import com.amfofana.school.entities.*;
 import com.amfofana.school.repositories.*;
-import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -70,6 +71,53 @@ public class AdminService {
         return userRepository.save(user);
     }
 
+    @Transactional
+    public Map<String, Object> saveAll(List<UserDTO> dtos) {
+        // Efficiently fetch emails for deduplication
+        Set<String> existingEmails = userRepository.findAllEmails();
+        List<User> usersToSave = new ArrayList<>();
+        int duplicateCount = 0;
+
+        for (UserDTO dto : dtos) {
+            if (existingEmails.contains(dto.getEmail())) {
+                duplicateCount++;
+                continue;
+            }
+
+            User user = new User();
+            // Core Identity Mapping
+            user.setName(dto.getName());
+            user.setEmail(dto.getEmail());
+            user.setRole(dto.getRole());
+            user.setBirthDate(dto.getBirthDate());
+            user.setBirthCountry(dto.getBirthCountry());
+            user.setBirthCity(dto.getBirthCity());
+            user.setAddress(dto.getAddress());
+            user.setGender(dto.getGender());
+            user.setPhoneNumber(dto.getPhoneNumber());
+
+            // Security & Registry Logic
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
+
+            // Your specific 12-digit ID logic
+            String generatedId = String.format("%012d", Math.abs(UUID.randomUUID().getMostSignificantBits()));
+            user.setUserId(generatedId.substring(0, 12));
+
+            usersToSave.add(user);
+        }
+
+        if (!usersToSave.isEmpty()) {
+            userRepository.saveAll(usersToSave);
+        }
+
+        // Return a detailed summary for the Admin Dashboard toast notification
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("imported", usersToSave.size());
+        summary.put("skipped", duplicateCount);
+        summary.put("totalProcessed", dtos.size());
+        return summary;
+    }
+
     public List<UserDTO> getAllUsers(String role) {
         List<User> users;
         if (role != null && !role.isEmpty()) {
@@ -110,7 +158,7 @@ public class AdminService {
             }
         } else if (user.getRole() == Role.STUDENT) {
             studentProfileRepository.findByUser(user).ifPresent(studentProfileRepository::delete);
-            attendanceRepository.deleteByStudent(user);
+            attendanceRepository.deleteRecordsByStudent(user);
 
             // IMPORTANT: Remove this student from all class enrollments
             // This fixes the "referenced from table classe_students" error
@@ -146,19 +194,19 @@ public class AdminService {
     }
 
     // Exam Management
-    public List<Exam> getExams(Long teacherId, Long classId) {
-        if (teacherId != null) {
-            return examRepository.findExamsByTeacherId(teacherId);
-        }
-
-        if (classId != null) {
-            Classe classe = classeRepository.findById(classId)
-                    .orElseThrow(() -> new RuntimeException("Class not found"));
-            return examRepository.findByClasse(classe);
-        }
-
-        return examRepository.findAll();
-    }
+//    public List<Exam> getExams(Long teacherId, Long classId) {
+//        if (teacherId != null) {
+//            return examRepository.findExamsByTeacherId(teacherId);
+//        }
+//
+//        if (classId != null) {
+//            Classe classe = classeRepository.findById(classId)
+//                    .orElseThrow(() -> new RuntimeException("Class not found"));
+//            return examRepository.findByClasse(classe);
+//        }
+//
+//        return examRepository.findAll();
+//    }
 
     // Subject CRUD
     public Subject createSubject(Subject subject) {
@@ -327,55 +375,6 @@ public class AdminService {
         }).collect(Collectors.toList());
     }
 
-//    public List<Map<String, Object>> filterResultsForAdmin(String studentQuery, Long classId) {
-//        List<ExamResult> rawResults = examResultRepository.findByAdminFilters(studentQuery, classId);
-//
-//        return rawResults.stream().map(result -> {
-//            Map<String, Object> dto = new HashMap<>();
-//            dto.put("id", result.getId());
-//            dto.put("marks", result.getMarks());
-//            dto.put("status", result.getStatus());
-//
-//            // --- ADD THESE TWO LINES ---
-//            dto.put("term", result.getExam().getTerm());     // Matches r.exam.term
-//            dto.put("weight", result.getExam().getWeight()); // Matches r.exam.weight
-//            dto.put("locked", result.getExam().isLocked());
-////            dto.put("semester",result).getExam().getSemester();// Needed for UI Lock icons
-//            // ---------------------------
-//
-//            // --- IMPROVED GRADE LOGIC ---
-//            // 1. Try to get the grade from the database
-//            String grade = result.getLetterGrade();
-//            // 2. If DB grade is null/empty, calculate it on the fly from the marks
-//            if (grade == null || grade.trim().isEmpty()) {
-//                grade = calculateGrade(result.getMarks());
-//            }
-//            dto.put("grade", grade);
-//            // -----------------------------
-//
-//            dto.put("student", Map.of(
-//                    "name", result.getStudent().getName(),
-//                    "userId", result.getStudent().getUserId()
-//            ));
-//
-//            // Ensure we handle potential null subject safely
-//            String subjectName = (result.getExam().getSubject() != null)
-//                    ? result.getExam().getSubject().getName()
-//                    : "General";
-//
-//            dto.put("exam", Map.of(
-//                    "name", result.getExam().getName(),
-//                    "subject", Map.of("name", subjectName)
-//            ));
-//
-//            Double avg = examResultRepository.getAverageByExamId(result.getExam().getId());
-//            dto.put("classAverage", avg != null ? Math.round(avg * 100.0) / 100.0 : 0.0);
-//
-//            return dto;
-//        }).collect(Collectors.toList());
-//    }
-
-    // Calculate SEMESTER GPA
     public Map<String, Object> calculateSemesterGPA(Long studentId, String semester) {
         List<ExamResult> results = examResultRepository.findByStudentIdAndSemester(studentId, semester);
 
@@ -437,6 +436,32 @@ public class AdminService {
         examRepository.saveAll(exams);
     }
 
+    @Transactional
+    public void lockAllExamsInSemester(String semester) {
+        List<Exam> exams = examRepository.findBySemester(semester);
+        exams.forEach(exam -> exam.setLocked(true));
+        examRepository.saveAll(exams);
+    }
+
+//    @Transactional(readOnly = true)
+//    public List<Exam> getAllExamsGlobal() {
+//        return examRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
+//    }
+
+    @Transactional(readOnly = true)
+    public List<Exam> getExams(Long teacherId, Long classId) {
+        if (teacherId != null && classId != null) {
+            return examRepository.findByTeacherIdAndClasseId(teacherId, classId);
+        } else if (teacherId != null) {
+            return examRepository.findExamsByTeacherId(teacherId);
+        } else if (classId != null) {
+            return examRepository.findByClasseId(classId);
+        } else {
+            // This is what the Global Dashboard uses (No filters)
+            return examRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
+        }
+    }
+
     //    public List<Map<String, Object>> getSemesterTranscript(Long studentId, String semester) {
 //        List<ExamResult> results = examResultRepository.findByStudentIdAndSemester(studentId, semester);
 //
@@ -476,6 +501,10 @@ public class AdminService {
         userDTO.setGender(user.getGender());
         userDTO.setPhoneNumber(user.getPhoneNumber());
         userDTO.setCreatedAt(user.getCreatedAt());
+
+        userDTO.setRole(Role.valueOf(user.getRole().name()));
+
+
         return userDTO;
     }
 

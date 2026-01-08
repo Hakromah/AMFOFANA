@@ -49,4 +49,14 @@ public interface ExamResultRepository extends JpaRepository<ExamResult, Long> {
     // Searches for exam results where the student's unique ID contains the search string
     List<ExamResult> findByStudent_UserIdContainingIgnoreCase(String userId);
 
+    @Query("SELECT er FROM ExamResult er " +
+            "WHERE er.student.id = :studentId " +
+            "AND er.exam.id = :examId " +
+            "AND er.exam.subject.id = :subjectId")
+    Optional<ExamResult> findByStudentIdAndExamIdAndSubjectId(
+            @Param("studentId") Long studentId,
+            @Param("examId") Long examId,
+            @Param("subjectId") Long subjectId
+    );
+
 }

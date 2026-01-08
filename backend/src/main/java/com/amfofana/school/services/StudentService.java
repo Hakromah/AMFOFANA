@@ -1,12 +1,16 @@
 package com.amfofana.school.services;
 
+import com.amfofana.school.dto.UserDTO;
 import com.amfofana.school.entities.*;
 import com.amfofana.school.repositories.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,22 +32,73 @@ public class StudentService {
     private final ClasseRepository classeRepository;
     private final AttendanceRepository attendanceRepository;
     private final ExamResultRepository examResultRepository;
-    private final LearningMaterialRepository learningMaterialRepository;
     private final ExamRepository examRepository;
     private final UserRepository userRepository;
+    private final TimetableRepository timetableRepository;
+
+    private PasswordEncoder passwordEncoder;
+
 
     public StudentService(ClasseRepository classeRepository,
                           AttendanceRepository attendanceRepository,
                           ExamResultRepository examResultRepository,
-                          LearningMaterialRepository learningMaterialRepository,
                           ExamRepository examRepository,
-                          UserRepository userRepository) {
+                          UserRepository userRepository, TimetableRepository timetableRepository, PasswordEncoder passwordEncoder) {
         this.classeRepository = classeRepository;
         this.attendanceRepository = attendanceRepository;
         this.examResultRepository = examResultRepository;
-        this.learningMaterialRepository = learningMaterialRepository;
         this.examRepository = examRepository;
         this.userRepository = userRepository;
+        this.timetableRepository = timetableRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+
+    //STUDENT SECTION
+    public UserDTO getStudentProfile(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow();
+        return convertToDTO(user);
+    }
+
+    @Transactional
+    public UserDTO updateProfile(String email, UserDTO dto) {
+        User user = userRepository.findByEmail(email).orElseThrow();
+
+        // Allowed fields for student to self-update
+        user.setEmail(dto.getEmail());
+        user.setPhoneNumber(dto.getPhoneNumber());
+        user.setAddress(dto.getAddress());
+        user.setBirthCity(dto.getBirthCity());
+
+        return convertToDTO(userRepository.save(user));
+    }
+
+    @Transactional
+    public void changePassword(String email, String oldPwd, String newPwd) {
+        User user = userRepository.findByEmail(email).orElseThrow();
+        if (!passwordEncoder.matches(oldPwd, user.getPassword())) {
+            throw new RuntimeException("Invalid current password");
+        }
+        user.setPassword(passwordEncoder.encode(newPwd));
+        userRepository.save(user);
+    }
+
+    private UserDTO convertToDTO(User user) {
+        // Ensure ALL fields are mapped here
+        UserDTO dto = new UserDTO();
+        dto.setId(user.getId());
+        dto.setUserId(user.getUserId());
+        dto.setName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setRole(user.getRole());
+        dto.setPhoneNumber(user.getPhoneNumber());
+        dto.setAddress(user.getAddress());
+        dto.setBirthCity(user.getBirthCity());
+        dto.setBirthCountry(user.getBirthCountry());
+        dto.setBirthDate(user.getBirthDate());
+        dto.setCreatedAt(user.getCreatedAt());
+        dto.setGender(user.getGender());
+        return dto;
     }
 
     public List<Classe> getClassesByStudent(Long studentId) {
@@ -51,36 +106,21 @@ public class StudentService {
         return classeRepository.findByStudentsContains(student);
     }
 
+    @Transactional(readOnly = true)
     public List<Attendance> getAttendanceByStudent(Long studentId) {
-        User student = userRepository.findById(studentId).orElseThrow(() -> new RuntimeException("Student not found"));
-        return attendanceRepository.findByStudent(student);
-    }
+        // Fetch the sessions
+        List<Attendance> sessions = attendanceRepository.findByRecordsStudentId(studentId);
 
-//    public List<Map<String, Object>> getResultsByStudent(Long studentId) {
-//        User student = userRepository.findById(studentId)
-//                .orElseThrow(() -> new RuntimeException("Student not found"));
-//
-//        return examResultRepository.findByStudent(student).stream()
-//                .filter(result -> result.getStatus() == ExamResult.Status.PUBLISHED || result.getStatus() == ExamResult.Status.GRADED)
-//                .map(result -> {
-//                    Map<String, Object> dto = new HashMap<>();
-//                    dto.put("id", result.getId());
-//                    dto.put("marks", result.getMarks());
-//                    dto.put("grade", result.getLetterGrade());
-//                    dto.put("exam", result.getExam());
-//                    dto.put("classAverage", examResultRepository.getAverageByExamId(result.getExam().getId()));
-//
-//                    // --- ADD THIS SECTION ---
-//                    Map<String, Object> studentMap = new HashMap<>();
-//                    studentMap.put("name", student.getName());
-//                    studentMap.put("userId", student.getUserId()); // This is your Student ID
-//                    dto.put("student", studentMap);
-//                    // ------------------------
-//
-//                    return dto;
-//                })
-//                .collect(Collectors.toList());
-//    }
+        // Manually trigger the loading of the records and filter for this student
+        sessions.forEach(session -> {
+            session.getRecords().size(); // Forces initialization of the proxy
+            session.setRecords(session.getRecords().stream()
+                    .filter(r -> r.getStudent().getId().equals(studentId))
+                    .collect(Collectors.toList()));
+        });
+
+        return sessions;
+    }
 
     public List<Map<String, Object>> getResultsByStudent(Long studentId) {
         User student = userRepository.findById(studentId)
@@ -141,14 +181,63 @@ public class StudentService {
         }).collect(Collectors.toList());
     }
 
-    public List<Exam> getExamsByStudent(Long studentId) {
-        return examRepository.findAll();
+
+    @Transactional(readOnly = true)
+    public List<Exam> getExamsForStudent(Long studentId) {
+        User student = userRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        // Assuming the student is enrolled in one or more classes
+        return examRepository.findByClasseIn(student.getEnrolledClasses());
     }
 
-    public List<LearningMaterial> getMaterialsByStudent(Long studentId) {
-        List<Classe> classes = getClassesByStudent(studentId);
-        return classes.stream()
-                .flatMap(classe -> learningMaterialRepository.findByClasse(classe).stream())
+    public Map<String, Object> getDashboardStats(Long studentId) {
+        User student = userRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        // 1. Course Count
+        long courseCount = classeRepository.findByStudentsContains(student).size();
+
+        Set<Classe> studentClasses = student.getEnrolledClasses();
+        long totalSessions = 0;
+        long presentSessions = 0;
+
+        if (!studentClasses.isEmpty()) {
+            // Total sessions held for the classes the student is in
+            totalSessions = attendanceRepository.countByClasseIn(studentClasses);
+            // Sessions where this specific student was marked present
+            presentSessions = attendanceRepository.countPresentSessions(studentId);
+        }
+
+        double attendanceRate = (totalSessions > 0)
+                ? ((double) presentSessions / totalSessions) * 100
+                : 0.0;
+
+
+        // 4. Grade Calculation (Averaging only SUBMITTED results)
+        List<ExamResult> results = examResultRepository.findByStudent(student).stream()
+                .filter(r -> r.getStatus() == ExamResult.Status.SUBMITTED)
                 .collect(Collectors.toList());
+
+        String avgGrade = calculateGrade(
+                results.stream().mapToDouble(ExamResult::getMarks).average().orElse(0.0)
+        );
+
+        // Response Map for Frontend
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("courseCount", courseCount);
+        stats.put("attendance", Math.round(attendanceRate * 10.0) / 10.0);
+        stats.put("averageGrade", avgGrade);
+
+        return stats;
     }
+
+    //TIMETABLE
+    public List<Timetable> getStudentTimetable(Long studentId) {
+        User student = userRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        return timetableRepository.findByClasseInOrderByDayOfWeekAscStartTimeAsc(student.getEnrolledClasses());
+    }
+
 }

@@ -14,6 +14,8 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "exams")
+// This prevents the "ByteBuddyInterceptor" error when returning the updated object
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Exam {
 
     @Id
@@ -60,7 +62,10 @@ public class Exam {
 
     private Integer weight; // e.g., 30 for midterm, 70 for final
 
-    private boolean isLocked = false; // To prevent edits after semester closure// Added end time
+    @Column(name = "is_closed", nullable = false)
+    private boolean closed = false;
+
+    private boolean isLocked = false;
 
 
 }

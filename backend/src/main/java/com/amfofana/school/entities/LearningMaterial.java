@@ -1,12 +1,14 @@
 package com.amfofana.school.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -19,15 +21,53 @@ public class LearningMaterial {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "class_id", nullable = false)
-    private Classe classe; // Changed from SchoolClass to Classe
-
     @Column(nullable = false)
-    private String url;
+    private String title;
 
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime timestamp;
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "file_name", nullable = false)
+    private String fileName;
+
+    @Column(name = "file_url", nullable = false, length = 500)
+    private String fileUrl;
+
+    private String fileType;
+    private Long fileSize;
+
+    @Column(name = "public_id", nullable = false)
+    private String publicId;
+
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "teacher_id")
+    @JsonIgnoreProperties({
+            "teachingClasses",
+            "enrolledClasses",
+            "password",
+            "authorities",
+            "accountNonExpired",
+            "accountNonLocked",
+            "credentialsNonExpired",
+            "enabled"
+    })
+    private User uploadedBy;
+
+    @ManyToMany
+    @JoinTable(
+            name = "material_classes",
+            joinColumns = @JoinColumn(name = "material_id"),
+            inverseJoinColumns = @JoinColumn(name = "class_id")
+    )
+    private Set<Classe> targetClasses = new HashSet<>();
+
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 
 }

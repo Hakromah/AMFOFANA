@@ -4,11 +4,9 @@ import com.amfofana.school.dto.AttendanceDTO;
 import com.amfofana.school.dto.MarksDTO;
 import com.amfofana.school.entities.*;
 import com.amfofana.school.repositories.*;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,9 +31,10 @@ public class TeacherService {
     private final ExamResultRepository examResultRepository;
     private final UserRepository userRepository;
     private final ExamRepository examRepository;
-    private final LearningMaterialRepository learningMaterialRepository;
     private final SubjectRepository subjectRepository;
     private final PasswordEncoder passwordEncoder;
+    private final TimetableRepository timetableRepository;
+
 
     public TeacherService(ClasseRepository classeRepository,
                           AttendanceRepository attendanceRepository,
@@ -44,15 +43,15 @@ public class TeacherService {
                           ExamRepository examRepository,
                           LearningMaterialRepository learningMaterialRepository,
                           SubjectRepository subjectRepository,
-                          PasswordEncoder passwordEncoder) {
+                          PasswordEncoder passwordEncoder, TimetableRepository timetableRepository) {
         this.classeRepository = classeRepository;
         this.attendanceRepository = attendanceRepository;
         this.examResultRepository = examResultRepository;
         this.userRepository = userRepository;
         this.examRepository = examRepository;
-        this.learningMaterialRepository = learningMaterialRepository;
         this.subjectRepository = subjectRepository;
         this.passwordEncoder = passwordEncoder;
+        this.timetableRepository = timetableRepository;
     }
 
     public List<Classe> getClassesByTeacher(Long teacherId) {
@@ -90,17 +89,77 @@ public class TeacherService {
         return new ArrayList<>(classe.getStudents());
     }
 
-    public void submitAttendance(AttendanceDTO attendanceDTO) {
-        Classe classe = classeRepository.findById(attendanceDTO.getClassId()).orElseThrow(() -> new RuntimeException("Class not found"));
-        for (AttendanceDTO.AttendanceRecordDTO record : attendanceDTO.getRecords()) {
-            User student = userRepository.findById(record.getStudentId()).orElseThrow(() -> new RuntimeException("Student not found"));
-            Attendance attendance = new Attendance();
-            attendance.setClasse(classe);
-            attendance.setStudent(student);
-            attendance.setDate(attendanceDTO.getDate());
-            attendance.setStatus(record.isPresent());
-            attendanceRepository.save(attendance);
+    //SUBMIT ATTENDANCE
+    @Transactional
+    public void submitAttendance(AttendanceDTO dto) {
+        Classe classe = classeRepository.findById(dto.getClassId())
+                .orElseThrow(() -> new RuntimeException("Class not found"));
+
+        Attendance attendance = new Attendance();
+        attendance.setClasse(classe);
+        attendance.setDate(dto.getDate());
+
+        List<AttendanceRecord> records = new ArrayList<>();
+
+        for (AttendanceDTO.AttendanceRecordDTO recordDto : dto.getRecords()) {
+            User student = userRepository.findById(recordDto.getStudentId())
+                    .orElseThrow(() -> new RuntimeException("Student not found"));
+
+            AttendanceRecord record = new AttendanceRecord();
+            record.setStudent(student);
+
+            record.setPresent(recordDto.isPresent());
+
+            // Link record back to the parent attendance session
+            record.setAttendance(attendance);
+
+            records.add(record);
         }
+
+        attendance.setRecords(records);
+        // CascadeType.ALL will now save the Attendance AND all its Records in one go
+        attendanceRepository.save(attendance);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getAttendanceHistory(Long classId) {
+        return attendanceRepository.findByClasseIdOrderByDateDesc(classId).stream()
+                .map(a -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", a.getId());
+                    map.put("date", a.getDate());
+                    map.put("presentCount", a.getRecords().stream().filter(AttendanceRecord::isPresent).count());
+                    map.put("totalCount", a.getRecords().size());
+                    return map;
+                }).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void updateAttendance(Long attendanceId, AttendanceDTO dto) {
+        Attendance existing = attendanceRepository.findById(attendanceId)
+                .orElseThrow(() -> new RuntimeException("Attendance session not found"));
+
+        // 1. Update the date if changed
+        existing.setDate(dto.getDate());
+
+        // 2. Clear old records
+        // orphanRemoval = true in the Entity will delete these from the database automatically
+        existing.getRecords().clear();
+
+        // 3. Re-add new records from the DTO
+        for (AttendanceDTO.AttendanceRecordDTO recordDto : dto.getRecords()) {
+            User student = userRepository.findById(recordDto.getStudentId())
+                    .orElseThrow(() -> new RuntimeException("Student not found"));
+
+            AttendanceRecord record = new AttendanceRecord();
+            record.setStudent(student);
+            record.setPresent(recordDto.isPresent());
+            record.setAttendance(existing); // Important: Link back to parent
+
+            existing.getRecords().add(record);
+        }
+
+        attendanceRepository.save(existing);
     }
 
     public void submitMarks(MarksDTO marksDTO) {
@@ -130,13 +189,60 @@ public class TeacherService {
         return examRepository.save(exam);
     }
 
-    public List<Exam> getAllExams() {
-        return examRepository.findAll();
-    }
-
     @Transactional(readOnly = true)
     public List<Exam> getExamsByTeacher(Long teacherId) {
         return examRepository.findExamsByTeacherId(teacherId);
+    }
+
+    // ExamService.java
+
+    @Transactional
+    public Exam updateExam(Long id, Exam details, Long teacherId) {
+        Exam exam = examRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Exam not found"));
+
+        // Security check: Only the creator can edit (unless Admin, but here focused on teacher)
+        if (!exam.getTeacher().getId().equals(teacherId)) {
+            throw new RuntimeException("Unauthorized to edit this exam");
+        }
+
+        if (exam.isLocked()) {
+            throw new RuntimeException("Exam is locked and cannot be modified");
+        }
+
+        exam.setDate(details.getDate());
+        exam.setStartTime(details.getStartTime());
+        exam.setEndTime(details.getEndTime());
+        exam.setWeight(details.getWeight());
+        exam.setTerm(details.getTerm());
+        exam.setSemester(details.getSemester());
+
+        // Update relationships if changed
+        if (details.getClasse() != null) {
+            Classe classe = classeRepository.findById(details.getClasse().getId()).orElseThrow();
+            exam.setClasse(classe);
+        }
+
+        return examRepository.save(exam);
+    }
+
+    @Transactional
+    public void deleteExam(Long id, Long teacherId) {
+        Exam exam = examRepository.findById(id).orElseThrow();
+        if (!exam.getTeacher().getId().equals(teacherId)) throw new RuntimeException("Unauthorized");
+        if (exam.isLocked()) throw new RuntimeException("Cannot delete locked exam");
+
+        examRepository.deleteById(id);
+    }
+
+    @Transactional
+    public Exam toggleExamStatus(Long id, boolean closed) {
+        System.out.println("Toggling exam " + id + " to status: " + closed); // Debug Log
+        Exam exam = examRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Exam with ID " + id + " not found"));
+
+        exam.setClosed(closed);
+        return examRepository.save(exam);
     }
 
     public List<ExamResult> getGradebookByClass(Long teacherId, Long classId) {
@@ -145,85 +251,6 @@ public class TeacherService {
             throw new RuntimeException("Unauthorized access to this class gradebook.");
         }
         return examResultRepository.findResultsByClassId(classId);
-    }
-
-    //BULK MARKS ENTRY
-    @Transactional
-    public void saveBulkResults(Long teacherId, List<ExamResult> results) {
-        for (ExamResult incoming : results) {
-            Long studentId = incoming.getStudent().getId();
-            Long examId = incoming.getExam().getId();
-
-            // 1. Authorization Check
-            Exam exam = examRepository.findById(examId)
-                    .orElseThrow(() -> new RuntimeException("Exam not found"));
-
-            boolean isAuthorized = exam.getClasse().getTeachers().stream()
-                    .anyMatch(t -> t.getId().equals(teacherId));
-
-            if (!isAuthorized) throw new RuntimeException("Unauthorized to grade this class");
-
-            // 2. The FindOrCreate (Upsert) Logic
-            ExamResult recordToSave = examResultRepository
-                    .findByStudentIdAndExamId(studentId, examId)
-                    .orElse(new ExamResult()); // Create new if not found
-
-            // 3. Update the data
-            if (recordToSave.getId() == null) {
-                // New record: set the relationships
-                recordToSave.setStudent(userRepository.getReferenceById(studentId));
-                recordToSave.setExam(exam);
-            }
-
-            recordToSave.setMarks(incoming.getMarks());
-            recordToSave.setLetterGrade(convertToLetter(incoming.getMarks()));
-            recordToSave.setStatus(ExamResult.Status.SUBMITTED);
-
-            examResultRepository.save(recordToSave);
-        }
-    }
-
-    public Exam updateExam(Long id, Exam examDetails) {
-        Exam exam = examRepository.findById(id).orElseThrow(() -> new RuntimeException("Exam not found"));
-        exam.setName(examDetails.getName());
-        exam.setClasse(examDetails.getClasse());
-        exam.setSubject(examDetails.getSubject());
-        exam.setDate(examDetails.getDate());
-        exam.setStartTime(examDetails.getStartTime());
-        exam.setEndTime(examDetails.getEndTime());
-        return examRepository.save(exam);
-    }
-
-    @Transactional
-    public void deleteExam(Long examId, Long teacherId) {
-        Exam exam = examRepository.findById(examId)
-                .orElseThrow(() -> new RuntimeException("Exam not found"));
-
-        // Check if the teacher trying to delete is the one who created it
-        if (!exam.getTeacher().getId().equals(teacherId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "You are not the creator of this exam");
-        }
-
-        examRepository.delete(exam);
-    }
-
-
-    public LearningMaterial uploadLearningMaterial(LearningMaterial material) {
-        return learningMaterialRepository.save(material);
-    }
-
-    public List<LearningMaterial> getMaterialsByTeacher(Long teacherId) {
-        User teacher = new User();
-        teacher.setId(teacherId);
-        List<Classe> classes = getClassesByTeacher(teacherId);
-        return classes.stream()
-                .flatMap(classe -> learningMaterialRepository.findByClasse(classe).stream())
-                .collect(Collectors.toList());
-    }
-
-    public void deleteLearningMaterial(Long id) {
-        learningMaterialRepository.deleteById(id);
     }
 
     public List<Subject> getAllSubjects() {
@@ -245,21 +272,6 @@ public class TeacherService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
-
-    //    @Transactional
-//    public ExamResult saveResult(Long teacherId, ExamResult result) {
-//        Exam exam = examRepository.findById(result.getExam().getId())
-//                .orElseThrow(() -> new RuntimeException("Exam not found"));
-//        // 2. Security Check: Is the current teacher assigned to this exam's class?
-//        boolean isAuthorized = exam.getClasse().getTeachers().stream()
-//                .anyMatch(t -> t.getId().equals(teacherId));
-//
-//        if (!isAuthorized) {
-//            throw new RuntimeException("Access Denied: You are not a teacher for this class.");
-//        }
-//        result.setStatus(ExamResult.Status.DRAFT);
-//        return examResultRepository.save(result);
-//    }
 
     @Transactional
     public ExamResult saveResult(Long teacherId, ExamResult result) {
@@ -293,6 +305,62 @@ public class TeacherService {
 
         result.setStatus(ExamResult.Status.DRAFT);
         return examResultRepository.save(result);
+    }
+
+
+    @Transactional
+    public Map<String, Object> saveBulkResults(Long teacherId, List<ExamResult> results) {
+        int updated = 0;
+        int created = 0;
+
+        for (ExamResult incoming : results) {
+            Long studentId = incoming.getStudent().getId();
+            Long examId = incoming.getExam().getId();
+
+            // 1. Fetch the Exam to get its linked Subject and verify the Teacher
+            Exam exam = examRepository.findById(examId)
+                    .orElseThrow(() -> new RuntimeException("Exam not found for ID: " + examId));
+
+            // Assuming your Exam entity has a getSubject() method
+            Long subjectId = exam.getSubject().getId();
+
+            // 2. Authorization Check: Is this teacher assigned to the class?
+            boolean isAuthorized = exam.getClasse().getTeachers().stream()
+                    .anyMatch(t -> t.getId().equals(teacherId));
+
+            if (!isAuthorized) {
+                throw new RuntimeException("Unauthorized: You are not assigned to " + exam.getClasse().getName());
+            }
+
+            // 3. Use your existing Repository Method
+            Optional<ExamResult> existingRecord = examResultRepository
+                    .findByStudentIdAndExamIdAndSubjectId(studentId, examId, subjectId);
+
+            ExamResult recordToSave;
+            if (existingRecord.isPresent()) {
+                recordToSave = existingRecord.get();
+                updated++;
+            } else {
+                recordToSave = new ExamResult();
+                recordToSave.setStudent(userRepository.getReferenceById(studentId));
+                recordToSave.setExam(exam);
+                created++;
+            }
+
+            // 4. Set fields that exist in your ExamResult Entity
+            recordToSave.setMarks(incoming.getMarks());
+            recordToSave.setLetterGrade(convertToLetter(incoming.getMarks()));
+            recordToSave.setStatus(ExamResult.Status.SUBMITTED);
+
+            examResultRepository.save(recordToSave);
+        }
+
+        // 5. Return Summary for the UI Toast
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("created", created);
+        summary.put("updated", updated);
+        summary.put("total", results.size());
+        return summary;
     }
 
     public ExamResult updateResult(Long id, ExamResult resultDetails) {
@@ -375,55 +443,11 @@ public class TeacherService {
         }).collect(Collectors.toList());
     }
 
+    //TIMETABLE
+    public List<Timetable> getTeacherTimetable(Long teacherId) {
+        User teacher = userRepository.findById(teacherId)
+                .orElseThrow(() -> new RuntimeException("Teacher not found"));
+        return timetableRepository.findByClasseInOrderByDayOfWeekAscStartTimeAsc(teacher.getTeachingClasses());
+    }
 
-//    public List<Map<String, Object>> filterResults(Long classId, Long studentId) {
-//        List<ExamResult> rawResults;
-//        if (classId != null) {
-//            rawResults = examResultRepository.findByExam_Classe_Id(classId);
-//        } else if (studentId != null) {
-//            rawResults = examResultRepository.findByStudent_Id(studentId);
-//        } else {
-//            rawResults = examResultRepository.findAll();
-//        }
-//
-//        return rawResults.stream().map(result -> {
-//            Map<String, Object> dto = new HashMap<>();
-//            dto.put("id", result.getId());
-//            dto.put("marks", result.getMarks());
-//            dto.put("status", result.getStatus());
-//            dto.put("grade", result.getLetterGrade());
-//
-//            // Student Mapping
-//            Map<String, Object> studentMap = new HashMap<>();
-//            studentMap.put("name", result.getStudent().getName());
-//            studentMap.put("userId", result.getStudent().getUserId());
-//            dto.put("student", studentMap);
-//
-//            // Exam Mapping - ADDING TERM AND WEIGHT HERE
-//            Map<String, Object> examMap = new HashMap<>();
-//            examMap.put("id", result.getExam().getId());
-//            examMap.put("name", result.getExam().getName());
-//
-//            // --- ADD THESE TWO LINES ---
-//            examMap.put("term", result.getExam().getTerm());     // Matches r.exam.term
-//            examMap.put("weight", result.getExam().getWeight()); // Matches r.exam.weight
-//            examMap.put("locked", result.getExam().isLocked());   // Needed for UI Lock icons
-//            // ---------------------------
-//
-//            // Class Mapping
-//            Map<String, Object> classeMap = new HashMap<>();
-//            classeMap.put("name", result.getExam().getClasse().getName());
-//            examMap.put("classe", classeMap);
-//
-//            // Subject Mapping
-//            if (result.getExam().getSubject() != null) {
-//                Map<String, Object> subMap = new HashMap<>();
-//                subMap.put("name", result.getExam().getSubject().getName());
-//                examMap.put("subject", subMap);
-//            }
-//
-//            dto.put("exam", examMap);
-//            return dto;
-//        }).collect(Collectors.toList());
-//    }
 }
