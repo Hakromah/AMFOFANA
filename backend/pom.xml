@@ -29,6 +29,102 @@
     <properties>
         <java.version>21</java.version>
     </properties>
+    <!--    <dependencies>-->
+    <!--        <dependency>-->
+    <!--            <groupId>org.springframework.boot</groupId>-->
+    <!--            <artifactId>spring-boot-starter-data-jpa</artifactId>-->
+    <!--        </dependency>-->
+    <!--        <dependency>-->
+    <!--            <groupId>org.springframework.boot</groupId>-->
+    <!--            <artifactId>spring-boot-starter-security</artifactId>-->
+    <!--        </dependency>-->
+    <!--        <dependency>-->
+    <!--            <groupId>org.springframework.boot</groupId>-->
+    <!--            <artifactId>spring-boot-starter-web</artifactId> &lt;!&ndash; Use starter-web instead of webmvc &ndash;&gt;-->
+    <!--        </dependency>-->
+    <!--        <dependency>-->
+    <!--            <groupId>org.springframework.boot</groupId>-->
+    <!--            <artifactId>spring-boot-starter-validation</artifactId>-->
+    <!--        </dependency>-->
+
+    <!--        &lt;!&ndash;security dependencies start&ndash;&gt;-->
+    <!--        <dependency>-->
+    <!--            <groupId>io.jsonwebtoken</groupId>-->
+    <!--            <artifactId>jjwt-api</artifactId>-->
+    <!--            <version>0.11.5</version>-->
+    <!--        </dependency>-->
+    <!--        <dependency>-->
+    <!--            <groupId>io.jsonwebtoken</groupId>-->
+    <!--            <artifactId>jjwt-impl</artifactId>-->
+    <!--            <version>0.11.5</version>-->
+    <!--            <scope>runtime</scope>-->
+    <!--        </dependency>-->
+    <!--        <dependency>-->
+    <!--            <groupId>io.jsonwebtoken</groupId>-->
+    <!--            <artifactId>jjwt-jackson</artifactId>-->
+    <!--            <version>0.11.5</version>-->
+    <!--            <scope>runtime</scope>-->
+    <!--        </dependency>-->
+    <!--        &lt;!&ndash;security dependencies end&ndash;&gt;-->
+    <!--        &lt;!&ndash; https://mvnrepository.com/artifact/com.cloudinary/cloudinary-http44 &ndash;&gt;-->
+    <!--        <dependency>-->
+    <!--            <groupId>com.cloudinary</groupId>-->
+    <!--            <artifactId>cloudinary-http44</artifactId>-->
+    <!--            <version>1.39.0</version>-->
+    <!--        </dependency>-->
+    <!--        <dependency>-->
+    <!--            <groupId>com.cloudinary</groupId>-->
+    <!--            <artifactId>cloudinary-http5</artifactId>-->
+    <!--            <version>2.0.0</version>-->
+    <!--        </dependency>-->
+    <!--        <dependency>-->
+    <!--            <groupId>com.cloudinary</groupId>-->
+    <!--            <artifactId>cloudinary-taglib</artifactId>-->
+    <!--            <version>2.0.0</version>-->
+    <!--        </dependency>-->
+    <!--        <dependency>-->
+    <!--            <groupId>io.github.cdimascio</groupId>-->
+    <!--            <artifactId>dotenv-java</artifactId>-->
+    <!--            <version>2.2.4</version>-->
+    <!--        </dependency>-->
+    <!--        <dependency>-->
+    <!--            <groupId>me.paulschwarz</groupId>-->
+    <!--            <artifactId>spring-dotenv</artifactId>-->
+    <!--            <version>4.0.0</version>-->
+    <!--        </dependency>-->
+
+    <!--        <dependency>-->
+    <!--            <groupId>org.springframework.boot</groupId>-->
+    <!--            <artifactId>spring-boot-devtools</artifactId>-->
+    <!--            <scope>runtime</scope>-->
+    <!--            <optional>true</optional>-->
+    <!--        </dependency>-->
+    <!--        <dependency>-->
+    <!--            <groupId>org.postgresql</groupId>-->
+    <!--            <artifactId>postgresql</artifactId>-->
+    <!--            <scope>runtime</scope>-->
+    <!--        </dependency>-->
+    <!--        <dependency>-->
+    <!--            <groupId>org.projectlombok</groupId>-->
+    <!--            <artifactId>lombok</artifactId>-->
+    <!--            <optional>true</optional>-->
+    <!--        </dependency>-->
+    <!--        <dependency>-->
+    <!--            <groupId>org.springframework.boot</groupId>-->
+    <!--            <artifactId>spring-boot-starter-test</artifactId>-->
+    <!--            <scope>test</scope>-->
+    <!--        </dependency>-->
+    <!--        <dependency>-->
+    <!--            <groupId>org.springframework.security</groupId>-->
+    <!--            <artifactId>spring-security-test</artifactId>-->
+    <!--            <scope>test</scope>-->
+    <!--        </dependency>-->
+    <!--        <dependency>-->
+    <!--            <groupId>org.springdoc</groupId>-->
+    <!--            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>-->
+    <!--            <version>2.5.0</version> &lt;!&ndash; Updated version for Spring Boot 3.2.x &ndash;&gt;-->
+    <!--        </dependency>-->
+    <!--    </dependencies>-->
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -40,14 +136,13 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId> <!-- Use starter-web instead of webmvc -->
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
-        <!--security dependencies start-->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
@@ -65,23 +160,13 @@
             <version>0.11.5</version>
             <scope>runtime</scope>
         </dependency>
-        <!--security dependencies end-->
-        <!-- https://mvnrepository.com/artifact/com.cloudinary/cloudinary-http44 -->
-        <dependency>
-            <groupId>com.cloudinary</groupId>
-            <artifactId>cloudinary-http44</artifactId>
-            <version>1.39.0</version>
-        </dependency>
+
         <dependency>
             <groupId>com.cloudinary</groupId>
             <artifactId>cloudinary-http5</artifactId>
             <version>2.0.0</version>
         </dependency>
-        <dependency>
-            <groupId>com.cloudinary</groupId>
-            <artifactId>cloudinary-taglib</artifactId>
-            <version>2.0.0</version>
-        </dependency>
+
         <dependency>
             <groupId>io.github.cdimascio</groupId>
             <artifactId>dotenv-java</artifactId>
@@ -109,6 +194,13 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.5.0</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -119,13 +211,7 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.5.0</version> <!-- Updated version for Spring Boot 3.2.x -->
-        </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>

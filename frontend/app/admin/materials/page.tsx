@@ -1,190 +1,256 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useState, useEffect } from 'react';
-import {
-   Database, Trash2, ShieldAlert, BarChart3,
-   HardDrive, Users2, FileSearch, Loader2,
-   Filter, DownloadCloud, AlertCircle, CheckCircle2
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'sonner';
+import { useEffect, useState } from 'react';
 import api from '@/lib/api';
-
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
+import {
+   Trash2, Download, Eye, Search, HardDrive,
+   BarChart3, User, Loader2, Calendar, FileText, Image as ImageIcon
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
 
-export default function AdminMaterialsMonitoring() {
+export default function AdminMaterialsPage() {
    const [materials, setMaterials] = useState<any[]>([]);
+   const [analytics, setAnalytics] = useState<any[]>([]);
+   const [query, setQuery] = useState('');
    const [loading, setLoading] = useState(true);
-   const [searchTerm, setSearchTerm] = useState("");
 
-   const fetchGlobalData = async () => {
+   const fetchData = async () => {
+      setLoading(true);
       try {
-         const res = await api.get('/admin/materials/all');
-         setMaterials(res.data);
-      } catch (e) {
-         toast.error("Security sync failed: Global data unreachable");
+         const endpoint = query
+            ? `/api/admin/materials/search?q=${query}`
+            : '/api/admin/materials';
+
+         const [matRes, analyticsRes] = await Promise.all([
+            api.get(endpoint),
+            api.get('/api/admin/materials/analytics/downloads-per-class')
+         ]);
+
+         setMaterials(matRes.data);
+         setAnalytics(analyticsRes.data);
+      } catch (err) {
+         toast.error('System synchronization failed');
+         console.error(err);
       } finally {
          setLoading(false);
       }
    };
 
-   useEffect(() => { fetchGlobalData(); }, []);
+   useEffect(() => {
+      fetchData();
+   }, []);
 
-   const handleForceDelete = async (id: number) => {
-      if (!confirm("ADMIN ALERT: This will permanently purge this resource from the server. Proceed?")) return;
-      const tid = toast.loading("Executing administrative purge...");
+   const deleteMaterial = async (id: number) => {
+      if (!confirm("Are you sure? This will remove the file from Cloudinary permanently.")) return;
+
+      const t = toast.loading('Purging digital asset...');
       try {
-         await api.delete(`/admin/materials/${id}`);
-         toast.success("Resource Purged", { id: tid });
-         fetchGlobalData();
-      } catch (e) {
-         toast.error("Purge command failed", { id: tid });
+         await api.delete(`/api/admin/materials/${id}`);
+         toast.success('Asset removed from registry', { id: t });
+         fetchData();
+      } catch (err) {
+         toast.error('System bypass failed: Could not delete', { id: t });
+         console.error(err);
       }
    };
 
-   // Analytics Logic
-   const totalStorage = materials.reduce((acc, curr) => acc + (curr.fileSize || 0), 0);
-   const formattedStorage = (totalStorage / (1024 * 1024)).toFixed(2); // MB
+   // FIXED PREVIEW LOGIC
+   const handlePreview = (m: any) => {
+      if (!m.fileUrl) return;
 
-   const filteredMaterials = materials.filter(m =>
-      m.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      m.uploadedBy.name.toLowerCase().includes(searchTerm.toLowerCase())
-   );
+      // 1. Check if it's a PDF
+      const isPdf = m.fileType?.includes('pdf') || m.fileName?.toLowerCase().endsWith('.pdf');
 
-   if (loading) return <div className="h-screen flex items-center justify-center bg-[#F8FAFC]"><Loader2 className="animate-spin text-blue-600" size={40} /></div>;
+      // 2. Prepare the optimized URL
+      let previewUrl = m.fileUrl.replace('/upload/', '/upload/f_auto,q_auto/');
+
+      // 3. FIX: Only append .pdf if the URL doesn't already have it
+      if (isPdf && !previewUrl.toLowerCase().endsWith('.pdf')) {
+         previewUrl = `${previewUrl}.pdf`;
+      }
+
+      // 4. Open with no-referrer to bypass LMS token conflicts with Cloudinary
+      window.open(previewUrl, '_blank', 'noopener,noreferrer');
+   };
+
+   const handleDownload = async (mat: any) => {
+      if (!mat.fileUrl) return;
+      const tid = toast.loading("Preparing download...");
+
+      try {
+         // 1. Fetch the file data directly
+         const response = await fetch(mat.fileUrl);
+         if (!response.ok) throw new Error('Network response was not ok');
+
+         const blob = await response.blob();
+
+         // 2. Create a temporary local URL for the file blob
+         const url = window.URL.createObjectURL(blob);
+
+         // 3. Create a hidden link and click it
+         const link = document.createElement('a');
+         link.href = url;
+
+         // Use the clean filename from your database
+         const fileName = mat.fileName || 'document.pdf';
+         link.setAttribute('download', fileName);
+
+         document.body.appendChild(link);
+         link.click();
+
+         // 4. Cleanup
+         link.parentNode?.removeChild(link);
+         window.URL.revokeObjectURL(url);
+         toast.success("Download started", { id: tid });
+      } catch (err) {
+         console.error("Download error:", err);
+         // Fallback: just open the URL in a new tab if fetch fails
+         window.open(mat.fileUrl, '_blank');
+         toast.dismiss(tid);
+      }
+   };
 
    return (
       <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10 space-y-10">
-         {/* Admin Header */}
-         <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+         {/* Header */}
+         <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-end gap-6">
             <div className="space-y-2">
                <div className="flex items-center gap-2 text-rose-600 font-black text-[10px] uppercase tracking-[0.4em]">
-                  <ShieldAlert size={14} /> Administrative Oversight
+                  <HardDrive size={14} /> Global Asset Registry
                </div>
                <h1 className="text-5xl font-black text-slate-900 tracking-tighter sm:text-7xl italic uppercase leading-none">
-                  Global <span className="text-rose-600">Archive.</span>
+                  Material <span className="text-rose-600">Admin.</span>
                </h1>
             </div>
-            <div className="flex gap-3">
-               <Button variant="outline" className="rounded-2xl h-12 border-slate-200 font-bold px-6 bg-white">
-                  <DownloadCloud size={18} className="mr-2" /> DATA EXPORT
+
+            <div className="flex w-full md:w-auto gap-3">
+               <div className="relative flex-1 md:w-80">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <Input
+                     placeholder="Filter archives..."
+                     className="pl-12 h-14 rounded-2xl border-none shadow-lg bg-white font-bold"
+                     value={query}
+                     onChange={e => setQuery(e.target.value)}
+                     onKeyDown={(e) => e.key === 'Enter' && fetchData()}
+                  />
+               </div>
+               <Button onClick={fetchData} className="h-14 px-8 bg-slate-900 text-white rounded-2xl font-black italic hover:bg-rose-600 transition-colors">
+                  EXECUTE
                </Button>
             </div>
          </header>
 
-         {/* Analytics Bento Grid */}
-         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="rounded-[2.5rem] border-none shadow-sm bg-white p-8 space-y-4">
-               <div className="flex items-center gap-3 text-blue-600">
-                  <HardDrive size={24} />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Storage Consumption</span>
-               </div>
-               <p className="text-5xl font-black text-slate-900 italic tracking-tighter">{formattedStorage} <span className="text-xl font-bold not-italic text-slate-300">MB</span></p>
-               <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-600 rounded-full" style={{ width: '45%' }} />
-               </div>
-            </Card>
-
-            <Card className="rounded-[2.5rem] border-none shadow-sm bg-white p-8 space-y-4">
-               <div className="flex items-center gap-3 text-emerald-600">
-                  <Database size={24} />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Asset Count</span>
-               </div>
-               <p className="text-5xl font-black text-slate-900 italic tracking-tighter">{materials.length} <span className="text-xl font-bold not-italic text-slate-300">FILES</span></p>
-               <p className="text-[10px] font-black text-emerald-500 uppercase flex items-center gap-1">
-                  <CheckCircle2 size={12} /> Registry Healthy
-               </p>
-            </Card>
-
-            <Card className="rounded-[2.5rem] border-none shadow-sm bg-slate-900 p-8 space-y-4 text-white">
-               <div className="flex items-center gap-3 text-rose-400">
-                  <BarChart3 size={24} />
-                  <span className="text-[10px] font-black uppercase tracking-widest opacity-50">System Integrity</span>
-               </div>
-               <p className="text-2xl font-black italic tracking-tighter uppercase leading-tight">Institutional Compliance Active</p>
-               <p className="text-[10px] font-bold opacity-40 leading-relaxed uppercase tracking-tighter">Monitoring all 2026 academic data deployments</p>
-            </Card>
+         {/* Analytics Grid */}
+         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-4">
+            {analytics.map((item, idx) => (
+               <Card key={idx} className="p-6 rounded-[2rem] border-none shadow-sm bg-white flex items-center justify-between">
+                  <div>
+                     <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">{item.className}</p>
+                     <h4 className="text-2xl font-black italic text-slate-900">
+                        {item.downloads} <span className="text-[10px] uppercase font-bold text-slate-400 not-italic">DLs</span>
+                     </h4>
+                  </div>
+                  <div className="h-10 w-10 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center">
+                     <BarChart3 size={20} />
+                  </div>
+               </Card>
+            ))}
          </div>
 
-         {/* Global Material Table */}
-         <Card className="max-w-7xl mx-auto rounded-[3rem] border-none shadow-sm bg-white overflow-hidden">
-            <div className="p-8 border-b border-slate-50 flex flex-col md:flex-row justify-between items-center gap-4">
-               <div className="flex items-center gap-3">
-                  <div className="h-10 w-1 bg-rose-600 rounded-full" />
-                  <h2 className="text-2xl font-black italic uppercase tracking-tight text-slate-900">Resource Master List</h2>
+         {/* Materials Grid */}
+         <main className="max-w-7xl mx-auto">
+            {loading ? (
+               <div className="h-96 flex items-center justify-center">
+                  <Loader2 className="animate-spin text-rose-600" size={40} />
                </div>
-               <div className="relative w-full md:w-80 group">
-                  <FileSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-rose-600 transition-colors" size={18} />
-                  <Input
-                     placeholder="Search by title or faculty..."
-                     className="h-12 pl-12 rounded-2xl bg-slate-50 border-none font-bold"
-                     value={searchTerm}
-                     onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-               </div>
-            </div>
+            ) : (
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  <AnimatePresence mode="popLayout">
+                     {materials.map(m => {
+                        const isPdf = m.fileName?.toLowerCase().endsWith('.pdf') || m.fileType?.includes('pdf');
 
-            <Table>
-               <TableHeader className="bg-slate-50/50">
-                  <TableRow className="border-none">
-                     <TableHead className="pl-10 font-black text-[10px] uppercase tracking-widest text-slate-400 py-6">Material Description</TableHead>
-                     <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-400">Faculty Member</TableHead>
-                     <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-400">Target Units</TableHead>
-                     <TableHead className="text-right pr-10 font-black text-[10px] uppercase tracking-widest text-slate-400">Action</TableHead>
-                  </TableRow>
-               </TableHeader>
-               <TableBody>
-                  {filteredMaterials.map((mat) => (
-                     <TableRow key={mat.id} className="hover:bg-slate-50/50 transition-colors border-slate-50">
-                        <TableCell className="pl-10 py-6">
-                           <div className="flex items-center gap-4">
-                              <div className="h-12 w-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400">
-                                 <HardDrive size={20} />
-                              </div>
-                              <div>
-                                 <p className="font-black text-slate-900 uppercase italic text-sm leading-tight">{mat.title}</p>
-                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-1">{mat.fileType} • {(mat.fileSize / 1024).toFixed(0)} KB</p>
-                              </div>
-                           </div>
-                        </TableCell>
-                        <TableCell>
-                           <div className="flex items-center gap-2 font-bold text-xs text-slate-600">
-                              <Users2 size={14} className="text-rose-600" /> {mat.uploadedBy.name}
-                           </div>
-                        </TableCell>
-                        <TableCell>
-                           <div className="flex flex-wrap gap-1">
-                              {mat.targetClasses.map((c: any) => (
-                                 <Badge key={c.id} className="bg-blue-50 text-blue-600 hover:bg-blue-50 border-none rounded-md text-[8px] font-black uppercase px-2">{c.name}</Badge>
-                              ))}
-                           </div>
-                        </TableCell>
-                        <TableCell className="text-right pr-10">
-                           <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleForceDelete(mat.id)}
-                              className="h-10 w-10 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                        return (
+                           <motion.div
+                              key={m.id}
+                              layout
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.9 }}
                            >
-                              <Trash2 size={18} />
-                           </Button>
-                        </TableCell>
-                     </TableRow>
-                  ))}
-               </TableBody>
-            </Table>
-            {filteredMaterials.length === 0 && (
-               <div className="p-20 text-center flex flex-col items-center gap-3">
-                  <AlertCircle size={40} className="text-slate-100" />
-                  <p className="text-[10px] font-black uppercase text-slate-300 tracking-widest">No matching archival data found</p>
+                              <Card className="rounded-[3rem] p-8 border-none shadow-sm bg-white hover:shadow-2xl transition-all group flex flex-col justify-between h-full relative overflow-hidden">
+                                 <div className="absolute top-0 left-0 w-2 h-full bg-rose-600/10 group-hover:bg-rose-600 transition-colors" />
+
+                                 <div>
+                                    <div className="flex justify-between items-start mb-6">
+                                       <Badge className="bg-slate-900 text-[9px] font-black uppercase tracking-widest italic rounded-lg">
+                                          ID: #{m.id}
+                                       </Badge>
+                                       <Button
+                                          onClick={() => deleteMaterial(m.id)}
+                                          variant="ghost"
+                                          size="icon"
+                                          className="text-slate-200 hover:text-rose-600 rounded-full"
+                                       >
+                                          <Trash2 size={20} />
+                                       </Button>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 mb-2">
+                                       {isPdf ? <FileText className="text-rose-600" size={20} /> : <ImageIcon className="text-indigo-600" size={20} />}
+                                       <h3 className="text-xl font-black italic uppercase text-slate-900 truncate tracking-tighter">
+                                          {m.fileName}
+                                       </h3>
+                                    </div>
+                                    <p className="text-slate-400 font-bold text-xs italic line-clamp-2 mb-6">{m.title}</p>
+
+                                    <div className="flex flex-wrap gap-2 mb-6">
+                                       {m.targetClasses.map((c: any) => (
+                                          <Badge key={c.id} className="bg-slate-50 text-slate-400 border-none font-black text-[9px] uppercase italic">
+                                             {c.name}
+                                          </Badge>
+                                       ))}
+                                    </div>
+                                 </div>
+
+                                 <div className="space-y-4">
+                                    <div className="p-4 rounded-2xl bg-slate-50 space-y-2">
+                                       <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 italic">
+                                          <User size={14} className="text-rose-600" /> Uploaded: {m.uploadedBy?.name}
+                                       </div>
+                                       <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 italic">
+                                          <Calendar size={14} className="text-rose-600" /> Date: {new Date(m.createdAt).toLocaleDateString()}
+                                       </div>
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                       <Button
+                                          onClick={() => handlePreview(m)}
+                                          className="flex-1 h-12 rounded-2xl bg-white border-2 border-slate-100 text-slate-900 font-black italic uppercase text-[10px] hover:bg-slate-50 shadow-sm"
+                                       >
+                                          <Eye size={16} className="mr-2" /> Preview
+                                       </Button>
+                                       <Button
+                                          onClick={() => handleDownload(m)}
+                                          className="flex-1 h-12 rounded-2xl bg-rose-600 text-white font-black italic uppercase text-[10px] hover:bg-slate-900 shadow-xl shadow-rose-200 transition-all"
+                                       >
+                                          <Download size={16} className="mr-2" /> Download
+                                       </Button>
+                                    </div>
+                                 </div>
+                              </Card>
+                           </motion.div>
+                        )
+                     })}
+                  </AnimatePresence>
                </div>
             )}
-         </Card>
+         </main>
       </div>
    );
 }

@@ -19,22 +19,35 @@ public class CloudStorageService {
     }
 
     public Map<?, ?> upload(MultipartFile file) throws IOException {
-        return cloudinary.uploader().upload(
-                file.getBytes(),
+
+        // Determine if it's an image or a document (PDF/Docx)
+        String contentType = file.getContentType();
+        String resourceType = "auto"; // Default
+
+        if (contentType != null && contentType.contains("pdf")) {
+            resourceType = "image";
+        }
+
+        return cloudinary.uploader().upload(file.getBytes(),
                 ObjectUtils.asMap(
-                        "resource_type", "raw",   // ✅ FORCE RAW
+                        "resource_type", resourceType,
                         "folder", "lms_materials",
                         "use_filename", true,
                         "unique_filename", true,
-                        "overwrite", false
-                )
-        );
+                        "access_mode", "public"
+                ));
     }
 
 
-    public void delete(String publicId) throws IOException {
-        cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
-    }
+    public void delete(String publicId, String fileType) throws IOException {
+        String resourceType = "image";
 
+        // If the file is not an image or PDF, it was likely stored as 'raw'
+        if (fileType != null && !fileType.contains("image") && !fileType.contains("pdf")) {
+            resourceType = "raw";
+        }
+
+        cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("resource_type", resourceType));
+    }
 
 }

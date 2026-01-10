@@ -85,9 +85,43 @@ export default function StudentMaterialsPage() {
     </div>
   );
 
-  //   const downloadFile = (material: any) => {
-  //   window.open(`${material.fileUrl}?fl_attachment`, "_blank");
-  // };
+  const handleDownload = async (mat: any) => {
+    if (!mat.fileUrl) return;
+    const tid = toast.loading("Preparing download...");
+
+    try {
+      // 1. Fetch the file data directly
+      const response = await fetch(mat.fileUrl);
+      if (!response.ok) throw new Error('Network response was not ok');
+
+      const blob = await response.blob();
+
+      // 2. Create a temporary local URL for the file blob
+      const url = window.URL.createObjectURL(blob);
+
+      // 3. Create a hidden link and click it
+      const link = document.createElement('a');
+      link.href = url;
+
+      // Use the clean filename from your database
+      const fileName = mat.fileName || 'document.pdf';
+      link.setAttribute('download', fileName);
+
+      document.body.appendChild(link);
+      link.click();
+
+      // 4. Cleanup
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success("Download started", { id: tid });
+    } catch (err) {
+      console.error("Download error:", err);
+      // Fallback: just open the URL in a new tab if fetch fails
+      window.open(mat.fileUrl, '_blank');
+      toast.dismiss(tid);
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10 space-y-10">
@@ -160,25 +194,29 @@ export default function StudentMaterialsPage() {
                         </div>
 
                         <div className="flex gap-2">
+                          {/* PREVIEW BUTTON: No attachment flags, just f_auto and conditional .pdf */}
                           <Button
                             variant="outline"
-                            onClick={() => window.open(`${mat.fileUrl}?fl_attachment=true&attachment_filename=${mat.fileName}`,
-                              "_blank", 'noopener,noreferrer')}
-                            className="rounded-2xl border-slate-100 text-slate-400 hover:text-indigo-600 font-black text-[10px] tracking-widest h-12 px-5 uppercase"
+                            onClick={() => {
+                              const isPdf = mat.fileType?.includes('pdf') || mat.fileName?.toLowerCase().endsWith('.pdf');
+                              let previewUrl = mat.fileUrl.replace('/upload/', '/upload/f_auto/');
+                              if (isPdf && !previewUrl.toLowerCase().endsWith('.pdf')) {
+                                previewUrl += '.pdf';
+                              }
+                              window.open(previewUrl, "_blank", 'noopener,noreferrer');
+                            }}
+                            className="rounded-2xl border-slate-100 text-slate-400 hover:text-blue-600 font-black text-[10px] tracking-widest h-10 px-4 uppercase"
                           >
-                            <Eye size={16} className="mr-2" /> Preview
+                            <Eye size={14} className="mr-2" /> Preview
                           </Button>
 
-                          <a href={mat.fileUrl} download={mat.title} target="_blank" rel="noopener noreferrer">
-                            <Button className="bg-slate-900 hover:bg-indigo-600 text-white rounded-2xl font-black text-[10px] tracking-widest px-6 h-12 shadow-xl uppercase">
-                              <Download size={16} className="mr-2" /> Get File
-                            </Button>
-                          </a>
+                          <Button
+                            onClick={() => handleDownload(mat)}
+                            className="flex-1 h-12 rounded-2xl bg-rose-600 text-white font-black italic uppercase text-[10px] hover:bg-slate-900 shadow-xl shadow-rose-200 transition-all"
+                          >
+                            <Download size={14} className="mr-2" /> Get
+                          </Button>
 
-                          {/* <button className="text-blue-500 hover:underline" onClick={() => downloadFile(mat)}>
-                            Download
-                          </button>
-                          <a href={mat.fileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">SOURCE FILE</a> */}
                         </div>
                       </div>
 

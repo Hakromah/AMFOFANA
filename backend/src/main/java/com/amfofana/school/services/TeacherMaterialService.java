@@ -33,9 +33,6 @@ public class TeacherMaterialService {
         this.cloudStorage = cloudStorage;
     }
 
-    /**
-     * Process file upload, store in Cloudinary, and save metadata to DB
-     */
     @Transactional
     public LearningMaterial upload(
             String email,
@@ -46,31 +43,33 @@ public class TeacherMaterialService {
     ) throws IOException {
 
         User teacher = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Teacher identity not found"));
+                .orElseThrow(() -> new RuntimeException("Teacher not found"));
 
         List<Classe> targetClasses = classeRepository.findAllById(classIds);
-        if (targetClasses.isEmpty()) {
-            throw new RuntimeException("At least one target class must be selected");
-        }
 
+        // 1. Call your CloudStorageService
         Map<?, ?> uploadResult = cloudStorage.upload(file);
 
+        // 2. Create the entity
         LearningMaterial material = new LearningMaterial();
         material.setTitle(title);
         material.setDescription(desc);
-        material.setPublicId((String) uploadResult.get("public_id")); // ✅ CORRECT
-        material.setFileUrl((String) uploadResult.get("secure_url")); // ✅ RAW URL
-        material.setFileName(file.getOriginalFilename() != null
-                ? file.getOriginalFilename()
-                : material.getTitle() + ".pdf");
-        material.setFileType((String) uploadResult.get("resource_type"));
+
+        // 3. SECURE THE URL AND METADATA
+        material.setFileUrl((String) uploadResult.get("secure_url"));
+        material.setPublicId((String) uploadResult.get("public_id"));
+
+        // ✅ SAVE THE ACTUAL CONTENT TYPE (e.g., "application/pdf")
+        // This allows the frontend to distinguish between a real image and a PDF-stored-as-image
+        material.setFileType(file.getContentType());
+
+        material.setFileName(file.getOriginalFilename());
         material.setFileSize(((Number) uploadResult.get("bytes")).longValue());
         material.setUploadedBy(teacher);
         material.setTargetClasses(new HashSet<>(targetClasses));
 
         return materialRepository.save(material);
     }
-
 
     /**
      * Fetch all materials uploaded by the current teacher
@@ -79,9 +78,7 @@ public class TeacherMaterialService {
         return materialRepository.findByUploadedByEmailOrderByCreatedAtDesc(email);
     }
 
-    /**
-     * Securely delete material from both Cloudinary and Database
-     */
+
     @Transactional
     public void delete(Long id, String email) throws IOException {
         LearningMaterial material = materialRepository.findById(id)
@@ -92,24 +89,11 @@ public class TeacherMaterialService {
             throw new RuntimeException("Access Denied: You do not own this resource");
         }
 
-        // 1. Purge from Cloudinary using the stored public_id
-        cloudStorage.delete(material.getFileName());
+        // 1. Purge from Cloudinary using the stored publicId and fileType
+        // ✅ FIXED: Using getPublicId() and getFileType()
+        cloudStorage.delete(material.getPublicId(), material.getFileType());
 
         // 2. Purge from Database
         materialRepository.delete(material);
     }
-
-
-//    @Transactional
-//    public void fixBrokenCloudinaryUrls() {
-//        List<LearningMaterial> materials = materialRepository.findAll();
-//
-//        materials.forEach(m -> {
-//            if (m.getFileUrl() != null && m.getFileUrl().contains("/image/upload/")) {
-//                m.setFileUrl(
-//                        m.getFileUrl().replace("/image/upload/", "/raw/upload/")
-//                );
-//            }
-//        });
-//    }
 }

@@ -112,12 +112,41 @@ export default function TeacherMaterialsPage() {
     }
   };
 
-  const downloadFile = (material: any) => {
-    const filename = encodeURIComponent(material.fileName || material.title);
-    window.open(
-      `${material.fileUrl}?fl_attachment=true&attachment_filename=${filename}`,
-      "_blank"
-    );
+  const handleDownload = async (mat: any) => {
+    if (!mat.fileUrl) return;
+    const tid = toast.loading("Preparing download...");
+
+    try {
+      // 1. Fetch the file data directly
+      const response = await fetch(mat.fileUrl);
+      if (!response.ok) throw new Error('Network response was not ok');
+
+      const blob = await response.blob();
+
+      // 2. Create a temporary local URL for the file blob
+      const url = window.URL.createObjectURL(blob);
+
+      // 3. Create a hidden link and click it
+      const link = document.createElement('a');
+      link.href = url;
+
+      // Use the clean filename from your database
+      const fileName = mat.fileName || 'document.pdf';
+      link.setAttribute('download', fileName);
+
+      document.body.appendChild(link);
+      link.click();
+
+      // 4. Cleanup
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success("Download started", { id: tid });
+    } catch (err) {
+      console.error("Download error:", err);
+      // Fallback: just open the URL in a new tab if fetch fails
+      window.open(mat.fileUrl, '_blank');
+      toast.dismiss(tid);
+    }
   };
 
   if (loading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-blue-600" size={40} /></div>;
@@ -165,29 +194,38 @@ export default function TeacherMaterialsPage() {
                       </Badge>
                     ))}
                   </div>
-
                   {/* The Footer Section */}
-                  <div className="flex items-center justify-between pt-4 border-t border-slate-50 text-[10px] font-black text-slate-300 uppercase tracking-widest">
-                    <div className="flex flex-col gap-1">
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                    <div className="flex flex-col gap-1 text-[10px] font-black text-slate-300 uppercase tracking-widest">
                       <div className="flex items-center gap-1.5">
                         <Calendar size={12} /> {new Date(mat.createdAt).toLocaleDateString()}
                       </div>
-                      {/* DISPLAYING THE FILE SIZE */}
                       <div className="flex items-center gap-1.5 text-blue-500/60">
                         <FileText size={12} /> {formatBytes(mat.fileSize)}
                       </div>
                     </div>
-                    <button className="text-blue-500 hover:underline" onClick={() => downloadFile(mat)}>
-                      Download
-                    </button>
+
                     <div className="flex gap-2">
+                      {/* PREVIEW BUTTON: No attachment flags, just f_auto and conditional .pdf */}
                       <Button
                         variant="outline"
-                        onClick={() => window.open(`${mat.fileUrl}?fl_attachment=true&attachment_filename=${mat.fileName}`,
-                          "_blank", 'noopener,noreferrer')}
-                        className="rounded-2xl border-slate-100 text-slate-400 hover:text-indigo-600 font-black text-[10px] tracking-widest h-12 px-5 uppercase"
+                        onClick={() => {
+                          const isPdf = mat.fileType?.includes('pdf') || mat.fileName?.toLowerCase().endsWith('.pdf');
+                          let previewUrl = mat.fileUrl.replace('/upload/', '/upload/f_auto/');
+                          if (isPdf && !previewUrl.toLowerCase().endsWith('.pdf')) {
+                            previewUrl += '.pdf';
+                          }
+                          window.open(previewUrl, "_blank", 'noopener,noreferrer');
+                        }}
+                        className="rounded-2xl border-slate-100 text-slate-400 hover:text-blue-600 font-black text-[10px] tracking-widest h-10 px-4 uppercase"
                       >
-                        <Eye size={16} className="mr-2" /> Preview
+                        <Eye size={14} className="mr-2" /> Preview
+                      </Button>
+                      <Button
+                        onClick={() => handleDownload(mat)}
+                        className="flex-1 h-12 rounded-2xl bg-rose-600 text-white font-black italic uppercase text-[10px] hover:bg-slate-900 shadow-xl shadow-rose-200 transition-all"
+                      >
+                        <Download size={14} className="mr-2" /> Download
                       </Button>
                     </div>
                   </div>

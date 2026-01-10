@@ -24,6 +24,8 @@ spring:
   jackson:
     serialization:
       fail-on-empty-beans: false
+  main:
+    allow-bean-definition-overriding: true
 cloudinary:
   cloud_name: ${CLOUDINARY_NAME}
   api_key: ${CLOUDINARY_KEY}

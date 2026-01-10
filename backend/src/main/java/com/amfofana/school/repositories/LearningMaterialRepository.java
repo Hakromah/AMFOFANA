@@ -25,4 +25,24 @@ public interface LearningMaterialRepository extends JpaRepository<LearningMateri
             "WHERE m.uploadedBy.email = :email " +
             "ORDER BY m.createdAt DESC")
     List<LearningMaterial> findByUploadedByEmailOrderByCreatedAtDesc(@Param("email") String email);
+
+    @Query("""
+                SELECT DISTINCT m FROM LearningMaterial m
+                LEFT JOIN FETCH m.targetClasses
+                JOIN FETCH m.uploadedBy
+                ORDER BY m.createdAt DESC
+            """)
+    List<LearningMaterial> findAllWithRelations();
+
+    @Query("""
+    SELECT DISTINCT m FROM LearningMaterial m
+    LEFT JOIN FETCH m.targetClasses
+    JOIN FETCH m.uploadedBy
+    WHERE LOWER(m.title) LIKE LOWER(CONCAT('%', :q, '%'))
+       OR LOWER(m.description) LIKE LOWER(CONCAT('%', :q, '%'))
+       OR LOWER(m.uploadedBy.name) LIKE LOWER(CONCAT('%', :q, '%'))
+""")
+    List<LearningMaterial> search(@Param("q") String q);
+
+
 }

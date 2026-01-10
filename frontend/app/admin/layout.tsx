@@ -11,6 +11,7 @@ export default function AdminLayout({
     { name: 'Class Management', href: '/admin/classes' },
     { name: 'Subject Management', href: '/admin/subjects' },
     { name: 'Exam Management', href: '/admin/exams' },
+    { name: 'Materials Management', href: '/admin/materials' },
     { name: 'Results Management', href: '/admin/results' }, // Added
     { name: 'Teacher Assignment', href: '/admin/assign-teacher' },
     { name: 'Student Assignment', href: '/admin/assign-student' },

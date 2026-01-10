@@ -5,41 +5,27 @@ import com.amfofana.school.repositories.LearningMaterialRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.List;
 
 @Service
 public class AdminMaterialService {
-    private final LearningMaterialRepository materialRepository;
-    private final CloudStorageService cloudStorageService;
 
+    private final LearningMaterialRepository materialRepository; // Add this
 
-    public AdminMaterialService(LearningMaterialRepository materialRepository, CloudStorageService cloudStorageService) {
+    public AdminMaterialService(LearningMaterialRepository materialRepository) {
         this.materialRepository = materialRepository;
-
-        this.cloudStorageService = cloudStorageService;
     }
 
-    public List<LearningMaterial> getAllMaterialsGlobal() {
-        return materialRepository.findAll();
+    @Transactional(readOnly = true)
+    public List<LearningMaterial> getAllMaterials() {
+        return materialRepository.findAllWithRelations();
     }
 
-    @Transactional
-    public void adminDelete(Long id) throws IOException {
-        LearningMaterial material = materialRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Material not found"));
-
-        // Global Cloud Purge
-        cloudStorageService.delete(material.getFileName());
-
-        // Global DB Purge
-        materialRepository.delete(material);
+    /**
+     * 🔍 FULL-TEXT SEARCH
+     */
+    @Transactional(readOnly = true)
+    public List<LearningMaterial> search(String q) {
+        return materialRepository.search(q);
     }
-
-//    @Transactional
-//    public void adminDelete(Long id) {
-//        LearningMaterial material = materialRepository.findById(id).orElseThrow();
-//        fileStorage.delete(material.getFileName());
-//        materialRepository.delete(material);
-//    }
 }

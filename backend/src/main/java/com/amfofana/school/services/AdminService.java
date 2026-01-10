@@ -443,11 +443,6 @@ public class AdminService {
         examRepository.saveAll(exams);
     }
 
-//    @Transactional(readOnly = true)
-//    public List<Exam> getAllExamsGlobal() {
-//        return examRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
-//    }
-
     @Transactional(readOnly = true)
     public List<Exam> getExams(Long teacherId, Long classId) {
         if (teacherId != null && classId != null) {
