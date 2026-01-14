@@ -112,7 +112,55 @@ export default function Sidebar({ menuItems }: SidebarProps) {
 
          {/* Navigation Section */}
          <div className="flex-1 px-4 py-8 space-y-8 overflow-y-auto">
-            <div>
+
+            <div className="flex-1 px-4 py-6 overflow-y-auto">
+               <div className="space-y-6">
+                  {/* Section Header */}
+                  <div className="px-3">
+                     <p className="text-[10px] font-extrabold tracking-widest text-slate-400 uppercase">
+                        {userData?.role || 'Guest'} Menu
+                     </p>
+                  </div>
+
+                  {/* Navigation */}
+                  <nav className="flex flex-col gap-1">
+                     {menuItems.map((item) => {
+                        const isActive = pathname === item.href;
+
+                        return (
+                           <Link key={item.name} href={item.href} className="group">
+                              <div
+                                 className={`relative flex items-center gap-3 h-11 px-4 rounded-xl transition-all
+                                    ${isActive
+                                       ? 'bg-slate-900 text-white'
+                                       : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                                    }`}
+                              >
+                                 {/* Active Indicator */}
+                                 {isActive && (
+                                    <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-full bg-blue-500" />
+                                 )}
+
+                                 <span
+                                    className={`transition-colors ${isActive ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-700'
+                                       }`}
+                                 >
+                                    {getIcon(item.name)}
+                                 </span>
+
+                                 <span className="text-xs font-semibold tracking-wide uppercase">
+                                    {item.name}
+                                 </span>
+                              </div>
+                           </Link>
+                        );
+                     })}
+                  </nav>
+               </div>
+            </div>
+
+
+            {/* <div>
                <p className="px-5 text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] mb-5">
                   {userData?.role || 'Guest'} Navigation
                </p>
@@ -142,7 +190,7 @@ export default function Sidebar({ menuItems }: SidebarProps) {
                      );
                   })}
                </nav>
-            </div>
+            </div> */}
 
             {/* Teacher Specific Alerts */}
             <AnimatePresence>

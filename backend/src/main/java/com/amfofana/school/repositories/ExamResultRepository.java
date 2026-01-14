@@ -58,5 +58,6 @@ public interface ExamResultRepository extends JpaRepository<ExamResult, Long> {
             @Param("examId") Long examId,
             @Param("subjectId") Long subjectId
     );
+    List<ExamResult> findTop2ByStudent_IdOrderByCreatedAtDesc(Long studentId);
 
 }

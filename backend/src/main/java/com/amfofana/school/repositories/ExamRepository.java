@@ -8,8 +8,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Repository
@@ -33,7 +35,7 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
 
     List<Exam> findByClasseId(Long classId);
 
-    // Alternative: If you want to order them by date automatically
-//    List<Exam> findByClasseInOrderByDateAsc(Collection<Classe> classes);
+    // Find the next upcoming exam for a student's class
+    Optional<Exam> findFirstByClasse_IdAndDateGreaterThanEqualOrderByDateAscStartTimeAsc(Long classId, LocalDate date);
 
 }

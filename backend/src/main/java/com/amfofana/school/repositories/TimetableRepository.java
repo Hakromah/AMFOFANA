@@ -16,4 +16,6 @@ public interface TimetableRepository extends JpaRepository<Timetable, Long> {
 
     // Find timetable for a list of classes (useful for students/teachers)
     List<Timetable> findByClasseInOrderByDayOfWeekAscStartTimeAsc(Collection<Classe> classes);
+
+    long countDistinctSubjectByClasse_Id(Long classId);
 }

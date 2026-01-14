@@ -1,21 +1,3 @@
-// import { useEffect, useState } from 'react';
-// import { getToken, getUserRole } from '@/lib/auth';
-
-// export const useAuth = () => {
-//   const [isLoggedIn, setIsLoggedIn] = useState(false);
-//   const [role, setRole] = useState<string | null>(null);
-
-//   useEffect(() => {
-//     const token = getToken();
-//     if (token) {
-//       setIsLoggedIn(true);
-//       setRole(getUserRole());
-//     }
-//   }, []);
-
-//   return { isLoggedIn, role };
-// };
-
 "use client";
 
 import { useSyncExternalStore } from "react";

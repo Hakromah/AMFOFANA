@@ -36,5 +36,4 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
     @Query("SELECT a FROM Attendance a JOIN a.records r WHERE r.student.id = :studentId")
     List<Attendance> findByRecordsStudentId(@Param("studentId") Long studentId);
-
 }

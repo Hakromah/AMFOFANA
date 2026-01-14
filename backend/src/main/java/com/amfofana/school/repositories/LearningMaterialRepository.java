@@ -45,4 +45,8 @@ public interface LearningMaterialRepository extends JpaRepository<LearningMateri
     List<LearningMaterial> search(@Param("q") String q);
 
 
+    long countByTargetClasses_Id(Long classId);
+
+    // Find last 2 materials uploaded for a class
+    List<LearningMaterial> findTop2ByTargetClasses_IdOrderByCreatedAtDesc(Long classId);
 }

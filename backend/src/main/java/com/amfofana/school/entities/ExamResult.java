@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -42,4 +44,13 @@ public class ExamResult {
     }
 
     private String letterGrade;
+
+    // Add this field to support the "OrderByCreatedAtDesc" query
+    private LocalDateTime createdAt;
+
+    // Optional: Automatically set the time when the record is created
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }
