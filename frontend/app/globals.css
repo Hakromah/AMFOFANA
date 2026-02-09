@@ -1,5 +1,12 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.linear-swiper-transition .swiper-wrapper {
+  transition-timing-function: linear !important;
+}
 
 @custom-variant dark (&:is(.dark *));
 
@@ -41,6 +48,17 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --header-height: 117px;
+  --breakpoint-3xl: 1921px;
+  --breakpoint-mxl: 1800px;
+  --breakpoint-2xl: 1681px;
+  --breakpoint-nxl: 1580px;
+  --breakpoint-xl: 1441px;
+  --breakpoint-xlg: 1367px;
+  --breakpoint-lg: 1281px;
+  --breakpoint-md: 1025px;
+  --breakpoint-sm: 769px;
+  --breakpoint-xs: 481px;
 }
 
 :root {
@@ -115,8 +133,51 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    -webkit-tap-highlight-color: transparent;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+::-webkit-scrollbar {
+  width: 3px !important;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 225px white;
+  border-radius: 10px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary) !important;
+  border-radius: 10px;
+}
+
+.academic-tabs::-webkit-scrollbar {
+  width: 10px !important;
+}
+
+.academic-tabs::-webkit-scrollbar {
+  height: 3px !important;
+}
+
+/* Track */
+.academic-tabs::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+/* Handle */
+.academic-tabs::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+.academic-tabs::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.6);
 }

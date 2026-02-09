@@ -30,9 +30,9 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
-        <div className="relative flex min-h-screen flex-col">
+        <div className="relative min-h-screen">
           <Navbar />
-          <main className="flex-1">{children}</main>
+          <main className="h-full w-full">{children}</main>
           <Footer />
         </div>
         <Toaster richColors />

@@ -1,36 +1,112 @@
-import { School } from 'lucide-react';
+"use client";
+
+import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { Facebook, Instagram, Linkedin, Twitter, Youtube } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 export default function Footer() {
   return (
-    <footer className="border-t">
-      <div className="container flex flex-col items-center justify-between gap-4 py-10 md:h-24 md:flex-row md:py-6">
-        <div className="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
-          <School className="h-6 w-6" />
-          <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
-            © {new Date().getFullYear()} School
+    <footer className="bg-[#2857AE] text-white pt-20 pb-10">
+      <div className="container mx-auto max-w-[1920px] px-5 md:px-[clamp(20px,5vw,60px)]">
+
+        {/* Top Section: Logo & Subscription */}
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-16 border-b border-white/20 pb-10">
+          <div className="flex items-center gap-4">
+            {/* Placeholder Logo */}
+            <div className="relative w-16 h-16 md:w-20 md:h-20">
+              <Image
+                src="/logo/fofana.png" // User can replace
+                alt="A.M. Fofana Logo"
+                width={100}
+                height={100}
+                className="object-contain"
+              />
+              {/* Fallback if no logo: A simple text or icon */}
+            </div>
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight">A.M. FOFANA</h2>
+              <p className="text-xs md:text-sm text-white/80 tracking-widest uppercase">Islamic & English High School</p>
+            </div>
+          </div>
+
+          {/* Subscription Form */}
+          <div className="w-full max-w-md bg-white rounded-lg p-2 flex">
+            <Input
+              type="email"
+              placeholder="Enter Your E-mail"
+              className="border-0 bg-transparent text-black focus-visible:ring-0 placeholder:text-gray-400"
+            />
+            <Button className="bg-[#2857AE] hover:bg-[#1e4287] text-white px-6 rounded-md">
+              Subscribe
+            </Button>
+          </div>
+        </div>
+
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">
+
+          {/* Column 1: About */}
+          <div className="space-y-6">
+            <p className="text-white/80 text-sm leading-relaxed max-w-sm">
+              Serving the community of Monrovia since 1977. We believe that education is the ultimate key to unlocking a bright future. Serving the community of Monrovia since 1977. We believe that education is the ultimate key to unlocking a bright future.
+            </p>
+            <div className="space-y-2">
+              <p className="text-xs text-white/60">Follow us on Social Media</p>
+              <div className="flex gap-4">
+                <Link href="#" className="text-white/80 hover:text-white transition-colors"><Linkedin className="h-5 w-5" /></Link>
+                <Link href="#" className="text-white/80 hover:text-white transition-colors"><Instagram className="h-5 w-5" /></Link>
+                <Link href="#" className="text-white/80 hover:text-white transition-colors"><Facebook className="h-5 w-5" /></Link>
+                <Link href="#" className="text-white/80 hover:text-white transition-colors"><Youtube className="h-5 w-5" /></Link>
+                <Link href="#" className="text-white/80 hover:text-white transition-colors"><Twitter className="h-5 w-5" /></Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Column 2: Quick Links */}
+          <div>
+            <h3 className="text-xl font-bold mb-6">Quick Links</h3>
+            <ul className="space-y-4 text-white/80 text-sm">
+              <li><Link href="#" className="hover:text-white transition-colors">Admission Requirements</Link></li>
+              <li><Link href="#" className="hover:text-white transition-colors">Tuition & Fees</Link></li>
+              <li><Link href="#" className="hover:text-white transition-colors">School News</Link></li>
+              <li><Link href="#" className="hover:text-white transition-colors">Gallery</Link></li>
+              <li><Link href="#" className="hover:text-white transition-colors">Opportunities</Link></li>
+            </ul>
+          </div>
+
+          {/* Column 3: Academics */}
+          <div>
+            <h3 className="text-xl font-bold mb-6">Academics</h3>
+            <ul className="space-y-4 text-white/80 text-sm">
+              <li><Link href="#" className="hover:text-white transition-colors">Curriculum</Link></li>
+              <li><Link href="#" className="hover:text-white transition-colors">Academic Calendar</Link></li>
+              <li><Link href="#" className="hover:text-white transition-colors">Programs</Link></li>
+              <li><Link href="#" className="hover:text-white transition-colors">Scholarships</Link></li>
+            </ul>
+          </div>
+
+          {/* Column 4: Contact Us */}
+          <div>
+            <h3 className="text-xl font-bold mb-6">Contact Us</h3>
+            <div className="space-y-4 text-white/80 text-sm leading-relaxed">
+              <p>Fish Market Monrovia,<br /> Liberia.</p>
+              <p className="text-xl font-bold text-white">+231 054 575 032 32</p>
+              <p>info@amfofana.com</p>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="pt-8 border-t border-white/10 text-center">
+          <p className="text-xs text-white/50">
+            © 2026 A.M. Fofana Islamic & English High School. All Rights Reserved.
           </p>
         </div>
-        <div className="flex items-center gap-4 text-sm font-medium">
-          <Link
-            href="/about"
-            className="text-foreground/60 transition-colors hover:text-foreground/80"
-          >
-            About
-          </Link>
-          <Link
-            href="/contact"
-            className="text-foreground/60 transition-colors hover:text-foreground/80"
-          >
-            Contact
-          </Link>
-          <Link
-            href="/privacy"
-            className="text-foreground/60 transition-colors hover:text-foreground/80"
-          >
-            Privacy Policy
-          </Link>
-        </div>
+
       </div>
     </footer>
   );
