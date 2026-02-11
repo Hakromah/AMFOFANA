@@ -12,19 +12,17 @@ export default function HomePage() {
   return (
     <div className="overflow-clip">
       <Intro />
-      {/* <AboutSection />
+     <AboutSection />
       <AcademicSection /> 
        <StudentLife />
         <WhyChooseUs />
          <VideoSection />
-          <StaffSection />*/}
-           <TestimonialsSection />
-     
-      {/* 
-     
-     
-     
-      <NewsSection /> */}
+          <StaffSection />
+            <TestimonialsSection />
+             <NewsSection />
+         
+      
+    
     </div>
   );
 }

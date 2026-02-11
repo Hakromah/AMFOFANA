@@ -9,11 +9,11 @@ import { Button } from '@/components/ui/button';
 
 export default function Footer() {
   return (
-    <footer className="bg-[#2857AE] text-white pt-20 pb-10">
+    <footer className="bg-[#2857AE] text-white pt-[clamp(20px,3vw,60px)] pb-[clamp(20px,3vw,40px)]">
       <div className="container mx-auto max-w-[1920px] px-5 md:px-[clamp(20px,5vw,60px)]">
 
         {/* Top Section: Logo & Subscription */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-16 border-b border-white/20 pb-10">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-[clamp(20px,3vw,40px)] pb-[clamp(20px,3vw,25px)]">
           <div className="flex items-center gap-4">
             {/* Placeholder Logo */}
             <div className="relative w-16 h-16 md:w-20 md:h-20">
@@ -39,17 +39,17 @@ export default function Footer() {
               placeholder="Enter Your E-mail"
               className="border-0 bg-transparent text-black focus-visible:ring-0 placeholder:text-gray-400"
             />
-            <Button className="bg-[#2857AE] hover:bg-[#1e4287] text-white px-6 rounded-md">
+            <Button className="bg-[#2857AE] hover:bg-[#1e4287] text-white px-6 py-2 rounded-md">
               Subscribe
             </Button>
           </div>
         </div>
 
         {/* Main Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2  max-lg:pb-4 lg:grid-cols-5 gap-12 lg:gap-8  border-t border-white/20">
 
           {/* Column 1: About */}
-          <div className="space-y-6">
+          <div className="space-y-6 lg:col-span-2 py-5">
             <p className="text-white/80 text-sm leading-relaxed max-w-sm">
               Serving the community of Monrovia since 1977. We believe that education is the ultimate key to unlocking a bright future. Serving the community of Monrovia since 1977. We believe that education is the ultimate key to unlocking a bright future.
             </p>
@@ -66,42 +66,50 @@ export default function Footer() {
           </div>
 
           {/* Column 2: Quick Links */}
-          <div>
+      
+          <div className="lg:col-span-1 lg:border-l border-white/20 lg:flex lg:justify-center">
+          <div className="lg:py-5 lg:px-5">
             <h3 className="text-xl font-bold mb-6">Quick Links</h3>
-            <ul className="space-y-4 text-white/80 text-sm">
+            <ul className="space-y-4 max-sm:space-y-2 text-white/80 text-sm">
               <li><Link href="#" className="hover:text-white transition-colors">Admission Requirements</Link></li>
               <li><Link href="#" className="hover:text-white transition-colors">Tuition & Fees</Link></li>
               <li><Link href="#" className="hover:text-white transition-colors">School News</Link></li>
               <li><Link href="#" className="hover:text-white transition-colors">Gallery</Link></li>
               <li><Link href="#" className="hover:text-white transition-colors">Opportunities</Link></li>
             </ul>
+            </div>
           </div>
 
           {/* Column 3: Academics */}
-          <div>
+          
+          <div className="lg:col-span-1 lg:border-l border-white/20 lg:flex lg:justify-center">
+          <div className="lg:py-5 lg:px-5">
             <h3 className="text-xl font-bold mb-6">Academics</h3>
-            <ul className="space-y-4 text-white/80 text-sm">
+            <ul className="space-y-4 max-sm:space-y-2 text-white/80 text-sm">
               <li><Link href="#" className="hover:text-white transition-colors">Curriculum</Link></li>
               <li><Link href="#" className="hover:text-white transition-colors">Academic Calendar</Link></li>
               <li><Link href="#" className="hover:text-white transition-colors">Programs</Link></li>
               <li><Link href="#" className="hover:text-white transition-colors">Scholarships</Link></li>
             </ul>
+            </div>
           </div>
 
           {/* Column 4: Contact Us */}
-          <div>
+          <div className="lg:col-span-1 lg:border-l border-white/20 lg:flex lg:justify-center">
+          <div className="lg:py-5 lg:px-5">
             <h3 className="text-xl font-bold mb-6">Contact Us</h3>
-            <div className="space-y-4 text-white/80 text-sm leading-relaxed">
+            <div className="space-y-4 max-sm:space-y-2 text-white/80 text-sm leading-relaxed">
               <p>Fish Market Monrovia,<br /> Liberia.</p>
               <p className="text-xl font-bold text-white">+231 054 575 032 32</p>
               <p>info@amfofana.com</p>
             </div>
           </div>
+          </div>
 
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-white/10 text-center">
+        <div className="pt-[clamp(20px,3vw,32px)] border-t border-white/10 text-center">
           <p className="text-xs text-white/50">
             © 2026 A.M. Fofana Islamic & English High School. All Rights Reserved.
           </p>

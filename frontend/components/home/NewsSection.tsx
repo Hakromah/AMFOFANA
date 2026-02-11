@@ -23,7 +23,7 @@ const newsItems = [
         date: "Jan 11, 2026",
         category: "Event",
         title: "Developing Critical Thinkers: The Annual Junior High Debate Cup",
-        image: "https://images.unsplash.com/photo-1544531696-608eda5d6d8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
         excerpt: "A display of brilliant minds as our Junior High students tackled complex global issues in our annual debate finals..."
     },
     {
@@ -50,12 +50,12 @@ const newsItems = [
         image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
         excerpt: "In a thrilling final match, our varsity team demonstrated exceptional teamwork and determination to secure the regional championship..."
     },
-     {
+    {
         id: 5,
         date: "Jan 11, 2026",
         category: "Event",
         title: "Developing Critical Thinkers: The Annual Junior High Debate Cup",
-        image: "https://images.unsplash.com/photo-1544531696-608eda5d6d8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
         excerpt: "A display of brilliant minds as our Junior High students tackled complex global issues in our annual debate finals..."
     },
     {
@@ -116,16 +116,16 @@ export default function NewsSection() {
     }, { scope: containerRef });
 
     return (
-        <section ref={containerRef} className="py-[clamp(40px,5vw,100px)] bg-white overflow-hidden">
-            <div className="container mx-auto max-w-[1920px] px-5 md:px-[clamp(20px,5vw,60px)]">
-
+        <section ref={containerRef} className="py-[clamp(20px,3vw,100px)] bg-white relative overflow-hidden">
+            <div className="background-gradient max-md:hidden absolute top-0 left-0 w-[clamp(250px,70vw,405px)] h-[clamp(400px,70vw,588px)] bg-gradient-to-r from-primary to-white z-1"></div>
+            <div className="container z-10 relative mx-auto max-w-[1920px] px-5 md:px-[clamp(20px,5vw,60px)]">
                 {/* Header Section */}
-                <div className="news-header flex flex-col md:flex-row justify-between items-end mb-12 gap-8">
+                <div className="news-header flex flex-col md:flex-row justify-between md:items-end md:mb-12 mb-6 gap-8">
                     <div>
-                        <h2 className="text-[clamp(30px,4vw,50px)] font-bold text-black mb-4">
+                        <h2 className="text-[clamp(20px,4vw,50px)] font-bold text-black mb-4">
                             Latest from our Campus
                         </h2>
-                        <p className="text-gray-600 text-lg max-w-2xl">
+                        <p className="text-black text-[clamp(16px,3vw,18px)] lg:max-w-2xl">
                             Stay updated with academic milestones, spiritual growth, and student achievements across all levels.
                         </p>
                     </div>
@@ -136,19 +136,22 @@ export default function NewsSection() {
                                 ref={prevRef}
                                 variant="outline"
                                 size="icon"
-                                className="rounded-full h-12 w-12 border-primary bg-primary text-white hover:bg-primary/90 hover:text-white border-0 transition-colors"
+                                className="group/previous cursor-pointer rounded-full h-14 w-14 max-md:w-10 max-md:h-10 bg-primary duration-500 border-0  text-white lg:hover:text-black lg:hover:bg-white transition-colors"
                             >
-                                <ArrowLeft className="h-5 w-5" />
+                                <ArrowLeft className="h-6 w-6 lg:group-hover/previous:text-black duration-500 text-white" />
+
                             </Button>
                             <Button
                                 ref={nextRef}
                                 variant="outline"
                                 size="icon"
-                                className="rounded-full h-12 w-12 border-primary bg-primary text-white hover:bg-primary/90 hover:text-white border-0 transition-colors"
+                                className="group/next cursor-pointer rounded-full h-14 w-14 max-md:w-10 max-md:h-10 bg-primary duration-500 border-0  text-white lg:hover:text-black lg:hover:bg-white transition-colors"
                             >
-                                <ArrowRight className="h-5 w-5" />
+                                <ArrowRight className="h-6 w-6 lg:group-hover/next:text-black duration-500 text-white" />
+
                             </Button>
                         </div>
+
                         <Link href="/news" className="flex items-center gap-2 text-primary font-medium hover:underline">
                             All News <ArrowUpRight className="h-4 w-4" />
                         </Link>
@@ -180,9 +183,7 @@ export default function NewsSection() {
                             1024: {
                                 slidesPerView: 3.2,
                             },
-                            1280: {
-                                slidesPerView: 4,
-                            }
+
                         }}
                         className="!overflow-visible py-4"
                     >
@@ -190,7 +191,7 @@ export default function NewsSection() {
                             <SwiperSlide key={item.id} className="h-auto">
                                 <div className="group cursor-pointer">
                                     {/* Image */}
-                                    <div className="relative h-64 w-full rounded-2xl overflow-hidden mb-6">
+                                    <div className="relative h-[336px] w-full rounded-2xl overflow-hidden mb-6">
                                         <Image
                                             src={item.image}
                                             alt={item.title}
