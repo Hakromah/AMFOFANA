@@ -38,7 +38,7 @@ export default function StudentLife() {
     }, { scope: containerRef });
 
     return (
-        <section ref={containerRef} className="py-[clamp(20px,3vw,100px)] bg-white">
+        <section ref={containerRef} className="py-[clamp(20px,3vw,100px)] bg-white overflow-clip">
             <div className="container mx-auto max-w-[1920px] px-5 md:px-[clamp(20px,5vw,60px)]">
                 {/* Header */}
                 <div className="student-life-header text-center mb-4 sm:mb-12  sm:space-y-[clamp(15px,3vw,24px)]">
@@ -50,7 +50,7 @@ export default function StudentLife() {
                 </div>
 
                 {/* Grid Layout */}
-                <div className="student-life-grid grid grid-cols-1 md:grid-cols-2 gap-4 h-auto md:h-[660px]">
+                <div className="student-life-grid grid grid-cols-1 md:grid-cols-2 gap-4 h-full overflow-hidden md:h-[660px]">
 
                     {/* Left Column: Large Image */}
                     <div className="student-card relative w-full aspect-video max-md:max-h-[400px] md:h-full rounded-[10px] overflow-hidden group">
@@ -63,13 +63,12 @@ export default function StudentLife() {
                     </div>
 
                     {/* Right Column: Nested Grid */}
-                    <div className="grid grid-rows-2 gap-4 h-[600px] md:h-full">
-
+                    <div className="grid grid-rows-2 gap-4 xs:h-[600px] md:h-full">
                         {/* Top Row: Two Images */}
                         <div className="grid grid-cols-2 gap-4 h-full">
                             <div className="student-card relative w-full h-full md:h-[351px] rounded-[10px] overflow-hidden group">
                                 <Image
-                                     src="/home/8.jpg" alt="Student winning award"
+                                    src="/home/8.jpg" alt="Student winning award"
                                     fill
                                     className="object-cover  h-full! w-full! relative! transition-transform duration-500 group-hover:scale-105"
                                 />
@@ -86,7 +85,7 @@ export default function StudentLife() {
                         {/* Bottom Row: Wide Image */}
                         <div className="student-card relative  max-md:aspect-video max-md:max-h-[400px] w-full md:h-[351px] rounded-[10px] overflow-hidden group">
                             <Image
-                                  src="/home/8.jpg" alt="Students group photo"
+                                src="/home/8.jpg" alt="Students group photo"
                                 fill
                                 className="object-cover h-full! w-full! relative! transition-transform duration-500 group-hover:scale-105"
                             />

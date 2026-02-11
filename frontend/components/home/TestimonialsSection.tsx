@@ -19,7 +19,7 @@ const testimonials = [
         quote: "The caliber of education and the personal attention our children receive here is unparalleled. Every teacher knows them by name, understands their aspirations, and nurtures their individual talents with genuine dedication.",
         name: "Ms. Emily Chen",
         role: "Mother of Charles & Sophia",
-        image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+        image: "/home/staff1.png",
     },
     {
         id: 2,
@@ -27,16 +27,28 @@ const testimonials = [
         quote: "The caliber of education and the personal attention our children receive here is unparalleled. Every teacher knows them by name, understands their aspirations, and nurtures their individual talents with genuine dedication.",
         name: "Ms. Emily Chen",
         role: "Mother of Charles & Sophia",
-        image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    },
+    image: "/home/staff2.png", },
     {
         id: 3,
         type: "ALUMNI",
         quote: "The caliber of education and the personal attention our children receive here is unparalleled. Every teacher knows them by name, understands their aspirations, and nurtures their individual talents with genuine dedication.",
         name: "Ms. Emily Chen",
         role: "Mother of Charles & Sophia",
-        image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    },
+    image: "/home/staff1.png",},
+     {
+        id: 4,
+        type: "ALUMNI",
+        quote: "The caliber of education and the personal attention our children receive here is unparalleled. Every teacher knows them by name, understands their aspirations, and nurtures their individual talents with genuine dedication.",
+        name: "Ms. Emily Chen",
+        role: "Mother of Charles & Sophia",
+    image: "/home/staff2.png",},
+     {
+        id: 5,
+        type: "ALUMNI",
+        quote: "The caliber of education and the personal attention our children receive here is unparalleled. Every teacher knows them by name, understands their aspirations, and nurtures their individual talents with genuine dedication.",
+        name: "Ms. Emily Chen",
+        role: "Mother of Charles & Sophia",
+    image: "/home/staff1.png",},
 ];
 
 export default function TestimonialsSection() {

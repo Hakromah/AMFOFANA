@@ -10,16 +10,21 @@ import NewsSection from "@/components/home/NewsSection";
 
 export default function HomePage() {
   return (
-    <>
+    <div className="overflow-clip">
       <Intro />
-      <AboutSection />
-      <AcademicSection />
-      <StudentLife />
-      <WhyChooseUs />
-      <VideoSection />
-      <StaffSection />
-      <TestimonialsSection />
-      <NewsSection />
-    </>
+      {/* <AboutSection />
+      <AcademicSection /> 
+       <StudentLife />
+        <WhyChooseUs />
+         <VideoSection />
+          <StaffSection />*/}
+           <TestimonialsSection />
+     
+      {/* 
+     
+     
+     
+      <NewsSection /> */}
+    </div>
   );
 }

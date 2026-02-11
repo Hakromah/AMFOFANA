@@ -22,7 +22,7 @@ const staffMembers = [
         name: "Sarah Mitchell",
         role: "Principal",
         email: "sarahmitchell@edu.lib",
-        image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+        image: "/home/staff1.png",
         bio: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement."
     },
     {
@@ -30,7 +30,7 @@ const staffMembers = [
         name: "Ms. Emily Chen",
         role: "Vice Principal",
         email: "emilychen@edu.lib",
-        image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+       image: "/home/staff2.png",
         bio: "Dedicated to student welfare and curriculum development. Ensuring a supportive and inclusive learning environment for all."
     },
     {
@@ -38,7 +38,7 @@ const staffMembers = [
         name: "Mr. David Ross",
         role: "Head of Science",
         email: "davidross@edu.lib",
-        image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+       image: "/home/staff1.png",
         bio: "Inspiring curiosity and scientific inquiry. Passionate about STEM education and hands-on learning experiences."
     },
     {
@@ -46,8 +46,24 @@ const staffMembers = [
         name: "Mrs. Lisa Wong",
         role: "Head of Arts",
         email: "lisawong@edu.lib",
-        image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-        bio: "Cultivating creativity and artistic expression. Believes in the power of arts to transform lives and perspectives."
+        image: "/home/staff2.png",
+         bio: "Cultivating creativity and artistic expression. Believes in the power of arts to transform lives and perspectives."
+    },
+      {
+        id: 5,
+        name: "Mrs. Lisa Wong",
+        role: "Head of Arts",
+        email: "lisawong@edu.lib",
+        image: "/home/staff1.png",
+         bio: "Cultivating creativity and artistic expression. Believes in the power of arts to transform lives and perspectives."
+    },
+      {
+        id: 6,
+        name: "Mrs. Lisa Wong",
+        role: "Head of Arts",
+        email: "lisawong@edu.lib",
+        image: "/home/staff2.png",
+         bio: "Cultivating creativity and artistic expression. Believes in the power of arts to transform lives and perspectives."
     },
 ];
 
@@ -82,91 +98,88 @@ export default function StaffSection() {
     }, { scope: containerRef });
 
     return (
-        <section ref={containerRef} className="py-[clamp(40px,5vw,100px)] bg-[#C7D4FF] text-white overflow-hidden">
+        <section ref={containerRef} className="py-[clamp(20px,3vw,80px)] bg-[#C7D4FF80]/50 text-white overflow-hidden">
             <div className="container mx-auto max-w-[1920px] px-5 md:px-[clamp(20px,5vw,60px)]">
-                <div className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-center">
-
-                    {/* Left Content */}
-                    <div className="staff-content w-full lg:w-1/3 flex flex-col items-start text-left">
-                        <h2 className="text-[clamp(40px,5vw,60px)] font-bold mb-6 text-black">STAFF</h2>
-                        <p className="text-white/90 text-lg leading-relaxed mb-10 max-w-md">
+                <div className="sm:grid max-sm:grid-cols-1 sm:grid-cols-4 gap-10 lg:gap-[clamp(15px,3vw,80px)] items-center">
+                    <div className="staff-content cols-pan-1 w-full flex flex-col items-start text-left">
+                        <h2 className="text-[clamp(20px,4vw,60px)] font-bold mb-3 sm:mb-6 text-black">STAFF</h2>
+                        <p className="text-black text-[clamp(16px,2vw,18px)] w-full leading-relaxed mb-4 md:mb-10">
                             Stay updated with academic milestones, spiritual growth, and student achievements across all levels.
                         </p>
-
                         <div className="flex gap-4 mt-auto">
                             <Button
                                 variant="outline"
                                 size="icon"
-                                className="rounded-full h-14 w-14 bg-white/20 border-0 hover:bg-white text-white hover:text-black transition-colors"
+                                className="group/previous cursor-pointer rounded-full h-14 w-14 max-md:w-10 max-md:h-10 bg-primary duration-500 border-0  text-white lg:hover:text-black lg:hover:bg-white transition-colors"
                                 onClick={() => swiperInstance?.slidePrev()}
                             >
-                                <ArrowLeft className="h-6 w-6" />
+                                <ArrowLeft className="h-6 w-6 lg:group-hover/previous:text-black duration-500 text-white" />
                             </Button>
                             <Button
                                 variant="outline"
                                 size="icon"
-                                className="rounded-full h-14 w-14 bg-white text-black border-0 hover:bg-white/90 hover:scale-105 transition-transform"
+                                className="group/next cursor-pointer rounded-full h-14 w-14 max-md:w-10 max-md:h-10 bg-primary duration-500 border-0  text-white lg:hover:text-black lg:hover:bg-white transition-colors"
                                 onClick={() => swiperInstance?.slideNext()}
                             >
-                                <ArrowRight className="h-6 w-6" />
+                                <ArrowRight className="h-6 w-6 lg:group-hover/next:text-black duration-500 text-white" />
                             </Button>
                         </div>
                     </div>
+                    <div className="w-full max-sm:mt-8 overflow-hidden h-full col-span-3 relative">
+                        <div className="staff-swiper w-full">
+                            <Swiper
+                                onSwiper={setSwiperInstance}
+                                modules={[Navigation, Autoplay]}
+                                spaceBetween={30}
+                                slidesPerView={1.2}
+                                breakpoints={{
+                                    640: {
+                                        slidesPerView: 2,
+                                    },
+                                    1024: {
+                                        slidesPerView: 2.1, // See 2 full and a bit of 3rd
+                                    },
+                                    1280: {
+                                        slidesPerView: 2.5,
+                                    }
+                                }}
+                                className="!overflow-visible py-10" // Padding for hover effects/shadows
+                            >
+                                {staffMembers.map((member) => (
+                                    <SwiperSlide key={member.id} className="h-auto">
 
-                    {/* Right Swiper */}
-                    <div className="staff-swiper w-full lg:w-2/3 min-w-0">
-                        <Swiper
-                            onSwiper={setSwiperInstance}
-                            modules={[Navigation, Autoplay]}
-                            spaceBetween={30}
-                            slidesPerView={1.2}
-                            breakpoints={{
-                                640: {
-                                    slidesPerView: 2.2,
-                                },
-                                1024: {
-                                    slidesPerView: 2.5, // See 2 full and a bit of 3rd
-                                },
-                                1280: {
-                                    slidesPerView: 3,
-                                }
-                            }}
-                            className="!overflow-visible py-10" // Padding for hover effects/shadows
-                        >
-                            {staffMembers.map((member) => (
-                                <SwiperSlide key={member.id} className="h-auto">
-                                    <div className="bg-gradient-to-b from-white via-[#8FACD8] to-[#2857AE] rounded-[30px] p-6 text-center h-full flex flex-col items-center group transition-transform duration-300 hover:-translate-y-2 shadow-lg">
+                                        <div className="bg-[linear-gradient(180deg,_#FFF_0%,_#2857AE_100%)] h-[470px] rounded-[20px] p-6 text-center max-md:h-full flex flex-col items-center justify-center group transition-transform duration-300 hover:-translate-y-2 shadow-lg">
 
-                                        {/* Image Container */}
-                                        <div className="relative w-32 h-32 mb-6 rounded-2xl overflow-hidden border-4 border-white/30 shadow-md">
-                                            <Image
-                                                src={member.image}
-                                                alt={member.name}
-                                                fill
-                                                className="object-cover"
-                                            />
+                                            <div className="w-full h-full flex flex-col justify-center items-center  ">
+                                                {/* Image Container */}
+                                                <div className="relative w-[174px] h-[189px] mb-3 rounded-[20px] overflow-hidden">
+                                                    <Image
+                                                        src={member.image}
+                                                        alt={member.name}
+                                                        fill
+                                                        className="object-cover w-full h-full" />
+                                                </div>
+
+                                                {/* Content */}
+                                                <div className='flex flex-col'>
+                                                    <h3 className="text-[clamp(20px,3vw,25px)] font-bold leading-normal text-white mb-2">{member.name}</h3>
+                                                    <div className="flex items-center text-[clamp(16px,3vw,20px)] justify-center gap-2 text-white/90 leading-normal font-medium mb-1">
+                                                        <span className="w-4 h-[1px] bg-white/60"></span>
+                                                        {member.role}
+                                                    </div>
+                                                    <p className="text-white/70 text-[16px] mb-[9px]">Email: {member.email}</p>
+                                                    <div className="w-full h-[1px] bg-white/20 mb-[9px]"></div>
+                                                    <p className="text-white/90 text-4 leading-relaxed mb-4 line-clamp-4">
+                                                        {member.bio}
+                                                    </p>
+                                                </div>
+                                            </div>
                                         </div>
-
-                                        {/* Content */}
-                                        <h3 className="text-2xl font-bold text-white mb-2">{member.name}</h3>
-                                        <div className="flex items-center justify-center gap-2 text-white/90 text-sm font-medium mb-1">
-                                            <span className="w-4 h-[1px] bg-white/60"></span>
-                                            {member.role}
-                                        </div>
-                                        <p className="text-white/70 text-xs mb-4">Email: {member.email}</p>
-
-                                        <div className="w-full h-[1px] bg-white/20 mb-4"></div>
-
-                                        <p className="text-white/90 text-sm leading-relaxed mb-4">
-                                            {member.bio}
-                                        </p>
-
-                                    </div>
-                                </SwiperSlide>
-                            ))}
-                        </Swiper>
+                                    </SwiperSlide>
+                                ))}
+                            </Swiper>
+                        </div>
                     </div>
-
                 </div>
             </div>
         </section>
