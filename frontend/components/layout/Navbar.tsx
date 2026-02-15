@@ -20,19 +20,13 @@ export default function Navbar() {
             name: "About",
             href: "/about",
             subItems: [
-                { name: "Our History", href: "/about#history", description: "Discover our legacy of excellence since 1990" },
-                { name: "Leadership", href: "/about#leadership", description: "Meet the team guiding our success" }
+                { name: "About Us", href: "/about", description: "Discover our legacy of excellence since 1990" },
+                 { name: "Staff & Leadership", href: "/staff", description: "Meet the team guiding our success" }
             ]
         },
         { name: "Blog", href: "/blog" },
-        {
-            name: "Academic",
-            href: "/academic",
-            subItems: [
-                { name: "Primary School", href: "/academic", description: "Foundation years: Grades 1-5" },
-                { name: "Departments", href: "/academic", description: "Explore our diverse subject areas" }
-            ]
-        },
+       
+          { name: "Academic", href: "/academic" },
         { name: "Gallery", href: "/gallery" },
         { name: "Opportunities", href: "/opportunities" },
     ];

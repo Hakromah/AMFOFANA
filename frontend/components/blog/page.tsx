@@ -2,70 +2,13 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Calendar, User } from 'lucide-react';
-
+import { Search, ArrowRight } from 'lucide-react';
 import Breadcrumb from '@/components/Breadcrumb';
-
-const blogPosts = [
-    {
-        id: 1,
-        title: "AMFOFANA Wins Regional Science Fair",
-        excerpt: "Our students showcased innovative projects at the annual regional science fair, securing top positions in physics and biology categories.",
-        date: "March 15, 2024",
-        author: "Science Dept.",
-        image: "https://images.unsplash.com/photo-1564981797816-1043664bf78d?q=80&w=1974&auto=format&fit=crop",
-        category: "Academic Achievement"
-    },
-    {
-        id: 2,
-        title: "Annual Sports Day Highlights",
-        excerpt: "A day filled with energy, sportsmanship, and record-breaking performances. See the highlights from our most exciting sports day yet.",
-        date: "February 28, 2024",
-        author: "Sports Dept.",
-        image: "https://images.unsplash.com/photo-1576678927484-9918154f4ea9?q=80&w=1978&auto=format&fit=crop",
-        category: "Events"
-    },
-    {
-        id: 3,
-        title: "New Art Wing Inauguration",
-        excerpt: "We are proud to announce the opening of our new state-of-the-art visual arts wing, fostering creativity and expression for all students.",
-        date: "January 10, 2024",
-        author: "Administration",
-        image: "https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=2070&auto=format&fit=crop",
-        category: "Campus News"
-    },
-    {
-        id: 4,
-        title: "Community Service Initiative Launched",
-        excerpt: "Students take the lead in giving back to the community through a new weekend volunteer program partnering with local shelters.",
-        date: "December 05, 2023",
-        author: "Student Council",
-        image: "https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=2070&auto=format&fit=crop",
-        category: "Community"
-    },
-    {
-        id: 5,
-        title: "Alumni Spotlight: Sarah Johnson",
-        excerpt: "Catch up with our 2015 graduate Sarah Johnson who is now leading renewable energy research at MIT.",
-        date: "November 20, 2023",
-        author: "Alumni Relations",
-        image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1976&auto=format&fit=crop",
-        category: "Alumni"
-    },
-    {
-        id: 6,
-        title: "Upcoming Parent-Teacher Conference",
-        excerpt: "Important dates and information regarding the upcoming semester's parent-teacher meetings. Schedule your slots online.",
-        date: "November 01, 2023",
-        author: "Principal's Office",
-        image: "https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=1974&auto=format&fit=crop",
-        category: "Announcements"
-    }
-];
+import { blogPosts } from '@/data/blogPosts';
 
 export default function BlogPage() {
     return (
-        <div className="w-full bg-background min-h-screen">
+        <div className="w-full bg-[#E8F1FF]/30 min-h-screen">
             {/* Header */}
             <Breadcrumb
                 title="School News & Updates"
@@ -74,53 +17,98 @@ export default function BlogPage() {
                 alt="Blog Header"
             />
 
-            {/* Blog Grid */}
             <section className="py-16">
                 <div className="container mx-auto px-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {blogPosts.map((post) => (
-                            <article key={post.id} className="group bg-card border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full">
-                                <div className="relative h-48 w-full overflow-hidden">
-                                    <Image
-                                        src={post.image}
-                                        alt={post.title}
-                                        fill
-                                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                    />
-                                    <div className="absolute top-4 left-4 bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wide">
-                                        {post.category}
-                                    </div>
-                                </div>
-                                <div className="p-6 flex flex-col flex-grow">
-                                    <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3">
-                                        <span className="flex items-center gap-1">
-                                            <Calendar className="h-3 w-3" /> {post.date}
-                                        </span>
-                                        <span className="flex items-center gap-1">
-                                            <User className="h-3 w-3" /> {post.author}
-                                        </span>
-                                    </div>
-                                    <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">
-                                        <Link href={`/blog/${post.id}`}>{post.title}</Link>
-                                    </h3>
-                                    <p className="text-muted-foreground text-sm line-clamp-3 mb-4 flex-grow">
-                                        {post.excerpt}
-                                    </p>
-                                    <Button variant="link" className="p-0 h-auto text-primary font-semibold self-start hover:no-underline group-hover:translate-x-1 transition-transform">
-                                        Read Full Story &rarr;
-                                    </Button>
-                                </div>
-                            </article>
-                        ))}
-                    </div>
+                    <div className="flex flex-col lg:flex-row gap-12">
+                        {/* Main Content */}
+                        <div className="w-full lg:w-2/3">
+                            <h2 className="text-3xl font-bold text-gray-900 mb-8">Latest Posts</h2>
 
-                    {/* Pagination Placeholder */}
-                    <div className="mt-16 flex justify-center gap-2">
-                        <Button variant="outline" disabled>Previous</Button>
-                        <Button variant="default" className="bg-primary">1</Button>
-                        <Button variant="outline">2</Button>
-                        <Button variant="outline">3</Button>
-                        <Button variant="outline">Next</Button>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                {blogPosts.map((post) => (
+                                    <article key={post.id} className="flex flex-col group">
+                                        {/* Image Container */}
+                                        <Link href={`/blog/${post.id}`} className="block relative h-64 w-full rounded-2xl overflow-hidden mb-5">
+                                            <Image
+                                                src={post.image}
+                                                alt={post.title}
+                                                fill
+                                                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                            />
+                                            {/* Arrow Button */}
+                                            <div className="absolute top-4 right-4 bg-[#2857AE] w-10 h-10 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                <ArrowRight className="w-5 h-5" />
+                                            </div>
+                                        </Link>
+
+                                        {/* Content */}
+                                        <div className="flex flex-col">
+                                            <div className="flex items-center gap-2 text-sm mb-2 font-medium">
+                                                <span className="text-gray-900">{post.date}</span>
+                                                <span className="text-[#2857AE]">•</span>
+                                                <span className="text-[#2857AE]">{post.category}</span>
+                                            </div>
+
+                                            <h3 className="text-xl font-bold text-gray-900 mb-3 leading-tight group-hover:text-[#2857AE] transition-colors">
+                                                <Link href={`/blog/${post.id}`}>
+                                                    {post.title}
+                                                </Link>
+                                            </h3>
+
+                                            <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
+                                                {post.excerpt}
+                                            </p>
+                                        </div>
+                                    </article>
+                                ))}
+                            </div>
+
+                            {/* Load More Button */}
+                            <div className="mt-16 flex justify-center">
+                                <Button className="bg-[#2857AE] hover:bg-[#1f448c] text-white px-8 py-6 rounded-full text-base font-medium">
+                                    Load More
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* Sidebar */}
+                        <div className="w-full lg:w-1/3">
+                            <div className="sticky top-24 space-y-8">
+                                {/* Search Widget */}
+                                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                                    <h3 className="text-lg font-bold text-gray-900 mb-4">Search for news</h3>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                            <Search className="h-4 w-4 text-gray-400" />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            placeholder="Search"
+                                            className="w-full pl-10 pr-4 py-3 bg-[#EEF2F6] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#2857AE]/20 transition-all"
+                                        />
+                                        <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                                            <Search className="h-4 w-4 text-[#2857AE] opacity-50" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Categories Widget */}
+                                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                                    <h3 className="text-lg font-bold text-gray-900 mb-4">Categories</h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        <button className="px-5 py-2 bg-[#2857AE] text-white text-sm font-medium rounded-full transition-colors">
+                                            All
+                                        </button>
+                                        <button className="px-5 py-2 bg-[#EEF2F6] text-gray-600 hover:bg-gray-200 text-sm font-medium rounded-full transition-colors">
+                                            News
+                                        </button>
+                                        <button className="px-5 py-2 bg-[#EEF2F6] text-gray-600 hover:bg-gray-200 text-sm font-medium rounded-full transition-colors">
+                                            Events
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>

@@ -1,121 +1,184 @@
-import React from 'react';
+"use client"
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { BookOpen, GraduationCap, Microscope, Palette, Globe } from 'lucide-react';
+import { FileText, Download, ArrowRight, CheckCircle } from 'lucide-react';
 import Breadcrumb from '@/components/Breadcrumb';
 
+const academicSections = [
+    {
+        id: 'elementary',
+        title: 'Elementary (K-5)',
+        content: 'Core focus on Literacy, Math, and Social-Emotional development using inquiry-based learning.',
+        image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=2022&auto=format&fit=crop',
+        details: [
+            "Inquiry-based learning approach",
+            "Strong focus on literacy and numeracy",
+            "Safe and nurturing environment"
+        ]
+    },
+    {
+        id: 'junior',
+        title: 'Junior High (6-8)',
+        content: 'Introduction to specialized subjects, lab sciences, and organizational skills for independence.',
+        image: 'https://images.unsplash.com/photo-1427504746696-ea3093607dbe?q=80&w=2053&auto=format&fit=crop',
+        details: [
+            "Specialized subject teachers",
+            "Introduction to lab sciences",
+            "Development of organizational skills"
+        ]
+    },
+    {
+        id: 'highschool',
+        title: 'High School (9-12)',
+        content: 'Advanced Placement (AP) courses, Honors tracks, and College & Career Readiness programs.',
+        image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop',
+        details: [
+            "Advanced Placement (AP) courses",
+            "College & Career Readiness programs",
+            "Leadership opportunities"
+        ]
+    }
+];
+
 export default function AcademicPage() {
+    const [activeSection, setActiveSection] = useState(academicSections[0].id);
+    const observerRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+    useEffect(() => {
+        const observerOptions = {
+            root: null,
+            rootMargin: '-20% 0px -20% 0px',
+            threshold: 0.5
+        };
+
+        const observerCallback = (entries: IntersectionObserverEntry[]) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    setActiveSection(entry.target.id);
+                }
+            });
+        };
+
+        const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+        Object.values(observerRefs.current).forEach((el) => {
+            if (el) observer.observe(el);
+        });
+
+        return () => observer.disconnect();
+    }, []);
+
+    const activeImage = academicSections.find(s => s.id === activeSection)?.image || academicSections[0].image;
+
     return (
         <div className="w-full min-h-screen bg-background">
-            {/* Hero Section */}
             <Breadcrumb
                 title="Academic Excellence"
-                description="Fostering intellectual curiosity and critical thinking through a comprehensive and rigorous curriculum."
+                description="Empowering students with comprehensive education and innovative learning approaches"
                 image="https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop"
                 alt="Academic Excellence"
             />
 
-            {/* Curriculum Overview */}
             <section className="py-20">
                 <div className="container mx-auto px-4">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl font-bold text-[#2857AE] mb-4">Our Curriculum</h2>
-                        <p className="text-muted-foreground max-w-3xl mx-auto">
-                            We offer a balanced education that combines core academic subjects with arts, sports, and technology. Our programs are designed to challenge students at every level.
+
+                    {/* Intro */}
+                    <div className="max-w-4xl mb-16">
+                        <div className="flex items-center gap-4 mb-6">
+                            <div className="h-12 w-1 bg-[#2857AE]"></div>
+                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Academic Excellence</h2>
+                        </div>
+                        <h3 className="text-xl font-semibold mb-4">Empowering students with comprehensive education and innovative learning approaches</h3>
+                        <p className="text-gray-600 leading-relaxed">
+                            Our curriculum is designed to meet national education standards and global best practices. We connect outstanding
+                            students with local and international scholarship opportunities. Students receive mentorship and guidance to help them
+                            choose future careers and university paths. Selected students participate in national and international exchange
+                            programs to broaden their global perspective.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {/* Primary School */}
-                        <div className="p-8 rounded-2xl bg-white shadow-lg border hover:shadow-xl transition-shadow">
-                            <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center text-[#2857AE] mb-6">
-                                <BookOpen className="h-6 w-6" />
-                            </div>
-                            <h3 className="text-2xl font-bold mb-4">Primary School</h3>
-                            <p className="text-muted-foreground mb-6">
-                                Building a strong foundation in literacy, numeracy, and social skills through play-based and inquiry learning.
-                            </p>
-                            <ul className="space-y-2 text-sm text-gray-600 mb-6">
-                                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-[#2857AE] rounded-full"></span> Grades 1 - 5</li>
-                                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-[#2857AE] rounded-full"></span> Focus on Core Skills</li>
-                                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-[#2857AE] rounded-full"></span> Creative Arts Integration</li>
-                            </ul>
-                            <Button variant="outline" className="w-full">Learn More</Button>
+                    <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 relative">
+                        {/* Left Column: Scrollable Content */}
+                        <div className="w-full lg:w-1/2 space-y-24">
+                            <h2 className="text-3xl font-bold text-gray-900 mb-8 border-b pb-4 inline-block">Learning Pathways</h2>
+
+                            {academicSections.map((section) => (
+                                <div
+                                    key={section.id}
+                                    id={section.id}
+                                    ref={el => { if (el) observerRefs.current[section.id] = el; }}
+                                    className="scroll-mt-32 min-h-[50vh] flex flex-col justify-center"
+                                >
+                                    <div className="border-l-4 border-[#2857AE] pl-6 py-2 transition-all duration-300">
+                                        <h3 className={`text-2xl font-bold mb-3 ${activeSection === section.id ? 'text-[#2857AE]' : 'text-gray-900'}`}>{section.title}</h3>
+                                        <p className="text-gray-600 text-lg mb-6 leading-relaxed">
+                                            {section.content}
+                                        </p>
+                                        <ul className="space-y-3">
+                                            {section.details.map((item, i) => (
+                                                <li key={i} className="flex items-center gap-3 text-gray-700">
+                                                    <CheckCircle className="w-5 h-5 text-green-500" />
+                                                    {item}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
 
-                        {/* Middle School */}
-                        <div className="p-8 rounded-2xl bg-white shadow-lg border hover:shadow-xl transition-shadow relative transform md:-translate-y-4">
-                            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#2857AE] text-white px-4 py-1 rounded-full text-sm font-semibold shadow-md">
-                                Most Popular
+                        {/* Right Column: Sticky Image */}
+                        <div className="hidden lg:block w-1/2 relative">
+                            <div className="sticky top-32 h-[500px] w-full bg-gray-100 rounded-3xl overflow-hidden shadow-2xl transition-all duration-700 ease-in-out">
+                                <Image
+                                    src={activeImage}
+                                    alt="Academic Level"
+                                    fill
+                                    className="object-cover transition-opacity duration-500"
+                                    priority
+                                />
+                                {/* Optional Overlay/Decoration resembling the book stack in the user request */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
                             </div>
-                            <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center text-[#2857AE] mb-6">
-                                <Globe className="h-6 w-6" />
-                            </div>
-                            <h3 className="text-2xl font-bold mb-4">Middle School</h3>
-                            <p className="text-muted-foreground mb-6">
-                                Encouraging independence and critical thinking as students explore a wider range of subjects and electives.
-                            </p>
-                            <ul className="space-y-2 text-sm text-gray-600 mb-6">
-                                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-[#2857AE] rounded-full"></span> Grades 6 - 8</li>
-                                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-[#2857AE] rounded-full"></span> Project-Based Learning</li>
-                                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-[#2857AE] rounded-full"></span> Initial Career Guidance</li>
-                            </ul>
-                            <Button className="w-full bg-[#2857AE] hover:bg-[#1e408a]">Learn More</Button>
                         </div>
+                    </div>
 
-                        {/* High School */}
-                        <div className="p-8 rounded-2xl bg-white shadow-lg border hover:shadow-xl transition-shadow">
-                            <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center text-[#2857AE] mb-6">
-                                <GraduationCap className="h-6 w-6" />
+                </div>
+            </section>
+
+            {/* Calendar Section */}
+            <section className="py-12 bg-gray-50">
+                <div className="container mx-auto px-4">
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div className="flex items-center gap-6">
+                            <div className="bg-blue-50 p-4 rounded-lg text-[#2857AE] font-bold text-xl">
+                                2026/2027
                             </div>
-                            <h3 className="text-2xl font-bold mb-4">High School</h3>
-                            <p className="text-muted-foreground mb-6">
-                                Preparing distinguished young adults for university success with advanced placement courses and leadership roles.
-                            </p>
-                            <ul className="space-y-2 text-sm text-gray-600 mb-6">
-                                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-[#2857AE] rounded-full"></span> Grades 9 - 12</li>
-                                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-[#2857AE] rounded-full"></span> University Prep</li>
-                                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-[#2857AE] rounded-full"></span> Leadership Program</li>
-                            </ul>
-                            <Button variant="outline" className="w-full">Learn More</Button>
+                            <h3 className="text-xl font-bold text-gray-900">School Calendar</h3>
                         </div>
+                        <Button variant="outline" className="gap-2 border-gray-300 hover:border-[#2857AE] hover:text-[#2857AE]">
+                            Download <FileText className="w-4 h-4" />
+                        </Button>
                     </div>
                 </div>
             </section>
 
-            {/* Departments Section */}
-            <section className="py-20 bg-muted/30">
+            {/* Resources Section */}
+            <section className="py-20 bg-gray-50">
                 <div className="container mx-auto px-4">
-                    <div className="flex flex-col md:flex-row gap-12 items-center">
-                        <div className="flex-1 space-y-6">
-                            <h2 className="text-3xl font-bold text-[#2857AE]">Key Departments</h2>
-                            <p className="text-muted-foreground">
-                                Our specialized departments ensure that every student finds their passion and excels in it. From the precision of sciences to the expression of arts.
-                            </p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="flex items-start gap-4 p-4 rounded-lg bg-background shadow-sm">
-                                    <Microscope className="h-8 w-8 text-[#2857AE]" />
-                                    <div>
-                                        <h4 className="font-bold">STEM</h4>
-                                        <p className="text-sm text-muted-foreground">Science, Technology, Engineering, Math</p>
+                    <div className="bg-[#f0f4f8] p-10 rounded-[30px]">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-8">Useful Academic Resources</h2>
+                        <div className="space-y-1">
+                            {[1, 2, 3].map((item) => (
+                                <div key={item} className="flex items-center justify-between py-6 border-b border-gray-200 last:border-0 hover:bg-white/50 px-4 rounded-lg transition-colors cursor-pointer group">
+                                    <span className="text-gray-700 font-medium">Resources document -{item}</span>
+                                    <div className="flex items-center gap-2 text-[#2857AE] opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <span className="text-sm font-semibold">Download</span>
+                                        <FileText className="w-5 h-5" />
                                     </div>
                                 </div>
-                                <div className="flex items-start gap-4 p-4 rounded-lg bg-background shadow-sm">
-                                    <Palette className="h-8 w-8 text-[#2857AE]" />
-                                    <div>
-                                        <h4 className="font-bold">Arts & Humanities</h4>
-                                        <p className="text-sm text-muted-foreground">Visual Arts, Music, History, Literature</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="flex-1 relative h-[300px] w-full rounded-2xl overflow-hidden shadow-lg">
-                            <Image
-                                src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=2070&auto=format&fit=crop"
-                                alt="Science Lab"
-                                fill
-                                className="object-cover"
-                            />
+                            ))}
                         </div>
                     </div>
                 </div>
