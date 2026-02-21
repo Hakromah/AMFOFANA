@@ -187,6 +187,7 @@ body::-webkit-scrollbar-thumb {
   0% {
     transform: translateX(0);
   }
+
   100% {
     transform: translateX(-50%);
   }
@@ -200,4 +201,68 @@ body::-webkit-scrollbar-thumb {
 
 .animate-marquee:hover {
   animation-play-state: paused;
+}
+
+
+/* LEAFLET CORE FIXES */
+.leaflet-container {
+  background: transparent !important;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  z-index: 1 !important;
+}
+
+.leaflet-tile {
+  filter: grayscale(70%);
+}
+
+.leaflet-bottom {
+  display: none !important;
+}
+
+
+
+/* pulse in SVG */
+svg.pulse-svg {
+  overflow: visible;
+}
+
+.first-circle {
+
+  transform: scale(0);
+  transform-origin: center center;
+  animation: pulse-circle 3s linear infinite;
+
+}
+
+.second-circle {
+
+  transform: scale(0);
+  transform-origin: center center;
+  animation: pulse-circle 3s linear infinite;
+  animation-delay: 1s;
+}
+
+.third-circle {
+
+  transform: scale(0);
+  transform-origin: center center;
+  animation: pulse-circle 3s linear infinite;
+  animation-delay: 2s;
+}
+
+@keyframes pulse-circle {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
 }

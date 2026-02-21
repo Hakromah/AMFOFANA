@@ -10,10 +10,9 @@ interface BreadcrumbProps {
 
 const Breadcrumb: React.FC<BreadcrumbProps> = ({ title, description, image, alt = "Breadcrumb background" }) => {
     return (
-        <section className="relative h-[60vh] flex items-center justify-center">
-            <div className="absolute inset-0">
-                <Image
-                    src={image}
+        <section className="relative h-fit md:h-[clamp(350px,50vh,501px)] flex items-center justify-center">
+            <div className="absolute w-full h-full inset-0">
+                <Image src={image}
                     alt={alt}
                     fill
                     className="object-cover"
@@ -21,10 +20,13 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ title, description, image, alt 
                 />
                 <div className="absolute inset-0 bg-black/60" />
             </div>
-            <div className="relative z-10 container mx-auto px-4 text-center text-white">
-                <h1 className="text-4xl md:text-6xl font-bold mb-4 font-sans">{title}</h1>
+            <div className="relative z-10  container max-md:py-[clamp(50px,20vh,150px)] max-w-1920 mx-auto  px-[clamp(20px,3vw,100px)] text-center text-white">
+                <div className="flex items-center justify-center w-full gap-[10px]">
+                    <a href="index.html" className="text-white/50 md:hover:text-white duration-500">Home</a> / <p className=''>{title}</p>
+                </div>
+                <h1 className="text-[clamp(1.5rem,3vw,4rem)] md:text-6xl font-bold mb-4 font-sans">{title}</h1>
                 {description && (
-                    <p className="text-xl md:text-2xl max-w-2xl mx-auto font-light">
+                    <p className="text-[clamp(1rem,3vw,1.2rem)]  lg:max-w-2xl mx-auto font-light">
                         {description}
                     </p>
                 )}
