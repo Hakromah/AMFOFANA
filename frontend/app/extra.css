@@ -1,0 +1,130 @@
+
+
+ .leaflet-bottom.leaflet-right .leaflet-control-zoom {
+  margin-right: 14px;
+  margin-bottom: 14px;
+}
+
+
+
+ /* LEAFLET CORE FIXES */
+    .leaflet-container {
+      background: transparent !important;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+      z-index: 1 !important;
+    }
+
+   
+    
+.map-container .leaflet-tile {
+  filter: grayscale(20%);
+}
+
+.leaflet-bottom {
+  display: none !important;
+}
+
+
+.leaflet-control-zoom-in {
+   width: clamp(32px, 4vw, 40px) !important;
+  height: clamp(32px, 4vw, 40px) !important;
+  transition: 0.2s ease-in;
+}
+
+.leaflet-control-zoom-in span {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.leaflet-control-zoom-in:hover {
+  background-color:  var(--primary) !important;
+  color: white !important;
+
+}
+
+.leaflet-control-zoom-out {
+ width: clamp(32px, 4vw, 40px) !important;
+  height: clamp(32px, 4vw, 40px) !important;
+  transition: 0.2s ease-in;
+}
+
+.leaflet-control-zoom-out span {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.leaflet-control-zoom-out:hover {
+  background-color:  var(--primary) !important;
+  color: white !important;
+
+}
+ .leaflet-popup{
+  min-width: 350px;
+  max-width: 350px;
+  
+ }
+
+.leaflet-popup-content{
+  margin: 0 !important;
+  max-width: 348px !important;
+
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 0px !important;
+      background-color:  transparent !important;
+}
+
+
+
+/* pulse in SVG */
+svg.pulse-svg {
+  overflow: visible;
+}
+
+.first-circle {
+
+  transform: scale(0);
+  transform-origin: center center;
+  animation: pulse-circle 3s linear infinite;
+
+}
+
+.second-circle {
+
+  transform: scale(0);
+  transform-origin: center center;
+  animation: pulse-circle 3s linear infinite;
+  animation-delay: 1s;
+}
+
+.third-circle {
+
+  transform: scale(0);
+  transform-origin: center center;
+  animation: pulse-circle 3s linear infinite;
+  animation-delay: 2s;
+}
+
+@keyframes pulse-circle {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}

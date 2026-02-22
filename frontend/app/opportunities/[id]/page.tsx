@@ -1,5 +1,5 @@
 import { opportunities } from '@/data/opportunities';
-import OpportunityDetail from '@/components/opportunities/OpportunityDetail';
+import OpportunityDetail from '@/app/pages-sections/opportunity/OpportunityDetail';
 import { notFound } from 'next/navigation';
 
 export async function generateStaticParams() {

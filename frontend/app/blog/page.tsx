@@ -1,5 +1,5 @@
 import React from "react";
-import BlogPage from "@/components/blog/page";
+import BlogPage from "@/app/pages-sections/blog/page";
 
 export default function Page() {
     return <BlogPage />;

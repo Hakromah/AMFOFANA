@@ -13,15 +13,15 @@ export const galleryItems: GalleryItem[] = [
         id: 'img1',
         type: 'image',
         category: 'Sports',
-        src: 'https://images.unsplash.com/photo-1526676037777-05a232554f77?q=80&w=2070&auto=format&fit=crop',
+         src: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=2070&auto=format&fit=crop',
         title: 'Annual Sports Day Victory'
     },
     {
         id: 'img2',
         type: 'image',
         category: 'Campus',
-        src: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop',
-        title: 'Main Campus Building'
+        src: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=2070&auto=format&fit=crop',
+       title: 'Main Campus Building'
     },
     {
         id: 'img3',
@@ -50,6 +50,13 @@ export const galleryItems: GalleryItem[] = [
         category: 'Sports',
         src: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=2070&auto=format&fit=crop',
         title: 'Football Championship'
+    },
+    {
+        id: 'img7',
+        type: 'image',
+        category: 'Events',
+        src: 'https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=2070&auto=format&fit=crop',
+        title: 'Graduation Ceremony 2025'
     },
 
     // VIDEOS (Using placeholders or links)

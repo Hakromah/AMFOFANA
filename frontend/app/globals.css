@@ -1,7 +1,5 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@tailwind base;
-@tailwind components;
 @tailwind utilities;
 
 .linear-swiper-transition .swiper-wrapper {
@@ -204,65 +202,17 @@ body::-webkit-scrollbar-thumb {
 }
 
 
-/* LEAFLET CORE FIXES */
-.leaflet-container {
-  background: transparent !important;
-  outline: none;
-  -webkit-tap-highlight-color: transparent;
-  z-index: 1 !important;
+
+/* Handle */
+.galleryBtn::-webkit-scrollbar-thumb {
+  background: var(--color-primary) !important;
+  border-radius: 10px;
 }
 
-.leaflet-tile {
-  filter: grayscale(70%);
+.galleryBtn::-webkit-scrollbar {
+  width: 10px !important;
 }
 
-.leaflet-bottom {
-  display: none !important;
-}
-
-
-
-/* pulse in SVG */
-svg.pulse-svg {
-  overflow: visible;
-}
-
-.first-circle {
-
-  transform: scale(0);
-  transform-origin: center center;
-  animation: pulse-circle 3s linear infinite;
-
-}
-
-.second-circle {
-
-  transform: scale(0);
-  transform-origin: center center;
-  animation: pulse-circle 3s linear infinite;
-  animation-delay: 1s;
-}
-
-.third-circle {
-
-  transform: scale(0);
-  transform-origin: center center;
-  animation: pulse-circle 3s linear infinite;
-  animation-delay: 2s;
-}
-
-@keyframes pulse-circle {
-  0% {
-    transform: scale(0.5);
-    opacity: 0;
-  }
-
-  50% {
-    opacity: 1;
-  }
-
-  100% {
-    transform: scale(1.2);
-    opacity: 0;
-  }
+.galleryBtn::-webkit-scrollbar {
+  height: 3px !important;
 }

@@ -6,6 +6,7 @@ export interface Opportunity {
     image: string;
     publishedDate: string;
     deadline: string;
+    dateNumber: string; // "03 2026" for sorting
     details: {
         intro: string;
         requirements: string[];
@@ -20,9 +21,10 @@ export const opportunities: Opportunity[] = [
         index: "01",
         title: "Empowering students with comprehensive education and innovative learning approaches",
         description: "Our curriculum is designed to meet national education standards and global best practices. We connect outstanding students with local and international scholarship opportunities.",
-        image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop",
-        publishedDate: "January 03 2026",
-        deadline: "January 03 2026",
+         image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=2070&auto=format&fit=crop",
+       publishedDate: "January 03 2026",
+        deadline: "January",
+        dateNumber: "03 2026",
         details: {
             intro: "The Comprehensive Education Scholarship acts as a bridge for students who demonstrate exceptional academic potential but face financial barriers. This program is not just about funding; it's about creating a support system that nurtures talent and fosters leadership.",
             requirements: [
@@ -48,7 +50,8 @@ export const opportunities: Opportunity[] = [
         description: "Join our specialized STEM track designed to prepare future engineers, doctors, and scientists. Features hands-on lab work and coding bootcamps.",
         image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=2070&auto=format&fit=crop",
         publishedDate: "February 15 2026",
-        deadline: "March 30 2026",
+        deadline: "March",
+         dateNumber: " 30 2026",
         details: {
             intro: "The STEM Excellence Program is an intensive track for students passionate about Science, Technology, Engineering, and Mathematics. We provide state-of-the-art lab access and partnerships with local tech firms.",
             requirements: [
@@ -72,7 +75,9 @@ export const opportunities: Opportunity[] = [
         description: "For students with a flair for the arts, music, and drama. This grant supports creative endeavors and exhibitions.",
         image: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=2070&auto=format&fit=crop",
         publishedDate: "March 10 2026",
-        deadline: "April 20 2026",
+        deadline: "April",
+        dateNumber: "20 2026",
+      
         details: {
             intro: "We believe in the power of expression. The Arts & Culture Grant provides materials, studio time, and exhibition space for students excelling in visual arts, music, or performing arts.",
             requirements: [

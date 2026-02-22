@@ -23,8 +23,19 @@ const Map = dynamic(() => import('./Map'), {
 export default function ContactPage() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // Handle form submission logic here
-        console.log("Form submitted");
+       
+        
+
+
+
+
+
+
+
+
+
+
+        
     };
 
     return (
@@ -39,7 +50,7 @@ export default function ContactPage() {
 
             {/* Contact Content */}
             <section className="py-[clamp(25px,3vw,80px)]">
-                <div className="container mx-auto max-w-1920 px-5">
+                <div className="container mx-auto max-w-1920 px-5 md:px-[clamp(20px,5vw,60px)]">
                     {/* Top Cards Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-sm:gap-5 mb-[clamp(30px,3vw,80px)]">
                         {/* Address Card */}

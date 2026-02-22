@@ -15,7 +15,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ title, description, image, alt 
                 <Image src={image}
                     alt={alt}
                     fill
-                    className="object-cover"
+                    className="object-cover h-full w-full object-center"
                     priority
                 />
                 <div className="absolute inset-0 bg-black/60" />
