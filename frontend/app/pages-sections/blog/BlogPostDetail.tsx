@@ -47,10 +47,10 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
                 </div>
             </div>
 
-            <div className="container mx-auto px-4 py-16">
-                <div className="max-w-4xl mx-auto">
+            <div className="container mx-auto max-w-[1200px] px-5 md:px-[clamp(20px,3vw,80px)] py-[clamp(25px,3vw,35px)]">
+                <div className="w-full h-full">
                     {/* Back to Home Button */}
-                    <div className="mb-8">
+                    <div className="mb-[clamp(20px,3vw,35px)]">
                         <Link href="/blog">
                             <Button variant="ghost" className="gap-2 pl-0 hover:bg-transparent hover:text-[#2857AE]">
                                 <ArrowLeft className="w-4 h-4" /> Back to News
@@ -59,15 +59,15 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
                     </div>
 
                     {/* Meta Info */}
-                    <div className="mb-8">
+                    <div className="mb-[clamp(20px,3vw,35px)]">
                         <span className="text-[#2857AE] font-bold">Published</span> <span className="text-gray-600 ml-2">{post.date}</span>
                     </div>
 
-                    <div className="flex flex-col md:flex-row gap-12 items-start">
+                    <div className="flex flex-col md:flex-row gap-[clamp(20px,3vw,50px)] items-start">
 
                         {/* Left Column: Social Share (Sticky) */}
-                        <div className="md:w-16 flex-shrink-0 sticky top-32 z-10">
-                            <div className="flex flex-col gap-6 items-center bg-white/80 backdrop-blur-sm p-4 rounded-full border border-gray-100 shadow-sm">
+                        <div className="md:w-16 w-full md:flex-shrink-0 md:sticky  md:top-32 z-10">
+                            <div className="flex max-md:flex-row md:flex-col gap-6 items-center bg-white/80 backdrop-blur-sm p-4 rounded-full border border-gray-100 shadow-sm">
                                 <button className="text-gray-400 hover:text-[#2857AE] transition-colors"><Facebook className="w-5 h-5" /></button>
                                 <button className="text-gray-400 hover:text-[#2857AE] transition-colors"><Twitter className="w-5 h-5" /></button>
                                 <button className="text-gray-400 hover:text-[#2857AE] transition-colors"><Linkedin className="w-5 h-5" /></button>
@@ -83,7 +83,7 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
 
                             {/* Dynamically rendered HTML content */}
                             <div
-                                className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-600 prose-p:leading-relaxed prose-img:rounded-xl"
+                                className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-600 prose-p:leading-relaxed prose-img:rounded-xl prose-img:w-full prose-img:h-64 prose-img:object-cover [&_img]:rounded-xl [&_img]:w-full [&_img]:h-64 [&_img]:object-cover [&_div]:grid [&_div]:grid-cols-1 [&_div]:md:grid-cols-2 [&_div]:gap-4 [&_div]:my-8"
                                 dangerouslySetInnerHTML={{ __html: post.content }}
                             />
 

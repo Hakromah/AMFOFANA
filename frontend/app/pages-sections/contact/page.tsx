@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { MapPin, Phone, Mail, Clock, Send, Facebook, Instagram, Linkedin, Twitter, Youtube, ArrowRight } from 'lucide-react';
 import Breadcrumb from '@/components/Breadcrumb';
+import Link from 'next/link';
 import {
     Sheet,
     SheetContent,
@@ -19,6 +20,15 @@ const Map = dynamic(() => import('./Map'), {
     ssr: false,
     loading: () => <div className="h-full w-full bg-gray-100 flex items-center justify-center">Loading Map...</div>
 });
+
+const socialLinks = [
+    { name: "facebook", href: "#" },
+    { name: "instagram", href: "#" },
+    { name: "x", href: "#" },
+    { name: "youtube", href: "#" },
+    { name: "tiktok", href: "#" },
+    { name: "whatsapp", href: "#" },
+];
 
 export default function ContactPage() {
     const handleSubmit = (e: React.FormEvent) => {
@@ -115,11 +125,15 @@ export default function ContactPage() {
                             </div>
 
                             <div className="flex items-center gap-4">
-                                <a href="#" className="text-[#2857AE] hover:text-blue-700 transition-colors"><Linkedin className="w-5 h-5" /></a>
-                                <a href="#" className="text-[#2857AE] hover:text-blue-700 transition-colors"><Instagram className="w-5 h-5" /></a>
-                                <a href="#" className="text-[#2857AE] hover:text-blue-700 transition-colors"><Facebook className="w-5 h-5" /></a>
-                                <a href="#" className="text-[#2857AE] hover:text-blue-700 transition-colors"><Youtube className="w-5 h-5" /></a>
-                                <a href="#" className="text-[#2857AE] hover:text-blue-700 transition-colors"><Twitter className="w-5 h-5" /></a>
+                                <div className="flex gap-4">
+                                    {socialLinks.map((social) => (
+                                        <Link
+                                            key={social.name}
+                                            href={social.href}
+                                            className={`icon icon-${social.name} text-primary/80 lg:hover:text-primary transition-all h-8 w-8 flex items-center justify-center rounded-full border border-transparent duration-500 lg:hover:border-primary/50`}
+                                        />
+                                    ))}
+                                </div>
                             </div>
 
                             <Sheet>

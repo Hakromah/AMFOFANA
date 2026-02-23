@@ -9,8 +9,8 @@ const academicSections = [
     {
         id: 'elementary',
         title: 'Elementary (K-5)',
-        content: 'Core focus on Literacy, Math, and Social-Emotional development using inquiry-based learning.',
-        image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=2022&auto=format&fit=crop',
+        content: 'Core focus on Literacy, Math, and Social-Emotional development using inquiry-based learning. Core focus on Literacy, Math, and Social-Emotional development using inquiry-based learning.',
+        image: '/home/classmate.jpg',
         details: [
             "Inquiry-based learning approach",
             "Strong focus on literacy and numeracy",
@@ -20,8 +20,8 @@ const academicSections = [
     {
         id: 'junior',
         title: 'Junior High (6-8)',
-        content: 'Introduction to specialized subjects, lab sciences, and organizational skills for independence.',
-        image: 'https://images.unsplash.com/photo-1427504746696-ea3093607dbe?q=80&w=2053&auto=format&fit=crop',
+        content: 'Introduction to specialized subjects, lab sciences, and organizational skills for independence. Introduction to specialized subjects, lab sciences, and organizational skills for independence.',
+        image: '/home/intro2.png',
         details: [
             "Specialized subject teachers",
             "Introduction to lab sciences",
@@ -31,8 +31,8 @@ const academicSections = [
     {
         id: 'highschool',
         title: 'High School (9-12)',
-        content: 'Advanced Placement (AP) courses, Honors tracks, and College & Career Readiness programs.',
-        image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop',
+        content: 'Advanced Placement (AP) courses, Honors tracks, and College & Career Readiness programs. Advanced Placement (AP) courses, Honors tracks, and College & Career Readiness programs.',
+        image: '/home/am1.png',
         details: [
             "Advanced Placement (AP) courses",
             "College & Career Readiness programs",
@@ -48,7 +48,7 @@ export default function AcademicPage() {
     useEffect(() => {
         const observerOptions = {
             root: null,
-            rootMargin: '-20% 0px -20% 0px',
+            rootMargin: '-40% 0px -40% 0px',
             threshold: 0.5
         };
 
@@ -80,16 +80,16 @@ export default function AcademicPage() {
                 alt="Academic Excellence"
             />
 
-            <section className="py-20">
-                <div className="container mx-auto px-4">
+            <section className="py-[clamp(25px,3vw,80px)]">
+                <div className="container mx-auto max-w-[1920px] px-5 md:px-[clamp(20px,5vw,60px)]">
 
                     {/* Intro */}
-                    <div className="max-w-4xl mb-16">
-                        <div className="flex items-center gap-4 mb-6">
+                    <div className="max-w-4xl mb-[clamp(20px,4vw,50px)]">
+                        <div className="flex items-center gap-4 mb-[clamp(12px,3vw,25px)]">
                             <div className="h-12 w-1 bg-[#2857AE]"></div>
-                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Academic Excellence</h2>
+                            <h2 className="text-xl md:text-4xl font-bold text-gray-900">Academic Excellence</h2>
                         </div>
-                        <h3 className="text-xl font-semibold mb-4">Empowering students with comprehensive education and innovative learning approaches</h3>
+                        <h3 className="text-md md:text-xl font-semibold mb-4 max-sm:mb-2">Empowering students with comprehensive education and innovative learning approaches</h3>
                         <p className="text-gray-600 leading-relaxed">
                             Our curriculum is designed to meet national education standards and global best practices. We connect outstanding
                             students with local and international scholarship opportunities. Students receive mentorship and guidance to help them
@@ -98,21 +98,21 @@ export default function AcademicPage() {
                         </p>
                     </div>
 
-                    <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 relative">
+                    <div className="flex flex-col md:flex-row gap-[clamp(20px,3.5vw,50px)] relative">
                         {/* Left Column: Scrollable Content */}
-                        <div className="w-full lg:w-1/2 space-y-24">
-                            <h2 className="text-3xl font-bold text-gray-900 mb-8 border-b pb-4 inline-block">Learning Pathways</h2>
+                        <div className="w-full lg:w-1/2 space-y-[clamp(30px,3vw,60px)]">
+                            <h2 className="text-[clamp(20px,3vw,32px)] font-bold text-gray-900 mb-[clamp(10px,3vw,26px)] border-b pb-4 max-sm:text-[20px] inline-block">Learning Pathways</h2>
 
                             {academicSections.map((section) => (
                                 <div
                                     key={section.id}
                                     id={section.id}
                                     ref={el => { if (el) observerRefs.current[section.id] = el; }}
-                                    className="scroll-mt-32 min-h-[50vh] flex flex-col justify-center"
+                                    className="scroll-mt-32 h-fit flex flex-col justify-center"
                                 >
                                     <div className="border-l-4 border-[#2857AE] pl-6 py-2 transition-all duration-300">
-                                        <h3 className={`text-2xl font-bold mb-3 ${activeSection === section.id ? 'text-[#2857AE]' : 'text-gray-900'}`}>{section.title}</h3>
-                                        <p className="text-gray-600 text-lg mb-6 leading-relaxed">
+                                        <h3 className={`text-[clamp(20px,3vw,32px)] font-bold mb-3 ${activeSection === section.id ? 'text-[#2857AE]' : 'text-gray-900'}`}>{section.title}</h3>
+                                        <p className="text-gray-600 text-lg mb-[clamp(15px,3vw,24px)] leading-relaxed">
                                             {section.content}
                                         </p>
                                         <ul className="space-y-3">
@@ -129,8 +129,8 @@ export default function AcademicPage() {
                         </div>
 
                         {/* Right Column: Sticky Image */}
-                        <div className="hidden lg:block w-1/2 relative">
-                            <div className="sticky top-32 h-[500px] w-full bg-gray-100 rounded-3xl overflow-hidden shadow-2xl transition-all duration-700 ease-in-out">
+                        <div className="hidden md:block w-1/2 relative">
+                            <div className="sticky top-32 h-[400px] w-full bg-gray-100 rounded-3xl overflow-hidden shadow-2xl transition-all duration-700 ease-in-out">
                                 <Image
                                     src={activeImage}
                                     alt="Academic Level"
@@ -139,7 +139,7 @@ export default function AcademicPage() {
                                     priority
                                 />
                                 {/* Optional Overlay/Decoration resembling the book stack in the user request */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+                                <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent pointer-events-none" />
                             </div>
                         </div>
                     </div>
@@ -148,35 +148,41 @@ export default function AcademicPage() {
             </section>
 
             {/* Calendar Section */}
-            <section className="py-12 bg-gray-50">
-                <div className="container mx-auto px-4">
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
+            <section className="sm:py-[clamp(20px,3vw,50px)] max-sm:pt-5 bg-gray-50">
+                <div className="container max-w-[1920px]] mx-auto px-5 md:px-[clamp(20px,5vw,60px)]">
+                    <a href="/file/sample.pdf" target="_blank" rel="noopener noreferrer" className='block w-full h-full'>
+                    <div className="bg-white p-[clamp(12px,4vw,26px)] rounded-xl md:shadow-sm border border-gray-100 flex flex-wrap items-center justify-between gap-6">
                         <div className="flex items-center gap-6">
-                            <div className="bg-blue-50 p-4 rounded-lg text-[#2857AE] font-bold text-xl">
+                            <div className="bg-blue-50 p-4 rounded-lg text-[#2857AE] font-bold text-xl max-md:text-sm">
                                 2026/2027
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900">School Calendar</h3>
+                            <h3 className="text-xl max-md:text-sm font-bold text-gray-900">School Calendar</h3>
                         </div>
-                        <Button variant="outline" className="gap-2 border-gray-300 hover:border-[#2857AE] hover:text-[#2857AE]">
+                        <Button variant="outline" className="gap-2 max-xs:w-full cursor-pointer border-gray-300 hover:border-[#2857AE] hover:text-[#2857AE]">
                             Download <FileText className="w-4 h-4" />
                         </Button>
                     </div>
+                    </a>
                 </div>
             </section>
 
             {/* Resources Section */}
-            <section className="py-20 bg-gray-50">
-                <div className="container mx-auto px-4">
-                    <div className="bg-[#f0f4f8] p-10 rounded-[30px]">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-8">Useful Academic Resources</h2>
+            <section className="py-[clamp(20px,3vw,80px)] bg-gray-50">
+                <div className="container mx-auto px-5 max-w-[1920px] md:px-[clamp(20px,5vw,60px)]">
+                    <div className="bg-[#f0f4f8] p-[clamp(12px,4vw,40px)] rounded-[clamp(12px,4vw,30px)]">
+                        <h2 className="text-[clamp(20px,3vw,32px)] font-bold text-gray-900 mb-[clamp(10px,3vw,26px)] border-b pb-4 max-sm:text-[20px]">Useful Academic Resources</h2>
                         <div className="space-y-1">
                             {[1, 2, 3].map((item) => (
-                                <div key={item} className="flex items-center justify-between py-6 border-b border-gray-200 last:border-0 hover:bg-white/50 px-4 rounded-lg transition-colors cursor-pointer group">
+                                <div key={item} className='w-full h-full relative'>
+                                    <a href='/file/sample.pdf' download rel='noopener noreferrer' className='block w-full h-full'>
+                                <div  className="flex items-center justify-between py-[clamp(12px,3vw,24px)] border-b border-gray-200 last:border-0 hover:bg-white/50 px-4 rounded-lg max-md:rounded-sm transition-colors cursor-pointer group">
                                     <span className="text-gray-700 font-medium">Resources document -{item}</span>
-                                    <div className="flex items-center gap-2 text-[#2857AE] opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex items-center gap-2 text-[#2857AE] opacity-70 max-md:opacity-100 group-hover:opacity-100 transition-opacity">
                                         <span className="text-sm font-semibold">Download</span>
                                         <FileText className="w-5 h-5" />
                                     </div>
+                                </div>
+                                </a>
                                 </div>
                             ))}
                         </div>

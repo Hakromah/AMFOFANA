@@ -7,6 +7,15 @@ import { Facebook, Instagram, Linkedin, Twitter, Youtube } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
+const socialLinks = [
+  { name: "facebook", href: "#" },
+  { name: "instagram", href: "#" },
+  { name: "x", href: "#" },
+  { name: "youtube", href: "#" },
+  { name: "tiktok", href: "#" },
+  { name: "whatsapp", href: "#" },
+];
+
 export default function Footer() {
   return (
     <footer className="bg-[#2857AE] text-white pt-[clamp(20px,3vw,60px)] pb-[clamp(20px,3vw,40px)]">
@@ -46,7 +55,7 @@ export default function Footer() {
         </div>
 
         {/* Main Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2  max-lg:pb-4 lg:grid-cols-5 gap-12 lg:gap-8  border-t border-white/20">
+        <div className="grid grid-cols-1 md:grid-cols-2  max-lg:pb-4 lg:grid-cols-5 gap-[clamp(20px,3.5vw,50px)] lg:gap-8  border-t border-white/20">
 
           {/* Column 1: About */}
           <div className="space-y-6 lg:col-span-2 py-5">
@@ -55,19 +64,22 @@ export default function Footer() {
             </p>
             <div className="space-y-2">
               <p className="text-xs text-white/60">Follow us on Social Media</p>
-              <div className="flex gap-4">
-                <Link href="#" className="text-white/80 hover:text-white transition-colors"><Linkedin className="h-5 w-5" /></Link>
-                <Link href="#" className="text-white/80 hover:text-white transition-colors"><Instagram className="h-5 w-5" /></Link>
-                <Link href="#" className="text-white/80 hover:text-white transition-colors"><Facebook className="h-5 w-5" /></Link>
-                <Link href="#" className="text-white/80 hover:text-white transition-colors"><Youtube className="h-5 w-5" /></Link>
-                <Link href="#" className="text-white/80 hover:text-white transition-colors"><Twitter className="h-5 w-5" /></Link>
+              <div className="flex gap-2 max-md:gap-2 pt-1">
+                {socialLinks.map((social) => (
+                  <Link
+                    key={social.name}
+                    href={social.href}
+                    className={`icon icon-${social.name} text-white/80 lg:hover:text-white transition-all h-8 w-8 flex items-center justify-center rounded-full border border-transparent duration-500 lg:hover:border-white/50`}
+                  >
+                  </Link>
+                ))}
               </div>
             </div>
           </div>
 
           {/* Column 2: Quick Links */}
       
-          <div className="lg:col-span-1 lg:border-l border-white/20 lg:flex lg:justify-center">
+          <div className="lg:col-span-1 lg:border-l max-xs:hidden border-white/20 lg:flex lg:justify-center">
           <div className="lg:py-5 lg:px-5">
             <h3 className="text-xl font-bold mb-6">Quick Links</h3>
             <ul className="space-y-4 max-sm:space-y-2 text-white/80 text-sm">
@@ -82,7 +94,7 @@ export default function Footer() {
 
           {/* Column 3: Academics */}
           
-          <div className="lg:col-span-1 lg:border-l border-white/20 lg:flex lg:justify-center">
+          <div className="lg:col-span-1 lg:border-l max-xs:hidden border-white/20 lg:flex lg:justify-center">
           <div className="lg:py-5 lg:px-5">
             <h3 className="text-xl font-bold mb-6">Academics</h3>
             <ul className="space-y-4 max-sm:space-y-2 text-white/80 text-sm">
@@ -100,8 +112,8 @@ export default function Footer() {
             <h3 className="text-xl font-bold mb-6">Contact Us</h3>
             <div className="space-y-4 max-sm:space-y-2 text-white/80 text-sm leading-relaxed">
               <p>Fish Market Monrovia,<br /> Liberia.</p>
-              <p className="text-xl font-bold text-white">+231 054 575 032 32</p>
-              <p>info@amfofana.com</p>
+              <a href="tel:+23105457503232" className="block text-xl font-bold text-white hover:text-white/80 transition-colors">+231 054 575 032 32</a>
+              <a href="mailto:info@amfofana.com" className="block hover:text-white transition-colors">info@amfofana.com</a>
             </div>
           </div>
           </div>
@@ -109,9 +121,9 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-[clamp(20px,3vw,32px)] border-t border-white/10 text-center">
+        <div className="pt-[clamp(10px,3vw,32px)] border-t border-white/10 text-center">
           <p className="text-xs text-white/50">
-            © 2026 A.M. Fofana Islamic & English High School. All Rights Reserved.
+            © {new Date().getFullYear()} A.M. Fofana Islamic & English High School. All Rights Reserved.
           </p>
         </div>
 

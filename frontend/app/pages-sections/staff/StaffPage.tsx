@@ -89,16 +89,16 @@ export default function StaffPage() {
             />
 
             {/* Intro Text */}
-            <div className="container mx-auto px-4 py-12 text-center">
-                <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
+            <div className="container max-w-[1920px] mx-auto px-5 md:px-[clamp(20px,3vw,80px)] py-[clamp(25px,3vw,48px)] text-center">
+                <p className="text-muted-foreground text-center text-lg lg:max-w-3xl mx-auto">
                     Stay updated with academic milestones, spiritual growth, and student achievements across all levels.
                 </p>
             </div>
 
             {/* Staff Grid Section */}
-            <section className="pb-20 bg-background">
+            <section className="pb-[clamp(25px,3vw,80px)] bg-background">
                 <div className="container mx-auto max-w-[1920px] px-[clamp(30px,2vw,150px)]">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 gap-y-12">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[clamp(20px,3vw,30px)] gap-y-[clamp(30px,3vw,48px)]">
                         {staffMembers.map((staff) => (
 
 

@@ -167,7 +167,7 @@ export default function GalleryPage() {
           </div>
         </div>
       </div>
-      <div className="max-w-[1920px] mx-auto px-5 sm:py-[clamp(20px,3vw,80px)]  md:px-[clamp(20px,3vw,60px)]">
+      <div className="max-w-[1920px] mx-auto px-5 max-sm:pb-5 sm:py-[clamp(20px,3vw,80px)]  md:px-[clamp(20px,3vw,60px)]">
         {/* 5. Past Events Grid Section */}
         <div className="mt-[clamp(20px,3vw,50px)] text-center">
           <h2 className="text-[clamp(20px,3vw,50px)] font-bold text-primary mb-[clamp(20px,3vw,50px)]">

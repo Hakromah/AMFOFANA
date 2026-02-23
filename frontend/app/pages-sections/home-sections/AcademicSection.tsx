@@ -50,7 +50,7 @@ const programs = [
         id: 5,
         category: 'Senior High',
         title: 'Senior High',
-        image: 'https://images.unsplash.com/photo-1427504746074-ce47bdb14719?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', // Placeholder
+        image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', // Placeholder
         description: 'Preparing students for higher education and career success with rigorous academic programs.'
     }
 ];
@@ -127,7 +127,7 @@ export default function AcademicSection() {
                                     <ArrowRight className="h-5 w-5 group-hover/next:translate-x-1 transition-all duration-500" />
                                 </Button>
                             </div>
-                            <Link href="/programs" className="group/all relative flex lg:hover:text-white items-center gap-2 text-white/80 duration-500 font-medium lg:before:absolute lg:before:w-0 lg:before:h-[1px] lg:before:bottom-[-2px] lg:before:left-0 lg:hover:before:w-full lg:before:bg-white lg:before:transition-all lg:before:duration-500 ml-4">
+                            <Link href="/academic" className="group/all relative flex lg:hover:text-white items-center gap-2 text-white/80 duration-500 font-medium lg:before:absolute lg:before:w-0 lg:before:h-[1px] lg:before:bottom-[-2px] lg:before:left-0 lg:hover:before:w-full lg:before:bg-white lg:before:transition-all lg:before:duration-500 ml-4">
                                 All Programs <ArrowUpRight className="h-4 w-4 lg:group-hover/all:rotate-45 transition-all  lg:group-hover/all:text-white text-white/80 duration-500" />
                             </Link>
                         </div>
@@ -170,8 +170,9 @@ export default function AcademicSection() {
                 >
                     {filteredPrograms.map((program) => (
                         <SwiperSlide key={program.id} className="h-full">
+                            <a href='/academic' className='block w-full h-full'>
                             <div className="group/card bg-white rounded-[15px] p-3 overflow-hidden h-[501px] max-sm:h-[400px] flex flex-col group cursor-pointer transition-transform duration-300">
-                                <div className=" relative h-[240px] max-xs:h-[220px] w-full overflow-hidden rounded-[12px]">
+                                <div className=" relative h-60 max-xs:h-[220px] w-full overflow-hidden rounded-[12px]">
                                     <Image
                                         src={program.image}
                                         alt={program.title}
@@ -194,6 +195,7 @@ export default function AcademicSection() {
                                     </div>
                                 </div>
                             </div>
+                            </a>
                         </SwiperSlide>
                     ))}
                 </Swiper>

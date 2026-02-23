@@ -152,7 +152,7 @@ export default function NewsSection() {
                             </Button>
                         </div>
 
-                        <Link href="/news" className="flex items-center gap-2 text-primary font-medium hover:underline">
+                        <Link href="/blog" className="flex items-center gap-2 text-primary font-medium hover:underline">
                             All News <ArrowUpRight className="h-4 w-4" />
                         </Link>
                     </div>

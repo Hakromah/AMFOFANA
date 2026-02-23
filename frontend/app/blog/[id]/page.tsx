@@ -1,5 +1,5 @@
 import React from 'react';
-import BlogPostDetail from '@/components/blog/BlogPostDetail';
+import BlogPostDetail from '@/app/pages-sections/blog/BlogPostDetail';
 import { blogPosts } from '@/data/blogPosts';
 import { notFound } from 'next/navigation';
 

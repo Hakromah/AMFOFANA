@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import Image from 'next/image'
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Swiper as SwiperType } from 'swiper';
@@ -37,6 +37,13 @@ const slides = [
 export default function Intro() {
     const [firstSwiper, setFirstSwiper] = useState<SwiperType | null>(null);
     const [secondSwiper, setSecondSwiper] = useState<SwiperType | null>(null);
+    const progressContent = useRef<HTMLDivElement>(null);
+
+    const onAutoplayTimeLeft = (s: any, time: number, progress: number) => {
+        if (progressContent.current) {
+            progressContent.current.style.width = `${(1 - progress) * 100}%`;
+        }
+    };
 
     return (
         <section className="w-full md:h-[calc(100vh-var(--header-height))] 3xl:max-h-[1100px] relative overflow-hidden">
@@ -77,6 +84,7 @@ export default function Intro() {
                         onSwiper={setFirstSwiper}
                         controller={{ control: secondSwiper }}
                         modules={[Controller, EffectCreative, Autoplay, Navigation]}
+                        onAutoplayTimeLeft={onAutoplayTimeLeft}
                         autoplay={{
                             delay: 5000,
                             disableOnInteraction: false,
@@ -125,7 +133,7 @@ export default function Intro() {
                     </Swiper>
 
                     {/* Custom Navigation Controls */}
-                    <div className="flex gap-4 pb-5 lg:pb-[clamp(40px,5vw,60px)] lg:pt-5">
+                    <div className="flex gap-4 pb-5 lg:pb-[clamp(40px,5vw,60px)] items-center lg:pt-5">
                         <Button
                             variant="outline"
                             size="icon"
@@ -142,6 +150,10 @@ export default function Intro() {
                         >
                             <ArrowRight className="h-6 w-6" />
                         </Button>
+
+                        <div className='h-px w-full bg-white/30'>
+                        <div ref={progressContent} className='filled bg-white w-0 h-px'></div>
+                        </div>
                     </div>
                 </div>
             </div>

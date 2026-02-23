@@ -1,4 +1,5 @@
-import React from 'react';
+"use client";
+import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -7,25 +8,27 @@ import Breadcrumb from '@/components/Breadcrumb';
 import { blogPosts } from '@/data/blogPosts';
 
 export default function BlogPage() {
+    const [visibleCount, setVisibleCount] = useState(6);
+
     return (
         <div className="w-full bg-[#E8F1FF]/30 min-h-screen">
             {/* Header */}
             <Breadcrumb
                 title="School News & Updates"
                 description="Stay informed about the latest happenings, achievements, and stories from the AMFOFANA community."
-                image="https://images.unsplash.com/photo-1499750310159-54f8f0ea9dbf?q=80&w=2070&auto=format&fit=crop"
+                image="https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=2070&auto=format&fit=crop"
                 alt="Blog Header"
             />
 
-            <section className="py-16">
-                <div className="container mx-auto px-4">
-                    <div className="flex flex-col lg:flex-row gap-12">
+            <section className="py-[clamp(25px,3vw,60px)]">
+                <div className="container mx-auto px-5 md:px-[clamp(20px,3vw,80px)]">
+                    <div className="flex flex-col lg:flex-row gap-[clamp(20px,3vw,50px)]">
                         {/* Main Content */}
-                        <div className="w-full lg:w-2/3">
-                            <h2 className="text-3xl font-bold text-gray-900 mb-8">Latest Posts</h2>
+                        <div className="w-full lg:w-2/3 max-lg:order-2">
+                            <h2 className="text-[clamp(20px,3vw,50px)] font-bold text-gray-900 mb-8">Latest Posts</h2>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                {blogPosts.map((post) => (
+                                {blogPosts.slice(0, visibleCount).map((post) => (
                                     <article key={post.id} className="flex flex-col group">
                                         {/* Image Container */}
                                         <Link href={`/blog/${post.id}`} className="block relative h-64 w-full rounded-2xl overflow-hidden mb-5">
@@ -64,15 +67,19 @@ export default function BlogPage() {
                             </div>
 
                             {/* Load More Button */}
-                            <div className="mt-16 flex justify-center">
-                                <Button className="bg-[#2857AE] hover:bg-[#1f448c] text-white px-8 py-6 rounded-full text-base font-medium">
-                                    Load More
-                                </Button>
-                            </div>
+                            {visibleCount < blogPosts.length && (
+                                <div className="mt-[clamp(30px,3vw,60px)] flex justify-center">
+                                    <Button 
+                                        onClick={() => setVisibleCount(prev => prev + 6)}
+                                        className="bg-[#2857AE] hover:bg-[#1f448c] cursor-pointer text-white px-8 py-6 rounded-full text-base font-medium">
+                                        Load More
+                                    </Button>
+                                </div>
+                            )}
                         </div>
 
                         {/* Sidebar */}
-                        <div className="w-full lg:w-1/3">
+                        <div className="w-full lg:w-1/3 max-lg:order-1">
                             <div className="sticky top-24 space-y-8">
                                 {/* Search Widget */}
                                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">

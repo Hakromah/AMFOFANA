@@ -37,7 +37,7 @@ export default function OpportunitiesPage() {
           </div>
 
           {/* Opportunities List */}
-          <div className="flex flex-col gap-[clamp(40px,3.5vw,40px)]">
+          <div className="flex flex-col gap-[clamp(30px,3.5vw,120px)]">
             {opportunities.map((opp) => (
               <div key={opp.id} className="w-full h-full relative">
                 <Link href={`/opportunities/${opp.id}`}>

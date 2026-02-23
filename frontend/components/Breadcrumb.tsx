@@ -20,8 +20,8 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ title, description, image, alt 
                 />
                 <div className="absolute inset-0 bg-black/60" />
             </div>
-            <div className="relative z-10  container max-md:py-[clamp(50px,20vh,150px)] max-w-1920 mx-auto  px-[clamp(20px,3vw,100px)] text-center text-white">
-                <div className="flex items-center justify-center w-full gap-[10px]">
+            <div className="relative z-10  container max-md:py-[clamp(50px,20vh,80px)] max-w-1920 mx-auto  px-[clamp(20px,3vw,100px)] text-center text-white">
+                <div className="flex items-center justify-center w-full gap-2.5">
                     <a href="index.html" className="text-white/50 md:hover:text-white duration-500">Home</a> / <p className=''>{title}</p>
                 </div>
                 <h1 className="text-[clamp(1.5rem,3vw,4rem)] md:text-6xl font-bold mb-4 font-sans">{title}</h1>
