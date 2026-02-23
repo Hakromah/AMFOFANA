@@ -34,3 +34,15 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+```
+=====================================================================================================
+Required edits:
+
+1- Login button should redirect to /login
+2- website icon should be changed to the logo of AMFOFANA
+3- On the Blog page, the Categories (all, news, events) buttons are not working.
+4- Nav items only about us have a dropdown menu on hover, the others don't have, I don't know if only about us should have a dropdown menu on hover.
+5- On Mobile/Tablet, the Footer sections should display as a grid with 2 or 3 columns. ```
+
