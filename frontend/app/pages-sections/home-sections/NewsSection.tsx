@@ -116,7 +116,7 @@ export default function NewsSection() {
     }, { scope: containerRef });
 
     return (
-        <section ref={containerRef} className="py-[clamp(20px,3vw,100px)] bg-white relative overflow-hidden">
+        <section ref={containerRef} className="overflow-clip py-[clamp(20px,3vw,100px)] bg-white relative overflow-hidden">
             <div className="background-gradient max-md:hidden absolute top-0 left-0 w-[clamp(250px,70vw,405px)] h-[clamp(400px,70vw,588px)] bg-gradient-to-r from-primary to-white z-1"></div>
             <div className="container z-10 relative mx-auto max-w-[1920px] px-5 md:px-[clamp(20px,5vw,60px)]">
                 {/* Header Section */}

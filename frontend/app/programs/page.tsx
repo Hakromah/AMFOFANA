@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Programs",
+};
+
 export default function ProgramsPage() {
   return (
     <div className="container py-12">

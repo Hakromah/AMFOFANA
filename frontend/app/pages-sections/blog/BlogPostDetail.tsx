@@ -1,8 +1,11 @@
-import React from 'react';
+"use client";
+
+import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Facebook, Twitter, Linkedin, Link2, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import printJS from 'print-js';
 
 interface BlogPost {
     id: number;
@@ -19,7 +22,36 @@ interface BlogPostDetailProps {
     post: BlogPost;
 }
 
+const socialShareLinks = [
+    { name: "facebook", href: "#" },
+    { name: "instagram", href: "#" },
+    { name: "youtube", href: "#" },
+    { name: "tiktok", href: "#" },
+    { name: "whatsapp", href: "https://wa.me/231880386681" },
+    { name: "linkedin", href: "#" },
+    { name: "printer", action: "print" },
+    { name: "link", action: "copy" },
+];
+
 export default function BlogPostDetail({ post }: BlogPostDetailProps) {
+    const [copied, setCopied] = useState(false);
+
+    const handleAction = (action: string) => {
+        if (action === "print") {
+            printJS({
+                printable: 'contToPrint',
+                type: 'html',
+                css: '/print.css',
+                scanStyles: false,
+            });
+        } else if (action === "copy") {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+            });
+        }
+    };
+
     return (
         <div className="w-full bg-background min-h-screen">
             {/* Full Width Hero Image with Overlay */}
@@ -66,18 +98,39 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
                     <div className="flex flex-col md:flex-row gap-[clamp(20px,3vw,50px)] items-start">
 
                         {/* Left Column: Social Share (Sticky) */}
-                        <div className="md:w-16 w-full md:flex-shrink-0 md:sticky  md:top-32 z-10">
-                            <div className="flex max-md:flex-row md:flex-col gap-6 items-center bg-white/80 backdrop-blur-sm p-4 rounded-full border border-gray-100 shadow-sm">
-                                <button className="text-gray-400 hover:text-[#2857AE] transition-colors"><Facebook className="w-5 h-5" /></button>
-                                <button className="text-gray-400 hover:text-[#2857AE] transition-colors"><Twitter className="w-5 h-5" /></button>
-                                <button className="text-gray-400 hover:text-[#2857AE] transition-colors"><Linkedin className="w-5 h-5" /></button>
-                                <button className="text-gray-400 hover:text-[#2857AE] transition-colors"><Link2 className="w-5 h-5" /></button>
+                        <div className="md:w-16 w-full md:flex-shrink-0 md:sticky md:top-32 z-10">
+                            <div className="flex max-md:flex-row md:flex-col gap-6 max-xs:gap-2 max-xs:justify-between items-center max-sm:overflow-auto bg-white/80 backdrop-blur-sm p-4 rounded-full border border-gray-100 shadow-sm relative">
+                                {socialShareLinks.map((social) => (
+                                    <div key={social.name} className="relative">
+                                        {social.action ? (
+                                            <button
+                                                onClick={() => handleAction(social.action!)}
+                                                className={`icon icon-${social.name} cursor-pointer text-gray-400 hover:text-[#2857AE] transition-colors w-5 h-5 flex justify-center items-center`}
+                                            />
+                                        ) : (
+                                            <a
+                                                href={social.href}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                            >
+                                                <span
+                                                    className={`icon icon-${social.name} ${social.name === "whatsapp" ? "text-[#25D366]/80 hover:text-[#25D366]" : "text-gray-400 hover:text-[#2857AE]"} transition-colors w-5 h-5 flex justify-center items-center`}
+                                                />
+                                            </a>
+                                        )}
+                                        {social.action === "copy" && copied && (
+                                            <span className="absolute -right-16 md:-right-18 top-1/2 -translate-y-1/2 text-xs text-green-600 font-medium whitespace-nowrap">
+                                                Copied!
+                                            </span>
+                                        )}
+                                    </div>
+                                ))}
                             </div>
                         </div>
 
                         {/* Main Content */}
-                        <div className="flex-1">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                        <div id="contToPrint" className="flex-1 contToPrint">
+                            <h2 className="text-[clamp(20px,3vw,32px)] font-bold text-gray-900 mb-6">
                                 A.M. Fofana continues to create platforms that inspire excellence beyond the classroom.
                             </h2>
 
@@ -87,6 +140,19 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
                                 dangerouslySetInnerHTML={{ __html: post.content }}
                             />
 
+                            {/* Apply Button for Scholarship Posts */}
+                            {post.category.toLowerCase() === "scholarship" && (
+                                <div className="mt-10 p-8 bg-gradient-to-r from-[#2857AE]/5 to-[#2857AE]/10 rounded-2xl border border-[#2857AE]/15 text-center">
+                                    <h3 className="text-[clamp(20px,3vw,32px)] font-bold text-gray-900 mb-2">Interested in this scholarship?</h3>
+                                    <p className="text-gray-600 mb-6">Submit your application today and take the next step in your academic journey.</p>
+                                    <a
+                                        href="#"
+                                        className="inline-block bg-[#2857AE] hover:bg-[#1f448c] text-white font-semibold px-10 py-4 rounded-full transition-colors text-base"
+                                    >
+                                        Apply Now
+                                    </a>
+                                </div>
+                            )}
 
                         </div>
                     </div>

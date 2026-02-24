@@ -13,7 +13,7 @@ const socialLinks = [
   { name: "x", href: "#" },
   { name: "youtube", href: "#" },
   { name: "tiktok", href: "#" },
-  { name: "whatsapp", href: "#" },
+  { name: "whatsapp", href: "https://wa.me/231880386681" },
 ];
 
 export default function Navbar() {
@@ -43,7 +43,23 @@ export default function Navbar() {
     },
     { name: "Blog", href: "/blog" },
 
-    { name: "Academic", href: "/academic" },
+   
+     {
+      name: "Academic",
+      href: "/academic",
+      subItems: [
+        {
+          name: "Academic",
+          href: "/academic",
+          description: "Discover our legacy of excellence since 1990",
+        },
+        {
+          name: "login",
+          href: "/login",
+          description: "Meet the team guiding our success",
+        },
+      ],
+    },
     { name: "Gallery", href: "/gallery" },
     { name: "Opportunities", href: "/opportunities" },
   ];
@@ -81,15 +97,13 @@ export default function Navbar() {
 
   return (
     <header
-      className={`sticky top-0 z-350 w-full border-b bg-background/95 transition-transform duration-500 ${
-        isVisible ? "translate-y-0" : "-translate-y-full"
-      }`}
+      className={`sticky top-0 z-350 w-full border-b bg-background/95 transition-transform duration-500 ${isVisible ? "translate-y-0" : "-translate-y-full"
+        }`}
     >
       <div className="w-full h-full container mx-auto max-w-[1920px]">
         <div
-          className={`topNav w-full bg-[#2857AE] flex items-center  overflow-hidden transition-all duration-500 ease-in-out px-5 md:px-[clamp(20px,5vw,60px)] ${
-            isScrolled ? "h-0 opacity-0" : "h-[37px] opacity-100"
-          }`}
+          className={`topNav w-full bg-[#2857AE] flex items-center  overflow-hidden transition-all duration-500 ease-in-out px-5 md:px-[clamp(20px,5vw,60px)] ${isScrolled ? "h-0 opacity-0" : "h-[37px] opacity-100"
+            }`}
         >
           <div className="w-full flex justify-between items-center py-3">
             <div>
@@ -102,7 +116,7 @@ export default function Navbar() {
                 <Link
                   key={social.name}
                   href={social.href}
-                  className={`icon icon-${social.name} text-white/80 lg:hover:text-white transition-all h-5 w-5 flex items-center justify-center rounded-full`}
+                  className={`icon icon-${social.name} ${social.name === "whatsapp" ? "text-[#25D366]/80 lg:hover:text-[#25D366]" : "text-white/80 lg:hover:text-white"} transition-all h-5 w-5 flex items-center justify-center rounded-full`}
                 ></Link>
               ))}
             </div>
@@ -145,11 +159,10 @@ export default function Navbar() {
                         flex flex-col md:flex-row items-center gap-10 max-md:bg-primary max-md:gap-5
                         transition-all duration-300 ease-in-out
                         md:static md:w-auto md:h-full md:pointer-events-auto md:opacity-100
-                        ${
-                          isMobileMenuOpen
-                            ? "max-md:h-[calc(100vh-80px)] max-md:opacity-100 max-md:pointer-events-auto max-md:border-b max-md:shadow-xl max-md:overflow-y-auto"
-                            : "max-md:h-0 max-md:opacity-0 max-md:pointer-events-none max-md:border-b-0 max-md:shadow-none max-md:overflow-hidden md:p-0 max-md:overflow-hidden"
-                        }
+                        ${isMobileMenuOpen
+                  ? "max-md:h-[calc(100vh-80px)] max-md:opacity-100 max-md:pointer-events-auto max-md:border-b max-md:shadow-xl max-md:overflow-y-auto"
+                  : "max-md:h-0 max-md:opacity-0 max-md:pointer-events-none max-md:border-b-0 max-md:shadow-none max-md:overflow-hidden md:p-0 max-md:overflow-hidden"
+                }
                     `}
             >
               <nav className="flex flex-col md:flex-row md:h-full items-start md:items-center w-full md:w-auto md:gap-5 text-sm font-medium ">
@@ -270,29 +283,26 @@ export default function Navbar() {
               >
                 <span
                   className={`
-                        ${
-                          isMobileMenuOpen
-                            ? "bg-[var(--color-primary)] relative  duration-300 translate-y-[8px] h-[2px] rotate-[45deg] opacity-100"
-                            : "bg-[var(--color-primary)] h-[2px] relative opacity-100 duration-300"
-                        }
+                        ${isMobileMenuOpen
+                      ? "bg-[var(--color-primary)] relative  duration-300 translate-y-[8px] h-[2px] rotate-[45deg] opacity-100"
+                      : "bg-[var(--color-primary)] h-[2px] relative opacity-100 duration-300"
+                    }
                     `}
                 ></span>
                 <span
                   className={`
-                        ${
-                          isMobileMenuOpen
-                            ? "bg-[var(--color-primary)] relative  duration-300 opacity-0 h-[2px]"
-                            : "bg-[var(--color-primary)] h-[2px] relative opacity-100 duration-300"
-                        }
+                        ${isMobileMenuOpen
+                      ? "bg-[var(--color-primary)] relative  duration-300 opacity-0 h-[2px]"
+                      : "bg-[var(--color-primary)] h-[2px] relative opacity-100 duration-300"
+                    }
                     `}
                 ></span>
                 <span
                   className={`
-                        ${
-                          isMobileMenuOpen
-                            ? "bg-[var(--color-primary)] relative  duration-300 translate-y-[-8px] h-[2px] rotate-[-45deg] opacity-100"
-                            : "bg-[var(--color-primary)] h-[2px] relative opacity-100 duration-300"
-                        }
+                        ${isMobileMenuOpen
+                      ? "bg-[var(--color-primary)] relative  duration-300 translate-y-[-8px] h-[2px] rotate-[-45deg] opacity-100"
+                      : "bg-[var(--color-primary)] h-[2px] relative opacity-100 duration-300"
+                    }
                     `}
                 ></span>{" "}
               </div>

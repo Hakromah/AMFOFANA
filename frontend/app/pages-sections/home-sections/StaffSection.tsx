@@ -98,7 +98,7 @@ export default function StaffSection() {
     }, { scope: containerRef });
 
     return (
-        <section ref={containerRef} className="py-[clamp(20px,3vw,80px)] bg-[#C7D4FF80]/50 text-white overflow-hidden">
+        <section ref={containerRef} className="overflow-clip py-[clamp(20px,3vw,80px)] bg-[#C7D4FF80]/50 text-white overflow-hidden">
             <div className="container mx-auto max-w-[1920px] px-5 md:px-[clamp(20px,5vw,60px)]">
                 <div className="sm:grid max-sm:grid-cols-1 sm:grid-cols-4 gap-10 lg:gap-[clamp(15px,3vw,80px)] items-center">
                     <div className="staff-content cols-pan-1 w-full flex flex-col items-start text-left">

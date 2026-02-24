@@ -43,7 +43,7 @@ export default function AboutSection() {
             }, "-=0.8");
     }, { scope: containerRef });
     return (
-        <section ref={containerRef} className="py-20 max-md:py-5 relative overflow-hidden">
+        <section ref={containerRef} className="py-20 overflow-clip max-md:py-5 relative overflow-hidden">
             <div className="container max-w-1920 mx-auto px-5 md:px-[clamp(20px,5vw,60px)] relative z-10">
                 <div className="flex max-lg:flex-col md:mt-30 justify-center gap-5 h-full lg:gap-15 items-center">
                     <div className="about-image relative h-full w-full">
