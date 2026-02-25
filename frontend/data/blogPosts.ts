@@ -81,7 +81,7 @@ export const blogPosts = [
             <p class="mb-6">Volunteers will spend their weekends assisting with various tasks, from serving meals to organizing donation drives. We are incredibly proud of our students for their initiative and dedication to making a positive difference.</p>
         `,
         date: "Dec 05, 2023",
-        category: "Community",
+        category: "scholarship",
         author: "Student Council",
         image: "https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=2070&auto=format&fit=crop",
     },
@@ -94,7 +94,7 @@ export const blogPosts = [
             <p class="mb-6">Sarah credits her time at our school for fostering her curiosity and passion for science. Her groundbreaking work serves as an inspiration to our current students and a testament to the quality of education we provide.</p>
         `,
         date: "Nov 20, 2023",
-        category: "Alumni",
+        category: "scholarship",
         author: "Alumni Relations",
         image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1976&auto=format&fit=crop",
     },

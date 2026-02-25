@@ -46,7 +46,7 @@ export default function Intro() {
     };
 
     return (
-        <section className="w-full md:h-[calc(100vh-var(--header-height))] 3xl:max-h-[1100px] relative overflow-hidden">
+        <section className="overflow-clip w-full md:h-[calc(100vh-var(--header-height))] 3xl:max-h-[1100px] relative overflow-hidden">
             <div className="absolute inset-0 w-full h-full">
                 <Swiper
                     onSwiper={setSecondSwiper}

@@ -1,5 +1,10 @@
 import React from "react";
 import OpportunitiesPage from "@/app/pages-sections/opportunity/page";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Opportunities",
+};
 
 export default function Page() {
     return <OpportunitiesPage />;
