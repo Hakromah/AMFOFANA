@@ -38,7 +38,7 @@ export default function StudentLife() {
     }, { scope: containerRef });
 
     return (
-        <section ref={containerRef} className="py-[clamp(20px,3vw,100px)] bg-white overflow-clip">
+        <section ref={containerRef} className="overflow-clip py-[clamp(20px,3vw,100px)] bg-white overflow-clip">
             <div className="container mx-auto max-w-[1920px] px-5 md:px-[clamp(20px,5vw,60px)]">
                 {/* Header */}
                 <div className="student-life-header text-center mb-4 sm:mb-12  sm:space-y-[clamp(15px,3vw,24px)]">

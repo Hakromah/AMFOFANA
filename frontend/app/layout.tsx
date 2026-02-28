@@ -18,8 +18,15 @@ const fontSans = FontSans({
 });
 
 export const metadata: Metadata = {
-  title: "AMFOFANA HIGH SCHOOL",
+  title: {
+    default: "AMFOFANA HIGH SCHOOL",
+    template: "%s | AM Fofana",
+  },
   description: "Excellence in Education. Future Leaders in the Making.",
+  icons: {
+    icon: "/logo/fofana.png",
+    apple: "/logo/fofana.png",
+  },
 };
 
 export default async function RootLayout({
@@ -38,12 +45,12 @@ export default async function RootLayout({
           fontSans.variable
         )}
       >
-        <div className="relative min-h-screen">
+        <div className="relative min-h-screen overflow-clip">
           <Navbar />
           <main className="h-full w-full">
-              <PreferencesProvider initialPreferences={preferences?.value}>
-                {children}
-              </PreferencesProvider></main>
+            <PreferencesProvider initialPreferences={preferences?.value}>
+              {children}
+            </PreferencesProvider></main>
           <Footer />
           <CookieConsent />
         </div>

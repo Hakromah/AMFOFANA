@@ -96,7 +96,7 @@ export default function AcademicSection() {
     }, { scope: containerRef });
 
     return (
-        <section ref={containerRef} className="py-[clamp(20px,5vw,80px)] bg-primary h-full text-white overflow-hidden">
+        <section ref={containerRef} className="overflow-clip py-[clamp(20px,5vw,80px)] bg-primary h-full text-white overflow-hidden">
             <div className="container mx-auto h-full max-w-1920 px-5 md:px-[clamp(20px,3vw,60px)]">
                 {/* Header */}
                 <div className='w-full h-full mb-14 max-md:mb-6'>

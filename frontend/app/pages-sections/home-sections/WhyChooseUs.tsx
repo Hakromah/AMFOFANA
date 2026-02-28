@@ -64,7 +64,7 @@ export default function WhyChooseUs() {
     }, { scope: containerRef });
 
     return (
-        <section ref={containerRef} className="relative min-h-screen md:h-screen w-full bg-[#EBF3FF] flex flex-col justify-center items-center overflow-hidden py-[clamp(20px,3vw,40px)] md:py-0">
+        <section ref={containerRef} className="overflow-clip relative min-h-screen md:h-screen w-full bg-[#EBF3FF] flex flex-col justify-center items-center overflow-hidden py-[clamp(20px,3vw,40px)] md:py-0">
 
             {/* Background Logo (Fixed/Sticky Effect within Container) */}
             <div ref={bgRef} className="absolute max-sm:hidden inset-0 flex items-center justify-center pointer-events-none z-0 opacity-10 md:opacity-100">
@@ -73,7 +73,7 @@ export default function WhyChooseUs() {
                         src="/logo/fofana.png"
                         alt="A.M. Fofana Seal"
                         fill
-                        className="object-contain"
+                        className="object-cover"
                         priority
                     />
                 </div>

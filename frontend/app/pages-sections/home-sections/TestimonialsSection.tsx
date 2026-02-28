@@ -84,7 +84,7 @@ export default function TestimonialsSection() {
     const allTestimonials = [...testimonials, ...testimonials, ...testimonials];
 
     return (
-        <section ref={containerRef} className="py-[clamp(20px,5vw,80px)] bg-white overflow-hidden">
+        <section ref={containerRef} className="overflow-clip py-[clamp(20px,5vw,80px)] bg-white overflow-hidden">
             <div className="container mx-auto max-w-[1920px] px-5 md:px-[clamp(20px,4vw,60px)]">
 
                 {/* Header Section */}

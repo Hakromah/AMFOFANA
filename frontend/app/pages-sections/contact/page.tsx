@@ -27,14 +27,12 @@ const socialLinks = [
     { name: "x", href: "#" },
     { name: "youtube", href: "#" },
     { name: "tiktok", href: "#" },
-    { name: "whatsapp", href: "#" },
+    { name: "whatsapp", href: "https://wa.me/231880386681" },
 ];
 
 export default function ContactPage() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-       
-        
 
 
 
@@ -45,7 +43,9 @@ export default function ContactPage() {
 
 
 
-        
+
+
+
     };
 
     return (
@@ -65,45 +65,53 @@ export default function ContactPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-sm:gap-5 mb-[clamp(30px,3vw,80px)]">
                         {/* Address Card */}
                         <div className="md:bg-white max-md:w-full md:p-8 md:rounded-2xl md:shadow-sm md:border md:border-gray-100 flex flex-col md:items-center items-start md:text-center md:hover:shadow-md transition-shadow">
+                            <a href="" className='max-md:w-full flex flex-col md:items-center items-start md:text-center'>
                             <div className="h-12 max-sm:hidden w-12 bg-blue-50 rounded-full flex items-center justify-center text-[#2857AE] mb-6">
-                                <Send className="h-5 w-5 rotate-45" />
+                                <span className='icon icon-map flex items-center justify-center text-primary h-5 w-5'></span>
                             </div>
                             <h3 className="font-bold text-lg mb-2">Address</h3>
                             <p className="text-gray-600 max-md:[&_br]:hidden max-md:w-full max-md:text-left text-sm leading-relaxed">
-                                A.M. FOFANA High School<br />
-                                Monrovia, Liberia<br />
+                                A.M. FOFANA High School Sinkor<br />
+                               Fish Market Monrovia, Liberia<br />
                                 West Africa
                             </p>
+                            </a>
                         </div>
 
                         {/* Phone Card */}
                         <div className="md:bg-white max-md:w-full md:p-8 md:rounded-2xl md:shadow-sm md:border md:border-gray-100 flex flex-col md:items-center items-start md:text-center md:hover:shadow-md transition-shadow">
                             <div className="h-12 w-12  max-sm:hidden bg-blue-50 rounded-full flex items-center justify-center text-[#2857AE] mb-6">
-                                <Send className="h-5 w-5 rotate-45" />
+
+                                <span className='icon icon-phone flex items-center justify-center text-primary h-5 w-5'></span>
                             </div>
                             <h3 className="font-bold text-lg mb-2">Phone</h3>
                             <div className="flex flex-col max-md:flex-row gap-3 text-gray-600 max-md:[&_br]:hidden text-sm leading-relaxed">
-                                <p>   +231 054 678 13 13</p>
-                                <p>   +231 077 123 4567</p>
+                                <p> <a href="" className='block w-fit h-fit'>  +231 054 678 13 13 </a> </p>
+                                <p> <a href=""  className='block w-fit h-fit'> +231 077 123 4567 </a>  </p>
                             </div>
                         </div>
 
                         {/* Email Card */}
                         <div className="md:bg-white max-md:w-full md:p-8 md:rounded-2xl md:shadow-sm md:border md:border-gray-100 flex flex-col md:items-center items-start md:text-center md:hover:shadow-md transition-shadow">
                             <div className="h-12  max-sm:hidden w-12 bg-blue-50 rounded-full flex items-center justify-center text-[#2857AE] mb-6">
-                                <Send className="h-5 w-5 rotate-45" />
+                                <span className='icon icon-mail flex items-center justify-center text-primary h-5 w-5'></span>
                             </div>
                             <h3 className="font-bold text-lg mb-2">Email</h3>
-                            <p className="text-gray-600 max-md:[&_br]:hidden text-sm leading-relaxed">
-                                info@amfofana.edu.lr<br />
-                                admissions@amfofana.edu.lr
+                            <div className="flex flex-col gap-2">
+                            <p className="text-gray-600 text-sm leading-relaxed">
+                               <a href="" className='block w-fit h-fit'> info@amfofana.edu.lr </a>  
                             </p>
+                             <p className="text-gray-600 text-sm leading-relaxed">
+                               <a href="" className='block w-fit h-fit'>   info@amfofana.edu.lr </a>
+                            </p>
+                            </div>
+                               
                         </div>
 
                         {/* Office Hours Card */}
                         <div className="md:bg-white max-md:w-full md:p-8 md:rounded-2xl md:shadow-sm md:border md:border-gray-100 flex flex-col md:items-center items-start md:text-center md:hover:shadow-md transition-shadow">
                             <div className="h-12  max-sm:hidden w-12 bg-blue-50 rounded-full flex items-center justify-center text-[#2857AE] mb-6">
-                                <Send className="h-5 w-5 rotate-45" />
+                                <span className='icon icon-clock flex items-center justify-center text-primary h-5 w-5'></span>
                             </div>
                             <h3 className="font-bold text-lg mb-2">Office Hours</h3>
                             <p className="text-gray-600 max-md:[&_br]:hidden text-sm leading-relaxed">
@@ -130,7 +138,7 @@ export default function ContactPage() {
                                         <Link
                                             key={social.name}
                                             href={social.href}
-                                            className={`icon icon-${social.name} text-primary/80 lg:hover:text-primary transition-all h-8 w-8 flex items-center justify-center rounded-full border border-transparent duration-500 lg:hover:border-primary/50`}
+                                            className={`icon icon-${social.name} ${social.name === "whatsapp" ? "text-[#25D366]/80 lg:hover:text-[#25D366]" : "text-primary/80 lg:hover:text-primary"} transition-all h-8 w-8 flex items-center justify-center rounded-full border border-transparent duration-500 lg:hover:border-primary/50`}
                                         />
                                     ))}
                                 </div>
@@ -138,7 +146,7 @@ export default function ContactPage() {
 
                             <Sheet>
                                 <SheetTrigger asChild>
-                                    <Button className="bg-[#2857AE] hover:bg-[#1e408a] text-white px-8 py-6 rounded-lg text-base font-medium w-full sm:w-auto">
+                                    <Button className="bg-[#2857AE] cursor-pointer hover:bg-[#1e408a] text-white px-8 py-6 rounded-lg text-base font-medium w-full sm:w-auto">
                                         Contact Form
                                     </Button>
                                 </SheetTrigger>
@@ -183,7 +191,7 @@ export default function ContactPage() {
                                                 ></textarea>
                                             </div>
 
-                                            <Button type="submit" className="w-full bg-[#2857AE] hover:bg-[#1e408a] py-6 text-base">
+                                            <Button type="submit" className="w-full cursor-pointer bg-[#2857AE] hover:bg-[#1e408a] py-6 text-base">
                                                 <Send className="mr-2 h-4 w-4" /> Send Message
                                             </Button>
                                         </form>

@@ -97,7 +97,7 @@ export default function VideoSection() {
     );
 
     return (
-        <section ref={containerRef} className="sm:h-screen h-full bg-white flex flex-col justify-center items-center relative z-10">
+        <section ref={containerRef} className="overflow-clip sm:h-screen h-full bg-white flex flex-col justify-center items-center relative z-10">
             <div className="relative max-w-[1920px] w-full sm:h-[calc(100vh-60px)] px-5 md:px-[calmp(30px,3vw,70px)] py-[clamp(20px,3vw,80px)] overflow-hidden">
 
                 <div className="w-full flex justify-center sm:mb-8 mb-4">
