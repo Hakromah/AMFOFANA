@@ -1,12 +1,16 @@
 import React from "react";
-import Image from "next/image";
+import StrapiImage from "@/components/StrapiImage";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Breadcrumb from "@/components/Breadcrumb";
-import { opportunities } from "@/data/opportunities";
+import type { Opportunity } from "@/types/strapi";
 
-export default function OpportunitiesPage() {
+interface OpportunitiesPageProps {
+  opportunities?: Opportunity[];
+}
+
+export default function OpportunitiesPage({ opportunities = [] }: OpportunitiesPageProps) {
   return (
     <div className="w-full min-h-screen bg-background lg:pb-20">
       {/* Breadcrumb Section */}
@@ -40,21 +44,24 @@ export default function OpportunitiesPage() {
           <div className="flex flex-col gap-[clamp(30px,3.5vw,120px)]">
             {opportunities.map((opp) => (
               <div key={opp.id} className="w-full h-full relative">
-                <Link href={`/opportunities/${opp.id}`}>
+                <Link href={`/opportunities/${opp.slug}`}>
                   {/* Left Side: Index & Image */}
                   <div className="flex flex-col lg:flex-row gap-[clamp(20px,3.5vw,40px)] items-start">
                     <div className="flex-1 w-full lg:w-auto flex gap-6 relative">
                       <div className="text-[clamp(15px,2.5vw,30px)] max-sm:absolute z-50 max-sm:top-3 max-sm:left-3 font-normal max-sm:w-15 max-sm:h-10 max-sm:text-white max-sm:bg-primary w-[83px] h-[63px] rounded-[10px] bg-primary/10 text-black flex items-center justify-center leading-none select-none">
                         {opp.index}
                       </div>
-                      <div className="relative h-[300px] w-full rounded-2xl overflow-hidden shadow-sm">
-                        <Image
-                          src={opp.image}
-                          alt={opp.title}
-                          fill
-                          className="object-cover transition-transform duration-500 hover:scale-105"
-                        />
-                      </div>
+                      {opp.image && (
+                        <div className="relative h-[300px] w-full rounded-2xl overflow-hidden shadow-sm">
+                          <StrapiImage
+                            src={opp.image}
+                            alt={opp.title}
+                            fill
+                            unoptimized
+                            className="object-cover transition-transform duration-500 hover:scale-105"
+                          />
+                        </div>
+                      )}
                     </div>
 
                     {/* Right Side: Content */}

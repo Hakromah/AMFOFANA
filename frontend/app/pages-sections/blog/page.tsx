@@ -1,26 +1,30 @@
 "use client";
 import React, { useState, useMemo } from 'react';
-import Image from 'next/image';
+import StrapiImage from '@/components/StrapiImage';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Search, ArrowRight } from 'lucide-react';
 import Breadcrumb from '@/components/Breadcrumb';
-import { blogPosts } from '@/data/blogPosts';
+import type { BlogPost } from '@/types/strapi';
 
-export default function BlogPage() {
+interface BlogPageProps {
+    initialPosts?: BlogPost[];
+}
+
+export default function BlogPage({ initialPosts = [] }: BlogPageProps) {
     const [visibleCount, setVisibleCount] = useState(6);
     const [searchQuery, setSearchQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('All');
 
     // Auto-generate categories from blog data (future-proof)
     const categories = useMemo(() => {
-        const uniqueCategories = [...new Set(blogPosts.map(post => post.category))];
+        const uniqueCategories = [...new Set(initialPosts.map(post => post.category))];
         return ['All', ...uniqueCategories];
-    }, []);
+    }, [initialPosts]);
 
     // Filter posts by search + category
     const filteredPosts = useMemo(() => {
-        return blogPosts.filter(post => {
+        return initialPosts.filter(post => {
             const matchesSearch = searchQuery === '' ||
                 post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
@@ -29,7 +33,7 @@ export default function BlogPage() {
 
             return matchesSearch && matchesCategory;
         });
-    }, [searchQuery, activeCategory]);
+    }, [initialPosts, searchQuery, activeCategory]);
 
     // Reset visible count when filters change
     const handleCategoryChange = (category: string) => {
@@ -78,7 +82,7 @@ export default function BlogPage() {
                                         <article key={post.id} className="flex flex-col group">
                                             {/* Image Container */}
                                             <Link href={`/blog/${post.id}`} className="block relative h-64 w-full rounded-2xl overflow-hidden mb-5">
-                                                <Image
+                                                <StrapiImage
                                                     src={post.image}
                                                     alt={post.title}
                                                     fill
@@ -162,8 +166,8 @@ export default function BlogPage() {
                                                 key={category}
                                                 onClick={() => handleCategoryChange(category)}
                                                 className={`px-5 py-2 text-sm font-medium rounded-full transition-colors cursor-pointer ${activeCategory === category
-                                                        ? 'bg-[#2857AE] text-white'
-                                                        : 'bg-[#EEF2F6] text-gray-600 hover:bg-gray-200'
+                                                    ? 'bg-[#2857AE] text-white'
+                                                    : 'bg-[#EEF2F6] text-gray-600 hover:bg-gray-200'
                                                     }`}
                                             >
                                                 {category}

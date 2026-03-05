@@ -1,10 +1,10 @@
 "use client"
 import React, { useState } from 'react';
-import Image from 'next/image';
+import StrapiImage from '@/components/StrapiImage';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Calendar, CheckCircle, Clock, Send, Upload } from 'lucide-react';
-import { Opportunity } from '@/data/opportunities';
+import type { Opportunity } from '@/types/strapi';
 import { Input } from '@/components/ui/input';
 import {
     Sheet,
@@ -24,29 +24,28 @@ export default function OpportunityDetail({ opportunity }: { opportunity: Opport
         // Simulate API call
         setTimeout(() => setIsApplied(false), 3000); // Reset for demo
     };
-
     return (
         <div className="min-h-screen bg-white sm:pb-[clamp(25px,3vw,80px)]">
             {/* Header / Hero */}
             <div className="relative h-[50vh] min-h-[400px]">
-                <Image
+                <StrapiImage
                     src={opportunity.image}
                     alt={opportunity.title}
                     fill
                     className="object-cover"
-                    priority
+                    unoptimized
                 />
                 <div className="absolute inset-0 bg-black/50" />
                 <div className="absolute inset-0 flex flex-col justify-end container mx-auto px-4 pb-12 text-white">
-                    <Link href="/pages/opportunities" className="inline-flex items-center text-white/80 hover:text-white mb-6 transition-colors">
+                    <Link href="/pages-sections/opportunity" className="inline-flex items-center text-white/80 hover:text-white mb-6 transition-colors">
                         <ArrowLeft className="w-5 h-5 mr-2" /> Back to Opportunities
                     </Link>
                     <div className="flex items-center gap-4 max-sm:flex-wrap text-sm font-medium mb-4">
                         <span className="bg-primary px-3 py-1 rounded-full">{opportunity.index}</span>
                         <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> Published: {opportunity.publishedDate}</span>
                         <span className="flex items-center gap-1 text-red-200"><Clock className="w-4 h-4" /> Deadline:   <div>
-                          Deadline {opportunity.deadline}{" "}
-                          <span className="text-white">{opportunity.dateNumber}</span>
+                            Deadline {opportunity.deadline}{" "}
+                            <span className="text-white">{opportunity.dateNumber}</span>
                         </div></span>
                     </div>
                     <h1 className="text-xl md:text-5xl font-bold max-w-4xl leading-tight">

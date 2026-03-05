@@ -3,9 +3,14 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Breadcrumb from "@/components/Breadcrumb";
 import LeadershipSlider from "./LeadershipSlider";
-import intro1 from "@/public/home/intro1.png";
-import staff from "@/public/home/staff2.png";
-export default function AboutPage() {
+import type { AboutPageData, StaffMember } from "@/types/strapi";
+
+interface AboutPageProps {
+  aboutData?: AboutPageData | null;
+  leadershipTeam?: StaffMember[];
+}
+
+export default function AboutPage({ aboutData, leadershipTeam }: AboutPageProps) {
   return (
     <div className="w-full">
       {/* Hero Section */}
@@ -13,7 +18,7 @@ export default function AboutPage() {
         <Breadcrumb
           title="About us"
           description="Discover Our History, Mission, and Vision"
-          image={intro1.src}
+          image="/home/intro1.png"
           alt="About Us Hero"
         />
       </div>
@@ -30,70 +35,70 @@ export default function AboutPage() {
               <p>
                 Starting with a few students in a modest structure, the school has grown over decades into a reputable institution graduating thousands of students who excel in various fields while upholding their faith and integrity.
               </p>
-               <p>
+              <p>
                 Starting with a few students in a modest structure, the school has grown over decades into a reputable institution graduating thousands of students who excel in various fields while upholding their faith and integrity.
               </p>
             </div>
             <div className="relative h-[400px] w-full bg-gray-200 rounded-2xl overflow-hidden shadow-xl flex items-center justify-center">
               <span className="text-gray-500">History Image Placeholder</span>
-               <Image
-                src={intro1.src}
+              <Image
+                src="/home/intro1.png"
                 alt="School History"
                 fill
                 className="object-cover"
-              /> 
+              />
             </div>
           </div>
         </div>
-          {/* Statistics Section */}
-      <div className="w-full h-full  mt-[clamp(25px,3vw,50px)] lg:px-5">
-        <div className="container mx-auto w-full h-full max-w-[1308px] py-[clamp(25px,3vw,50px)] px-[clamp(20px,3vw,100px)] bg-primary/10 lg:rounded-[clamp(10px,2vw,20px)]">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-[clamp(20px,3vw,30px)] text-center">
-            {/* Stat 1 */}
-            <div className="flex flex-col items-center">
-              <div className="w-16 h-16 bg-[#2857AE] rounded-lg flex items-center justify-center mb-4 text-white shadow-md">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                </svg>
+        {/* Statistics Section */}
+        <div className="w-full h-full  mt-[clamp(25px,3vw,50px)] lg:px-5">
+          <div className="container mx-auto w-full h-full max-w-[1308px] py-[clamp(25px,3vw,50px)] px-[clamp(20px,3vw,100px)] bg-primary/10 lg:rounded-[clamp(10px,2vw,20px)]">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-[clamp(20px,3vw,30px)] text-center">
+              {/* Stat 1 */}
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 bg-[#2857AE] rounded-lg flex items-center justify-center mb-4 text-white shadow-md">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900">1,500+</h3>
+                <p className="text-gray-600 font-medium">Students</p>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900">1,500+</h3>
-              <p className="text-gray-600 font-medium">Students</p>
-            </div>
-            {/* Stat 2 */}
-            <div className="flex flex-col items-center">
-              <div className="w-16 h-16 bg-[#2857AE] rounded-lg flex items-center justify-center mb-4 text-white shadow-md">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                </svg>
+              {/* Stat 2 */}
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 bg-[#2857AE] rounded-lg flex items-center justify-center mb-4 text-white shadow-md">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900">40+</h3>
+                <p className="text-gray-600 font-medium">Years Excellence</p>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900">40+</h3>
-              <p className="text-gray-600 font-medium">Years Excellence</p>
-            </div>
-            {/* Stat 3 */}
-            <div className="flex flex-col items-center">
-              <div className="w-16 h-16 bg-[#2857AE] rounded-lg flex items-center justify-center mb-4 text-white shadow-md">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
-                </svg>
+              {/* Stat 3 */}
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 bg-[#2857AE] rounded-lg flex items-center justify-center mb-4 text-white shadow-md">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900">15+</h3>
+                <p className="text-gray-600 font-medium">Programs</p>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900">15+</h3>
-              <p className="text-gray-600 font-medium">Programs</p>
-            </div>
-            {/* Stat 4 */}
-            <div className="flex flex-col items-center">
-              <div className="w-16 h-16 bg-[#2857AE] rounded-lg flex items-center justify-center mb-4 text-white shadow-md">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0V5.625a1.125 1.125 0 0 0-1.125-1.125h-2.25a1.125 1.125 0 0 0-1.125 1.125v9.75" />
-                </svg>
+              {/* Stat 4 */}
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 bg-[#2857AE] rounded-lg flex items-center justify-center mb-4 text-white shadow-md">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0V5.625a1.125 1.125 0 0 0-1.125-1.125h-2.25a1.125 1.125 0 0 0-1.125 1.125v9.75" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900">20+</h3>
+                <p className="text-gray-600 font-medium">Awards</p>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900">20+</h3>
-              <p className="text-gray-600 font-medium">Awards</p>
             </div>
           </div>
         </div>
-      </div>
       </section>
-    
+
       {/* Mission & Vision Section */}
       <section id="mission" className="py-[clamp(25px,3vw,40px)] bg-primary/20">
         <div className="container mx-auto max-w-[1920px] px-5 md:px-[clamp(20px,5vw,60px)]">
@@ -123,7 +128,7 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
-        {/* Values Section */}
+      {/* Values Section */}
       <section id="values" className="py-[clamp(25px,3vw,80px)] bg-background">
         <div className="container mx-auto w-full max-w-[1920px] px-5 md:px-[clamp(20px,5vw,60px)]">
           <div className="text-center mb-12">
@@ -186,7 +191,7 @@ export default function AboutPage() {
             <div className="w-full md:w-1/3">
               <div className="relative h-[400px] w-full rounded-[clamp(15px,2vw,20px)] overflow-hidden border-4 border-white/20 shadow-2xl">
                 <Image
-                  src={staff} /* Placeholder matching the vibe, or use the one from staff if known */
+                  src="/home/staff2.png" /* Placeholder matching the vibe, or use the one from staff if known */
                   alt="Principal Message"
                   fill
                   className="object-cover"
@@ -212,13 +217,6 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
-
-    
-
-   
-
-    
-
       {/* Leadership Slider */}
       <LeadershipSlider />
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import StrapiImage from '@/components/StrapiImage';
 import { ArrowRight, ArrowLeft, ArrowUpRight } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Swiper as SwiperType } from 'swiper';
@@ -12,59 +12,36 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 
+import type { AcademicProgram } from '@/types/strapi';
+
 import 'swiper/css';
 import 'swiper/css/navigation';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const programs = [
-    {
-        id: 1,
-        category: 'Kindergarten',
-        title: 'Kindergarten',
-        image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', // Placeholder
-        description: 'Global education system has become one of our early childhood program focuses on "Learning through Play." We prioritize...'
-    },
-    {
-        id: 2,
-        category: 'Elementary',
-        title: 'Elementary',
-        image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', // Placeholder
-        description: 'Global education system has become one of our early childhood program focuses on "Learning through Play." We prioritize...'
-    },
-    {
-        id: 3,
-        category: 'Junior High',
-        title: 'Junior High',
-        image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', // Placeholder
-        description: 'Global education system has become one of our early childhood program focuses on "Learning through Play." We prioritize...'
-    },
-    {
-        id: 4,
-        category: 'Vocational Training',
-        title: 'Vocational Training',
-        image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', // Placeholder
-        description: 'Global education system has become one of our early childhood program focuses on "Learning through Play." We prioritize...'
-    },
-    {
-        id: 5,
-        category: 'Senior High',
-        title: 'Senior High',
-        image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', // Placeholder
-        description: 'Preparing students for higher education and career success with rigorous academic programs.'
-    }
+const fallbackPrograms: AcademicProgram[] = [
+    { id: 1, category: 'Kindergarten', title: 'Kindergarten', image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', description: 'Global education system has become one of our early childhood program focuses on "Learning through Play." We prioritize...' },
+    { id: 2, category: 'Elementary', title: 'Elementary', image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', description: 'Global education system has become one of our early childhood program focuses on "Learning through Play." We prioritize...' },
+    { id: 3, category: 'Junior High', title: 'Junior High', image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', description: 'Global education system has become one of our early childhood program focuses on "Learning through Play." We prioritize...' },
+    { id: 4, category: 'Vocational Training', title: 'Vocational Training', image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', description: 'Global education system has become one of our early childhood program focuses on "Learning through Play." We prioritize...' },
+    { id: 5, category: 'Senior High', title: 'Senior High', image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', description: 'Preparing students for higher education and career success with rigorous academic programs.' },
 ];
 
-const categories = ["All Programs", "Kindergarten", "Elementary", "Junior High", "Senior High", "Vocational Training"];
+const allCategories = ["All Programs", "Kindergarten", "Elementary", "Junior High", "Senior High", "Vocational Training"];
 
-export default function AcademicSection() {
+interface AcademicSectionProps {
+    programs?: AcademicProgram[];
+}
+
+export default function AcademicSection({ programs: programsProp }: AcademicSectionProps) {
+    const activePrograms = (programsProp && programsProp.length > 0) ? programsProp : fallbackPrograms;
     const [activeTab, setActiveTab] = useState("All Programs");
     const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
     const containerRef = useRef<HTMLElement>(null);
 
     const filteredPrograms = activeTab === "All Programs"
-        ? programs
-        : programs.filter(p => p.category === activeTab);
+        ? activePrograms
+        : activePrograms.filter(p => p.category === activeTab);
 
     useGSAP(() => {
         const tl = gsap.timeline({
@@ -136,11 +113,11 @@ export default function AcademicSection() {
                     {/* Tabs */}
 
                     <div className="academic-tabs flex items-center justify-start gap-x-8 border-b border-white/20 overflow-x-auto [-webkit-overflow-scrolling:touch] scrollbar-thin pb-2 sm:pb-[17px]">
-                        {categories.map((cat) => (
+                        {allCategories.map((cat) => (
                             <button
                                 key={cat}
                                 onClick={() => setActiveTab(cat)}
-                                className={`button text-nowrap h-fit cursor-pointer text-base h-full font-medium transition-all duration-500 relative py-2 after:duration-500 sm:after:absolute sm:after:bottom-[-17px] after:left-0 after:w-0 after:h-[2px] after:bg-white 
+                                className={`button text-nowrap h-fit cursor-pointer text-base h-full font-medium transition-all duration-500 relative py-2 after:duration-500 sm:after:absolute sm:after:bottom-[-17px] after:left-0 after:w-0 after:h-[2px] after:bg-white
                                 ${activeTab === cat ? 'text-white opacity-100  sm:after:w-full duration-500 after:duration-500' : 'text-white/60 lg:hover:text-white'}`}>
                                 {cat}
                             </button>
@@ -171,30 +148,31 @@ export default function AcademicSection() {
                     {filteredPrograms.map((program) => (
                         <SwiperSlide key={program.id} className="h-full">
                             <a href='/academic' className='block w-full h-full'>
-                            <div className="group/card bg-white rounded-[15px] p-3 overflow-hidden h-[501px] max-sm:h-[400px] flex flex-col group cursor-pointer transition-transform duration-300">
-                                <div className=" relative h-60 max-xs:h-[220px] w-full overflow-hidden rounded-[12px]">
-                                    <Image
-                                        src={program.image}
-                                        alt={program.title}
-                                        fill
-                                        className="object-cover transition-transform duration-500 lg:group-hover/card:scale-110"
-                                    />
-                                    <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-300" />
-                                </div>
+                                <div className="group/card bg-white rounded-[15px] p-3 overflow-hidden h-[501px] max-sm:h-[400px] flex flex-col group cursor-pointer transition-transform duration-300">
+                                    <div className=" relative h-60 max-xs:h-[220px] w-full overflow-hidden rounded-[12px]">
+                                        <StrapiImage
+                                            src={program.image}
+                                            alt={program.title}
+                                            fill
+                                            unoptimized
+                                            className="object-cover transition-transform duration-500 lg:group-hover/card:scale-110"
+                                        />
+                                        <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-300" />
+                                    </div>
 
-                                <div className="pb-6  pt-3 flex flex-col flex-grow text-primary">
-                                    <h3 className="text-[clamp(20px,2vw,25px)] font-semibold mb-3 line-clamp-2">{program.title}</h3>
-                                    <p className="text-[#4B5563] text-[clamp(16px,1.5vw,18px)] line-clamp-3 leading-relaxed mb-6 flex-grow">
-                                        {program.description}
-                                    </p>
+                                    <div className="pb-6  pt-3 flex flex-col flex-grow text-primary">
+                                        <h3 className="text-[clamp(20px,2vw,25px)] font-semibold mb-3 line-clamp-2">{program.title}</h3>
+                                        <p className="text-[#4B5563] text-[clamp(16px,1.5vw,18px)] line-clamp-3 leading-relaxed mb-6 flex-grow">
+                                            {program.description}
+                                        </p>
 
-                                    <div className="mt-auto">
-                                        <Button className="w-full rounded-full font-bold bg-[#2857AE]/10 lg:hover:bg-primary lg:hover:text-white text-primary text-[clamp(16px,1.5vw,18px)] italic font-bold transition-all duration-500 border border-primary">
-                                            Explore Curriculum
-                                        </Button>
+                                        <div className="mt-auto">
+                                            <Button className="w-full rounded-full font-bold bg-[#2857AE]/10 lg:hover:bg-primary lg:hover:text-white text-primary text-[clamp(16px,1.5vw,18px)] italic font-bold transition-all duration-500 border border-primary">
+                                                Explore Curriculum
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
                             </a>
                         </SwiperSlide>
                     ))}

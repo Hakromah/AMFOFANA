@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
-import Image from 'next/image';
+import StrapiImage from '@/components/StrapiImage';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -11,20 +11,24 @@ import { Button } from '@/components/ui/button';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
+import type { BlogPost } from '@/types/strapi';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const newsItems = [
+const fallbackNewsItems: BlogPost[] = [
     {
         id: 1,
         date: "Jan 11, 2026",
-        category: "Event",
+        category: "Events",
         title: "Developing Critical Thinkers: The Annual Junior High Debate Cup",
         image: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-        excerpt: "A display of brilliant minds as our Junior High students tackled complex global issues in our annual debate finals..."
+        excerpt: "A display of brilliant minds as our Junior High students tackled complex global issues in our annual debate finals...",
+        content: "",
+        author: "",
+        slug: "1",
     },
     {
         id: 2,
@@ -32,15 +36,21 @@ const newsItems = [
         category: "Academics",
         title: "Scientific Breakthroughs: Students Present Research at State Fair",
         image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-        excerpt: "Our young scientists showcased their innovative projects, earning top honors and recognition for their detailed research..."
+        excerpt: "Our young scientists showcased their innovative projects, earning top honors and recognition for their detailed research...",
+        content: "",
+        author: "",
+        slug: "2",
     },
     {
         id: 3,
         date: "Jan 11, 2026",
-        category: "Event",
+        category: "Events",
         title: "Cultural Heritage Day: Celebrating Diversity on Campus",
         image: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-        excerpt: "Students and faculty came together to share traditions, food, and performances, fostering a deeper understanding of our global community..."
+        excerpt: "Students and faculty came together to share traditions, food, and performances, fostering a deeper understanding of our global community...",
+        content: "",
+        author: "",
+        slug: "3",
     },
     {
         id: 4,
@@ -48,43 +58,19 @@ const newsItems = [
         category: "Sports",
         title: "Championship Victory: Soccer Team Takes the Trophy",
         image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-        excerpt: "In a thrilling final match, our varsity team demonstrated exceptional teamwork and determination to secure the regional championship..."
-    },
-    {
-        id: 5,
-        date: "Jan 11, 2026",
-        category: "Event",
-        title: "Developing Critical Thinkers: The Annual Junior High Debate Cup",
-        image: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-        excerpt: "A display of brilliant minds as our Junior High students tackled complex global issues in our annual debate finals..."
-    },
-    {
-        id: 6,
-        date: "Jan 11, 2026",
-        category: "Academics",
-        title: "Scientific Breakthroughs: Students Present Research at State Fair",
-        image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-        excerpt: "Our young scientists showcased their innovative projects, earning top honors and recognition for their detailed research..."
-    },
-    {
-        id: 7,
-        date: "Jan 11, 2026",
-        category: "Event",
-        title: "Cultural Heritage Day: Celebrating Diversity on Campus",
-        image: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-        excerpt: "Students and faculty came together to share traditions, food, and performances, fostering a deeper understanding of our global community..."
-    },
-    {
-        id: 8,
-        date: "Jan 11, 2026",
-        category: "Sports",
-        title: "Championship Victory: Soccer Team Takes the Trophy",
-        image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-        excerpt: "In a thrilling final match, our varsity team demonstrated exceptional teamwork and determination to secure the regional championship..."
+        excerpt: "In a thrilling final match, our varsity team demonstrated exceptional teamwork and determination to secure the regional championship...",
+        content: "",
+        author: "",
+        slug: "4",
     },
 ];
 
-export default function NewsSection() {
+interface NewsSectionProps {
+    newsItems?: BlogPost[];
+}
+
+export default function NewsSection({ newsItems: newsItemsProp }: NewsSectionProps) {
+    const activeItems = (newsItemsProp && newsItemsProp.length > 0) ? newsItemsProp : fallbackNewsItems;
     const containerRef = useRef<HTMLElement>(null);
     const prevRef = useRef<HTMLButtonElement>(null);
     const nextRef = useRef<HTMLButtonElement>(null);
@@ -187,12 +173,12 @@ export default function NewsSection() {
                         }}
                         className="!overflow-visible py-4"
                     >
-                        {newsItems.map((item) => (
+                        {activeItems.map((item) => (
                             <SwiperSlide key={item.id} className="h-auto">
                                 <div className="group cursor-pointer">
                                     {/* Image */}
                                     <div className="relative h-[336px] w-full rounded-2xl overflow-hidden mb-6">
-                                        <Image
+                                        <StrapiImage
                                             src={item.image}
                                             alt={item.title}
                                             fill

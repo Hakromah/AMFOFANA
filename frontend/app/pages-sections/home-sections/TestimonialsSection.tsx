@@ -1,57 +1,27 @@
 "use client";
 
 import React, { useRef } from 'react';
-import Image from 'next/image';
+import StrapiImage from '@/components/StrapiImage';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 
+import type { Testimonial } from '@/types/strapi';
+
 gsap.registerPlugin(ScrollTrigger);
 
-const testimonials = [
-    {
-        id: 1,
-        type: "PARENT",
-        quote: "The caliber of education and the personal attention our children receive here is unparalleled. Every teacher knows them by name, understands their aspirations, and nurtures their individual talents with genuine dedication.",
-        name: "Ms. Emily Chen",
-        role: "Mother of Charles & Sophia",
-        image: "/home/staff1.png",
-    },
-    {
-        id: 2,
-        type: "STUDENT",
-        quote: "The caliber of education and the personal attention our children receive here is unparalleled. Every teacher knows them by name, understands their aspirations, and nurtures their individual talents with genuine dedication.",
-        name: "Ms. Emily Chen",
-        role: "Mother of Charles & Sophia",
-        image: "/home/staff2.png",
-    },
-    {
-        id: 3,
-        type: "ALUMNI",
-        quote: "The caliber of education and the personal attention our children receive here is unparalleled. Every teacher knows them by name, understands their aspirations, and nurtures their individual talents with genuine dedication.",
-        name: "Ms. Emily Chen",
-        role: "Mother of Charles & Sophia",
-        image: "/home/staff1.png",
-    },
-    {
-        id: 4,
-        type: "ALUMNI",
-        quote: "The caliber of education and the personal attention our children receive here is unparalleled. Every teacher knows them by name, understands their aspirations, and nurtures their individual talents with genuine dedication.",
-        name: "Ms. Emily Chen",
-        role: "Mother of Charles & Sophia",
-        image: "/home/staff2.png",
-    },
-    {
-        id: 5,
-        type: "ALUMNI",
-        quote: "The caliber of education and the personal attention our children receive here is unparalleled. Every teacher knows them by name, understands their aspirations, and nurtures their individual talents with genuine dedication.",
-        name: "Ms. Emily Chen",
-        role: "Mother of Charles & Sophia",
-        image: "/home/staff1.png",
-    },
+const fallbackTestimonials: Testimonial[] = [
+    { id: 1, type: "PARENT", quote: "The caliber of education and the personal attention our children receive here is unparalleled. Every teacher knows them by name, understands their aspirations, and nurtures their individual talents with genuine dedication.", name: "Ms. Emily Chen", role: "Mother of Charles & Sophia", image: "/home/staff1.png" },
+    { id: 2, type: "STUDENT", quote: "The caliber of education and the personal attention our children receive here is unparalleled. Every teacher knows them by name, understands their aspirations, and nurtures their individual talents with genuine dedication.", name: "Ms. Emily Chen", role: "Mother of Charles & Sophia", image: "/home/staff2.png" },
+    { id: 3, type: "ALUMNI", quote: "The caliber of education and the personal attention our children receive here is unparalleled. Every teacher knows them by name, understands their aspirations, and nurtures their individual talents with genuine dedication.", name: "Ms. Emily Chen", role: "Mother of Charles & Sophia", image: "/home/staff1.png" },
 ];
 
-export default function TestimonialsSection() {
+interface TestimonialsSectionProps {
+    testimonials?: Testimonial[];
+}
+
+export default function TestimonialsSection({ testimonials: testimonialsProp }: TestimonialsSectionProps) {
+    const activeTestimonials = (testimonialsProp && testimonialsProp.length > 0) ? testimonialsProp : fallbackTestimonials;
     const containerRef = useRef<HTMLElement>(null);
 
     useGSAP(() => {
@@ -81,7 +51,7 @@ export default function TestimonialsSection() {
     }, { scope: containerRef });
 
     // Triple the testimonials to ensure smooth infinite loop on all screen sizes
-    const allTestimonials = [...testimonials, ...testimonials, ...testimonials];
+    const allTestimonials = [...activeTestimonials, ...activeTestimonials, ...activeTestimonials];
 
     return (
         <section ref={containerRef} className="overflow-clip py-[clamp(20px,5vw,80px)] bg-white overflow-hidden">
@@ -133,11 +103,12 @@ export default function TestimonialsSection() {
                                     {/* Profile */}
                                     <div className="flex items-center gap-4 mt-auto">
                                         <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white/30 flex-shrink-0">
-                                            <Image
+                                            <StrapiImage
                                                 src={testimonial.image}
                                                 alt={testimonial.name}
                                                 fill
                                                 className="object-cover"
+                                                unoptimized
                                             />
                                         </div>
                                         <div>

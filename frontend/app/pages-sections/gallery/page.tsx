@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { galleryItems } from "@/data/gallery";
+import type { GalleryItem } from "@/types/strapi";
 import { Play, ArrowRight, ArrowLeft } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
@@ -14,7 +14,11 @@ import "@fancyapps/ui/dist/fancybox/fancybox.css";
 import "swiper/css";
 import "swiper/css/navigation";
 
-export default function GalleryPage() {
+interface GalleryPageProps {
+  items?: GalleryItem[];
+}
+
+export default function GalleryPage({ items = [] }: GalleryPageProps) {
   const [activeMediaType, setActiveMediaType] = useState<"image" | "video">(
     "image",
   );
@@ -24,7 +28,7 @@ export default function GalleryPage() {
   const [visibleGridCount, setVisibleGridCount] = useState(6);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const filteredItems = galleryItems.filter(
+  const filteredItems = items.filter(
     (item) =>
       (activeMediaType === "video"
         ? item.type === "video"
@@ -33,7 +37,7 @@ export default function GalleryPage() {
   );
 
   // Filter items for the grid (only images)
-  const gridItems = galleryItems.filter((item) => item.type === "image");
+  const gridItems = items.filter((item: GalleryItem) => item.type === "image");
 
   useEffect(() => {
     const container = containerRef.current;
@@ -61,21 +65,19 @@ export default function GalleryPage() {
             <div className="bg-[#F8F9FA] p-1.5 rounded-full inline-flex items-center gap-1">
               <button
                 onClick={() => setActiveMediaType("image")}
-                className={`px-8 py-2.5 rounded-full text-sm font-semibold cursor-pointer text-nowrap transition-all duration-300 ${
-                  activeMediaType === "image"
-                    ? "bg-primary text-white shadow-sm"
-                    : "text-gray-500 hover:text-gray-900 bg-transparent"
-                }`}
+                className={`px-8 py-2.5 rounded-full text-sm font-semibold cursor-pointer text-nowrap transition-all duration-300 ${activeMediaType === "image"
+                  ? "bg-primary text-white shadow-sm"
+                  : "text-gray-500 hover:text-gray-900 bg-transparent"
+                  }`}
               >
                 Image Gallery
               </button>
               <button
                 onClick={() => setActiveMediaType("video")}
-                className={`px-8 py-2.5 rounded-full text-sm font-semibold cursor-pointer text-nowrap transition-all duration-300 ${
-                  activeMediaType === "video"
-                    ? "bg-[#2857AE] text-white shadow-md"
-                    : "text-gray-500 hover:text-gray-900 bg-transparent"
-                }`}
+                className={`px-8 py-2.5 rounded-full text-sm font-semibold cursor-pointer text-nowrap transition-all duration-300 ${activeMediaType === "video"
+                  ? "bg-[#2857AE] text-white shadow-md"
+                  : "text-gray-500 hover:text-gray-900 bg-transparent"
+                  }`}
               >
                 Video Gallery
               </button>
@@ -89,11 +91,10 @@ export default function GalleryPage() {
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat as any)}
-                  className={`min-w-[80px] flex justify-center items-center px-6 py-2 rounded-full border cursor-pointer text-sm font-medium transition-all duration-200 ${
-                    activeCategory === cat
-                      ? "bg-[#2857AE] text-white border-[#2857AE]"
-                      : "bg-white text-[#2857AE] border-[#2857AE] hover:bg-blue-50"
-                  }`}
+                  className={`min-w-[80px] flex justify-center items-center px-6 py-2 rounded-full border cursor-pointer text-sm font-medium transition-all duration-200 ${activeCategory === cat
+                    ? "bg-[#2857AE] text-white border-[#2857AE]"
+                    : "bg-white text-[#2857AE] border-[#2857AE] hover:bg-blue-50"
+                    }`}
                 >
                   {cat}
                 </button>
@@ -133,6 +134,7 @@ export default function GalleryPage() {
                       }
                       alt={item.title}
                       fill
+                      unoptimized
                       className="object-cover transition-transform duration-700 group-hover:scale-105"
                     />
 
@@ -187,6 +189,7 @@ export default function GalleryPage() {
                   src={item.src}
                   alt={item.title}
                   fill
+                  unoptimized
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
                 {/* Optional: Hover Overlay */}

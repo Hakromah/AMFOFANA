@@ -1,48 +1,25 @@
 "use client"
 import React, { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
+import StrapiImage from '@/components/StrapiImage';
 import { Button } from '@/components/ui/button';
 import { FileText, Download, ArrowRight, CheckCircle } from 'lucide-react';
 import Breadcrumb from '@/components/Breadcrumb';
+import type { AcademicSection, AcademicResource } from '@/types/strapi';
 
-const academicSections = [
-    {
-        id: 'elementary',
-        title: 'Elementary (K-5)',
-        content: 'Core focus on Literacy, Math, and Social-Emotional development using inquiry-based learning. Core focus on Literacy, Math, and Social-Emotional development using inquiry-based learning.',
-        image: '/home/classmate.jpg',
-        details: [
-            "Inquiry-based learning approach",
-            "Strong focus on literacy and numeracy",
-            "Safe and nurturing environment"
-        ]
-    },
-    {
-        id: 'junior',
-        title: 'Junior High (6-8)',
-        content: 'Introduction to specialized subjects, lab sciences, and organizational skills for independence. Introduction to specialized subjects, lab sciences, and organizational skills for independence.',
-        image: '/home/intro2.png',
-        details: [
-            "Specialized subject teachers",
-            "Introduction to lab sciences",
-            "Development of organizational skills"
-        ]
-    },
-    {
-        id: 'highschool',
-        title: 'High School (9-12)',
-        content: 'Advanced Placement (AP) courses, Honors tracks, and College & Career Readiness programs. Advanced Placement (AP) courses, Honors tracks, and College & Career Readiness programs.',
-        image: '/home/am1.png',
-        details: [
-            "Advanced Placement (AP) courses",
-            "College & Career Readiness programs",
-            "Leadership opportunities"
-        ]
-    }
+const fallbackSections: AcademicSection[] = [
+    { id: 1, sectionId: 'elementary', title: 'Elementary (K-5)', content: 'Core focus on Literacy, Math, and Social-Emotional development using inquiry-based learning.', image: '/home/classmate.jpg', details: ["Inquiry-based learning approach", "Strong focus on literacy and numeracy", "Safe and nurturing environment"], header: "Elementary (K-5)", subheader: "Core focus on Literacy, Math, and Social-Emotional development using inquiry-based learning." },
+    { id: 2, sectionId: 'junior', title: 'Junior High (6-8)', content: 'Introduction to specialized subjects, lab sciences, and organizational skills for independence.', image: '/home/intro2.png', details: ["Specialized subject teachers", "Introduction to lab sciences", "Development of organizational skills"], header: "Junior High (6-8)", subheader: "Introduction to specialized subjects, lab sciences, and organizational skills for independence." },
+    { id: 3, sectionId: 'highschool', title: 'High School (9-12)', content: 'Advanced Placement (AP) courses, Honors tracks, and College & Career Readiness programs.', image: '/home/am1.png', details: ["Advanced Placement (AP) courses", "College & Career Readiness programs", "Leadership opportunities"], header: "High School (9-12)", subheader: "Advanced Placement (AP) courses, Honors tracks, and College & Career Readiness programs." },
 ];
 
-export default function AcademicPage() {
-    const [activeSection, setActiveSection] = useState(academicSections[0].id);
+interface AcademicPageProps {
+    sections?: AcademicSection[];
+    resources?: AcademicResource[];
+}
+
+export default function AcademicPage({ sections: sectionsProp, resources: resourcesProp }: AcademicPageProps) {
+    const academicSections = (sectionsProp && sectionsProp.length > 0) ? sectionsProp : fallbackSections;
+    const [activeSection, setActiveSection] = useState<string>(academicSections[0].sectionId);
     const observerRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
     useEffect(() => {
@@ -69,7 +46,8 @@ export default function AcademicPage() {
         return () => observer.disconnect();
     }, []);
 
-    const activeImage = academicSections.find(s => s.id === activeSection)?.image || academicSections[0].image;
+    const activeImage = academicSections.find(s => s.sectionId === activeSection)?.image || academicSections[0].image;
+    const activeData = academicSections.find(s => s.sectionId === activeSection) || academicSections[0];
 
     return (
         <div className="w-full min-h-screen bg-background">
@@ -89,12 +67,11 @@ export default function AcademicPage() {
                             <div className="h-12 w-1 bg-[#2857AE]"></div>
                             <h2 className="text-xl md:text-4xl font-bold text-gray-900">Academic Excellence</h2>
                         </div>
-                        <h3 className="text-md md:text-xl font-semibold mb-4 max-sm:mb-2">Empowering students with comprehensive education and innovative learning approaches</h3>
+                        <h3 className="text-md md:text-xl font-semibold mb-4 max-sm:mb-2">
+                            {activeData.header || 'Empowering students with comprehensive education and innovative learning approaches'}
+                        </h3>
                         <p className="text-gray-600 leading-relaxed">
-                            Our curriculum is designed to meet national education standards and global best practices. We connect outstanding
-                            students with local and international scholarship opportunities. Students receive mentorship and guidance to help them
-                            choose future careers and university paths. Selected students participate in national and international exchange
-                            programs to broaden their global perspective.
+                            {activeData.subheader || 'Our curriculum is designed to meet national education standards and global best practices. We connect outstanding students with local and international scholarship opportunities. Students receive mentorship and guidance to help them choose future careers and university paths.'}
                         </p>
                     </div>
 
@@ -105,15 +82,17 @@ export default function AcademicPage() {
 
                             {academicSections.map((section) => (
                                 <div
-                                    key={section.id}
-                                    id={section.id}
-                                    ref={el => { if (el) observerRefs.current[section.id] = el; }}
+                                    key={section.sectionId}
+                                    id={section.sectionId}
+                                    ref={el => { if (el) observerRefs.current[section.sectionId] = el; }}
                                     className="scroll-mt-32 h-fit flex flex-col justify-center"
                                 >
                                     <div className="border-l-4 border-[#2857AE] pl-6 py-2 transition-all duration-300">
-                                        <h3 className={`text-[clamp(20px,3vw,32px)] font-bold mb-3 ${activeSection === section.id ? 'text-[#2857AE]' : 'text-gray-900'}`}>{section.title}</h3>
+                                        <h3 className={`text-[clamp(20px,3vw,32px)] font-bold mb-3 ${activeSection === section.sectionId ? 'text-[#2857AE]' : 'text-gray-900'}`}>
+                                            {section.header || section.title}
+                                        </h3>
                                         <p className="text-gray-600 text-lg mb-[clamp(15px,3vw,24px)] leading-relaxed">
-                                            {section.content}
+                                            {section.subheader || section.content}
                                         </p>
                                         <ul className="space-y-3">
                                             {section.details.map((item, i) => (
@@ -131,12 +110,13 @@ export default function AcademicPage() {
                         {/* Right Column: Sticky Image */}
                         <div className="hidden md:block w-1/2 relative">
                             <div className="sticky top-32 h-[400px] w-full bg-gray-100 rounded-3xl overflow-hidden shadow-2xl transition-all duration-700 ease-in-out">
-                                <Image
+                                <StrapiImage
                                     src={activeImage}
                                     alt="Academic Level"
                                     fill
                                     className="object-cover transition-opacity duration-500"
                                     priority
+                                    unoptimized
                                 />
                                 {/* Optional Overlay/Decoration resembling the book stack in the user request */}
                                 <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent pointer-events-none" />
@@ -151,17 +131,17 @@ export default function AcademicPage() {
             <section className="sm:py-[clamp(20px,3vw,50px)] max-sm:pt-5 bg-gray-50">
                 <div className="container max-w-[1920px]] mx-auto px-5 md:px-[clamp(20px,5vw,60px)]">
                     <a href="/file/sample.pdf" target="_blank" rel="noopener noreferrer" className='block w-full h-full'>
-                    <div className="bg-white p-[clamp(12px,4vw,26px)] rounded-xl md:shadow-sm border border-gray-100 flex flex-wrap items-center justify-between gap-6">
-                        <div className="flex items-center gap-6">
-                            <div className="bg-blue-50 p-4 rounded-lg text-[#2857AE] font-bold text-xl max-md:text-sm">
-                                2026/2027
+                        <div className="bg-white p-[clamp(12px,4vw,26px)] rounded-xl md:shadow-sm border border-gray-100 flex flex-wrap items-center justify-between gap-6">
+                            <div className="flex items-center gap-6">
+                                <div className="bg-blue-50 p-4 rounded-lg text-[#2857AE] font-bold text-xl max-md:text-sm">
+                                    2026/2027
+                                </div>
+                                <h3 className="text-xl max-md:text-sm font-bold text-gray-900">School Calendar</h3>
                             </div>
-                            <h3 className="text-xl max-md:text-sm font-bold text-gray-900">School Calendar</h3>
+                            <Button variant="outline" className="gap-2 max-xs:w-full cursor-pointer border-gray-300 hover:border-[#2857AE] hover:text-[#2857AE]">
+                                Download <FileText className="w-4 h-4" />
+                            </Button>
                         </div>
-                        <Button variant="outline" className="gap-2 max-xs:w-full cursor-pointer border-gray-300 hover:border-[#2857AE] hover:text-[#2857AE]">
-                            Download <FileText className="w-4 h-4" />
-                        </Button>
-                    </div>
                     </a>
                 </div>
             </section>
@@ -175,14 +155,14 @@ export default function AcademicPage() {
                             {[1, 2, 3].map((item) => (
                                 <div key={item} className='w-full h-full relative'>
                                     <a href='/file/sample.pdf' download rel='noopener noreferrer' className='block w-full h-full'>
-                                <div  className="flex items-center justify-between py-[clamp(12px,3vw,24px)] border-b border-gray-200 last:border-0 hover:bg-white/50 px-4 rounded-lg max-md:rounded-sm transition-colors cursor-pointer group">
-                                    <span className="text-gray-700 font-medium">Resources document -{item}</span>
-                                    <div className="flex items-center gap-2 text-[#2857AE] opacity-70 max-md:opacity-100 group-hover:opacity-100 transition-opacity">
-                                        <span className="text-sm font-semibold">Download</span>
-                                        <FileText className="w-5 h-5" />
-                                    </div>
-                                </div>
-                                </a>
+                                        <div className="flex items-center justify-between py-[clamp(12px,3vw,24px)] border-b border-gray-200 last:border-0 hover:bg-white/50 px-4 rounded-lg max-md:rounded-sm transition-colors cursor-pointer group">
+                                            <span className="text-gray-700 font-medium">Resources document -{item}</span>
+                                            <div className="flex items-center gap-2 text-[#2857AE] opacity-70 max-md:opacity-100 group-hover:opacity-100 transition-opacity">
+                                                <span className="text-sm font-semibold">Download</span>
+                                                <FileText className="w-5 h-5" />
+                                            </div>
+                                        </div>
+                                    </a>
                                 </div>
                             ))}
                         </div>

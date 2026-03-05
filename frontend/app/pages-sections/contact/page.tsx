@@ -15,13 +15,14 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet"
 import dynamic from 'next/dynamic';
+import type { ContactInfoData } from '@/types/strapi';
 
 const Map = dynamic(() => import('./Map'), {
     ssr: false,
     loading: () => <div className="h-full w-full bg-gray-100 flex items-center justify-center">Loading Map...</div>
 });
 
-const socialLinks = [
+const fallbackSocialLinks = [
     { name: "facebook", href: "#" },
     { name: "instagram", href: "#" },
     { name: "x", href: "#" },
@@ -30,7 +31,12 @@ const socialLinks = [
     { name: "whatsapp", href: "https://wa.me/231880386681" },
 ];
 
-export default function ContactPage() {
+interface ContactPageProps {
+    contactInfo?: ContactInfoData | null;
+}
+
+export default function ContactPage({ contactInfo }: ContactPageProps) {
+    const socialLinks = contactInfo?.socialLinks ?? fallbackSocialLinks;
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -66,15 +72,15 @@ export default function ContactPage() {
                         {/* Address Card */}
                         <div className="md:bg-white max-md:w-full md:p-8 md:rounded-2xl md:shadow-sm md:border md:border-gray-100 flex flex-col md:items-center items-start md:text-center md:hover:shadow-md transition-shadow">
                             <a href="" className='max-md:w-full flex flex-col md:items-center items-start md:text-center'>
-                            <div className="h-12 max-sm:hidden w-12 bg-blue-50 rounded-full flex items-center justify-center text-[#2857AE] mb-6">
-                                <span className='icon icon-map flex items-center justify-center text-primary h-5 w-5'></span>
-                            </div>
-                            <h3 className="font-bold text-lg mb-2">Address</h3>
-                            <p className="text-gray-600 max-md:[&_br]:hidden max-md:w-full max-md:text-left text-sm leading-relaxed">
-                                A.M. FOFANA High School Sinkor<br />
-                               Fish Market Monrovia, Liberia<br />
-                                West Africa
-                            </p>
+                                <div className="h-12 max-sm:hidden w-12 bg-blue-50 rounded-full flex items-center justify-center text-[#2857AE] mb-6">
+                                    <span className='icon icon-map flex items-center justify-center text-primary h-5 w-5'></span>
+                                </div>
+                                <h3 className="font-bold text-lg mb-2">Address</h3>
+                                <p className="text-gray-600 max-md:[&_br]:hidden max-md:w-full max-md:text-left text-sm leading-relaxed">
+                                    A.M. FOFANA High School Sinkor<br />
+                                    Fish Market Monrovia, Liberia<br />
+                                    West Africa
+                                </p>
                             </a>
                         </div>
 
@@ -87,7 +93,7 @@ export default function ContactPage() {
                             <h3 className="font-bold text-lg mb-2">Phone</h3>
                             <div className="flex flex-col max-md:flex-row gap-3 text-gray-600 max-md:[&_br]:hidden text-sm leading-relaxed">
                                 <p> <a href="" className='block w-fit h-fit'>  +231 054 678 13 13 </a> </p>
-                                <p> <a href=""  className='block w-fit h-fit'> +231 077 123 4567 </a>  </p>
+                                <p> <a href="" className='block w-fit h-fit'> +231 077 123 4567 </a>  </p>
                             </div>
                         </div>
 
@@ -98,14 +104,14 @@ export default function ContactPage() {
                             </div>
                             <h3 className="font-bold text-lg mb-2">Email</h3>
                             <div className="flex flex-col gap-2">
-                            <p className="text-gray-600 text-sm leading-relaxed">
-                               <a href="" className='block w-fit h-fit'> info@amfofana.edu.lr </a>  
-                            </p>
-                             <p className="text-gray-600 text-sm leading-relaxed">
-                               <a href="" className='block w-fit h-fit'>   info@amfofana.edu.lr </a>
-                            </p>
+                                <p className="text-gray-600 text-sm leading-relaxed">
+                                    <a href="" className='block w-fit h-fit'> info@amfofana.edu.lr </a>
+                                </p>
+                                <p className="text-gray-600 text-sm leading-relaxed">
+                                    <a href="" className='block w-fit h-fit'>   info@amfofana.edu.lr </a>
+                                </p>
                             </div>
-                               
+
                         </div>
 
                         {/* Office Hours Card */}
