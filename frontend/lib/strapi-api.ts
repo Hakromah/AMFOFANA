@@ -24,6 +24,7 @@ import type {
    StrapiOpportunity,
    StrapiAcademicSection,
    StrapiAcademicResource,
+   StrapiSchoolCalendar,
    StrapiAboutPage,
    StrapiContactInfo,
    StrapiRichTextBlock,
@@ -37,6 +38,7 @@ import type {
    Opportunity,
    AcademicSection,
    AcademicResource,
+   SchoolCalendar,
    AboutPageData,
    ContactInfoData,
 } from '@/types/strapi';
@@ -338,6 +340,24 @@ export async function fetchAcademicResources(): Promise<AcademicResource[]> {
       return data.data.map((item) => ({
          id: item.id,
          name: item.name,
+         fileUrl: mediaUrl(item.file),
+      }));
+   } catch {
+      return [];
+   }
+}
+
+// ─── School Calendars ─────────────────────────────────────────────────────────
+
+export async function fetchSchoolCalendars(): Promise<SchoolCalendar[]> {
+   try {
+      const { data } = await strapi.get<StrapiListResponse<StrapiSchoolCalendar>>(
+         '/school-calendars?populate=file&sort=createdAt:desc'
+      );
+      return data.data.map((item) => ({
+         id: item.id,
+         year: item.year ?? '',
+         label: item.label ?? 'School Calendar',
          fileUrl: mediaUrl(item.file),
       }));
    } catch {

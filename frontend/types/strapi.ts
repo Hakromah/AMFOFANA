@@ -167,6 +167,14 @@ export interface StrapiAcademicResource {
    file: StrapiMediaItem | StrapiMediaItem[] | null;
 }
 
+/** school-calendars collection */
+export interface StrapiSchoolCalendar {
+   id: number;
+   documentId?: string;
+   year: string;
+   label: string | null;
+   file: StrapiMediaItem | StrapiMediaItem[] | null;
+}
 // ─────────────────────────────────────────────
 // Single Types  (v5 flat)
 // ─────────────────────────────────────────────
@@ -295,6 +303,13 @@ export interface AcademicSection {
 export interface AcademicResource {
    id: number;
    name: string;
+   fileUrl: string;
+}
+
+export interface SchoolCalendar {
+   id: number;
+   year: string;
+   label: string;
    fileUrl: string;
 }
 

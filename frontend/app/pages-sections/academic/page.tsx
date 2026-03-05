@@ -4,7 +4,7 @@ import StrapiImage from '@/components/StrapiImage';
 import { Button } from '@/components/ui/button';
 import { FileText, Download, ArrowRight, CheckCircle } from 'lucide-react';
 import Breadcrumb from '@/components/Breadcrumb';
-import type { AcademicSection, AcademicResource } from '@/types/strapi';
+import type { AcademicSection, AcademicResource, SchoolCalendar } from '@/types/strapi';
 
 const fallbackSections: AcademicSection[] = [
     { id: 1, sectionId: 'elementary', title: 'Elementary (K-5)', content: 'Core focus on Literacy, Math, and Social-Emotional development using inquiry-based learning.', image: '/home/classmate.jpg', details: ["Inquiry-based learning approach", "Strong focus on literacy and numeracy", "Safe and nurturing environment"], header: "Elementary (K-5)", subheader: "Core focus on Literacy, Math, and Social-Emotional development using inquiry-based learning." },
@@ -15,9 +15,10 @@ const fallbackSections: AcademicSection[] = [
 interface AcademicPageProps {
     sections?: AcademicSection[];
     resources?: AcademicResource[];
+    calendars?: SchoolCalendar[];
 }
 
-export default function AcademicPage({ sections: sectionsProp, resources: resourcesProp }: AcademicPageProps) {
+export default function AcademicPage({ sections: sectionsProp, resources: resourcesProp, calendars: calendarsProp }: AcademicPageProps) {
     const raw = (sectionsProp && sectionsProp.length > 0) ? sectionsProp : fallbackSections;
     // Sort by sort_order ascending (nulls last), then by id as tiebreaker
     const academicSections = [...raw].sort((a, b) => {
@@ -139,19 +140,37 @@ export default function AcademicPage({ sections: sectionsProp, resources: resour
             {/* Calendar Section */}
             <section className="sm:py-[clamp(20px,3vw,50px)] max-sm:pt-5 bg-gray-50">
                 <div className="container max-w-[1920px]] mx-auto px-5 md:px-[clamp(20px,5vw,60px)]">
-                    <a href="/file/sample.pdf" target="_blank" rel="noopener noreferrer" className='block w-full h-full'>
-                        <div className="bg-white p-[clamp(12px,4vw,26px)] rounded-xl md:shadow-sm border border-gray-100 flex flex-wrap items-center justify-between gap-6">
-                            <div className="flex items-center gap-6">
-                                <div className="bg-blue-50 p-4 rounded-lg text-[#2857AE] font-bold text-xl max-md:text-sm">
-                                    2026/2027
+                    {calendarsProp && calendarsProp.length > 0 ? (
+                        calendarsProp.map((cal) => (
+                            <a key={cal.id} href={cal.fileUrl || '#'} target="_blank" download rel="noopener noreferrer" className='block w-full h-full mb-4 last:mb-0'>
+                                <div className="bg-white p-[clamp(12px,4vw,26px)] rounded-xl md:shadow-sm border border-gray-100 flex flex-wrap items-center justify-between gap-6">
+                                    <div className="flex items-center gap-6">
+                                        <div className="bg-blue-50 p-4 rounded-lg text-[#2857AE] font-bold text-xl max-md:text-sm">
+                                            {cal.year}
+                                        </div>
+                                        <h3 className="text-xl max-md:text-sm font-bold text-gray-900">{cal.label}</h3>
+                                    </div>
+                                    <Button variant="outline" className="gap-2 max-xs:w-full cursor-pointer border-gray-300 hover:border-[#2857AE] hover:text-[#2857AE]">
+                                        Download <FileText className="w-4 h-4" />
+                                    </Button>
                                 </div>
-                                <h3 className="text-xl max-md:text-sm font-bold text-gray-900">School Calendar</h3>
+                            </a>
+                        ))
+                    ) : (
+                        <a href="#" className='block w-full h-full'>
+                            <div className="bg-white p-[clamp(12px,4vw,26px)] rounded-xl md:shadow-sm border border-gray-100 flex flex-wrap items-center justify-between gap-6">
+                                <div className="flex items-center gap-6">
+                                    <div className="bg-blue-50 p-4 rounded-lg text-[#2857AE] font-bold text-xl max-md:text-sm">
+                                        —
+                                    </div>
+                                    <h3 className="text-xl max-md:text-sm font-bold text-gray-900">School Calendar</h3>
+                                </div>
+                                <Button variant="outline" className="gap-2 max-xs:w-full cursor-pointer border-gray-300 hover:border-[#2857AE] hover:text-[#2857AE]">
+                                    Download <FileText className="w-4 h-4" />
+                                </Button>
                             </div>
-                            <Button variant="outline" className="gap-2 max-xs:w-full cursor-pointer border-gray-300 hover:border-[#2857AE] hover:text-[#2857AE]">
-                                Download <FileText className="w-4 h-4" />
-                            </Button>
-                        </div>
-                    </a>
+                        </a>
+                    )}
                 </div>
             </section>
 
@@ -161,19 +180,29 @@ export default function AcademicPage({ sections: sectionsProp, resources: resour
                     <div className="bg-[#f0f4f8] p-[clamp(12px,4vw,40px)] rounded-[clamp(12px,4vw,30px)]">
                         <h2 className="text-[clamp(20px,3vw,32px)] font-bold text-gray-900 mb-[clamp(10px,3vw,26px)] border-b pb-4 max-sm:text-[20px]">Useful Academic Resources</h2>
                         <div className="space-y-1">
-                            {[1, 2, 3].map((item) => (
-                                <div key={item} className='w-full h-full relative'>
-                                    <a href='/file/sample.pdf' download rel='noopener noreferrer' className='block w-full h-full'>
-                                        <div className="flex items-center justify-between py-[clamp(12px,3vw,24px)] border-b border-gray-200 last:border-0 hover:bg-white/50 px-4 rounded-lg max-md:rounded-sm transition-colors cursor-pointer group">
-                                            <span className="text-gray-700 font-medium">Resources document -{item}</span>
-                                            <div className="flex items-center gap-2 text-[#2857AE] opacity-70 max-md:opacity-100 group-hover:opacity-100 transition-opacity">
-                                                <span className="text-sm font-semibold">Download</span>
-                                                <FileText className="w-5 h-5" />
+                            {resourcesProp && resourcesProp.length > 0 ? (
+                                resourcesProp.map((resource) => (
+                                    <div key={resource.id} className='w-full h-full relative'>
+                                        <a
+                                            href={resource.fileUrl || '#'}
+                                            download
+                                            target="_blank"
+                                            rel='noopener noreferrer'
+                                            className='block w-full h-full'
+                                        >
+                                            <div className="flex items-center justify-between py-[clamp(12px,3vw,24px)] border-b border-gray-200 last:border-0 hover:bg-white/50 px-4 rounded-lg max-md:rounded-sm transition-colors cursor-pointer group">
+                                                <span className="text-gray-700 font-medium">{resource.name}</span>
+                                                <div className="flex items-center gap-2 text-[#2857AE] opacity-70 max-md:opacity-100 group-hover:opacity-100 transition-opacity">
+                                                    <span className="text-sm font-semibold">Download</span>
+                                                    <FileText className="w-5 h-5" />
+                                                </div>
                                             </div>
-                                        </div>
-                                    </a>
-                                </div>
-                            ))}
+                                        </a>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-gray-500 py-4 px-4">No resources available at this time.</p>
+                            )}
                         </div>
                     </div>
                 </div>
