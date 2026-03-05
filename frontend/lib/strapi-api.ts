@@ -314,7 +314,7 @@ export async function fetchAcademicSections(): Promise<AcademicSection[]> {
       );
       return data.data.map((item) => ({
          id: item.id,
-         sectionId: item.section_id,
+         sectionId: item.section_id || String(item.id),
          title: item.title,
          content: item.content,
          image: mediaUrl(item.image),

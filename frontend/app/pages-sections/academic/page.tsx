@@ -18,7 +18,14 @@ interface AcademicPageProps {
 }
 
 export default function AcademicPage({ sections: sectionsProp, resources: resourcesProp }: AcademicPageProps) {
-    const academicSections = (sectionsProp && sectionsProp.length > 0) ? sectionsProp : fallbackSections;
+    const raw = (sectionsProp && sectionsProp.length > 0) ? sectionsProp : fallbackSections;
+    // Sort by sort_order ascending (nulls last), then by id as tiebreaker
+    const academicSections = [...raw].sort((a, b) => {
+        const aOrder = (a as AcademicSection & { sort_order?: number | null }).sort_order ?? Infinity;
+        const bOrder = (b as AcademicSection & { sort_order?: number | null }).sort_order ?? Infinity;
+        if (aOrder !== bOrder) return aOrder - bOrder;
+        return a.id - b.id;
+    });
     const [activeSection, setActiveSection] = useState<string>(academicSections[0].sectionId);
     const observerRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
@@ -39,15 +46,17 @@ export default function AcademicPage({ sections: sectionsProp, resources: resour
 
         const observer = new IntersectionObserver(observerCallback, observerOptions);
 
+        // Key refs by section.id (always unique) not sectionId which may be null
         Object.values(observerRefs.current).forEach((el) => {
             if (el) observer.observe(el);
         });
 
         return () => observer.disconnect();
-    }, []);
+        // Re-register observer when sections change
+    }, [academicSections]);
 
-    const activeImage = academicSections.find(s => s.sectionId === activeSection)?.image || academicSections[0].image;
-    const activeData = academicSections.find(s => s.sectionId === activeSection) || academicSections[0];
+    const activeImage = academicSections.find(s => String(s.id) === activeSection)?.image || academicSections[0].image;
+    const activeData = academicSections.find(s => String(s.id) === activeSection) || academicSections[0];
 
     return (
         <div className="w-full min-h-screen bg-background">
@@ -82,13 +91,13 @@ export default function AcademicPage({ sections: sectionsProp, resources: resour
 
                             {academicSections.map((section) => (
                                 <div
-                                    key={section.sectionId}
-                                    id={section.sectionId}
-                                    ref={el => { if (el) observerRefs.current[section.sectionId] = el; }}
+                                    key={String(section.id)}
+                                    id={String(section.id)}
+                                    ref={el => { if (el) observerRefs.current[String(section.id)] = el; }}
                                     className="scroll-mt-32 h-fit flex flex-col justify-center"
                                 >
                                     <div className="border-l-4 border-[#2857AE] pl-6 py-2 transition-all duration-300">
-                                        <h3 className={`text-[clamp(20px,3vw,32px)] font-bold mb-3 ${activeSection === section.sectionId ? 'text-[#2857AE]' : 'text-gray-900'}`}>
+                                        <h3 className={`text-[clamp(20px,3vw,32px)] font-bold mb-3 ${activeSection === String(section.id) ? 'text-[#2857AE]' : 'text-gray-900'}`}>
                                             {section.header || section.title}
                                         </h3>
                                         <p className="text-gray-600 text-lg mb-[clamp(15px,3vw,24px)] leading-relaxed">
