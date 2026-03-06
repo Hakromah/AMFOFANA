@@ -98,7 +98,7 @@ function formatDate(isoString: string | null | undefined): string {
 export async function fetchHeroSlides(): Promise<HeroSlide[]> {
    try {
       const { data } = await strapi.get<StrapiListResponse<StrapiHeroSlide>>(
-         '/hero-slides?populate=image&sort=sort_order:asc'
+         '/hero-slides?populate[0]=image&populate[1]=cta_primary_label&populate[2]=cta_secondary_label&sort=sort_order:asc'
       );
       return data.data.map((item) => ({
          id: item.id,
@@ -106,8 +106,10 @@ export async function fetchHeroSlides(): Promise<HeroSlide[]> {
          subtitle: item.subtitle,
          description: item.description,
          image: mediaUrl(item.image),
-         ctaPrimaryLabel: item.cta_primary_label || 'Explore More',
-         ctaSecondaryLabel: item.cta_secondary_label || 'Admissions',
+         ctaPrimaryLabel: item.cta_primary_label?.text || 'Explore More',
+         ctaPrimaryVisible: item.cta_primary_label?.visibled === true,
+         ctaSecondaryLabel: item.cta_secondary_label?.text || 'Admissions',
+         ctaSecondaryVisible: item.cta_secondary_label?.visibled === true,
       }));
    } catch {
       return [];
@@ -183,7 +185,7 @@ export async function fetchStaffMembers(filter?: {
    try {
       let filterStr = '';
       if (filter?.featured) filterStr += '&filters[is_featured][$eq]=true';
-      if (filter?.leadership) filterStr += '&filters[is_leadership][$eq]=true';
+      if (filter?.leadership) filterStr += '&filters[isLeadership][$eq]=true';
       const { data } = await strapi.get<StrapiListResponse<StrapiStaffMember>>(
          `/staff-members?populate=image&sort=sort_order:asc${filterStr}`
       );
@@ -370,7 +372,7 @@ export async function fetchSchoolCalendars(): Promise<SchoolCalendar[]> {
 export async function fetchAboutPage(): Promise<AboutPageData | null> {
    try {
       const { data } = await strapi.get<StrapiSingleResponse<StrapiAboutPage>>(
-         '/about-page?populate=history_image,principal_image'
+         '/about-page?populate[0]=history_image&populate[1]=principal_image&populate[2]=values'
       );
       if (!data.data) return null;
       const a = data.data;

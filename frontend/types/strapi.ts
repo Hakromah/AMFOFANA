@@ -50,6 +50,13 @@ export interface StrapiSingleResponse<T> {
 // Collection Types  (v5 flat – fields directly on the object)
 // ─────────────────────────────────────────────
 
+/** Shared link-items component shape */
+export interface StrapiLinkItem {
+   id: number;
+   text: string;
+   visibled: boolean | null;
+}
+
 /** hero-slides collection */
 export interface StrapiHeroSlide {
    id: number;
@@ -58,8 +65,8 @@ export interface StrapiHeroSlide {
    subtitle: string;
    description: string;
    image: StrapiMediaItem | StrapiMediaItem[] | null;
-   cta_primary_label: string;
-   cta_secondary_label: string;
+   cta_primary_label: StrapiLinkItem | null;
+   cta_secondary_label: StrapiLinkItem | null;
    sort_order: number;
 }
 
@@ -219,7 +226,9 @@ export interface HeroSlide {
    description: string;
    image: string;
    ctaPrimaryLabel: string;
+   ctaPrimaryVisible: boolean;
    ctaSecondaryLabel: string;
+   ctaSecondaryVisible: boolean;
 }
 
 export interface BlogPost {

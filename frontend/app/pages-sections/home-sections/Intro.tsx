@@ -22,7 +22,9 @@ const fallbackSlides: HeroSlide[] = [
         description: "Our high school program offers a rigorous curriculum designed to prepare students for top universities and future careers. We focus on critical thinking, creativity, and character development.",
         image: "/home/intro1.png",
         ctaPrimaryLabel: "Explore More",
+        ctaPrimaryVisible: true,
         ctaSecondaryLabel: "Admissions",
+        ctaSecondaryVisible: true,
     },
     {
         id: 2,
@@ -31,7 +33,9 @@ const fallbackSlides: HeroSlide[] = [
         description: "A legacy of excellence in education. We provide a world-class environment where students are empowered to achieve their highest potential through rigorous academics and character development.",
         image: "/home/intro2.png",
         ctaPrimaryLabel: "Explore More",
+        ctaPrimaryVisible: true,
         ctaSecondaryLabel: "Admissions",
+        ctaSecondaryVisible: true,
     },
     {
         id: 3,
@@ -40,7 +44,9 @@ const fallbackSlides: HeroSlide[] = [
         description: "From championship-winning sports teams to award-winning art programs, we believe in holistic development. Discover your passion in our diverse extracurricular activities.",
         image: "/home/intro3.png",
         ctaPrimaryLabel: "Explore More",
+        ctaPrimaryVisible: true,
         ctaSecondaryLabel: "Admissions",
+        ctaSecondaryVisible: true,
     },
 ];
 
@@ -134,14 +140,21 @@ export default function Intro({ slides: slidesProp }: IntroProps) {
                                             {slide.description}
                                         </p>
                                     </div>
-                                    <div className="flex gap-4 max-xs:flex-col max-xs:flex-wrap pt-8 ">
-                                        <Button size="lg" className="rounded-full max-xs:w-fit cursor-pointer bg-primary hover:bg-primary/90 text-white h-12 px-8 text-lg group-[&.swiper-slide-active]/slide:translate-y-0 translate-y-5 opacity-0 group-[&.swiper-slide-active]/slide:opacity-100 group-[&.swiper-slide-active]/slide:delay-700 transition-all duration-500">
-                                            Explore More
-                                        </Button>
-                                        <Button variant="outline" size="lg" className="cursor-pointer  max-xs:w-fit rounded-full bg-transparent text-white border-white hover:bg-white/20 hover:text-white h-12 px-8 text-lg group-[&.swiper-slide-active]/slide:translate-y-0 translate-y-5 opacity-0 group-[&.swiper-slide-active]/slide:opacity-100 xs:group-[&.swiper-slide-active]/slide:delay-700 max-xs:group-[&.swiper-slide-active]/slide:delay-900 transition-all duration-500">
-                                            Admissions
-                                        </Button>
-                                    </div>
+                                    {/* CTA Buttons — only render when visibled === true in Strapi */}
+                                    {(slide.ctaPrimaryVisible || slide.ctaSecondaryVisible) && (
+                                        <div className="flex gap-4 max-xs:flex-col max-xs:flex-wrap pt-8 ">
+                                            {slide.ctaPrimaryVisible && (
+                                                <Button size="lg" className="rounded-full max-xs:w-fit cursor-pointer bg-primary hover:bg-primary/90 text-white h-12 px-8 text-lg group-[&.swiper-slide-active]/slide:translate-y-0 translate-y-5 opacity-0 group-[&.swiper-slide-active]/slide:opacity-100 group-[&.swiper-slide-active]/slide:delay-700 transition-all duration-500">
+                                                    {slide.ctaPrimaryLabel}
+                                                </Button>
+                                            )}
+                                            {slide.ctaSecondaryVisible && (
+                                                <Button variant="outline" size="lg" className="cursor-pointer  max-xs:w-fit rounded-full bg-transparent text-white border-white hover:bg-white/20 hover:text-white h-12 px-8 text-lg group-[&.swiper-slide-active]/slide:translate-y-0 translate-y-5 opacity-0 group-[&.swiper-slide-active]/slide:opacity-100 xs:group-[&.swiper-slide-active]/slide:delay-700 max-xs:group-[&.swiper-slide-active]/slide:delay-900 transition-all duration-500">
+                                                    {slide.ctaSecondaryLabel}
+                                                </Button>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </SwiperSlide>
                         ))}

@@ -125,7 +125,6 @@ export default function AcademicPage({ sections: sectionsProp, resources: resour
                                     alt="Academic Level"
                                     fill
                                     className="object-cover transition-opacity duration-500"
-                                    priority
                                     unoptimized
                                 />
                                 {/* Optional Overlay/Decoration resembling the book stack in the user request */}
