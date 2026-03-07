@@ -237,6 +237,9 @@ export async function fetchAcademicPrograms(): Promise<AcademicProgram[]> {
          category: item.category,
          description: item.description,
          image: mediaUrl(item.image),
+         sortOrder: item.sort_order,
+         header: item.header,
+         subheader: item.subheader,
       }));
    } catch {
       return [];
@@ -372,7 +375,7 @@ export async function fetchSchoolCalendars(): Promise<SchoolCalendar[]> {
 export async function fetchAboutPage(): Promise<AboutPageData | null> {
    try {
       const { data } = await strapi.get<StrapiSingleResponse<StrapiAboutPage>>(
-         '/about-page?populate[0]=history_image&populate[1]=principal_image&populate[2]=values'
+         '/about-page?populate[0]=history_image&populate[1]=principal_image&populate[2]=values&populate[3]=home_image_1&populate[4]=home_image_2'
       );
       if (!data.data) return null;
       const a = data.data;
@@ -393,6 +396,11 @@ export async function fetchAboutPage(): Promise<AboutPageData | null> {
          principalRole: a.principal_role,
          principalMessage: a.principal_message,
          principalImage: mediaUrl(a.principal_image),
+         homeHeading: a.home_heading ?? '',
+         homeDescription: a.home_description ?? '',
+         homeStat: a.home_stat ?? '',
+         homeImage1: mediaUrl(a.home_image_1),
+         homeImage2: mediaUrl(a.home_image_2),
       };
    } catch {
       return null;

@@ -119,6 +119,8 @@ export interface StrapiAcademicProgram {
    description: string;
    image: StrapiMediaItem | StrapiMediaItem[] | null;
    sort_order: number;
+   header: string;
+   subheader: string;
 }
 
 /** gallery-items collection */
@@ -203,6 +205,11 @@ export interface StrapiAboutPage {
    principal_role: string;
    principal_message: string;
    principal_image: StrapiMediaItem | StrapiMediaItem[] | null;
+   home_heading: string | null;
+   home_description: string | null;
+   home_stat: string | null;
+   home_image_1: StrapiMediaItem | StrapiMediaItem[] | null;
+   home_image_2: StrapiMediaItem | StrapiMediaItem[] | null;
 }
 
 export interface StrapiContactInfo {
@@ -269,6 +276,10 @@ export interface AcademicProgram {
    category: string;
    description: string;
    image: string;
+   sortOrder: number;
+   header: string;
+   subheader: string;
+
 }
 
 export interface GalleryItem {
@@ -334,6 +345,11 @@ export interface AboutPageData {
    principalRole: string;
    principalMessage: string;
    principalImage: string;
+   homeHeading: string;
+   homeDescription: string;
+   homeStat: string;
+   homeImage1: string;
+   homeImage2: string;
 }
 
 export interface ContactInfoData {
