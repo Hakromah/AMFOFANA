@@ -30,6 +30,8 @@ import type {
    StrapiStudentLife,
    StrapiWhyChooseUs,
    StrapiVideoSection,
+   StrapiFooter,
+   StrapiFooterLink,
    StrapiFeatureCard,
    StrapiRichTextBlock,
    StrapiMediaItem,
@@ -48,6 +50,7 @@ import type {
    StudentLifeData,
    WhyChooseUsData,
    VideoSectionData,
+   FooterData,
 } from '@/types/strapi';
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
@@ -419,14 +422,14 @@ export async function fetchAboutPage(): Promise<AboutPageData | null> {
 export async function fetchContactInfo(): Promise<ContactInfoData | null> {
    try {
       const { data } = await strapi.get<StrapiSingleResponse<StrapiContactInfo>>(
-         '/contact-info'
+         '/contact-info?populate=*'
       );
       if (!data.data) return null;
       const c = data.data;
       return {
          address: c.address,
-         phones: (c.phones ?? []).map((p) => p.number),
-         emails: (c.emails ?? []).map((e) => e.address),
+         phones: (c.phones ?? []).map((p) => String(p.phones)),
+         emails: (c.email ?? []).map((e) => e.address),
          officeHours: c.office_hours,
          socialLinks: c.social_links ?? [],
       };
@@ -499,6 +502,36 @@ export async function fetchVideoSection(): Promise<VideoSectionData | null> {
          overlaySubtitle: v.overlay_subtitle,
          overlayQuote: v.overlay_quote,
          overlayAuthor: v.overlay_author,
+      };
+   } catch {
+      return null;
+   }
+}
+
+// ─── Footer (Single Type) ─────────────────────────────────────────────────────
+
+export async function fetchFooter(): Promise<FooterData | null> {
+   try {
+      const { data } = await strapi.get<StrapiSingleResponse<StrapiFooter>>(
+         '/footer?populate=*'
+      );
+      if (!data.data) return null;
+      const f = data.data;
+      return {
+         logo: mediaUrl(f.logo),
+         title: f.title,
+         subtitle: f.subtitle,
+         description: f.description,
+         quickLinks: (f.quick_links || []).map((l: StrapiFooterLink) => ({
+            id: l.id,
+            label: l.label,
+            url: l.url
+         })),
+         academicsLinks: (f.academics_links || []).map((l: StrapiFooterLink) => ({
+            id: l.id,
+            label: l.label,
+            url: l.url
+         })),
       };
    } catch {
       return null;

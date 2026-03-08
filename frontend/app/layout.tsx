@@ -9,6 +9,7 @@ import Footer from "@/components/layout/Footer";
 import { Toaster } from "sonner";
 import CookieConsent from "@/components/CookieConsent";
 import { PreferencesProvider } from '@/app/context/PreferencesContext';
+import { fetchFooter, fetchContactInfo } from "@/lib/strapi-api";
 
 
 // Force rebuild to clear cache
@@ -37,6 +38,11 @@ export default async function RootLayout({
   const cookieStore = await cookies();
   const preferences = cookieStore.get("preferences");
 
+  const [footerData, contactInfo] = await Promise.all([
+     fetchFooter(),
+     fetchContactInfo(),
+  ]);
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -51,7 +57,7 @@ export default async function RootLayout({
             <PreferencesProvider initialPreferences={preferences?.value}>
               {children}
             </PreferencesProvider></main>
-          <Footer />
+          <Footer footerData={footerData} contactInfo={contactInfo} />
           <CookieConsent />
         </div>
         <Toaster richColors />

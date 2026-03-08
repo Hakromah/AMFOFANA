@@ -40,18 +40,6 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-
-
-
-
-
-
-
-
-
-
-
-
     };
 
     return (
@@ -76,10 +64,12 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
                                     <span className='icon icon-map flex items-center justify-center text-primary h-5 w-5'></span>
                                 </div>
                                 <h3 className="font-bold text-lg mb-2">Address</h3>
-                                <p className="text-gray-600 max-md:[&_br]:hidden max-md:w-full max-md:text-left text-sm leading-relaxed">
-                                    A.M. FOFANA High School Sinkor<br />
-                                    Fish Market Monrovia, Liberia<br />
-                                    West Africa
+                                <p className="text-gray-600 max-md:[&_br]:hidden max-md:w-full max-md:text-left text-sm leading-relaxed whitespace-pre-line">
+                                    {contactInfo?.address ? contactInfo.address : (
+                                        <>A.M. FOFANA High School Sinkor<br />
+                                        Fish Market Monrovia, Liberia<br />
+                                        West Africa</>
+                                    )}
                                 </p>
                             </a>
                         </div>
@@ -92,8 +82,16 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
                             </div>
                             <h3 className="font-bold text-lg mb-2">Phone</h3>
                             <div className="flex flex-col max-md:flex-row gap-3 text-gray-600 max-md:[&_br]:hidden text-sm leading-relaxed">
-                                <p> <a href="" className='block w-fit h-fit'>  +231 054 678 13 13 </a> </p>
-                                <p> <a href="" className='block w-fit h-fit'> +231 077 123 4567 </a>  </p>
+                                {contactInfo?.phones && contactInfo.phones.length > 0 ? (
+                                    contactInfo.phones.map((phone, i) => (
+                                        <p key={i}> <a href={`tel:${phone.replace(/\s+/g, '')}`} className='block w-fit h-fit'>{phone}</a> </p>
+                                    ))
+                                ) : (
+                                    <>
+                                        <p> <a href="" className='block w-fit h-fit'>  +231 054 678 13 13 </a> </p>
+                                        <p> <a href="" className='block w-fit h-fit'> +231 077 123 4567 </a> </p>
+                                    </>
+                                )}
                             </div>
                         </div>
 
@@ -104,12 +102,22 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
                             </div>
                             <h3 className="font-bold text-lg mb-2">Email</h3>
                             <div className="flex flex-col gap-2">
-                                <p className="text-gray-600 text-sm leading-relaxed">
-                                    <a href="" className='block w-fit h-fit'> info@amfofana.edu.lr </a>
-                                </p>
-                                <p className="text-gray-600 text-sm leading-relaxed">
-                                    <a href="" className='block w-fit h-fit'>   info@amfofana.edu.lr </a>
-                                </p>
+                                {contactInfo?.emails && contactInfo.emails.length > 0 ? (
+                                    contactInfo.emails.map((email, i) => (
+                                        <p key={i} className="text-gray-600 text-sm leading-relaxed">
+                                            <a href={`mailto:${email}`} className='block w-fit h-fit'>{email}</a>
+                                        </p>
+                                    ))
+                                ) : (
+                                    <>
+                                        <p className="text-gray-600 text-sm leading-relaxed">
+                                            <a href="" className='block w-fit h-fit'> info@amfofana.edu.lr </a>
+                                        </p>
+                                        <p className="text-gray-600 text-sm leading-relaxed">
+                                            <a href="" className='block w-fit h-fit'> info@amfofana.edu.lr </a>
+                                        </p>
+                                    </>
+                                )}
                             </div>
 
                         </div>
@@ -120,9 +128,10 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
                                 <span className='icon icon-clock flex items-center justify-center text-primary h-5 w-5'></span>
                             </div>
                             <h3 className="font-bold text-lg mb-2">Office Hours</h3>
-                            <p className="text-gray-600 max-md:[&_br]:hidden text-sm leading-relaxed">
-                                Mon - Fri: 8 AM - 4 PM<br />
-                                Sat: 8 AM - 12 PM
+                            <p className="text-gray-600 max-md:[&_br]:hidden text-sm leading-relaxed whitespace-pre-line">
+                                {contactInfo?.officeHours ? contactInfo.officeHours : (
+                                    <>Mon - Fri: 8 AM - 4 PM<br />Sat: 8 AM - 12 PM</>
+                                )}
                             </p>
                         </div>
                     </div>

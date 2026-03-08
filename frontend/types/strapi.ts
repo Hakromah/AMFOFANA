@@ -216,8 +216,8 @@ export interface StrapiContactInfo {
    id: number;
    documentId?: string;
    address: string;
-   phones: Array<{ number: string }>;
-   emails: Array<{ address: string }>;
+   phones: Array<{ phones: string | number }>;
+   email: Array<{ address: string }>;
    office_hours: string;
    social_links: Array<{ name: string; href: string }>;
 }
@@ -424,6 +424,23 @@ export interface StrapiVideoSection {
    overlay_author: string;
 }
 
+export interface StrapiFooterLink {
+   id: number;
+   label: string;
+   url: string;
+}
+
+export interface StrapiFooter {
+   id: number;
+   documentId?: string;
+   logo: StrapiMediaItem | StrapiMediaItem[] | null;
+   title: string;
+   subtitle: string;
+   description: string;
+   quick_links: StrapiFooterLink[];
+   academics_links: StrapiFooterLink[];
+}
+
 export interface FeatureCardData {
    id: number;
    icon: "BookOpen" | "HandHeart" | "Home" | "Star" | "Shield" | "GraduationCap";
@@ -445,4 +462,19 @@ export interface VideoSectionData {
    overlaySubtitle: string;
    overlayQuote: string;
    overlayAuthor: string;
+}
+
+export interface FooterLinkData {
+   id: number;
+   label: string;
+   url: string;
+}
+
+export interface FooterData {
+   logo: string;
+   title: string;
+   subtitle: string;
+   description: string;
+   quickLinks: FooterLinkData[];
+   academicsLinks: FooterLinkData[];
 }
