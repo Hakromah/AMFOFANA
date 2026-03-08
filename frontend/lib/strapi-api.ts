@@ -32,6 +32,9 @@ import type {
    StrapiVideoSection,
    StrapiFooter,
    StrapiFooterLink,
+   StrapiNavbar,
+   StrapiNavItem,
+   StrapiNavSubItem,
    StrapiFeatureCard,
    StrapiRichTextBlock,
    StrapiMediaItem,
@@ -51,6 +54,7 @@ import type {
    WhyChooseUsData,
    VideoSectionData,
    FooterData,
+   NavbarData,
 } from '@/types/strapi';
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
@@ -532,6 +536,37 @@ export async function fetchFooter(): Promise<FooterData | null> {
             label: l.label,
             url: l.url
          })),
+      };
+   } catch {
+      return null;
+   }
+}
+
+// ─── Navbar (Single Type) ─────────────────────────────────────────────────────
+
+export async function fetchNavbar(): Promise<NavbarData | null> {
+   try {
+      const { data } = await strapi.get<StrapiSingleResponse<StrapiNavbar>>(
+         '/navbar?populate[0]=logo&populate[nav_items][populate]=sub_items'
+      );
+      if (!data.data) return null;
+      const n = data.data;
+      return {
+         logo: mediaUrl(n.logo),
+         title: n.title,
+         subtitle: n.subtitle,
+         establishmentDate: n.establishment_date,
+         navItems: (n.nav_items || []).map((item: StrapiNavItem) => ({
+            id: item.id,
+            label: item.label,
+            url: item.url,
+            subItems: (item.sub_items && item.sub_items.length > 0) ? item.sub_items.map(sub => ({
+               id: sub.id,
+               label: sub.label,
+               url: sub.url,
+               description: sub.description || null
+            })) : null
+         }))
       };
    } catch {
       return null;

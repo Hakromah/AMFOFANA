@@ -4,8 +4,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Phone, ChevronDown } from "lucide-react";
-import { Icons } from "../Icons";
 import { useEffect, useState, useRef } from "react";
+import StrapiImage from "@/components/StrapiImage";
+import type { NavbarData, ContactInfoData } from "@/types/strapi";
 
 const socialLinks = [
   { name: "facebook", href: "#" },
@@ -16,14 +17,20 @@ const socialLinks = [
   { name: "whatsapp", href: "https://wa.me/231880386681" },
 ];
 
-export default function Navbar() {
+interface NavbarProps {
+  navbarData?: NavbarData | null;
+  contactInfo?: ContactInfoData | null;
+}
+
+export default function Navbar({ navbarData, contactInfo }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mobileSubmenu, setMobileSubmenu] = useState<string | null>(null);
   const lastScrollY = useRef(0);
 
-  const navItems = [
+  // Use Strapi nav items if present, otherwise fallback to default
+  const navItems = navbarData?.navItems?.length ? navbarData.navItems : [
     { name: "Home", href: "/" },
     {
       name: "About",
@@ -42,8 +49,6 @@ export default function Navbar() {
       ],
     },
     { name: "Blog", href: "/blog" },
-
-   
      {
       name: "Academic",
       href: "/academic",
@@ -63,6 +68,9 @@ export default function Navbar() {
     { name: "Gallery", href: "/gallery" },
     { name: "Opportunities", href: "/opportunities" },
   ];
+
+  // Merge social links from contactInfo or default array
+  const socials = contactInfo?.socialLinks ?? socialLinks;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -108,11 +116,11 @@ export default function Navbar() {
           <div className="w-full flex justify-between items-center py-3">
             <div>
               <p className="text-white text-sm font-normal">
-                Est. February 20 1990
+                {navbarData?.establishmentDate || "Est. February 20 1990"}
               </p>
             </div>
             <div className="social-media flex items-center space-x-[clamp(10px,2vw,18px)]">
-              {socialLinks.map((social) => (
+              {socials.map((social) => (
                 <Link
                   key={social.name}
                   href={social.href}
@@ -129,23 +137,22 @@ export default function Navbar() {
               className="mr-6 h-full flex items-center space-x-2 z-50 relative"
             >
               <div className="flex items-center max-xs:gap-2 gap-4">
-                {/* Placeholder Logo */}
+                {/* Dynamic Logo */}
                 <div className="relative w-[40px] h-[40px] md:w-[57px] md:h-[57px]">
-                  <Image
-                    src="/logo/fofana.png" // User can replace
+                  <StrapiImage
+                    src={navbarData?.logo || "/logo/fofana.png"}
                     alt="A.M. Fofana Logo"
-                    width={57}
-                    height={57}
+                    fill
                     className="object-contain"
+                    unoptimized
                   />
-                  {/* Fallback if no logo: A simple text or icon */}
                 </div>
                 <div>
                   <h2 className="text-[clamp(18px,2.5vw,24px)] font-semibold text-primary mb-[-3px]">
-                    A.M. FOFANA
+                    {navbarData?.title || "A.M. FOFANA"}
                   </h2>
                   <p className="text-[clamp(9px,1.2vw,12px)] text-black tracking-widest uppercase">
-                    Islamic & English High School
+                    {navbarData?.subtitle || "Islamic & English High School"}
                   </p>
                 </div>
               </div>
@@ -166,9 +173,9 @@ export default function Navbar() {
                     `}
             >
               <nav className="flex flex-col md:flex-row md:h-full items-start md:items-center w-full md:w-auto md:gap-5 text-sm font-medium ">
-                {navItems.map((item) => (
+                {navItems.map((item: any) => (
                   <div
-                    key={item.name}
+                    key={item.label || item.name}
                     className="group w-full md:w-auto flex flex-col md:flex-row md:h-full md:items-center relative md:static"
                   >
                     <div className="flex items-center md:h-full  justify-between w-full md:w-auto md:justify-start gap-1">
@@ -178,15 +185,15 @@ export default function Navbar() {
                             className="text-foreground/60 h-auto max-md:w-full md:h-full flex items-center justify-between w-full md:w-auto transition-colors hover:text-foreground/80 py-3 md:py-0 relative cursor-pointer max-md:px-5"
                             onClick={(e) => {
                               e.preventDefault();
-                              toggleMobileSubmenu(item.name);
+                              toggleMobileSubmenu(item.label || item.name);
                               // Don't close mobile menu, just toggle submenu
                             }}
                           >
                             <div className="relative max-md:text-white h-full flex items-center md:before:absolute md:before:bottom-0 md:before:left-0 md:before:w-0 md:before:h-0.5 md:before:bg-primary md:before:transition-all md:before:duration-300 md:hover:before:w-full md:hover:before:duration-500 md:hover:text-[#2857AE]">
-                              {item.name}
+                              {item.label || item.name}
                             </div>
                             <ChevronDown
-                              className={`h-4 w-4 transition-transform max-md:text-white duration-300 ml-1 ${mobileSubmenu === item.name ? "rotate-180" : ""} md:group-hover:rotate-180`}
+                              className={`h-4 w-4 transition-transform max-md:text-white duration-300 ml-1 ${mobileSubmenu === (item.label || item.name) ? "rotate-180" : ""} md:group-hover:rotate-180`}
                             />
                           </div>
                           <div
@@ -203,20 +210,20 @@ export default function Navbar() {
                                               relative max-md:w-full
                                                md:absolute md:top-full
                                                 md:w-[277px] md:h-fit md:z-150 md:left-1/2 h-full md:-translate-x-1/2
-                                            ${mobileSubmenu === item.name ? "max-md:grid max-md:grid-rows-[1fr] max-md:opacity-100 max-md:mt-2 max-md:relative max-md:h-full max-md:w-full" : "max-md:grid max-md:grid-rows-[0fr] max-md:opacity-0 max-md:mt-0 max-md:px-0 max-md:w-full"}
+                                            ${mobileSubmenu === (item.label || item.name) ? "max-md:grid max-md:grid-rows-[1fr] max-md:opacity-100 max-md:mt-2 max-md:relative max-md:h-full max-md:w-full" : "max-md:grid max-md:grid-rows-[0fr] max-md:opacity-0 max-md:mt-0 max-md:px-0 max-md:w-full"}
                                         
                                         `}
                           >
                             <div className="h-full w-full max-md:overflow-hidden">
                               <div className="flex flex-col max-md:w-full h-full md:gap-2 max-md:gap-[1px]">
-                                {item.subItems.map((sub) => (
+                                {item.subItems.map((sub: any) => (
                                   <Link
-                                    key={sub.name}
-                                    href={sub.href}
+                                    key={sub.label || sub.name}
+                                    href={sub.url || sub.href}
                                     className="group/item relative md:pr-[35px] w-full flex justify-between items-center block max-md:bg-white py-2 md:py-3 md:px-[18px] duration-500 md:hover:text-primary md:rounded-lg md:hover:bg-primary/10 transition-colors max-md:px-5"
                                     onClick={() => setIsMobileMenuOpen(false)}
                                   >
-                                    <div>{sub.name}</div>
+                                    <div>{sub.label || sub.name}</div>
 
                                     <div className="w-[25px] max-md:hidden h-[25px] absolute right-3 duration-500 scale-75 group-hover/item:scale-100 group-hover/item:opacity-100 opacity-0 top-1/2 -translate-y-1/2 bg-primary rounded-full flex justify-center items-center">
                                       <svg
@@ -239,12 +246,12 @@ export default function Navbar() {
                         </div>
                       ) : (
                         <Link
-                          href={item.href}
+                          href={item.url || item.href}
                           className="text-foreground/60 h-auto md:h-full max-md:w-full   max-md:border-b max-md:border-white/50 flex items-center transition-colors hover:text-foreground/80 py-3 md:py-0 relative"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           <div className="relative h-full max-md:text-white flex items-center md:before:absolute md:before:bottom-0 max-md:px-5 md:before:left-0 md:before:w-0 md:before:h-0.5 md:before:bg-primary md:before:transition-all md:before:duration-300 md:hover:before:w-full md:hover:before:duration-500 md:hover:text-[#2857AE]">
-                            {item.name}
+                            {item.label || item.name}
                           </div>
                         </Link>
                       )}
@@ -254,7 +261,7 @@ export default function Navbar() {
               </nav>
               <div className="flex flex-col md:flex-row w-full md:w-auto gap-5 items-center mt-4 md:mt-0 max-md:px-5">
                 <a
-                  href="tel:+1234567890"
+                  href={`tel:${contactInfo?.phones?.[0]?.replace(/\s+/g, '') || '+1234567890'}`}
                   className="text-foreground/60 h-auto md:h-full transition-colors hover:text-foreground/80 hidden md:flex items-center"
                 >
                   <div className="relative h-full flex items-center">

@@ -441,6 +441,30 @@ export interface StrapiFooter {
    academics_links: StrapiFooterLink[];
 }
 
+export interface StrapiNavSubItem {
+   id: number;
+   label: string;
+   url: string;
+   description?: string | null;
+}
+
+export interface StrapiNavItem {
+   id: number;
+   label: string;
+   url: string;
+   sub_items?: StrapiNavSubItem[] | null;
+}
+
+export interface StrapiNavbar {
+   id: number;
+   documentId?: string;
+   logo: StrapiMediaItem | StrapiMediaItem[] | null;
+   title: string;
+   subtitle: string;
+   establishment_date: string;
+   nav_items: StrapiNavItem[];
+}
+
 export interface FeatureCardData {
    id: number;
    icon: "BookOpen" | "HandHeart" | "Home" | "Star" | "Shield" | "GraduationCap";
@@ -477,4 +501,26 @@ export interface FooterData {
    description: string;
    quickLinks: FooterLinkData[];
    academicsLinks: FooterLinkData[];
+}
+
+export interface NavSubItemData {
+   id: number;
+   label: string;
+   url: string;
+   description: string | null;
+}
+
+export interface NavItemData {
+   id: number;
+   label: string;
+   url: string;
+   subItems: NavSubItemData[] | null;
+}
+
+export interface NavbarData {
+   logo: string;
+   title: string;
+   subtitle: string;
+   establishmentDate: string;
+   navItems: NavItemData[];
 }
