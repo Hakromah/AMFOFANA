@@ -29,6 +29,7 @@ import type {
    StrapiContactInfo,
    StrapiStudentLife,
    StrapiWhyChooseUs,
+   StrapiVideoSection,
    StrapiFeatureCard,
    StrapiRichTextBlock,
    StrapiMediaItem,
@@ -46,6 +47,7 @@ import type {
    ContactInfoData,
    StudentLifeData,
    WhyChooseUsData,
+   VideoSectionData,
 } from '@/types/strapi';
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
@@ -476,6 +478,27 @@ export async function fetchWhyChooseUs(): Promise<WhyChooseUsData | null> {
             title: c.title,
             description: c.description
          })),
+      };
+   } catch {
+      return null;
+   }
+}
+
+// ─── Video Section (Single Type) ──────────────────────────────────────────────
+
+export async function fetchVideoSection(): Promise<VideoSectionData | null> {
+   try {
+      const { data } = await strapi.get<StrapiSingleResponse<StrapiVideoSection>>(
+         '/video-section?populate=*'
+      );
+      if (!data.data) return null;
+      const v = data.data;
+      return {
+         title: v.title,
+         video: mediaUrl(v.video),
+         overlaySubtitle: v.overlay_subtitle,
+         overlayQuote: v.overlay_quote,
+         overlayAuthor: v.overlay_author,
       };
    } catch {
       return null;

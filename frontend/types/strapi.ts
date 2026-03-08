@@ -414,6 +414,16 @@ export interface StrapiWhyChooseUs {
    cards: StrapiFeatureCard[];
 }
 
+export interface StrapiVideoSection {
+   id: number;
+   documentId?: string;
+   title: string;
+   video: StrapiMediaItem | StrapiMediaItem[] | null;
+   overlay_subtitle: string;
+   overlay_quote: string;
+   overlay_author: string;
+}
+
 export interface FeatureCardData {
    id: number;
    icon: "BookOpen" | "HandHeart" | "Home" | "Star" | "Shield" | "GraduationCap";
@@ -427,4 +437,12 @@ export interface WhyChooseUsData {
    description: string;
    image: string;
    cards: FeatureCardData[];
+}
+
+export interface VideoSectionData {
+   title: string;
+   video: string;
+   overlaySubtitle: string;
+   overlayQuote: string;
+   overlayAuthor: string;
 }
