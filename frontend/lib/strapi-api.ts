@@ -28,6 +28,8 @@ import type {
    StrapiAboutPage,
    StrapiContactInfo,
    StrapiStudentLife,
+   StrapiWhyChooseUs,
+   StrapiFeatureCard,
    StrapiRichTextBlock,
    StrapiMediaItem,
    HeroSlide,
@@ -43,6 +45,7 @@ import type {
    AboutPageData,
    ContactInfoData,
    StudentLifeData,
+   WhyChooseUsData,
 } from '@/types/strapi';
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
@@ -447,6 +450,32 @@ export async function fetchStudentLife(): Promise<StudentLifeData | null> {
          image2: mediaUrl(s.image_2),
          image3: mediaUrl(s.image_3),
          image4: mediaUrl(s.image_4),
+      };
+   } catch {
+      return null;
+   }
+}
+
+// ─── Why Choose Us (Single Type) ──────────────────────────────────────────────
+
+export async function fetchWhyChooseUs(): Promise<WhyChooseUsData | null> {
+   try {
+      const { data } = await strapi.get<StrapiSingleResponse<StrapiWhyChooseUs>>(
+         '/why-choose-us-section?populate=*'
+      );
+      if (!data.data) return null;
+      const w = data.data;
+      return {
+         subtitle: w.subtitle,
+         title: w.title,
+         description: w.description,
+         image: mediaUrl(w.image),
+         cards: (w.cards || []).map((c: StrapiFeatureCard) => ({
+            id: c.id,
+            icon: c.icon,
+            title: c.title,
+            description: c.description
+         })),
       };
    } catch {
       return null;

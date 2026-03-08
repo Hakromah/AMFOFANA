@@ -282,6 +282,20 @@ export interface Testimonial {
    image: string;
 }
 
+export interface FeatureCardData {
+   id: number;
+   icon: "BookOpen" | "HandHeart" | "Home" | "Star" | "Shield" | "GraduationCap";
+   title: string;
+   description: string;
+}
+
+export interface WhyChooseUsData {
+   subtitle: string;
+   title: string;
+   description: string;
+   cards: FeatureCardData[];
+}
+
 export interface AcademicProgram {
    id: number;
    title: string;
@@ -381,4 +395,36 @@ export interface StudentLifeData {
    image3: string;
    image4: string;
 
+}
+
+export interface StrapiFeatureCard {
+   id: number;
+   icon: "BookOpen" | "HandHeart" | "Home" | "Star" | "Shield" | "GraduationCap";
+   title: string;
+   description: string;
+}
+
+export interface StrapiWhyChooseUs {
+   id: number;
+   documentId?: string;
+   subtitle: string;
+   title: string;
+   description: string;
+   image: StrapiMediaItem | StrapiMediaItem[] | null;
+   cards: StrapiFeatureCard[];
+}
+
+export interface FeatureCardData {
+   id: number;
+   icon: "BookOpen" | "HandHeart" | "Home" | "Star" | "Shield" | "GraduationCap";
+   title: string;
+   description: string;
+}
+
+export interface WhyChooseUsData {
+   subtitle: string;
+   title: string;
+   description: string;
+   image: string;
+   cards: FeatureCardData[];
 }
