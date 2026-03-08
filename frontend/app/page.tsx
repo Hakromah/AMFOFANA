@@ -15,11 +15,12 @@ import {
   fetchTestimonials,
   fetchAcademicPrograms,
   fetchAboutPage,
+  fetchStudentLife,
 } from "@/lib/strapi-api";
 
 export default async function Index() {
   // Fetch all home page data in parallel from Strapi
-  const [heroSlides, { posts: newsItems }, featuredStaff, testimonials, programs, aboutData] =
+  const [heroSlides, { posts: newsItems }, featuredStaff, testimonials, programs, aboutData, studentLifeData] =
     await Promise.all([
       fetchHeroSlides(),
       fetchBlogPosts({ pageSize: 8 }),
@@ -27,6 +28,7 @@ export default async function Index() {
       fetchTestimonials(),
       fetchAcademicPrograms(),
       fetchAboutPage(),
+      fetchStudentLife(),
     ]);
 
   return (
@@ -34,7 +36,7 @@ export default async function Index() {
       <Intro slides={heroSlides} />
       <AboutSection aboutData={aboutData} />
       <AcademicSection programs={programs} />
-      <StudentLife />
+      <StudentLife studentLifeData={studentLifeData} />
       <WhyChooseUs />
       <VideoSection />
       <StaffSection staffMembers={featuredStaff} />

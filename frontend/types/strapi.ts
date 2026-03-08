@@ -222,6 +222,18 @@ export interface StrapiContactInfo {
    social_links: Array<{ name: string; href: string }>;
 }
 
+export interface StrapiStudentLife {
+   id: number;
+   documentId?: string;
+   heading: string;
+   description: string;
+   school_name: string;
+   image_1: StrapiMediaItem | StrapiMediaItem[] | null;
+   image_2: StrapiMediaItem | StrapiMediaItem[] | null;
+   image_3: StrapiMediaItem | StrapiMediaItem[] | null;
+   image_4: StrapiMediaItem | StrapiMediaItem[] | null;
+}
+
 // ─────────────────────────────────────────────
 // Normalised frontend DTOs  (flat, easy to use in components)
 // ─────────────────────────────────────────────
@@ -358,4 +370,15 @@ export interface ContactInfoData {
    emails: string[];
    officeHours: string;
    socialLinks: Array<{ name: string; href: string }>;
+}
+
+export interface StudentLifeData {
+   heading: string;
+   description: string;
+   schoolName: string;
+   image1: string;
+   image2: string;
+   image3: string;
+   image4: string;
+
 }

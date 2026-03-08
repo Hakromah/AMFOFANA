@@ -1,14 +1,19 @@
 "use client";
 
 import { useRef } from "react";
-import Image from "next/image";
+import StrapiImage from "@/components/StrapiImage";
+import type { StudentLifeData } from "@/types/strapi";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function StudentLife() {
+interface StudentLifeProps {
+    studentLifeData?: StudentLifeData | null;
+}
+
+export default function StudentLife({ studentLifeData }: StudentLifeProps) {
     const containerRef = useRef<HTMLElement>(null);
 
     useGSAP(() => {
@@ -42,10 +47,15 @@ export default function StudentLife() {
             <div className="container mx-auto max-w-[1920px] px-5 md:px-[clamp(20px,5vw,60px)]">
                 {/* Header */}
                 <div className="student-life-header text-center mb-4 sm:mb-12  sm:space-y-[clamp(15px,3vw,24px)]">
-                    <h2 className="text-[clamp(22px,3vw,48px)] text-black leading-normal tracking-normal xl:tracking-[-1px] font-bold">Student Life at <span className="text-primary">A.M. Fofana</span>
+                    <h2 className="text-[clamp(22px,3vw,48px)] text-black leading-normal tracking-normal xl:tracking-[-1px] font-bold">
+                        {studentLifeData?.heading ? (
+                            <span dangerouslySetInnerHTML={{ __html: studentLifeData.heading.replace('A.M. Fofana', '<span class="text-primary">A.M. Fofana</span>') }} />
+                        ) : (
+                            <>Student Life at <span className="text-primary">{studentLifeData?.schoolName}</span></>
+                        )}
                     </h2>
                     <p className="text-black text-[clamp(16px,2vw,20px)] font-normal text-lg">
-                        Beyond the classroom—building memories that last a lifetime
+                        {studentLifeData?.description || "Beyond the classroom—building memories that last a lifetime"}
                     </p>
                 </div>
 
@@ -54,11 +64,12 @@ export default function StudentLife() {
 
                     {/* Left Column: Large Image */}
                     <div className="student-card relative w-full aspect-video max-md:max-h-[400px] md:h-full rounded-[10px] overflow-hidden group">
-                        <Image
-                            src="/home/4.jpg" // Basketball image placeholder
-                            alt="Students playing basketball"
+                        <StrapiImage
+                            src={studentLifeData?.image1 || "/home/4.jpg"}
+                            alt="Student Life 1"
                             fill
                             className="object-cover relative! w-full! transition-transform duration-500 group-hover:scale-105"
+                            unoptimized
                         />
                     </div>
 
@@ -67,30 +78,32 @@ export default function StudentLife() {
                         {/* Top Row: Two Images */}
                         <div className="grid grid-cols-2 gap-4 h-full">
                             <div className="student-card relative w-full h-full md:h-[351px] rounded-[10px] overflow-hidden group">
-                                <Image
-                                    src="/home/8.jpg" alt="Student winning award"
+                                <StrapiImage
+                                    src={studentLifeData?.image2 || "/home/8.jpg"} alt="Student Life 2"
                                     fill
                                     className="object-cover  h-full! w-full! relative! transition-transform duration-500 group-hover:scale-105"
+                                    unoptimized
                                 />
                             </div>
                             <div className="student-card relative w-full h-full rounded-[10px] overflow-hidden group">
-                                <Image
-                                    src="/home/23.png" alt="Student speaking"
+                                <StrapiImage
+                                    src={studentLifeData?.image3 || "/home/23.png"} alt="Student Life 3"
                                     fill
                                     className="object-cover  h-full! w-full! relative! transition-transform duration-500 group-hover:scale-105"
+                                    unoptimized
                                 />
                             </div>
                         </div>
 
                         {/* Bottom Row: Wide Image */}
                         <div className="student-card relative  max-md:aspect-video max-md:max-h-[400px] w-full md:h-[351px] rounded-[10px] overflow-hidden group">
-                            <Image
-                                src="/home/8.jpg" alt="Students group photo"
+                            <StrapiImage
+                                src={studentLifeData?.image4 || "/home/8.jpg"} alt="Student Life 4"
                                 fill
                                 className="object-cover h-full! w-full! relative! transition-transform duration-500 group-hover:scale-105"
+                                unoptimized
                             />
                         </div>
-
                     </div>
                 </div>
             </div>

@@ -27,6 +27,7 @@ import type {
    StrapiSchoolCalendar,
    StrapiAboutPage,
    StrapiContactInfo,
+   StrapiStudentLife,
    StrapiRichTextBlock,
    StrapiMediaItem,
    HeroSlide,
@@ -41,6 +42,7 @@ import type {
    SchoolCalendar,
    AboutPageData,
    ContactInfoData,
+   StudentLifeData,
 } from '@/types/strapi';
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
@@ -422,6 +424,29 @@ export async function fetchContactInfo(): Promise<ContactInfoData | null> {
          emails: (c.emails ?? []).map((e) => e.address),
          officeHours: c.office_hours,
          socialLinks: c.social_links ?? [],
+      };
+   } catch {
+      return null;
+   }
+}
+
+// ─── Student Life (Single Type) ───────────────────────────────────────────────
+
+export async function fetchStudentLife(): Promise<StudentLifeData | null> {
+   try {
+      const { data } = await strapi.get<StrapiSingleResponse<StrapiStudentLife>>(
+         '/student-life-section?populate[0]=image_1&populate[1]=image_2&populate[2]=image_3&populate[3]=image_4'
+      );
+      if (!data.data) return null;
+      const s = data.data;
+      return {
+         heading: s.heading,
+         description: s.description,
+         schoolName: s.school_name,
+         image1: mediaUrl(s.image_1),
+         image2: mediaUrl(s.image_2),
+         image3: mediaUrl(s.image_3),
+         image4: mediaUrl(s.image_4),
       };
    } catch {
       return null;
