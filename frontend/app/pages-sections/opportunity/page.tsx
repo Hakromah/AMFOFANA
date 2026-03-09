@@ -25,18 +25,27 @@ export default function OpportunitiesPage({ opportunities = [] }: OpportunitiesP
       <section className="py-[clamp(25px,3vw,80px)]">
         <div className="container  px-5 md:px-[clamp(20px,5vw,60px)] mx-auto max-w-[1920px]">
           {/* Section Header */}
+          {/* <div className="mb-[clamp(30px,4vw,50px)]">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="h-12 w-1 bg-[#2857AE]"></div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+                {opportunities?.[0]?.header || "Check the latest Opportunities"}
+              </h2>
+            </div>
+            <p className="text-lg text-gray-600 max-w-4xl leading-relaxed">
+              {opportunities?.[0]?.subheader || "Empowering students Where ambition meets opportunity: Providing the resources, scholarships, and networks students need to thrive in an evolving world with comprehensive education and innovative learning approaches"}
+            </p>
+          </div> */}
+
           <div className="mb-[clamp(30px,4vw,50px)]">
             <div className="flex items-center gap-4 mb-6">
               <div className="h-12 w-1 bg-[#2857AE]"></div>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-                Check the latest Opportunities
+                {opportunities?.[0]?.header}
               </h2>
             </div>
             <p className="text-lg text-gray-600 max-w-4xl leading-relaxed">
-              Empowering students Where ambition meets opportunity: Providing
-              the resources, scholarships, and networks students need to thrive
-              in an evolving world with comprehensive education and innovative
-              learning approaches
+              {opportunities?.[0]?.subheader}
             </p>
           </div>
 

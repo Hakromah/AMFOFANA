@@ -310,6 +310,8 @@ function normalizeOpportunity(item: StrapiOpportunity): Opportunity {
       id: item.id,
       index: item.index,
       title: item.title,
+      header: item.header,
+      subheader: item.subheader,
       description: item.description,
       image: mediaUrl(item.image),
       publishedDate: item.published_date,

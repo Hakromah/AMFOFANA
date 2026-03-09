@@ -140,6 +140,8 @@ export interface StrapiOpportunity {
    documentId?: string;
    index: string;
    title: string;
+   header: string;
+   subheader: string;
    description: string;
    image: StrapiMediaItem | StrapiMediaItem[] | null;
    published_date: string;
@@ -321,6 +323,8 @@ export interface Opportunity {
    id: number;
    index: string;
    title: string;
+   header: string;
+   subheader: string;
    description: string;
    image: string;
    publishedDate: string;

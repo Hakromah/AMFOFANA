@@ -37,7 +37,7 @@ export default function OpportunityDetail({ opportunity }: { opportunity: Opport
                 />
                 <div className="absolute inset-0 bg-black/50" />
                 <div className="absolute inset-0 flex flex-col justify-end container mx-auto px-4 pb-12 text-white">
-                    <Link href="/pages-sections/opportunity" className="inline-flex items-center text-white/80 hover:text-white mb-6 transition-colors">
+                    <Link href="/opportunities" className="inline-flex items-center text-white/80 hover:text-white mb-6 transition-colors">
                         <ArrowLeft className="w-5 h-5 mr-2" /> Back to Opportunities
                     </Link>
                     <div className="flex items-center gap-4 max-sm:flex-wrap text-sm font-medium mb-4">
