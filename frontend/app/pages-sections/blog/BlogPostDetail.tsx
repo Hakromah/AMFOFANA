@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ArrowLeft } from 'lucide-react';
-import printJS from 'print-js';
+import { getSettings, formatDate } from '@/lib/api';
+import { Fancybox } from '@fancyapps/ui';
+import "@fancyapps/ui/dist/fancybox/fancybox.css";
 
 interface BlogPost {
     id: number;
@@ -22,7 +25,7 @@ interface BlogPostDetailProps {
     post: BlogPost;
 }
 
-const socialShareLinks = [
+const defaultSocialLinks = [
     { name: "facebook", href: "#" },
     { name: "instagram", href: "#" },
     { name: "youtube", href: "#" },
@@ -35,22 +38,68 @@ const socialShareLinks = [
 
 export default function BlogPostDetail({ post }: BlogPostDetailProps) {
     const [copied, setCopied] = useState(false);
+    const [settings, setSettings] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        getSettings().then(setSettings).catch(() => { });
+    }, []);
+    const cmsSocialLinks = settings.social_links ? JSON.parse(settings.social_links) : [];
+
+    // Merge CMS social links (which have URLs) with action links (print/copy)
+    const socialShareLinks = defaultSocialLinks.map(defaultLink => {
+        if (defaultLink.action) return defaultLink; // Keep action buttons as is
+        const cmsLink = cmsSocialLinks.find((l: any) => l.name === defaultLink.name);
+        return cmsLink ? cmsLink : defaultLink; // Override URL if CMS has it, otherwise use default
+    });
+
+    const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
 
     const handleAction = (action: string) => {
         if (action === "print") {
-            printJS({
-                printable: 'contToPrint',
-                type: 'html',
-                css: '/print.css',
-                scanStyles: false,
+            import('print-js').then((module) => {
+                const printJS = module.default;
+                printJS({
+                    printable: 'contToPrint',
+                    type: 'html',
+                    css: '/print.css',
+                    scanStyles: false,
+                });
             });
         } else if (action === "copy") {
             navigator.clipboard.writeText(window.location.href).then(() => {
                 setCopied(true);
-                setTimeout(() => setCopied(false), 2000);
+                setOpenStates(prev => ({ ...prev, copy: true })); // Force open when copied
+                setTimeout(() => {
+                    setCopied(false);
+                    // Let the tooltip naturally close or stay open based on hover
+                }, 2000);
             });
         }
     };
+
+    // Pre-process the HTML content to wrap images in Fancybox anchors
+    const processContent = (htmlContent: string) => {
+        // Find all img tags and their src attributes
+        return htmlContent.replace(/<img([^>]*)src=["']([^"']*)["']([^>]*)>/gi, (match, before, src, after) => {
+            return `
+                <a href="${src}" data-fancybox="gallery" class="block overflow-hidden rounded-xl cursor-zoom-in group">
+                    <img ${before} src="${src}" ${after} class="transition-transform duration-500 ease-in-out group-hover:scale-110 w-full h-64 object-cover rounded-xl" />
+                </a>
+            `;
+        });
+    };
+
+    const processedContent = processContent(post.content);
+
+    // Initialize Fancybox
+    useEffect(() => {
+        Fancybox.bind('[data-fancybox="gallery"]', {});
+
+        return () => {
+            Fancybox.unbind('[data-fancybox="gallery"]');
+            Fancybox.close();
+        };
+    }, [processedContent]);
 
     return (
         <div className="w-full bg-background min-h-screen">
@@ -70,7 +119,7 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
                 <div className="absolute inset-0 flex items-center justify-center">
                     <div className="container mx-auto px-4 text-center text-white">
                         <p className="text-sm md:text-base font-medium mb-4 uppercase tracking-widest opacity-90">
-                            Home / Blog / <span className="text-white font-bold">News Detail</span>
+                            Home / <a href="/blog">Blog</a> / <span className="text-white font-bold">News Detail</span>
                         </p>
                         <h1 className="text-3xl md:text-5xl font-bold max-w-4xl mx-auto leading-tight">
                             {post.title}
@@ -84,7 +133,7 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
                     {/* Back to Home Button */}
                     <div className="mb-[clamp(20px,3vw,35px)]">
                         <Link href="/blog">
-                            <Button variant="ghost" className="gap-2 pl-0 hover:bg-transparent hover:text-[#2857AE]">
+                            <Button variant="ghost" className="gap-2 pl-0 text-white bg-primary rounded-full duration-500 cursor-pointer">
                                 <ArrowLeft className="w-4 h-4" /> Back to News
                             </Button>
                         </Link>
@@ -92,7 +141,7 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
 
                     {/* Meta Info */}
                     <div className="mb-[clamp(20px,3vw,35px)]">
-                        <span className="text-[#2857AE] font-bold">Published</span> <span className="text-gray-600 ml-2">{post.date}</span>
+                        <span className="text-[#2857AE] font-bold">Published</span> <span className="text-gray-600 ml-2">{formatDate(post.date)}</span>
                     </div>
 
                     <div className="flex flex-col md:flex-row gap-[clamp(20px,3vw,50px)] items-start">
@@ -103,10 +152,24 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
                                 {socialShareLinks.map((social) => (
                                     <div key={social.name} className="relative">
                                         {social.action ? (
-                                            <button
-                                                onClick={() => handleAction(social.action!)}
-                                                className={`icon icon-${social.name} cursor-pointer text-gray-400 hover:text-[#2857AE] transition-colors w-5 h-5 flex justify-center items-center`}
-                                            />
+                                            <TooltipProvider delayDuration={200}>
+                                                <Tooltip
+                                                    open={social.action === 'copy' && copied ? true : openStates[social.action]}
+                                                    onOpenChange={(open) => setOpenStates(prev => ({ ...prev, [social.action!]: open }))}
+                                                >
+                                                    <TooltipTrigger asChild>
+                                                        <button
+                                                            onClick={() => handleAction(social.action!)}
+                                                            className={`icon icon-${social.name} cursor-pointer text-gray-400 hover:text-[#2857AE] transition-colors w-5 h-5 flex justify-center items-center`}
+                                                        />
+                                                    </TooltipTrigger>
+                                                    <TooltipContent side="top" className="bg-primary text-white">
+                                                        <p className="capitalize">
+                                                            {social.action === "copy" && copied ? "Copied!" : social.action}
+                                                        </p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
                                         ) : (
                                             <a
                                                 href={social.href}
@@ -117,11 +180,6 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
                                                     className={`icon icon-${social.name} ${social.name === "whatsapp" ? "text-[#25D366]/80 hover:text-[#25D366]" : "text-gray-400 hover:text-[#2857AE]"} transition-colors w-5 h-5 flex justify-center items-center`}
                                                 />
                                             </a>
-                                        )}
-                                        {social.action === "copy" && copied && (
-                                            <span className="absolute -right-16 md:-right-18 top-1/2 -translate-y-1/2 text-xs text-green-600 font-medium whitespace-nowrap">
-                                                Copied!
-                                            </span>
                                         )}
                                     </div>
                                 ))}
@@ -137,7 +195,7 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
                             {/* Dynamically rendered HTML content */}
                             <div
                                 className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-600 prose-p:leading-relaxed prose-img:rounded-xl prose-img:w-full prose-img:h-64 prose-img:object-cover [&_img]:rounded-xl [&_img]:w-full [&_img]:h-64 [&_img]:object-cover [&_div]:grid [&_div]:grid-cols-1 [&_div]:md:grid-cols-2 [&_div]:gap-4 [&_div]:my-8"
-                                dangerouslySetInnerHTML={{ __html: post.content }}
+                                dangerouslySetInnerHTML={{ __html: processedContent }}
                             />
 
                             {/* Apply Button for Scholarship Posts */}

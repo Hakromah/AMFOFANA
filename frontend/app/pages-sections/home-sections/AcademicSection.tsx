@@ -97,7 +97,7 @@ export default function AcademicSection() {
 
     return (
         <section ref={containerRef} className="overflow-clip py-[clamp(20px,5vw,80px)] bg-primary h-full text-white overflow-hidden">
-            <div className="container mx-auto h-full max-w-1920 px-5 md:px-[clamp(20px,3vw,60px)]">
+            <div className="container mx-auto h-full max-w-[1920px] px-5 md:px-[clamp(20px,3vw,60px)]">
                 {/* Header */}
                 <div className='w-full h-full mb-14 max-md:mb-6'>
                     <div className="academic-header flex flex-col md:flex-row justify-between items-start md:items-end pb-5 md:mb-12 gap-8">
@@ -135,7 +135,7 @@ export default function AcademicSection() {
 
                     {/* Tabs */}
 
-                    <div className="academic-tabs flex items-center justify-start gap-x-8 border-b border-white/20 overflow-x-auto [-webkit-overflow-scrolling:touch] scrollbar-thin pb-2 sm:pb-[17px]">
+                    <div className="academic-tabs flex items-center justify-start gap-x-8 border-b border-white/20 max-md:overflow-x-auto [-webkit-overflow-scrolling:touch] scrollbar-thin pb-2 sm:pb-[17px]">
                         {categories.map((cat) => (
                             <button
                                 key={cat}
@@ -170,32 +170,32 @@ export default function AcademicSection() {
                 >
                     {filteredPrograms.map((program) => (
                         <SwiperSlide key={program.id} className="h-full">
-                            <a href='/academic' className='block w-full h-full'>
-                            <div className="group/card bg-white rounded-[15px] p-3 overflow-hidden h-[501px] max-sm:h-[400px] flex flex-col group cursor-pointer transition-transform duration-300">
-                                <div className=" relative h-60 max-xs:h-[220px] w-full overflow-hidden rounded-[12px]">
-                                    <Image
-                                        src={program.image}
-                                        alt={program.title}
-                                        fill
-                                        className="object-cover transition-transform duration-500 lg:group-hover/card:scale-110"
-                                    />
-                                    <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-300" />
-                                </div>
+                            <Link href={`/academic/${program.title.toLowerCase().replace(/ /g, '-')}`} className='block w-full h-full'>
+                                <div className="group/card bg-white rounded-[15px] p-3 overflow-hidden h-[501px] max-sm:h-[400px] flex flex-col group cursor-pointer transition-transform duration-300">
+                                    <div className=" relative h-60 max-xs:h-[220px] w-full overflow-hidden rounded-[12px]">
+                                        <Image
+                                            src={program.image}
+                                            alt={program.title}
+                                            fill
+                                            className="object-cover transition-transform duration-500 lg:group-hover/card:scale-110"
+                                        />
+                                        <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-300" />
+                                    </div>
 
-                                <div className="pb-6  pt-3 flex flex-col flex-grow text-primary">
-                                    <h3 className="text-[clamp(20px,2vw,25px)] font-semibold mb-3 line-clamp-2">{program.title}</h3>
-                                    <p className="text-[#4B5563] text-[clamp(16px,1.5vw,18px)] line-clamp-3 leading-relaxed mb-6 flex-grow">
-                                        {program.description}
-                                    </p>
+                                    <div className="pb-6  pt-3 flex flex-col flex-grow text-primary">
+                                        <h3 className="text-[clamp(20px,2vw,25px)] font-semibold mb-3 line-clamp-2">{program.title}</h3>
+                                        <p className="text-[#4B5563] text-[clamp(16px,1.5vw,18px)] line-clamp-3 leading-relaxed mb-6 flex-grow">
+                                            {program.description}
+                                        </p>
 
-                                    <div className="mt-auto">
-                                        <Button className="w-full rounded-full font-bold bg-[#2857AE]/10 lg:hover:bg-primary lg:hover:text-white text-primary text-[clamp(16px,1.5vw,18px)] italic font-bold transition-all duration-500 border border-primary">
-                                            Explore Curriculum
-                                        </Button>
+                                        <div className="mt-auto">
+                                            <Button className="w-full rounded-full cursor-pointer font-bold bg-[#2857AE]/10 lg:hover:bg-primary lg:hover:text-white text-primary text-[clamp(16px,1.5vw,18px)] italic font-bold transition-all duration-500 border border-primary">
+                                                Explore Curriculum
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            </a>
+                            </Link>
                         </SwiperSlide>
                     ))}
                 </Swiper>

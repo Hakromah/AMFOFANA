@@ -6,7 +6,7 @@ import { Swiper as SwiperType } from 'swiper';
 import { Autoplay, Navigation, Controller, Parallax, EffectCreative } from 'swiper/modules';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
+import Link from 'next/link';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -59,14 +59,16 @@ export default function Intro() {
                     className="w-full h-full"
                 >
                     {slides.map((slide, index) => (
-                        <SwiperSlide key={index} className="overflow-hidden w-full h-full"
+                        <SwiperSlide key={index} className="group/slide overflow-hidden w-full h-full"
                         >
                             <div className="relative w-full h-full">
                                 <Image
                                     src={slide.image}
                                     alt={slide.title}
                                     fill
-                                    className="object-cover"
+                                    className="object-cover w-full h-full transition-transform duration-5000 ease-linear 
+               scale-100 group-[&.swiper-slide-active]/slide:scale-110 
+               backface-hidden will-change-transform"
                                     priority={index === 0}
                                 />
                                 <div
@@ -105,11 +107,11 @@ export default function Intro() {
                         className="w-full"
                     >
                         {slides.map((slide, index) => (
-                            <SwiperSlide key={index} className='group/slide w-full h-full'>
+                           <SwiperSlide key={index} className='group/slide w-full h-full'>
                                 <div className="w-full ">
                                     <div className="space-y-4">
                                         <h1
-                                            className="w-full group-[&.swiper-slide-active]/slide:translate-y-0 xl:tracking-[-3px] tracking-normal translate-y-5 opacity-0 group-[&.swiper-slide-active]/slide:opacity-100 group-[&.swiper-slide-active]/slide:delay-500 transition-all duration-500 text-[clamp(25px,4vw,80px)] font-semibold leading-[clamp(45px,6vw,90px)] font-sans bg-clip-text text-transparent bg-[linear-gradient(90deg,#FFF_54.33%,#2857AE_100%)] pb-2"
+                                            className="w-full group-[&.swiper-slide-active]/slide:translate-y-0 line-clamp-2 xl:tracking-[-3px] tracking-normal translate-y-5 opacity-0 group-[&.swiper-slide-active]/slide:opacity-100 group-[&.swiper-slide-active]/slide:delay-500 transition-all duration-500 text-[clamp(25px,4vw,60px)] font-semibold leading-[clamp(45px,6vw,75px)] font-sans bg-clip-text text-transparent bg-[linear-gradient(90deg,#FFF_54.33%,#2857AE_100%)] pb-2"
                                         >
                                             {slide.subtitle} <br />
                                             {slide.title}
@@ -121,11 +123,13 @@ export default function Intro() {
                                     </div>
                                     <div className="flex gap-4 max-xs:flex-col max-xs:flex-wrap pt-8 ">
                                         <Button size="lg" className="rounded-full max-xs:w-fit cursor-pointer bg-primary hover:bg-primary/90 text-white h-12 px-8 text-lg group-[&.swiper-slide-active]/slide:translate-y-0 translate-y-5 opacity-0 group-[&.swiper-slide-active]/slide:opacity-100 group-[&.swiper-slide-active]/slide:delay-700 transition-all duration-500">
+                                           <Link href="academic">
                                             Explore More
+                                           </Link>
                                         </Button>
-                                        <Button variant="outline" size="lg" className="cursor-pointer  max-xs:w-fit rounded-full bg-transparent text-white border-white hover:bg-white/20 hover:text-white h-12 px-8 text-lg group-[&.swiper-slide-active]/slide:translate-y-0 translate-y-5 opacity-0 group-[&.swiper-slide-active]/slide:opacity-100 xs:group-[&.swiper-slide-active]/slide:delay-700 max-xs:group-[&.swiper-slide-active]/slide:delay-900 transition-all duration-500">
+                                        {/* <Button variant="outline" size="lg" className="cursor-pointer  max-xs:w-fit rounded-full bg-transparent text-white border-white hover:bg-white/20 hover:text-white h-12 px-8 text-lg group-[&.swiper-slide-active]/slide:translate-y-0 translate-y-5 opacity-0 group-[&.swiper-slide-active]/slide:opacity-100 xs:group-[&.swiper-slide-active]/slide:delay-700 max-xs:group-[&.swiper-slide-active]/slide:delay-900 transition-all duration-500">
                                             Admissions
-                                        </Button>
+                                        </Button> */}
                                     </div>
                                 </div>
                             </SwiperSlide>
