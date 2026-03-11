@@ -1,9 +1,9 @@
 "use client"
 import React, { useState, useRef } from 'react'
-import Image from 'next/image'
+import StrapiImage from '@/components/StrapiImage';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Swiper as SwiperType } from 'swiper';
-import { Autoplay, Navigation, Controller, Parallax, EffectCreative } from 'swiper/modules';
+import { Autoplay, Navigation, Controller, EffectCreative } from 'swiper/modules';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -13,28 +13,49 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-creative';
 
-const slides = [
+// Static fallback slides used when Strapi is unavailable
+const fallbackSlides: HeroSlide[] = [
     {
+        id: 1,
         title: "of Tomorrow",
         subtitle: "Shaping the Leaders",
         description: "Our high school program offers a rigorous curriculum designed to prepare students for top universities and future careers. We focus on critical thinking, creativity, and character development.",
-        image: "/home/intro1.png"
+        image: "/home/intro1.png",
+        ctaPrimaryLabel: "Explore More",
+        ctaPrimaryVisible: true,
+        ctaSecondaryLabel: "Admissions",
+        ctaSecondaryVisible: true,
     },
     {
-        title: " Environments",
+        id: 2,
+        title: "Environments",
         subtitle: "State of the Art Learning",
         description: "A legacy of excellence in education. We provide a world-class environment where students are empowered to achieve their highest potential through rigorous academics and character development.",
-        image: "/home/intro2.png"
+        image: "/home/intro2.png",
+        ctaPrimaryLabel: "Explore More",
+        ctaPrimaryVisible: true,
+        ctaSecondaryLabel: "Admissions",
+        ctaSecondaryVisible: true,
     },
     {
+        id: 3,
         title: "Academics",
-        subtitle: "Nurturing Talent Beyond ",
+        subtitle: "Nurturing Talent Beyond",
         description: "From championship-winning sports teams to award-winning art programs, we believe in holistic development. Discover your passion in our diverse extracurricular activities.",
-        image: "/home/intro3.png"
-    }
+        image: "/home/intro3.png",
+        ctaPrimaryLabel: "Explore More",
+        ctaPrimaryVisible: true,
+        ctaSecondaryLabel: "Admissions",
+        ctaSecondaryVisible: true,
+    },
 ];
 
-export default function Intro() {
+interface IntroProps {
+    slides?: HeroSlide[];
+}
+
+export default function Intro({ slides: slidesProp }: IntroProps) {
+    const activeSlides = (slidesProp && slidesProp.length > 0) ? slidesProp : fallbackSlides;
     const [firstSwiper, setFirstSwiper] = useState<SwiperType | null>(null);
     const [secondSwiper, setSecondSwiper] = useState<SwiperType | null>(null);
     const progressContent = useRef<HTMLDivElement>(null);
@@ -62,7 +83,7 @@ export default function Intro() {
                         <SwiperSlide key={index} className="group/slide overflow-hidden w-full h-full"
                         >
                             <div className="relative w-full h-full">
-                                <Image
+                                <StrapiImage
                                     src={slide.image}
                                     alt={slide.title}
                                     fill
@@ -156,7 +177,7 @@ export default function Intro() {
                         </Button>
 
                         <div className='h-px w-full bg-white/30'>
-                        <div ref={progressContent} className='filled bg-white w-0 h-px'></div>
+                            <div ref={progressContent} className='filled bg-white w-0 h-px'></div>
                         </div>
                     </div>
                 </div>

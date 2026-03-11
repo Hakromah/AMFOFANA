@@ -1,83 +1,20 @@
 import React from "react";
 import Image from "next/image";
 import Breadcrumb from "@/components/Breadcrumb";
+import type { StaffMember } from "@/types/strapi";
 
-const staffMembers = [
-    {
-        id: 1,
-        name: "Sarah Mitchell",
-        role: "Principal",
-        email: "sarah.mitchell@edu.lb",
-        description: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.",
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1887&auto=format&fit=crop"
-    },
-    {
-        id: 2,
-        name: "Ms. Emily Chen",
-        role: "Vice Principal",
-        email: "emily.chen@edu.lb",
-        description: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.",
-        image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
-        id: 3,
-        name: "Ms. Jonathan Lee",
-        role: "Head of Science",
-        email: "jonathan.lee@edu.lb",
-        description: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.",
-        image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
-        id: 4,
-        name: "Sarah Mitchell",
-        role: "Principal",
-        email: "sarah.mitchell@edu.lb",
-        description: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.",
-        image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1887&auto=format&fit=crop"
-    },
-    {
-        id: 5,
-        name: "Ms. Emily Chen",
-        role: "Principal",
-        email: "emily.chen@edu.lb",
-        description: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.",
-        image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1888&auto=format&fit=crop"
-    },
-    {
-        id: 6,
-        name: "Ms. Emily Chen",
-        role: "Principal",
-        email: "emily.chen@edu.lb",
-        description: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.",
-        image: "https://images.unsplash.com/photo-1554151228-14d9def656ec?q=80&w=1886&auto=format&fit=crop"
-    },
-    {
-        id: 7,
-        name: "Sarah Mitchell",
-        role: "Principal",
-        email: "sarah.mitchell@edu.lb",
-        description: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.",
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1887&auto=format&fit=crop"
-    },
-    {
-        id: 8,
-        name: "Ms. Emily Chen",
-        role: "Vice Principal",
-        email: "emily.chen@edu.lb",
-        description: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.",
-        image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
-        id: 9,
-        name: "Ms. Emily Chen",
-        role: "Vice Principal",
-        email: "emily.chen@edu.lb",
-        description: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.",
-        image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2070&auto=format&fit=crop"
-    }
+const fallbackStaff: StaffMember[] = [
+    { id: 1, name: "Sarah Mitchell", role: "Principal", email: "sarah.mitchell@edu.lb", bio: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1887&auto=format&fit=crop", isFeatured: true, isLeadership: true },
+    { id: 2, name: "Ms. Emily Chen", role: "Vice Principal", email: "emily.chen@edu.lb", bio: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2070&auto=format&fit=crop", isFeatured: true, isLeadership: true },
+    { id: 3, name: "Ms. Jonathan Lee", role: "Head of Science", email: "jonathan.lee@edu.lb", bio: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2070&auto=format&fit=crop", isFeatured: false, isLeadership: false },
 ];
 
-export default function StaffPage() {
+interface StaffPageProps {
+    staffMembers?: StaffMember[];
+}
+
+export default function StaffPage({ staffMembers: staffProp }: StaffPageProps) {
+    const activeStaff = (staffProp && staffProp.length > 0) ? staffProp : fallbackStaff;
     return (
         <div className="w-full">
             {/* Hero Section */}
@@ -99,7 +36,7 @@ export default function StaffPage() {
             <section className="pb-[clamp(25px,3vw,80px)] bg-background">
                 <div className="container mx-auto max-w-[1920px] px-[clamp(30px,2vw,150px)]">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[clamp(20px,3vw,30px)] gap-y-[clamp(30px,3vw,48px)]">
-                        {staffMembers.map((staff) => (
+                        {activeStaff.map((staff) => (
 
 
                             <div key={staff.id} className="bg-[linear-gradient(180deg,_#FFF_0%,_#2857AE_100%)] h-[470px] rounded-[20px] p-6 text-center max-md:h-full flex flex-col items-center justify-center group transition-transform duration-300 hover:-translate-y-2 shadow-lg">
@@ -124,7 +61,7 @@ export default function StaffPage() {
                                         <p className="text-white/70 text-[16px] mb-[9px]">Email: {staff.email}</p>
                                         <div className="w-full h-[1px] bg-white/20 mb-[9px]"></div>
                                         <p className="text-white/90 text-4 leading-relaxed mb-4 line-clamp-4">
-                                            {staff.description}
+                                            {staff.bio}
                                         </p>
                                     </div>
                                 </div>

@@ -5,10 +5,15 @@ import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import type { VideoSectionData } from "@/types/strapi";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function VideoSection() {
+interface VideoSectionProps {
+    videoSectionData?: VideoSectionData | null;
+}
+
+export default function VideoSection({ videoSectionData }: VideoSectionProps) {
     const containerRef = useRef<HTMLElement>(null);
     const videoContainerRef = useRef<HTMLDivElement>(null);
     const textRef = useRef<HTMLDivElement>(null);
@@ -102,7 +107,7 @@ export default function VideoSection() {
 
                 <div className="w-full flex justify-center sm:mb-8 mb-4">
                     <h2 className="video-title text-[clamp(20px,3vw,60px)] font-bold text-primary text-center">
-                        <SplitText text="The Excellence School" wordClass="title-reveal-word" />
+                        <SplitText text={videoSectionData?.title || "The Excellence School"} wordClass="title-reveal-word" />
                     </h2>
                 </div>
 
@@ -112,7 +117,7 @@ export default function VideoSection() {
                     className="relative w-full overflow-hidden mx-auto"
                 >
                     <video
-                        src="/video/school-video.mp4"
+                        src={videoSectionData?.video || "/video/school-video.mp4"}
                         autoPlay
                         muted
                         loop
@@ -129,13 +134,13 @@ export default function VideoSection() {
                         className="absolute max-sm:left-0 bottom-0 sm:bottom-5 sm:right-0 p-[clamp(20px,5vw,80px)] max-w-2xl text-white video-overlay-text opacity-100 sm:opacity-0" // Visible on mobile, hidden on desktop (animated)
                     >
                         <p className="text-[clamp(14px,2vw,16px)] font-semibold uppercase tracking-widest mb-2 sm:mb-4 opacity-80 decoration-clone">
-                            <SplitText text="A Message from the Leadership" wordClass="overlay-reveal-word" />
+                            <SplitText text={videoSectionData?.overlaySubtitle || "A Message from the Leadership"} wordClass="overlay-reveal-word" />
                         </p>
                         <blockquote className="text-[clamp(16px,2vw,30px)] font-bold leading-tight mb-2 sm:mb-6">
-                            <SplitText text="&quot;Our mission is to ensure every student leaves our halls with both knowledge and wisdom.&quot;" wordClass="overlay-reveal-word" />
+                            <SplitText text={videoSectionData?.overlayQuote || "\"Our mission is to ensure every student leaves our halls with both knowledge and wisdom.\""} wordClass="overlay-reveal-word" />
                         </blockquote>
                         <p className="text-[clamp(16px,2vw,20px)] text-lg font-medium italic">
-                            <SplitText text="— Office of the Principal" wordClass="overlay-reveal-word" />
+                            <SplitText text={videoSectionData?.overlayAuthor || "— Office of the Principal"} wordClass="overlay-reveal-word" />
                         </p>
                     </div>
                 </div>

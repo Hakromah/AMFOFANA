@@ -1,10 +1,10 @@
 "use client"
 import React, { useState } from 'react';
-import Image from 'next/image';
+import StrapiImage from '@/components/StrapiImage';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Calendar, CheckCircle, Clock, Send, Upload } from 'lucide-react';
-import { Opportunity } from '@/data/opportunities';
+import type { Opportunity } from '@/types/strapi';
 import { Input } from '@/components/ui/input';
 import {
     Sheet,
@@ -24,17 +24,16 @@ export default function OpportunityDetail({ opportunity }: { opportunity: Opport
         // Simulate API call
         setTimeout(() => setIsApplied(false), 3000); // Reset for demo
     };
-
     return (
         <div className="min-h-screen bg-white sm:pb-[clamp(25px,3vw,80px)]">
             {/* Header / Hero */}
             <div className="relative h-[50vh] min-h-[400px]">
-                <Image
+                <StrapiImage
                     src={opportunity.image}
                     alt={opportunity.title}
                     fill
                     className="object-cover"
-                    priority
+                    unoptimized
                 />
                 <div className="absolute inset-0 bg-black/50" />
                 <div className="absolute inset-0 flex flex-col justify-end container mx-auto px-4 pb-12 text-white">

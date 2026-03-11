@@ -8,8 +8,16 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        // Strapi local dev server
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '1337',
+        pathname: '/uploads/**',
+      },
     ],
   },
 };
 
 export default nextConfig;
+

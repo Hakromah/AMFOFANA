@@ -21,7 +21,7 @@ const Map = dynamic(() => import('./Map'), {
     loading: () => <div className="h-full w-full bg-gray-100 flex items-center justify-center">Loading Map...</div>
 });
 
-const socialLinks = [
+const fallbackSocialLinks = [
     { name: "facebook", href: "#" },
     { name: "instagram", href: "#" },
     { name: "x", href: "#" },
@@ -30,7 +30,12 @@ const socialLinks = [
     { name: "whatsapp", href: "https://wa.me/231880386681" },
 ];
 
-export default function ContactPage() {
+interface ContactPageProps {
+    contactInfo?: ContactInfoData | null;
+}
+
+export default function ContactPage({ contactInfo }: ContactPageProps) {
+    const socialLinks = contactInfo?.socialLinks ?? fallbackSocialLinks;
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -102,9 +107,10 @@ export default function ContactPage() {
                                 <span className='icon icon-clock flex items-center justify-center text-primary h-5 w-5'></span>
                             </div>
                             <h3 className="font-bold text-lg mb-2">Office Hours</h3>
-                            <p className="text-gray-600 max-md:[&_br]:hidden text-sm leading-relaxed">
-                                Mon - Fri: 8 AM - 4 PM<br />
-                                Sat: 8 AM - 12 PM
+                            <p className="text-gray-600 max-md:[&_br]:hidden text-sm leading-relaxed whitespace-pre-line">
+                                {contactInfo?.officeHours ? contactInfo.officeHours : (
+                                    <>Mon - Fri: 8 AM - 4 PM<br />Sat: 8 AM - 12 PM</>
+                                )}
                             </p>
                         </div>
                     </div>

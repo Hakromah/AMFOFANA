@@ -2,12 +2,14 @@ import React from "react";
 import GalleryPage from "@/app/pages-sections/gallery/page";
 import Breadcrumb from "@/components/Breadcrumb";
 import type { Metadata } from "next";
+import { fetchGalleryItems } from "@/lib/strapi-api";
 
 export const metadata: Metadata = {
     title: "Gallery",
 };
 
-export default function Page() {
+export default async function Page() {
+    const items = await fetchGalleryItems();
     return (
         <div className="overflow-clip">
             <div className="relative -z-1">
@@ -19,9 +21,8 @@ export default function Page() {
                 />
             </div>
             <div className="z-20! relative bg-transparent">
-                <GalleryPage />
+                <GalleryPage items={items} />
             </div>
-
         </div>
     );
 }

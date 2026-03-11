@@ -6,8 +6,10 @@ import Image from 'next/image';
 import { Facebook, Instagram, Linkedin, Twitter, Youtube } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import StrapiImage from '@/components/StrapiImage';
+import type { FooterData, ContactInfoData } from '@/types/strapi';
 
-const socialLinks = [
+const fallbackSocialLinks = [
   { name: "facebook", href: "#" },
   { name: "instagram", href: "#" },
   { name: "x", href: "#" },
@@ -16,7 +18,14 @@ const socialLinks = [
   { name: "whatsapp", href: "https://wa.me/231880386681" },
 ];
 
-export default function Footer() {
+interface FooterProps {
+  footerData?: FooterData | null;
+  contactInfo?: ContactInfoData | null;
+}
+
+export default function Footer({ footerData, contactInfo }: FooterProps) {
+  const socialLinks = contactInfo?.socialLinks ?? fallbackSocialLinks;
+
   return (
     <footer className="bg-[#2857AE] text-white pt-[clamp(20px,3vw,60px)] pb-[clamp(20px,3vw,40px)]">
       <div className="container mx-auto max-w-[1920px] px-5 md:px-[clamp(20px,5vw,60px)]">
@@ -26,18 +35,17 @@ export default function Footer() {
           <div className="flex items-center gap-4">
             {/* Placeholder Logo */}
             <div className="relative w-16 h-16 md:w-20 md:h-20">
-              <Image
-                src="/logo/fofana.png" // User can replace
+              <StrapiImage
+                src={footerData?.logo || "/logo/fofana.png"}
                 alt="A.M. Fofana Logo"
-                width={100}
-                height={100}
+                fill
                 className="object-contain"
+                unoptimized
               />
-              {/* Fallback if no logo: A simple text or icon */}
             </div>
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold tracking-tight">A.M. FOFANA</h2>
-              <p className="text-xs md:text-sm text-white/80 tracking-widest uppercase">Islamic & English High School</p>
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight">{footerData?.title || "A.M. FOFANA"}</h2>
+              <p className="text-xs md:text-sm text-white/80 tracking-widest uppercase">{footerData?.subtitle || "Islamic & English High School"}</p>
             </div>
           </div>
 
@@ -59,8 +67,8 @@ export default function Footer() {
 
           {/* Column 1: About */}
           <div className="space-y-6 lg:col-span-2 lg:py-5">
-            <p className="text-white/80 text-sm leading-relaxed max-w-sm">
-              Serving the community of Monrovia since 1977. We believe that education is the ultimate key to unlocking a bright future. Serving the community of Monrovia since 1977. We believe that education is the ultimate key to unlocking a bright future.
+            <p className="text-white/80 text-sm leading-relaxed max-w-sm whitespace-pre-line">
+              {footerData?.description || "Serving the community of Monrovia since 1977. We believe that education is the ultimate key to unlocking a bright future."}
             </p>
             <div className="space-y-2">
               <p className="text-xs text-white/60">Follow us on Social Media</p>
@@ -78,30 +86,40 @@ export default function Footer() {
           </div>
 
           {/* Column 2: Quick Links */}
-
           <div className="lg:col-span-1 lg:border-l max-xs:hidden border-white/20 lg:flex lg:justify-center">
             <div className="lg:py-5 lg:px-5">
               <h3 className="text-xl font-bold mb-6">Quick Links</h3>
               <ul className="space-y-4 max-sm:space-y-2 text-white/80 text-sm">
-                <li><Link href="#" className="hover:text-white transition-colors">Admission Requirements</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Tuition & Fees</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">School News</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Gallery</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Opportunities</Link></li>
+                {(footerData && footerData.quickLinks.length > 0) ? footerData.quickLinks.map(link => (
+                    <li key={link.id}><Link href={link.url} className="hover:text-white transition-colors">{link.label}</Link></li>
+                )) : (
+                    <>
+                        <li><Link href="#" className="hover:text-white transition-colors">Admission Requirements</Link></li>
+                        <li><Link href="#" className="hover:text-white transition-colors">Tuition & Fees</Link></li>
+                        <li><Link href="#" className="hover:text-white transition-colors">School News</Link></li>
+                        <li><Link href="#" className="hover:text-white transition-colors">Gallery</Link></li>
+                        <li><Link href="#" className="hover:text-white transition-colors">Opportunities</Link></li>
+                    </>
+                )}
               </ul>
             </div>
           </div>
 
           {/* Column 3: Academics */}
-
           <div className="lg:col-span-1 lg:border-l max-xs:hidden border-white/20 lg:flex lg:justify-center">
             <div className="lg:py-5 lg:px-5">
               <h3 className="text-xl font-bold mb-6">Academics</h3>
               <ul className="space-y-4 max-sm:space-y-2 text-white/80 text-sm">
-                <li><Link href="#" className="hover:text-white transition-colors">Curriculum</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Academic Calendar</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Programs</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Scholarships</Link></li>
+                {(footerData && footerData.academicsLinks.length > 0) ? footerData.academicsLinks.map(link => (
+                    <li key={link.id}><Link href={link.url} className="hover:text-white transition-colors">{link.label}</Link></li>
+                )) : (
+                    <>
+                        <li><Link href="#" className="hover:text-white transition-colors">Curriculum</Link></li>
+                        <li><Link href="#" className="hover:text-white transition-colors">Academic Calendar</Link></li>
+                        <li><Link href="#" className="hover:text-white transition-colors">Programs</Link></li>
+                        <li><Link href="#" className="hover:text-white transition-colors">Scholarships</Link></li>
+                    </>
+                )}
               </ul>
             </div>
           </div>
@@ -110,10 +128,18 @@ export default function Footer() {
           <div className="lg:col-span-1 lg:border-l border-white/20 lg:flex lg:justify-center">
             <div className="lg:py-5 lg:px-5">
               <h3 className="text-xl font-bold mb-6">Contact Us</h3>
-              <div className="space-y-4 max-sm:space-y-2 text-white/80 text-sm leading-relaxed">
-                <p>Fish Market Monrovia,<br /> Liberia.</p>
-                <a href="tel:+23105457503232" className="block text-xl font-bold text-white hover:text-white/80 transition-colors">+231 054 575 032 32</a>
-                <a href="mailto:info@amfofana.com" className="block hover:text-white transition-colors">info@amfofana.com</a>
+              <div className="space-y-4 max-sm:space-y-2 text-white/80 text-sm leading-relaxed whitespace-pre-line">
+                <p>{contactInfo?.address || "Fish Market Monrovia,\nLiberia."}</p>
+                {contactInfo?.phones && contactInfo.phones.length > 0 ? (
+                  <a href={`tel:${contactInfo.phones[0].replace(/\s+/g, '')}`} className="block text-xl font-bold text-white hover:text-white/80 transition-colors">{contactInfo.phones[0]}</a>
+                ) : (
+                  <a href="tel:+23105457503232" className="block text-xl font-bold text-white hover:text-white/80 transition-colors">+231 054 575 032 32</a>
+                )}
+                {contactInfo?.emails && contactInfo.emails.length > 0 ? (
+                  <a href={`mailto:${contactInfo.emails[0]}`} className="block hover:text-white transition-colors">{contactInfo.emails[0]}</a>
+                ) : (
+                  <a href="mailto:info@amfofana.com" className="block hover:text-white transition-colors">info@amfofana.com</a>
+                )}
               </div>
             </div>
           </div>

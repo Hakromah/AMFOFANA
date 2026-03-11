@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
-import Image from 'next/image';
+import StrapiImage from '@/components/StrapiImage';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Swiper as SwiperType } from 'swiper';
@@ -11,63 +11,26 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 
+import type { StaffMember } from '@/types/strapi';
+
 import 'swiper/css';
 import 'swiper/css/navigation';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const staffMembers = [
-    {
-        id: 1,
-        name: "Sarah Mitchell",
-        role: "Principal",
-        email: "sarahmitchell@edu.lib",
-        image: "/home/staff1.png",
-        bio: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement."
-    },
-    {
-        id: 2,
-        name: "Ms. Emily Chen",
-        role: "Vice Principal",
-        email: "emilychen@edu.lib",
-       image: "/home/staff2.png",
-        bio: "Dedicated to student welfare and curriculum development. Ensuring a supportive and inclusive learning environment for all."
-    },
-    {
-        id: 3,
-        name: "Mr. David Ross",
-        role: "Head of Science",
-        email: "davidross@edu.lib",
-       image: "/home/staff1.png",
-        bio: "Inspiring curiosity and scientific inquiry. Passionate about STEM education and hands-on learning experiences."
-    },
-    {
-        id: 4,
-        name: "Mrs. Lisa Wong",
-        role: "Head of Arts",
-        email: "lisawong@edu.lib",
-        image: "/home/staff2.png",
-         bio: "Cultivating creativity and artistic expression. Believes in the power of arts to transform lives and perspectives."
-    },
-      {
-        id: 5,
-        name: "Mrs. Lisa Wong",
-        role: "Head of Arts",
-        email: "lisawong@edu.lib",
-        image: "/home/staff1.png",
-         bio: "Cultivating creativity and artistic expression. Believes in the power of arts to transform lives and perspectives."
-    },
-      {
-        id: 6,
-        name: "Mrs. Lisa Wong",
-        role: "Head of Arts",
-        email: "lisawong@edu.lib",
-        image: "/home/staff2.png",
-         bio: "Cultivating creativity and artistic expression. Believes in the power of arts to transform lives and perspectives."
-    },
+const fallbackStaff: StaffMember[] = [
+    { id: 1, name: "Sarah Mitchell", role: "Principal", email: "sarahmitchell@edu.lib", image: "/home/staff1.png", bio: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.", isFeatured: true, isLeadership: true },
+    { id: 2, name: "Ms. Emily Chen", role: "Vice Principal", email: "emilychen@edu.lib", image: "/home/staff2.png", bio: "Dedicated to student welfare and curriculum development. Ensuring a supportive and inclusive learning environment for all.", isFeatured: true, isLeadership: true },
+    { id: 3, name: "Mr. David Ross", role: "Head of Science", email: "davidross@edu.lib", image: "/home/staff1.png", bio: "Inspiring curiosity and scientific inquiry. Passionate about STEM education and hands-on learning experiences.", isFeatured: true, isLeadership: false },
+    { id: 4, name: "Mrs. Lisa Wong", role: "Head of Arts", email: "lisawong@edu.lib", image: "/home/staff2.png", bio: "Cultivating creativity and artistic expression. Believes in the power of arts to transform lives and perspectives.", isFeatured: true, isLeadership: false },
 ];
 
-export default function StaffSection() {
+interface StaffSectionProps {
+    staffMembers?: StaffMember[];
+}
+
+export default function StaffSection({ staffMembers: staffProp }: StaffSectionProps) {
+    const activeStaff = (staffProp && staffProp.length > 0) ? staffProp : fallbackStaff;
     const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
     const containerRef = useRef<HTMLElement>(null);
 
@@ -149,7 +112,7 @@ export default function StaffSection() {
                                 }}
                                 className="!overflow-visible py-10" // Padding for hover effects/shadows
                             >
-                                {staffMembers.map((member) => (
+                                {activeStaff.map((member) => (
                                     <SwiperSlide key={member.id} className="h-auto">
 
                                         <div className="bg-[linear-gradient(180deg,_#FFF_0%,_#2857AE_100%)] h-[470px] rounded-[20px] p-6 text-center max-md:h-full flex flex-col items-center justify-center group transition-transform duration-300 hover:-translate-y-2 shadow-lg">
@@ -157,7 +120,7 @@ export default function StaffSection() {
                                             <div className="w-full h-full flex flex-col justify-center items-center  ">
                                                 {/* Image Container */}
                                                 <div className="relative w-[174px] h-[189px] mb-3 rounded-[20px] overflow-hidden">
-                                                    <Image
+                                                    <StrapiImage
                                                         src={member.image}
                                                         alt={member.name}
                                                         fill

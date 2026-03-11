@@ -1,12 +1,38 @@
 import React from "react";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import StrapiImage from "@/components/StrapiImage";
 import Breadcrumb from "@/components/Breadcrumb";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import LeadershipSlider from "./LeadershipSlider";
-import intro1 from "@/public/home/intro1.png";
-import staff from "@/public/home/staff2.png";
-export default function AboutPage() {
+import type { AboutPageData, StaffMember } from "@/types/strapi";
+
+interface AboutPageProps {
+  aboutData?: AboutPageData | null;
+  leadershipTeam?: StaffMember[];
+}
+
+// Default value cards if Strapi returns no values
+const defaultValues = [
+  {
+    title: "Dual Curriculum",
+    description: "A unique English academic system perfectly combined with a strong, deep-rooted Islamic education for a balanced life.",
+    icon: <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" /></svg>,
+  },
+  {
+    title: "Discipline & Values",
+    description: "We nurture respect, responsibility, and leadership in every student.",
+    icon: <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>,
+  },
+  {
+    title: "Safe Learning Environment",
+    description: "A supportive and secure campus where every student feels seen, heard, and valued.",
+    icon: <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>,
+  },
+];
+
+export default function AboutPage({ aboutData, leadershipTeam }: AboutPageProps) {
+  const stats = aboutData?.stats;
+  const values = aboutData?.values && aboutData.values.length > 0 ? aboutData.values : null;
+
   return (
     <div className="w-full">
       {/* Hero Section */}
@@ -14,7 +40,7 @@ export default function AboutPage() {
         <Breadcrumb
           title="About us"
           description="Discover Our History, Mission, and Vision"
-          image={intro1.src}
+          image="/home/intro1.png"
           alt="About Us Hero"
         />
       </div>
@@ -24,25 +50,27 @@ export default function AboutPage() {
         <div className="container max-w-[1920px] mx-auto px-5 md:px-[clamp(20px,5vw,60px)] ">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-[clamp(20px,3vw,40px)] items-center">
             <div className="space-y-[clamp(15px,2vw,20px)] [&_p]:font-normal [&_p]:text-black/70 [&_p]:leading-relaxed [&_p]:text-[clamp(16px,2vw,18px)] [&_:is(h1,h2,h3,h4,h5,h6)]:font-semibold [&_:is(h1,h2,h3,h4,h5,h6)]:leading-normal [&_:is(h1,h2,h3,h4,h5,h6)]:text-[clamp(18px,2vw,32px)] [&_:is(h1,h2,h3,h4,h5,h6)]:text-primary">
-              <h2>Our History</h2>
-              <p>
-                A.M. FOFANA Islamic & English High School was founded in February 1990 by the late Alhaji Sheikh Mohammed Mustapha Fofana. It began with a vision to provide a blanded education that integrates Islamic moral values with modern academic excellence.
-              </p>
-              <p>
-                Starting with a few students in a modest structure, the school has grown over decades into a reputable institution graduating thousands of students who excel in various fields while upholding their faith and integrity.
-              </p>
-               <p>
-                Starting with a few students in a modest structure, the school has grown over decades into a reputable institution graduating thousands of students who excel in various fields while upholding their faith and integrity.
-              </p>
+              <h2>{aboutData?.historyTitle || "Our History"}</h2>
+              {aboutData?.historyBody
+                ? aboutData.historyBody.split("\n\n").map((para, i) => (
+                  <p key={i}>{para}</p>
+                ))
+                : (
+                  <>
+                    <p>A.M. FOFANA Islamic &amp; English High School was founded in February 1990 by the late Alhaji Sheikh Mohammed Mustapha Fofana. It began with a vision to provide a blended education that integrates Islamic moral values with modern academic excellence.</p>
+                    <p>Starting with a few students in a modest structure, the school has grown over decades into a reputable institution graduating thousands of students who excel in various fields while upholding their faith and integrity.</p>
+                  </>
+                )
+              }
             </div>
-            <div className="relative h-[400px] w-full bg-gray-200 rounded-2xl overflow-hidden shadow-xl flex items-center justify-center">
-              <span className="text-gray-500">History Image Placeholder</span>
-               <Image
-                src={intro1.src}
+            <div className="relative h-[400px] w-full bg-gray-200 rounded-2xl overflow-hidden shadow-xl">
+              <StrapiImage
+                src={aboutData?.historyImage || "/home/intro1.png"}
                 alt="School History"
                 fill
                 className="object-cover"
-              /> 
+                unoptimized
+              />
             </div>
           </div>
         </div>
@@ -95,134 +123,101 @@ export default function AboutPage() {
         </div>
      
       </section>
-    
+
       {/* Mission & Vision Section */}
       <section id="mission" className="py-[clamp(25px,3vw,40px)] bg-primary/20">
         <div className="container mx-auto max-w-[1920px] px-5 md:px-[clamp(20px,5vw,60px)]">
           <div className="grid grid-cols-1 sm:grid-cols-2 w-full gap-[clamp(20px,3vw,30px)]">
-            {/* Mission */}
             <div className="bg-white p-[clamp(15px,3vw,40px)] rounded-[clamp(15px,3vw,20px)] shadow-sm max-sm:w-full">
               <div className="w-12 h-12 bg-linear-to-br from-primary to-[#15346F] rounded-lg mb-[clamp(20px,3vw,25px)] flex items-center justify-center shadow-lg">
-                {/* Placeholder for the specific icon, using a generic book/school icon for now */}
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" /></svg>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">Our Mission</h3>
               <p className="text-gray-600 leading-relaxed text-[15px]">
-                To provide a comprehensive education that nurtures the intellectual, spiritual, and moral development of our students. We aim to produce graduates who are academically excellent, morally upright, and committed to serving their communities with integrity and compassion.
+                {aboutData?.missionText || "To provide a comprehensive education that nurtures the intellectual, spiritual, and moral development of our students."}
               </p>
             </div>
-            {/* Vision */}
             <div className="bg-white p-[clamp(15px,3vw,40px)] rounded-[clamp(15px,3vw,20px)] shadow-sm">
               <div className="w-12 h-12 bg-linear-to-br from-primary to-[#15346F] rounded-lg mb-6 flex items-center justify-center shadow-lg">
-                {/* Placeholder for the specific icon */}
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><circle cx="12" cy="12" r="10" /><path d="M2 12h20" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></svg>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">Our Vision</h3>
               <p className="text-gray-600 leading-relaxed text-[15px]">
-                To be a leading institution of learning that produces well-rounded individuals who excel in both religious and secular knowledge. We envision our graduates as leaders who positively impact society while maintaining strong Islamic values and moral character.
+                {aboutData?.visionText || "To be a leading institution of learning that produces well-rounded individuals who excel in both religious and secular knowledge."}
               </p>
             </div>
           </div>
         </div>
       </section>
-        {/* Values Section */}
+
+      {/* Values Section */}
       <section id="values" className="py-[clamp(25px,3vw,80px)] bg-background">
         <div className="container mx-auto w-full max-w-[1920px] px-5 md:px-[clamp(20px,5vw,60px)]">
           <div className="text-center mb-12">
             <h2 className="text-[clamp(20px,3vw,40px)] font-bold text-[#2857AE]">Our Core Value</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Card 1: Dual Curriculum */}
-            <div className="group rounded-[clamp(15px,2vw,20px)] p-[clamp(15px,3vw,30px)] shadow-lg transition-all duration-300 hover:-translate-y-2 bg-[linear-gradient(180deg,#FFFFFF_0%,#E8F1FF_25%,#6a93e0_100%)] border border-blue-100/50">
-              <div className="flex flex-col h-full">
-                <div className="w-14 h-14 bg-gradient-to-br from-[#2857AE] to-[#15346F] rounded-lg flex items-center justify-center mb-6 text-white shadow-md">
-                  {/* Book Icon */}
-                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" /></svg>
+            {(values || defaultValues).map((val, i) => (
+              <div key={i} className="group rounded-[clamp(15px,2vw,20px)] p-[clamp(15px,3vw,30px)] shadow-lg transition-all duration-300 hover:-translate-y-2 bg-[linear-gradient(180deg,#FFFFFF_0%,#E8F1FF_25%,#6a93e0_100%)] border border-blue-100/50">
+                <div className="flex flex-col h-full">
+                  <div className="w-14 h-14 bg-gradient-to-br from-[#2857AE] to-[#15346F] rounded-lg flex items-center justify-center mb-6 text-white shadow-md">
+                    {/* Use default icons for Strapi values (no icon field), or default icon set */}
+                    {defaultValues[i % defaultValues.length]?.icon}
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{val.title}</h3>
+                  <div className="w-full h-[1px] bg-white/30 mb-4"></div>
+                  <p className="text-white text-[15px] leading-relaxed font-medium opacity-95">
+                    {val.description}
+                  </p>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Dual Curriculum</h3>
-                <div className="w-full h-[1px] bg-white/30 mb-4"></div>
-                <p className="text-white text-[15px] leading-relaxed font-medium opacity-95">
-                  A unique English academic system perfectly combined with a strong, deep-rooted Islamic education for a balanced life.
-                </p>
               </div>
-            </div>
-
-            {/* Card 2: Discipline & Values */}
-            <div className="group rounded-[clamp(15px,2vw,20px)] p-[clamp(15px,3vw,30px)] shadow-lg transition-all duration-300 hover:-translate-y-2 bg-[linear-gradient(180deg,#FFFFFF_0%,#E8F1FF_25%,#6a93e0_100%)] border border-blue-100/50">
-              <div className="flex flex-col h-full">
-                <div className="w-14 h-14 bg-gradient-to-br from-[#2857AE] to-[#15346F] rounded-lg flex items-center justify-center mb-6 text-white shadow-md">
-                  {/* Heart Icon */}
-                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Discipline & Values</h3>
-                <div className="w-full h-[1px] bg-white/30 mb-4"></div>
-                <p className="text-white text-[15px] leading-relaxed font-medium opacity-95">
-                  We nurture respect, responsibility, and leadership.
-                </p>
-              </div>
-            </div>
-
-            {/* Card 3: Safe Learning Environment */}
-            <div className="group rounded-[clamp(15px,2vw,20px)] p-[clamp(15px,3vw,30px)] shadow-lg transition-all duration-300 hover:-translate-y-2 bg-[linear-gradient(180deg,#FFFFFF_0%,#E8F1FF_25%,#6a93e0_100%)] border border-blue-100/50">
-              <div className="flex flex-col h-full">
-                <div className="w-14 h-14 bg-gradient-to-br from-[#2857AE] to-[#15346F] rounded-lg flex items-center justify-center mb-6 text-white shadow-md">
-                  {/* Home Icon */}
-                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Safe Learning Environment</h3>
-                <div className="w-full h-[1px] bg-white/30 mb-4"></div>
-                <p className="text-white text-[15px] leading-relaxed font-medium opacity-95">
-                  A supportive and secure campus where every student feels seen, heard, and valued.
-                  A supportive and secure campus where every student feels seen, heard, and valued.
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
+
       {/* Principal's Message Section */}
       <section className="py-[clamp(25px,3vw,80px)] bg-[#2857AE]">
         <div className="container mx-auto max-w-[1920px] w-full px-5 md:py-10 md:px-[clamp(20px,5vw,60px)]">
           <div className="flex flex-col md:flex-row items-center gap-[clamp(20px,3vw,40px)]">
-            {/* Image */}
             <div className="w-full md:w-1/3">
               <div className="relative h-[400px] w-full rounded-[clamp(15px,2vw,20px)] overflow-hidden border-4 border-white/20 shadow-2xl">
-                <Image
-                  src={staff} /* Placeholder matching the vibe, or use the one from staff if known */
-                  alt="Principal Message"
+                <StrapiImage
+                  src={aboutData?.principalImage || "/home/staff2.png"}
+                  alt={aboutData?.principalName || "Principal"}
                   fill
                   className="object-cover"
+                  unoptimized
                 />
               </div>
             </div>
-            {/* Content */}
             <div className="w-full md:w-2/3 text-white">
               <h2 className="text-[clamp(20px,3vw,32px)] font-bold mb-[clamp(16px,3vw,25px)]">Principal&apos;s Message</h2>
               <div className="space-y-6 text-lg leading-relaxed opacity-90">
-                <p>
-                  &quot;Education is not merely about acquiring knowledge; it is about building character, nurturing faith, and preparing young minds to contribute positively to society. At A.M. FOFANA High School, we are committed to providing an environment where every student can thrive academically, spiritually, and socially.&quot;
-                </p>
-                <p>
-                  As we continue to build on the legacy of our founder, Sheikh A.M. Fofana, we remain dedicated to excellence in education and character development. Our students are our future, and we take great pride in shaping them into responsible citizens and faithful Muslims.
-                </p>
+                {aboutData?.principalMessage
+                  ? aboutData.principalMessage.split("\n\n").map((para, i) => (
+                    <p key={i}>{para}</p>
+                  ))
+                  : (
+                    <p>&quot;Education is not merely about acquiring knowledge; it is about building character, nurturing faith, and preparing young minds to contribute positively to society.&quot;</p>
+                  )
+                }
               </div>
               <div className="mt-[clamp(15px,3vw,30px)]">
-                <h3 className="text-[clamp(20px,3vw,32px)] font-semilbold text-white">Dr. Ibrahim Kamara</h3>
-                <p className="text-white/70 text-sm mt-1 uppercase tracking-wider">Principal, A.M. FOFANA High School</p>
+                <h3 className="text-[clamp(20px,3vw,32px)] font-semibold text-white">
+                  {aboutData?.principalName || "Dr. Ibrahim Kamara"}
+                </h3>
+                <p className="text-white/70 text-sm mt-1 uppercase tracking-wider">
+                  {aboutData?.principalRole || "Principal, A.M. FOFANA High School"}
+                </p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-    
-
-   
-
-    
-
       {/* Leadership Slider */}
-      <LeadershipSlider />
+      <LeadershipSlider leadershipTeam={leadershipTeam} />
 
     </div>
   );

@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import StrapiImage from '@/components/StrapiImage';
 import { ArrowRight, ArrowLeft, ArrowUpRight } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Swiper as SwiperType } from 'swiper';
@@ -12,59 +12,36 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 
+import type { AcademicProgram } from '@/types/strapi';
+
 import 'swiper/css';
 import 'swiper/css/navigation';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const programs = [
-    {
-        id: 1,
-        category: 'Kindergarten',
-        title: 'Kindergarten',
-        image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', // Placeholder
-        description: 'Global education system has become one of our early childhood program focuses on "Learning through Play." We prioritize...'
-    },
-    {
-        id: 2,
-        category: 'Elementary',
-        title: 'Elementary',
-        image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', // Placeholder
-        description: 'Global education system has become one of our early childhood program focuses on "Learning through Play." We prioritize...'
-    },
-    {
-        id: 3,
-        category: 'Junior High',
-        title: 'Junior High',
-        image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', // Placeholder
-        description: 'Global education system has become one of our early childhood program focuses on "Learning through Play." We prioritize...'
-    },
-    {
-        id: 4,
-        category: 'Vocational Training',
-        title: 'Vocational Training',
-        image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', // Placeholder
-        description: 'Global education system has become one of our early childhood program focuses on "Learning through Play." We prioritize...'
-    },
-    {
-        id: 5,
-        category: 'Senior High',
-        title: 'Senior High',
-        image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', // Placeholder
-        description: 'Preparing students for higher education and career success with rigorous academic programs.'
-    }
+const fallbackPrograms: AcademicProgram[] = [
+    { id: 1, category: 'Kindergarten', title: 'Kindergarten', image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', description: 'Global education system has become one of our early childhood program focuses on "Learning through Play." We prioritize...', sortOrder: 1, header: 'Kindergarten', subheader: 'Kindergarten' },
+    { id: 2, category: 'Elementary', title: 'Elementary', image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', description: 'Global education system has become one of our early childhood program focuses on "Learning through Play." We prioritize...', sortOrder: 2, header: 'Elementary', subheader: 'Elementary' },
+    { id: 3, category: 'Junior High', title: 'Junior High', image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', description: 'Global education system has become one of our early childhood program focuses on "Learning through Play." We prioritize...', sortOrder: 3, header: 'Junior High', subheader: 'Junior High' },
+    { id: 4, category: 'Vocational Training', title: 'Vocational Training', image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', description: 'Global education system has become one of our early childhood program focuses on "Learning through Play." We prioritize...', sortOrder: 4, header: 'Vocational Training', subheader: 'Vocational Training' },
+    { id: 5, category: 'Senior High', title: 'Senior High', image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', description: 'Preparing students for higher education and career success with rigorous academic programs.', sortOrder: 5, header: 'Senior High', subheader: 'Senior High' },
 ];
 
-const categories = ["All Programs", "Kindergarten", "Elementary", "Junior High", "Senior High", "Vocational Training"];
+const allCategories = ["All Programs", "Kindergarten", "Elementary", "Junior High", "Senior High", "Vocational Training"];
 
-export default function AcademicSection() {
+interface AcademicSectionProps {
+    programs?: AcademicProgram[];
+}
+
+export default function AcademicSection({ programs: programsProp }: AcademicSectionProps) {
+    const activePrograms = (programsProp && programsProp.length > 0) ? programsProp : fallbackPrograms;
     const [activeTab, setActiveTab] = useState("All Programs");
     const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
     const containerRef = useRef<HTMLElement>(null);
 
     const filteredPrograms = activeTab === "All Programs"
-        ? programs
-        : programs.filter(p => p.category === activeTab);
+        ? activePrograms
+        : activePrograms.filter(p => p.category === activeTab);
 
     useGSAP(() => {
         const tl = gsap.timeline({
@@ -102,9 +79,11 @@ export default function AcademicSection() {
                 <div className='w-full h-full mb-14 max-md:mb-6'>
                     <div className="academic-header flex flex-col md:flex-row justify-between items-start md:items-end pb-5 md:mb-12 gap-8">
                         <div className="md:max-w-2xl">
-                            <h2 className="text-[clamp(22px,4vw,50px)] font-bold mb-6">Our Academic Programs</h2>
+                            <h2 className="text-[clamp(22px,4vw,50px)] font-bold mb-6">
+                                {activePrograms[0]?.header || "Our Academic Programs"}
+                            </h2>
                             <p className="text-[#E6ECFFB2] text-[clamp(18px,2vw,20px)] leading-relaxed">
-                                From the first steps in our Kindergarten to the specialized skills of Vocational Training, our school provides a holistic and continuous learning journey. We are dedicated to nurturing academic excellence, character development, and practical expertise to prepare students for the challenges of the 21st century.
+                                {activePrograms[0]?.subheader || "From the first steps in our Kindergarten to the specialized skills of Vocational Training, our school provides a holistic and continuous learning journey. We are dedicated to nurturing academic excellence, character development, and practical expertise to prepare students for the challenges of the 21st century."}
                             </p>
                         </div>
 
@@ -140,7 +119,7 @@ export default function AcademicSection() {
                             <button
                                 key={cat}
                                 onClick={() => setActiveTab(cat)}
-                                className={`button text-nowrap h-fit cursor-pointer text-base h-full font-medium transition-all duration-500 relative py-2 after:duration-500 sm:after:absolute sm:after:bottom-[-17px] after:left-0 after:w-0 after:h-[2px] after:bg-white 
+                                className={`button text-nowrap h-fit cursor-pointer text-base h-full font-medium transition-all duration-500 relative py-2 after:duration-500 sm:after:absolute sm:after:bottom-[-17px] after:left-0 after:w-0 after:h-[2px] after:bg-white
                                 ${activeTab === cat ? 'text-white opacity-100  sm:after:w-full duration-500 after:duration-500' : 'text-white/60 lg:hover:text-white'}`}>
                                 {cat}
                             </button>

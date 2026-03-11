@@ -78,6 +78,9 @@ export default function Navbar() {
   const schoolSubtitle = settings.school_subtitle || 'Islamic & English High School';
   const schoolPhone = settings.school_phone || '+231 054 575 032 32';
 
+  // Merge social links from contactInfo or default array
+  const socials = contactInfo?.socialLinks ?? socialLinks;
+
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;

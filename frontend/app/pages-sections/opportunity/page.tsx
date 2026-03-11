@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Breadcrumb from "@/components/Breadcrumb";
-import { opportunities } from "@/data/opportunities";
+import type { Opportunity } from "@/types/strapi";
 
 export default function OpportunitiesPage() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -49,14 +49,11 @@ export default function OpportunitiesPage() {
             <div className="flex items-center gap-4 mb-6">
               <div className="h-12 w-1 bg-[#2857AE]"></div>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-                Check the latest Opportunities
+                {opportunities?.[0]?.header}
               </h2>
             </div>
             <p className="text-lg text-gray-600 max-w-4xl leading-relaxed">
-              Empowering students Where ambition meets opportunity: Providing
-              the resources, scholarships, and networks students need to thrive
-              in an evolving world with comprehensive education and innovative
-              learning approaches
+              {opportunities?.[0]?.subheader}
             </p>
           </div>
 

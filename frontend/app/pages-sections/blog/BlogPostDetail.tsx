@@ -105,12 +105,13 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
         <div className="w-full bg-background min-h-screen">
             {/* Full Width Hero Image with Overlay */}
             <div className="relative w-full h-[60vh] min-h-[400px]">
-                <Image
+                <StrapiImage
                     src={post.image}
                     alt={post.title}
                     fill
                     className="object-cover"
                     priority
+                    unoptimized
                 />
                 {/* Dark Overlay */}
                 <div className="absolute inset-0 bg-black/50"></div>
