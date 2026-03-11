@@ -664,6 +664,39 @@ export interface ApiContactInfoContactInfo extends Struct.SingleTypeSchema {
   };
 }
 
+export interface ApiFooterFooter extends Struct.SingleTypeSchema {
+  collectionName: 'footers';
+  info: {
+    displayName: 'Footer';
+    pluralName: 'footers';
+    singularName: 'footer';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    academics_links: Schema.Attribute.Component<'shared.footer-link', true>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::footer.footer'
+    > &
+      Schema.Attribute.Private;
+    logo: Schema.Attribute.Media<'images', true>;
+    publishedAt: Schema.Attribute.DateTime;
+    quick_links: Schema.Attribute.Component<'shared.footer-link', true>;
+    subtitle: Schema.Attribute.String;
+    title: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiGalleryItemGalleryItem extends Struct.CollectionTypeSchema {
   collectionName: 'gallery_items';
   info: {
@@ -730,6 +763,38 @@ export interface ApiHeroSlideHeroSlide extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiNavbarNavbar extends Struct.SingleTypeSchema {
+  collectionName: 'navbars';
+  info: {
+    displayName: 'Navbar';
+    pluralName: 'navbars';
+    singularName: 'navbar';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    establishment_date: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::navbar.navbar'
+    > &
+      Schema.Attribute.Private;
+    logo: Schema.Attribute.Media<'images'>;
+    nav_items: Schema.Attribute.Component<'shared.nav-item', true>;
+    publishedAt: Schema.Attribute.DateTime;
+    subtitle: Schema.Attribute.String;
+    title: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiNewsPostNewsPost extends Struct.CollectionTypeSchema {
   collectionName: 'news_posts';
   info: {
@@ -785,6 +850,7 @@ export interface ApiOpportunityOpportunity extends Struct.CollectionTypeSchema {
     deadline: Schema.Attribute.String;
     description: Schema.Attribute.Text;
     details_intro: Schema.Attribute.Text;
+    header: Schema.Attribute.Text;
     how_to_apply: Schema.Attribute.Text;
     image: Schema.Attribute.Media<
       'images' | 'files' | 'videos' | 'audios',
@@ -801,6 +867,7 @@ export interface ApiOpportunityOpportunity extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     requirements: Schema.Attribute.Component<'shared.benefit', true>;
     slug: Schema.Attribute.UID<'title'>;
+    subheader: Schema.Attribute.Text;
     title: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -876,6 +943,41 @@ export interface ApiStaffMemberStaffMember extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiStudentLifeSectionStudentLifeSection
+  extends Struct.SingleTypeSchema {
+  collectionName: 'student_life_sections';
+  info: {
+    displayName: 'Student Life Section';
+    pluralName: 'student-life-sections';
+    singularName: 'student-life-section';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    heading: Schema.Attribute.String;
+    image_1: Schema.Attribute.Media<'images'>;
+    image_2: Schema.Attribute.Media<'images'>;
+    image_3: Schema.Attribute.Media<'images'>;
+    image_4: Schema.Attribute.Media<'images'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::student-life-section.student-life-section'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    school_name: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiTestimonialTestimonial extends Struct.CollectionTypeSchema {
   collectionName: 'testimonials';
   info: {
@@ -902,6 +1004,71 @@ export interface ApiTestimonialTestimonial extends Struct.CollectionTypeSchema {
     quote: Schema.Attribute.Text;
     role: Schema.Attribute.String;
     type: Schema.Attribute.Enumeration<['PARENT', 'STUDENT', 'ALUMNI']>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiVideoSectionVideoSection extends Struct.SingleTypeSchema {
+  collectionName: 'video_sections';
+  info: {
+    displayName: 'Video Section';
+    pluralName: 'video-sections';
+    singularName: 'video-section';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::video-section.video-section'
+    > &
+      Schema.Attribute.Private;
+    overlay_author: Schema.Attribute.String;
+    overlay_quote: Schema.Attribute.Text;
+    overlay_subtitle: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    title: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    video: Schema.Attribute.Media<'videos'>;
+  };
+}
+
+export interface ApiWhyChooseUsSectionWhyChooseUsSection
+  extends Struct.SingleTypeSchema {
+  collectionName: 'why_choose_us_sections';
+  info: {
+    displayName: 'Why Choose Us Section';
+    pluralName: 'why-choose-us-sections';
+    singularName: 'why-choose-us-section';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    cards: Schema.Attribute.Component<'shared.feature-card', true>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    image: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::why-choose-us-section.why-choose-us-section'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    subtitle: Schema.Attribute.Text;
+    title: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1425,13 +1592,18 @@ declare module '@strapi/strapi' {
       'api::academic-section.academic-section': ApiAcademicSectionAcademicSection;
       'api::blog-post.blog-post': ApiBlogPostBlogPost;
       'api::contact-info.contact-info': ApiContactInfoContactInfo;
+      'api::footer.footer': ApiFooterFooter;
       'api::gallery-item.gallery-item': ApiGalleryItemGalleryItem;
       'api::hero-slide.hero-slide': ApiHeroSlideHeroSlide;
+      'api::navbar.navbar': ApiNavbarNavbar;
       'api::news-post.news-post': ApiNewsPostNewsPost;
       'api::opportunity.opportunity': ApiOpportunityOpportunity;
       'api::school-calendar.school-calendar': ApiSchoolCalendarSchoolCalendar;
       'api::staff-member.staff-member': ApiStaffMemberStaffMember;
+      'api::student-life-section.student-life-section': ApiStudentLifeSectionStudentLifeSection;
       'api::testimonial.testimonial': ApiTestimonialTestimonial;
+      'api::video-section.video-section': ApiVideoSectionVideoSection;
+      'api::why-choose-us-section.why-choose-us-section': ApiWhyChooseUsSectionWhyChooseUsSection;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;

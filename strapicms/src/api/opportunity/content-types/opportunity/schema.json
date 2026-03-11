@@ -58,6 +58,12 @@
       "type": "component",
       "component": "shared.benefit",
       "repeatable": true
+    },
+    "header": {
+      "type": "text"
+    },
+    "subheader": {
+      "type": "text"
     }
   }
 }

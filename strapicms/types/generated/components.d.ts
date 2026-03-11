@@ -30,6 +30,34 @@ export interface SharedEmails extends Struct.ComponentSchema {
   };
 }
 
+export interface SharedFeatureCard extends Struct.ComponentSchema {
+  collectionName: 'components_shared_feature_cards';
+  info: {
+    description: '';
+    displayName: 'Feature Card';
+    icon: 'layout';
+  };
+  attributes: {
+    description: Schema.Attribute.Text & Schema.Attribute.Required;
+    icon: Schema.Attribute.Enumeration<
+      ['BookOpen', 'HandHeart', 'Home', 'Star', 'Shield', 'GraduationCap']
+    >;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
+export interface SharedFooterLink extends Struct.ComponentSchema {
+  collectionName: 'components_shared_footer_links';
+  info: {
+    description: '';
+    displayName: 'footer-link';
+  };
+  attributes: {
+    label: Schema.Attribute.String & Schema.Attribute.Required;
+    url: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
 export interface SharedHeroSlide extends Struct.ComponentSchema {
   collectionName: 'components_shared_hero_slides';
   info: {
@@ -55,6 +83,32 @@ export interface SharedLinkItems extends Struct.ComponentSchema {
   attributes: {
     text: Schema.Attribute.String;
     visibled: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+  };
+}
+
+export interface SharedNavItem extends Struct.ComponentSchema {
+  collectionName: 'components_shared_nav_items';
+  info: {
+    displayName: 'nav-item';
+    icon: 'link';
+  };
+  attributes: {
+    label: Schema.Attribute.String & Schema.Attribute.Required;
+    sub_items: Schema.Attribute.Component<'shared.nav-sub-item', true>;
+    url: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
+export interface SharedNavSubItem extends Struct.ComponentSchema {
+  collectionName: 'components_shared_nav_sub_items';
+  info: {
+    displayName: 'nav-sub-item';
+    icon: 'bulletList';
+  };
+  attributes: {
+    description: Schema.Attribute.Text;
+    label: Schema.Attribute.String & Schema.Attribute.Required;
+    url: Schema.Attribute.String & Schema.Attribute.Required;
   };
 }
 
@@ -106,8 +160,12 @@ declare module '@strapi/strapi' {
       'shared.benefit': SharedBenefit;
       'shared.details': SharedDetails;
       'shared.emails': SharedEmails;
+      'shared.feature-card': SharedFeatureCard;
+      'shared.footer-link': SharedFooterLink;
       'shared.hero-slide': SharedHeroSlide;
       'shared.link-items': SharedLinkItems;
+      'shared.nav-item': SharedNavItem;
+      'shared.nav-sub-item': SharedNavSubItem;
       'shared.phones': SharedPhones;
       'shared.requirement': SharedRequirement;
       'shared.social-links': SharedSocialLinks;
