@@ -25,6 +25,10 @@ export default function TestimonialsSection({ testimonials: testimonialsProp }: 
     const containerRef = useRef<HTMLElement>(null);
 
     useGSAP(() => {
+         const mm = gsap.matchMedia();
+
+    // This will only run if the screen is wider than 768px
+    mm.add("(min-width: 769px)", () => {
         const tl = gsap.timeline({
             scrollTrigger: {
                 trigger: containerRef.current,
@@ -47,7 +51,7 @@ export default function TestimonialsSection({ testimonials: testimonialsProp }: 
                 stagger: 0.1,
                 ease: "power3.out"
             }, "-=0.4");
-
+   });
     }, { scope: containerRef });
 
     // Triple the testimonials to ensure smooth infinite loop on all screen sizes

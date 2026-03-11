@@ -62,7 +62,7 @@ export default function GalleryPage({ items = [] }: GalleryPageProps) {
         <div className="container mx-auto overflow-hidden py-[clamp(20px,3vw,100px)] px-5 md:px-[clamp(20px,3vw,60px)]">
           {/* 1. Toggle Switch (Segmented Control) */}
           <div className="flex justify-center w-fit max-w-500 mx-auto mb-8 absolute left-1/2 -translate-x-1/2 -top-7 z-10 ">
-            <div className="bg-[#F8F9FA] p-1.5 rounded-full inline-flex items-center gap-1">
+            <div className="bg-white p-1.5 rounded-full inline-flex items-center gap-1">
               <button
                 onClick={() => setActiveMediaType("image")}
                 className={`px-8 py-2.5 rounded-full text-sm font-semibold cursor-pointer text-nowrap transition-all duration-300 ${activeMediaType === "image"

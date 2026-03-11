@@ -54,9 +54,9 @@ export default function VideoSection({ videoSectionData }: VideoSectionProps) {
             // 1. Scale Video from 75% to 100%
             tl.fromTo(videoContainerRef.current,
                 {
-                    width: "75%",
+                    width: "95%",
                     borderRadius: "2rem",
-                    height: "60%" // Start height
+                    height: "95%" // Start height
                 },
                 {
                     width: "100%",

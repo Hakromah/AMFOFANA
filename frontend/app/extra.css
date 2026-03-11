@@ -145,6 +145,19 @@ svg.pulse-svg {
 }
 
 
+/* intro slider css */
+/* This ensures that as soon as a slide is no longer active, 
+   it snaps back to 100% so it's ready for the next zoom-in. */
+.intro .swiper-slide:not(.swiper-slide-active) img {
+    transform: scale(1);
+    transition: none !important;
+}
+
+/* When active, zoom to 1.1 (or 1.15) over the duration of your autoplay delay (5000ms) */
+.intro .swiper-slide-active img {
+    transform: scale(1.1);
+}
+
 
 /* Iconfont - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 

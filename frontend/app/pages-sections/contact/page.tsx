@@ -3,7 +3,6 @@ import React from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MapPin, Phone, Mail, Clock, Send, Facebook, Instagram, Linkedin, Twitter, Youtube, ArrowRight } from 'lucide-react';
 import Breadcrumb from '@/components/Breadcrumb';
 import Link from 'next/link';
 import {
@@ -15,7 +14,7 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet"
 import dynamic from 'next/dynamic';
-import type { ContactInfoData } from '@/types/strapi';
+import { Send } from 'lucide-react';
 
 const Map = dynamic(() => import('./Map'), {
     ssr: false,
@@ -64,12 +63,10 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
                                     <span className='icon icon-map flex items-center justify-center text-primary h-5 w-5'></span>
                                 </div>
                                 <h3 className="font-bold text-lg mb-2">Address</h3>
-                                <p className="text-gray-600 max-md:[&_br]:hidden max-md:w-full max-md:text-left text-sm leading-relaxed whitespace-pre-line">
-                                    {contactInfo?.address ? contactInfo.address : (
-                                        <>A.M. FOFANA High School Sinkor<br />
-                                        Fish Market Monrovia, Liberia<br />
-                                        West Africa</>
-                                    )}
+                                <p className="text-gray-600 max-md:[&_br]:hidden max-md:w-full max-md:text-left text-sm leading-relaxed">
+                                    A.M. FOFANA High School Sinkor<br />
+                                    Fish Market Monrovia, Liberia<br />
+                                    West Africa
                                 </p>
                             </a>
                         </div>
@@ -82,16 +79,8 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
                             </div>
                             <h3 className="font-bold text-lg mb-2">Phone</h3>
                             <div className="flex flex-col max-md:flex-row gap-3 text-gray-600 max-md:[&_br]:hidden text-sm leading-relaxed">
-                                {contactInfo?.phones && contactInfo.phones.length > 0 ? (
-                                    contactInfo.phones.map((phone, i) => (
-                                        <p key={i}> <a href={`tel:${phone.replace(/\s+/g, '')}`} className='block w-fit h-fit'>{phone}</a> </p>
-                                    ))
-                                ) : (
-                                    <>
-                                        <p> <a href="" className='block w-fit h-fit'>  +231 054 678 13 13 </a> </p>
-                                        <p> <a href="" className='block w-fit h-fit'> +231 077 123 4567 </a> </p>
-                                    </>
-                                )}
+                                <p> <a href="" className='block w-fit h-fit'>  +231 054 678 13 13 </a> </p>
+                                <p> <a href="" className='block w-fit h-fit'> +231 077 123 4567 </a>  </p>
                             </div>
                         </div>
 
@@ -102,22 +91,12 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
                             </div>
                             <h3 className="font-bold text-lg mb-2">Email</h3>
                             <div className="flex flex-col gap-2">
-                                {contactInfo?.emails && contactInfo.emails.length > 0 ? (
-                                    contactInfo.emails.map((email, i) => (
-                                        <p key={i} className="text-gray-600 text-sm leading-relaxed">
-                                            <a href={`mailto:${email}`} className='block w-fit h-fit'>{email}</a>
-                                        </p>
-                                    ))
-                                ) : (
-                                    <>
-                                        <p className="text-gray-600 text-sm leading-relaxed">
-                                            <a href="" className='block w-fit h-fit'> info@amfofana.edu.lr </a>
-                                        </p>
-                                        <p className="text-gray-600 text-sm leading-relaxed">
-                                            <a href="" className='block w-fit h-fit'> info@amfofana.edu.lr </a>
-                                        </p>
-                                    </>
-                                )}
+                                <p className="text-gray-600 text-sm leading-relaxed">
+                                    <a href="" className='block w-fit h-fit'> info@amfofana.edu.lr </a>
+                                </p>
+                                <p className="text-gray-600 text-sm leading-relaxed">
+                                    <a href="" className='block w-fit h-fit'>   info@amfofana.edu.lr </a>
+                                </p>
                             </div>
 
                         </div>
@@ -177,31 +156,27 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
                                         <form onSubmit={handleSubmit} className="space-y-6">
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <div className="space-y-2">
-                                                    <label htmlFor="firstName" className="text-sm font-medium">First Name</label>
-                                                    <Input id="firstName" placeholder="John" required />
+
+                                                    <Input id="firstName" placeholder="firstName" required />
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <label htmlFor="lastName" className="text-sm font-medium">Last Name</label>
-                                                    <Input id="lastName" placeholder="Doe" required />
+                                                    <Input id="lastName" placeholder="lastName" required />
                                                 </div>
                                             </div>
 
                                             <div className="space-y-2">
-                                                <label htmlFor="email" className="text-sm font-medium">Email Address</label>
-                                                <Input id="email" type="email" placeholder="john@example.com" required />
+                                                <Input id="email" type="email" placeholder="E-mail" required />
                                             </div>
 
                                             <div className="space-y-2">
-                                                <label htmlFor="subject" className="text-sm font-medium">Subject</label>
                                                 <Input id="subject" placeholder="Inquiry about admissions" required />
                                             </div>
 
                                             <div className="space-y-2">
-                                                <label htmlFor="message" className="text-sm font-medium">Message</label>
                                                 <textarea
                                                     id="message"
-                                                    className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                                    placeholder="How can we help you?"
+                                                    className="flex min-h-[120px] max-h-[160px] w-full rounded-md border border-primary/20 lg:hover:border-primary duration-500 focus:duration-500 fous:border-primary bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                                                    placeholder="Write your message here"
                                                     required
                                                 ></textarea>
                                             </div>

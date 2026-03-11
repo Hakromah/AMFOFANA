@@ -8,15 +8,18 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(ScrollTrigger);
+export default function AboutSection() {
+  const containerRef = useRef<HTMLElement>(null);
 
-export default function AboutSection({ aboutData }: { aboutData?: AboutPageData | null }) {
-    const containerRef = useRef<HTMLElement>(null);
+useGSAP(() => {
+    const mm = gsap.matchMedia();
 
-    useGSAP(() => {
+    // This will only run if the screen is wider than 768px
+    mm.add("(min-width: 769px)", () => {
         const tl = gsap.timeline({
             scrollTrigger: {
                 trigger: containerRef.current,
-                start: "top 80%", // Start animation earlier
+                start: "top 80%",
                 toggleActions: "play none none reverse",
             }
         });
@@ -29,19 +32,20 @@ export default function AboutSection({ aboutData }: { aboutData?: AboutPageData 
             stagger: 0.2,
             ease: "power3.out"
         })
-            .from(".bluerectangle", {
-                scale: 0,
-                opacity: 0,
-                duration: 1,
-                ease: "back.out(1.7)"
-            }, "-=0.2")
-            .from(".about-content > *", {
-                y: 30,
-                opacity: 0,
-                duration: 1,
-                stagger: 0.1,
-                ease: "power3.out"
-            }, "-=0.8");
+        .from(".bluerectangle", {
+            scale: 0,
+            opacity: 0,
+            duration: 1,
+            ease: "back.out(1.7)"
+        }, "-=0.2")
+        .from(".about-content > *", {
+            y: 30,
+            opacity: 0,
+            duration: 1,
+            stagger: 0.1,
+            ease: "power3.out"
+        }, "-=0.5");
+        });
     }, { scope: containerRef });
     return (
         <section ref={containerRef} className="py-20 overflow-clip max-md:py-5 relative overflow-hidden">

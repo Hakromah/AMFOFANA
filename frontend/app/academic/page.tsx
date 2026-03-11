@@ -7,11 +7,6 @@ export const metadata: Metadata = {
     title: "Academic",
 };
 
-export default async function Page() {
-    const [sections, resources, calendars] = await Promise.all([
-        fetchAcademicSections(),
-        fetchAcademicResources(),
-        fetchSchoolCalendars(),
-    ]);
-    return <AcademicPage sections={sections} resources={resources} calendars={calendars} />;
+export default function Page() {
+    return <AcademicPage />;
 }
