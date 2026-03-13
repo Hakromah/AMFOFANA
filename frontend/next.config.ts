@@ -15,6 +15,10 @@ const nextConfig = {
         port: '1337',
         pathname: '/uploads/**',
       },
+      {
+        protocol:"https",
+        hostname:"outgoing-fruit-84aa9644f7.media.strapiapp.com",
+      }
     ],
   },
 };

@@ -14,12 +14,13 @@ export default function OpportunitiesPage({ opportunities = [] }: OpportunitiesP
   return (
     <div className="w-full min-h-screen bg-background lg:pb-20">
       {/* Breadcrumb Section */}
-      <Breadcrumb
+      {/* <Breadcrumb
         title="Opportunities"
         description="Join our team, apply for scholarships, or lead student initiatives."
         image="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=2084&auto=format&fit=crop"
         alt="Opportunities"
-      />
+      /> */}
+
 
       {/* Main Content */}
       <section className="py-[clamp(25px,3vw,80px)]">
