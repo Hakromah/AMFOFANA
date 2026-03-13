@@ -6,7 +6,7 @@ export interface SharedBenefit extends Struct.ComponentSchema {
     displayName: 'List Item';
   };
   attributes: {
-    text: Schema.Attribute.String;
+    text: Schema.Attribute.Text;
   };
 }
 
