@@ -285,7 +285,7 @@ export async function fetchGalleryItems(): Promise<GalleryItem[]> {
 export async function fetchOpportunities(): Promise<Opportunity[]> {
    try {
       const { data } = await strapi.get<StrapiListResponse<StrapiOpportunity>>(
-         '/opportunities?populate[0]=image&populate[1]=requirements&populate[2]=benefits&sort=published_date:desc'
+         '/opportunities?populate[0]=image&populate[1]=requirements&populate[2]=benefits&populate[3]=breadcrumb_item.image&sort=published_date:desc'
       );
       return data.data.map(normalizeOpportunity);
    } catch {
@@ -318,6 +318,17 @@ function normalizeOpportunity(item: StrapiOpportunity): Opportunity {
       deadline: item.deadline,
       dateNumber: item.date_number,
       slug: item.slug,
+
+      // --- New Breadcrumb Mapping ---
+      breadcrumb_item: (item.breadcrumb_item ?? []).map((bc) => ({
+         id: bc.id,
+         breadcrumb_title: bc.breadcrumb_title,
+         description: bc.description,
+         // We use mediaUrl here to handle the nested Strapi image object
+         imageUrl: mediaUrl(bc.image),
+      })),
+      // ------------------------------
+
       details: {
          intro: item.details_intro,
          // Repeatable components return [{id, text}] — extract the text strings

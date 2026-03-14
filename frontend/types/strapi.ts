@@ -149,6 +149,13 @@ export interface StrapiOpportunity {
    date_number: string;
    slug: string;
    details_intro: string;
+   /** New: Matching the Strapi component structure */
+   breadcrumb_item: Array<{
+      id: number;
+      breadcrumb_title: string;
+      description: string;
+      image: StrapiMediaItem | StrapiMediaItem[] | null;
+   }> | null;
    /** Repeatable component: { id, text }[] */
    requirements: Array<{ id: number; text: string }> | null;
    /** Repeatable component: { id, text }[] */
@@ -319,6 +326,14 @@ export interface GalleryItem {
    thumbnail?: string;
 }
 
+/** New Breadcrumb Interface */
+export interface BreadcrumbItem {
+   id: number;
+   breadcrumb_title: string;
+   description: string;
+   imageUrl: string;
+}
+
 export interface Opportunity {
    id: number;
    index: string;
@@ -331,6 +346,8 @@ export interface Opportunity {
    deadline: string;
    dateNumber: string;
    slug: string;
+   // Added breadcrumb array
+   breadcrumb_item: BreadcrumbItem[];
    details: {
       intro: string;
       requirements: string[];

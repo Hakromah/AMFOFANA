@@ -11,22 +11,26 @@ interface OpportunitiesPageProps {
 }
 
 export default function OpportunitiesPage({ opportunities = [] }: OpportunitiesPageProps) {
+  // Grab the breadcrumb from the first opportunity entry
+  const breadcrumbData = opportunities[0]?.breadcrumb_item?.[0];
+
   return (
     <div className="w-full min-h-screen bg-background lg:pb-20">
       {/* Breadcrumb Section */}
-      {/* <Breadcrumb
-        title="Opportunities"
-        description="Join our team, apply for scholarships, or lead student initiatives."
-        image="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=2084&auto=format&fit=crop"
-        alt="Opportunities"
-      /> */}
+      <Breadcrumb
+        // Use Strapi data if available, otherwise fallback to defaults
+        title={breadcrumbData?.breadcrumb_title || "Opportunities"}
+        description={breadcrumbData?.description || "Join our team, apply for scholarships, or lead student initiatives."}
+        image={breadcrumbData?.imageUrl || "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=2084&auto=format&fit=crop"}
+        alt={breadcrumbData?.breadcrumb_title || "Opportunities"}
+      />
 
 
       {/* Main Content */}
       <section className="py-[clamp(25px,3vw,80px)]">
         <div className="container  px-5 md:px-[clamp(20px,5vw,60px)] mx-auto max-w-[1920px]">
           {/* Section Header */}
-          {/* <div className="mb-[clamp(30px,4vw,50px)]">
+          <div className="mb-[clamp(30px,4vw,50px)]">
             <div className="flex items-center gap-4 mb-6">
               <div className="h-12 w-1 bg-[#2857AE]"></div>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
@@ -35,18 +39,6 @@ export default function OpportunitiesPage({ opportunities = [] }: OpportunitiesP
             </div>
             <p className="text-lg text-gray-600 max-w-4xl leading-relaxed">
               {opportunities?.[0]?.subheader || "Empowering students Where ambition meets opportunity: Providing the resources, scholarships, and networks students need to thrive in an evolving world with comprehensive education and innovative learning approaches"}
-            </p>
-          </div> */}
-
-          <div className="mb-[clamp(30px,4vw,50px)]">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="h-12 w-1 bg-[#2857AE]"></div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-                {opportunities?.[0]?.header}
-              </h2>
-            </div>
-            <p className="text-lg text-gray-600 max-w-4xl leading-relaxed">
-              {opportunities?.[0]?.subheader}
             </p>
           </div>
 
