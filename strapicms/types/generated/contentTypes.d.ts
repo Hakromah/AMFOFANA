@@ -644,6 +644,7 @@ export interface ApiContactInfoContactInfo extends Struct.SingleTypeSchema {
   };
   attributes: {
     address: Schema.Attribute.Text;
+    breadcrumb_item: Schema.Attribute.Component<'shared.readcrumb', true>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -843,6 +844,7 @@ export interface ApiOpportunityOpportunity extends Struct.CollectionTypeSchema {
   };
   attributes: {
     benefits: Schema.Attribute.Component<'shared.benefit', true>;
+    breadcrumb_item: Schema.Attribute.Component<'shared.readcrumb', true>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

@@ -31,6 +31,11 @@
       "type": "component",
       "component": "shared.social-links",
       "repeatable": true
+    },
+    "breadcrumb_item": {
+      "type": "component",
+      "component": "shared.readcrumb",
+      "repeatable": true
     }
   }
 }

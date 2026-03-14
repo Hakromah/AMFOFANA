@@ -122,6 +122,19 @@ export interface SharedPhones extends Struct.ComponentSchema {
   };
 }
 
+export interface SharedReadcrumb extends Struct.ComponentSchema {
+  collectionName: 'components_shared_readcrumbs';
+  info: {
+    displayName: 'readcrumb';
+    icon: 'crown';
+  };
+  attributes: {
+    breadcrumb_title: Schema.Attribute.String;
+    description: Schema.Attribute.Text;
+    image: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+  };
+}
+
 export interface SharedRequirement extends Struct.ComponentSchema {
   collectionName: 'components_shared_requirements';
   info: {
@@ -167,6 +180,7 @@ declare module '@strapi/strapi' {
       'shared.nav-item': SharedNavItem;
       'shared.nav-sub-item': SharedNavSubItem;
       'shared.phones': SharedPhones;
+      'shared.readcrumb': SharedReadcrumb;
       'shared.requirement': SharedRequirement;
       'shared.social-links': SharedSocialLinks;
       'shared.values': SharedValues;
