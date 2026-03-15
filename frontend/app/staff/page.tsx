@@ -1,5 +1,5 @@
 import React from "react";
-import StaffPage from "@/app/pages-sections/staff/StaffPage";
+import StaffPage from "@/app/pages-sections/staffs/StaffPage";
 import type { Metadata } from "next";
 import { fetchStaffMembers } from "@/lib/strapi-api";
 

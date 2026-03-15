@@ -7,9 +7,33 @@ import Breadcrumb from '@/components/Breadcrumb';
 import type { AcademicSection, AcademicResource, SchoolCalendar } from '@/types/strapi';
 
 const fallbackSections: AcademicSection[] = [
-    { id: 1, sectionId: 'elementary', title: 'Elementary (K-5)', content: 'Core focus on Literacy, Math, and Social-Emotional development using inquiry-based learning.', image: '/home/classmate.jpg', details: ["Inquiry-based learning approach", "Strong focus on literacy and numeracy", "Safe and nurturing environment"], header: "Elementary (K-5)", subheader: "Core focus on Literacy, Math, and Social-Emotional development using inquiry-based learning." },
-    { id: 2, sectionId: 'junior', title: 'Junior High (6-8)', content: 'Introduction to specialized subjects, lab sciences, and organizational skills for independence.', image: '/home/intro2.png', details: ["Specialized subject teachers", "Introduction to lab sciences", "Development of organizational skills"], header: "Junior High (6-8)", subheader: "Introduction to specialized subjects, lab sciences, and organizational skills for independence." },
-    { id: 3, sectionId: 'highschool', title: 'High School (9-12)', content: 'Advanced Placement (AP) courses, Honors tracks, and College & Career Readiness programs.', image: '/home/am1.png', details: ["Advanced Placement (AP) courses", "College & Career Readiness programs", "Leadership opportunities"], header: "High School (9-12)", subheader: "Advanced Placement (AP) courses, Honors tracks, and College & Career Readiness programs." },
+    {
+        id: 1, sectionId: 'elementary', title: 'Elementary (K-5)',
+        content: 'Core focus on Literacy, Math, and Social-Emotional development using inquiry-based learning.',
+        image: '/home/classmate.jpg',
+        details: ["Inquiry-based learning approach", "Strong focus on literacy and numeracy", "Safe and nurturing environment"],
+        header: "Elementary (K-5)",
+        subheader: "Core focus on Literacy, Math, and Social-Emotional development using inquiry-based learning.",
+        breadcrumb_item: []
+    },
+    {
+        id: 2, sectionId: 'junior', title: 'Junior High (6-8)',
+        content: 'Introduction to specialized subjects, lab sciences, and organizational skills for independence.',
+        image: '/home/intro2.png',
+        details: ["Specialized subject teachers", "Introduction to lab sciences", "Development of organizational skills"],
+        header: "Junior High (6-8)",
+        subheader: "Introduction to specialized subjects, lab sciences, and organizational skills for independence.",
+        breadcrumb_item: []
+    },
+    {
+        id: 3, sectionId: 'highschool', title: 'High School (9-12)',
+        content: 'Advanced Placement (AP) courses, Honors tracks, and College & Career Readiness programs.',
+        image: '/home/am1.png',
+        details: ["Advanced Placement (AP) courses", "College & Career Readiness programs", "Leadership opportunities"],
+        header: "High School (9-12)",
+        subheader: "Advanced Placement (AP) courses, Honors tracks, and College & Career Readiness programs.",
+        breadcrumb_item: []
+    },
 ];
 
 interface AcademicPageProps {
@@ -21,14 +45,23 @@ interface AcademicPageProps {
 export default function AcademicPage({ sections: sectionsProp, resources: resourcesProp, calendars: calendarsProp }: AcademicPageProps) {
     const raw = (sectionsProp && sectionsProp.length > 0) ? sectionsProp : fallbackSections;
     // Sort by sort_order ascending (nulls last), then by id as tiebreaker
+
     const academicSections = [...raw].sort((a, b) => {
         const aOrder = (a as AcademicSection & { sort_order?: number | null }).sort_order ?? Infinity;
         const bOrder = (b as AcademicSection & { sort_order?: number | null }).sort_order ?? Infinity;
         if (aOrder !== bOrder) return aOrder - bOrder;
         return a.id - b.id;
     });
+
+
+    const academicBreadcrumb = academicSections.find(s => s.breadcrumb_item && s.breadcrumb_item.length > 0);
+    const breadcrumbData = academicBreadcrumb?.breadcrumb_item?.[0];
+
+    // Extract Breadcrumb from the first sorted section
+
     const [activeSection, setActiveSection] = useState<string>(academicSections[0].sectionId);
     const observerRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
 
     useEffect(() => {
         const observerOptions = {
@@ -62,10 +95,10 @@ export default function AcademicPage({ sections: sectionsProp, resources: resour
     return (
         <div className="w-full min-h-screen bg-background">
             <Breadcrumb
-                title="Academic Excellence"
-                description="Empowering students with comprehensive education and innovative learning approaches"
-                image="https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop"
-                alt="Academic Excellence"
+                title={breadcrumbData?.breadcrumb_title || "Academic Excellence"}
+                description={breadcrumbData?.description || "Empowering students with comprehensive education and innovative learning approaches"}
+                image={breadcrumbData?.imageUrl || "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop"}
+                alt={breadcrumbData?.breadcrumb_title || "Academic Excellence"}
             />
 
             <section className="py-[clamp(25px,3vw,80px)]">

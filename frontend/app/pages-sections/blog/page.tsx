@@ -16,6 +16,9 @@ export default function BlogPage({ initialPosts = [] }: BlogPageProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('All');
 
+    const postWithBreadcrumb = initialPosts.find(p => p.breadcrumb_item && p.breadcrumb_item.length > 0);
+    const breadcrumbData = postWithBreadcrumb?.breadcrumb_item?.[0];
+
     // Auto-generate categories from blog data (future-proof)
     const categories = useMemo(() => {
         const uniqueCategories = [...new Set(initialPosts.map(post => post.category))];
@@ -50,12 +53,11 @@ export default function BlogPage({ initialPosts = [] }: BlogPageProps) {
         <div className="w-full bg-[#E8F1FF]/30 min-h-screen">
             {/* Header */}
             <Breadcrumb
-                title="School News & Updates"
-                description="Stay informed about the latest happenings, achievements, and stories from the AMFOFANA community."
-                image="https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=2070&auto=format&fit=crop"
-                alt="Blog Header"
+                title={breadcrumbData?.breadcrumb_title || "School News & Updates"}
+                description={breadcrumbData?.description || "Stay informed about the latest happenings, achievements, and stories from the AMFOFANA community."}
+                image={breadcrumbData?.imageUrl || "https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=2070&auto=format&fit=crop"}
+                alt={breadcrumbData?.breadcrumb_title || "Blog Header"}
             />
-
             <section className="py-[clamp(25px,3vw,60px)]">
                 <div className="container mx-auto px-5 md:px-[clamp(20px,3vw,80px)]">
                     <div className="flex flex-col lg:flex-row gap-[clamp(20px,3vw,50px)]">

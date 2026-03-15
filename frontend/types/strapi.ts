@@ -83,6 +83,12 @@ export interface StrapiBlogPost {
    author: string;
    image: StrapiMediaItem | StrapiMediaItem[] | null;
    slug: string;
+   breadcrumb_item: Array<{
+      id: number;
+      breadcrumb_title: string;
+      description: string;
+      image: StrapiMediaItem | null;
+   }> | null;
 }
 
 /** staff-members collection */
@@ -93,9 +99,16 @@ export interface StrapiStaffMember {
    role: string;
    email: string;
    bio: string;
+   heading: string;
    image: StrapiMediaItem | StrapiMediaItem[] | null;
    is_leadership: boolean;
    is_featured: boolean;
+   breadcrumb_item: Array<{
+      id: number;
+      breadcrumb_title: string;
+      description: string;
+      image: StrapiMediaItem | null;
+   }> | null;
    sort_order: number;
 }
 
@@ -132,6 +145,12 @@ export interface StrapiGalleryItem {
    category: 'Campus' | 'Events' | 'Sports';
    src: StrapiMediaItem | StrapiMediaItem[] | null;
    thumbnail: StrapiMediaItem | StrapiMediaItem[] | null;
+   breadcrumb_item: Array<{
+      id: number;
+      breadcrumb_title: string;
+      description: string;
+      image: StrapiMediaItem | null;
+   }> | null;
 }
 
 /** opportunities collection */
@@ -175,6 +194,12 @@ export interface StrapiAcademicSection {
    sort_order: number;
    header: string;
    subheader: string;
+   breadcrumb_item: Array<{
+      id: number;
+      breadcrumb_title: string;
+      description: string;
+      image: StrapiMediaItem | null;
+   }> | null;
 }
 
 /** academic-resources collection */
@@ -219,6 +244,12 @@ export interface StrapiAboutPage {
    home_stat: string | null;
    home_image_1: StrapiMediaItem | StrapiMediaItem[] | null;
    home_image_2: StrapiMediaItem | StrapiMediaItem[] | null;
+   breadcrumb_item: Array<{
+      id: number;
+      breadcrumb_title: string;
+      description: string;
+      image: StrapiMediaItem | null;
+   }> | null;
 }
 
 export interface StrapiContactInfo {
@@ -229,6 +260,12 @@ export interface StrapiContactInfo {
    email: Array<{ address: string }>;
    office_hours: string;
    social_links: Array<{ name: string; href: string }>;
+   breadcrumb_item: Array<{
+      id: number;
+      breadcrumb_title: string;
+      description: string;
+      image: StrapiMediaItem | null;
+   }> | null;
 }
 
 export interface StrapiStudentLife {
@@ -269,6 +306,7 @@ export interface BlogPost {
    author: string;
    image: string;
    slug: string;
+   breadcrumb_item: BreadcrumbItem[];
 }
 
 export interface StaffMember {
@@ -278,8 +316,10 @@ export interface StaffMember {
    email: string;
    bio: string;
    image: string;
+   heading: string;
    isLeadership: boolean;
    isFeatured: boolean;
+   breadcrumb_item: BreadcrumbItem[];
 }
 
 export interface Testimonial {
@@ -324,6 +364,7 @@ export interface GalleryItem {
    category: 'Campus' | 'Events' | 'Sports';
    src: string;
    thumbnail?: string;
+   breadcrumb_item: BreadcrumbItem[];
 }
 
 /** New Breadcrumb Interface */
@@ -365,6 +406,7 @@ export interface AcademicSection {
    details: string[];
    header: string;
    subheader: string;
+   breadcrumb_item: BreadcrumbItem[];
 }
 
 export interface AcademicResource {
@@ -397,6 +439,7 @@ export interface AboutPageData {
    homeStat: string;
    homeImage1: string;
    homeImage2: string;
+   breadcrumb_item: BreadcrumbItem[];
 }
 
 export interface ContactInfoData {
@@ -405,6 +448,7 @@ export interface ContactInfoData {
    emails: string[];
    officeHours: string;
    socialLinks: Array<{ name: string; href: string }>;
+   breadcrumb_item: BreadcrumbItem[];
 }
 
 export interface StudentLifeData {

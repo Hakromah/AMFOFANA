@@ -36,6 +36,9 @@ interface ContactPageProps {
 }
 
 export default function ContactPage({ contactInfo }: ContactPageProps) {
+
+    const breadcrumbData = contactInfo?.breadcrumb_item?.[0];
+
     const socialLinks = contactInfo?.socialLinks ?? fallbackSocialLinks;
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -46,10 +49,10 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
         <div className="w-full min-h-screen bg-background">
             {/* Header */}
             <Breadcrumb
-                title="Contact Us"
-                description="We're here to help. Reach out to us with any questions about admissions, academics, or school life."
-                image="/home/intro3.png"
-                alt="Contact Us"
+                title={breadcrumbData?.breadcrumb_title || "Contact Us"}
+                description={breadcrumbData?.description || "We're here to help. Reach out to us with any questions about admissions, academics, or school life."}
+                image={breadcrumbData?.imageUrl || "/home/intro3.png"}
+                alt={breadcrumbData?.breadcrumb_title || "Contact Us"}
             />
 
             {/* Contact Content */}

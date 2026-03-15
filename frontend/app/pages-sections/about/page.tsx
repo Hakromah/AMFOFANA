@@ -31,16 +31,17 @@ const defaultValues = [
 export default function AboutPage({ aboutData, leadershipTeam }: AboutPageProps) {
   const stats = aboutData?.stats;
   const values = aboutData?.values && aboutData.values.length > 0 ? aboutData.values : null;
+  const breadcrumbData = aboutData?.breadcrumb_item?.[0];
 
   return (
     <div className="w-full">
       {/* Hero Section */}
       <div id="intro">
         <Breadcrumb
-          title="About us"
-          description="Discover Our History, Mission, and Vision"
-          image="/home/intro1.png"
-          alt="About Us Hero"
+          title={breadcrumbData?.breadcrumb_title || "About us"}
+          description={breadcrumbData?.description || "Discover Our History, Mission, and Vision"}
+          image={breadcrumbData?.imageUrl || "/home/intro1.png"}
+          alt={breadcrumbData?.breadcrumb_title || "About Us Hero"}
         />
       </div>
 

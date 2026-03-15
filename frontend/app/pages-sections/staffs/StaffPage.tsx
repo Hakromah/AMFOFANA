@@ -4,10 +4,11 @@ import Breadcrumb from "@/components/Breadcrumb";
 import type { StaffMember } from "@/types/strapi";
 
 const fallbackStaff: StaffMember[] = [
-    { id: 1, name: "Sarah Mitchell", role: "Principal", email: "sarah.mitchell@edu.lb", bio: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1887&auto=format&fit=crop", isFeatured: true, isLeadership: true },
-    { id: 2, name: "Ms. Emily Chen", role: "Vice Principal", email: "emily.chen@edu.lb", bio: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2070&auto=format&fit=crop", isFeatured: true, isLeadership: true },
-    { id: 3, name: "Ms. Jonathan Lee", role: "Head of Science", email: "jonathan.lee@edu.lb", bio: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2070&auto=format&fit=crop", isFeatured: false, isLeadership: false },
+    { id: 1, name: "Sarah Mitchell", role: "Principal", email: "sarah.mitchell@edu.lb", bio: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1887&auto=format&fit=crop", isFeatured: true, isLeadership: true, breadcrumb_item: [], heading: "" },
+    { id: 2, name: "Ms. Emily Chen", role: "Vice Principal", email: "emily.chen@edu.lb", bio: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2070&auto=format&fit=crop", isFeatured: true, isLeadership: true, breadcrumb_item: [], heading: "" },
+    { id: 3, name: "Ms. Jonathan Lee", role: "Head of Science", email: "jonathan.lee@edu.lb", bio: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2070&auto=format&fit=crop", isFeatured: false, isLeadership: false, breadcrumb_item: [], heading: "" },
 ];
+// const breadcrumbData = staffMembers?.[0]?.breadcrumb_item?.[0];
 
 interface StaffPageProps {
     staffMembers?: StaffMember[];
@@ -15,20 +16,26 @@ interface StaffPageProps {
 
 export default function StaffPage({ staffMembers: staffProp }: StaffPageProps) {
     const activeStaff = (staffProp && staffProp.length > 0) ? staffProp : fallbackStaff;
+
+    // FIND the first staff member who actually has a breadcrumb item filled in
+    const staffWithBreadcrumb = activeStaff.find(s => s.breadcrumb_item && s.breadcrumb_item.length > 0);
+    const breadcrumbData = staffWithBreadcrumb?.breadcrumb_item?.[0];
+
+
     return (
         <div className="w-full">
             {/* Hero Section */}
             <Breadcrumb
-                title="Our Staff"
-                description="Moments Captured at A.M. FOFANA High School"
-                image="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070&auto=format&fit=crop"
-                alt="Staff Hero"
+                title={breadcrumbData?.breadcrumb_title || "Our Staff"}
+                description={breadcrumbData?.description || "Moments Captured at A.M. FOFANA High School"}
+                image={breadcrumbData?.imageUrl || "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070&auto=format&fit=crop"}
+                alt={breadcrumbData?.breadcrumb_title || "Staff Hero"}
             />
 
             {/* Intro Text */}
             <div className="container max-w-[1920px] mx-auto px-5 md:px-[clamp(20px,3vw,80px)] py-[clamp(25px,3vw,48px)] text-center">
                 <p className="text-muted-foreground text-center text-lg lg:max-w-3xl mx-auto">
-                    Stay updated with academic milestones, spiritual growth, and student achievements across all levels.
+                    {activeStaff.map((staff) => staff.heading).join(" ") || "Stay updated with academic milestones, spiritual growth, and student achievements across all levels."}
                 </p>
             </div>
 
@@ -48,6 +55,7 @@ export default function StaffPage({ staffMembers: staffProp }: StaffPageProps) {
                                             src={staff.image}
                                             alt={staff.name}
                                             fill
+                                            unoptimized
                                             className="object-cover w-full h-full" />
                                     </div>
 
