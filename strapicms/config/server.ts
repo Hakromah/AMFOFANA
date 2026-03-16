@@ -8,7 +8,7 @@ const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Server =>
   },
   transfer: {
     remote: {
-      enabled: env.bool('STRAPI_TRANSFER_ENABLED', true),
+      enabled: true,
     },
   },
 });
