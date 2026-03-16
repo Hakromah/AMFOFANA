@@ -43,6 +43,11 @@
     },
     "subheader": {
       "type": "text"
+    },
+    "breadcrumb_item": {
+      "type": "component",
+      "component": "shared.readcrumb",
+      "repeatable": true
     }
   }
 }

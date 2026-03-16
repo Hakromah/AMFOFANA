@@ -42,6 +42,14 @@
     },
     "sort_order": {
       "type": "integer"
+    },
+    "breadcrumb_item": {
+      "type": "component",
+      "component": "shared.readcrumb",
+      "repeatable": true
+    },
+    "heading": {
+      "type": "text"
     }
   }
 }

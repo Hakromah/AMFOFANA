@@ -78,12 +78,21 @@
     "home_image_1": {
       "type": "media",
       "multiple": false,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
     },
     "home_image_2": {
       "type": "media",
       "multiple": false,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "breadcrumb_item": {
+      "type": "component",
+      "component": "shared.readcrumb",
+      "repeatable": true
     }
   }
 }

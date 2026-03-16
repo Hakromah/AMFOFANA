@@ -441,6 +441,7 @@ export interface ApiAboutPageAboutPage extends Struct.SingleTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    breadcrumb_item: Schema.Attribute.Component<'shared.readcrumb', true>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -563,6 +564,7 @@ export interface ApiAcademicSectionAcademicSection
     draftAndPublish: true;
   };
   attributes: {
+    breadcrumb_item: Schema.Attribute.Component<'shared.readcrumb', true>;
     content: Schema.Attribute.Text;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -599,6 +601,7 @@ export interface ApiBlogPostBlogPost extends Struct.CollectionTypeSchema {
   };
   attributes: {
     author: Schema.Attribute.String;
+    breadcrumb_item: Schema.Attribute.Component<'shared.readcrumb', true>;
     category: Schema.Attribute.Enumeration<
       [
         'Academics',
@@ -709,6 +712,7 @@ export interface ApiGalleryItemGalleryItem extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    breadcrumb_item: Schema.Attribute.Component<'shared.readcrumb', true>;
     category: Schema.Attribute.Enumeration<['Campus', 'Events', 'Sports']>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -920,12 +924,14 @@ export interface ApiStaffMemberStaffMember extends Struct.CollectionTypeSchema {
   };
   attributes: {
     bio: Schema.Attribute.Text;
+    breadcrumb_item: Schema.Attribute.Component<'shared.readcrumb', true>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     email: Schema.Attribute.Email &
       Schema.Attribute.Required &
       Schema.Attribute.Unique;
+    heading: Schema.Attribute.Text;
     image: Schema.Attribute.Media<'images'>;
     is_featured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     isLeadership: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
