@@ -104,7 +104,7 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
                                 {socialShareLinks.map((social) => (
                                     <div key={social.name} className="relative">
                                         {social.action ? (
-                                            <button
+                                            <Button
                                                 onClick={() => handleAction(social.action!)}
                                                 className={`icon icon-${social.name} cursor-pointer text-gray-400 hover:text-[#2857AE] transition-colors w-5 h-5 flex justify-center items-center`}
                                             />
