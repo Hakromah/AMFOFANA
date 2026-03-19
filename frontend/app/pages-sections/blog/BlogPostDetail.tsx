@@ -5,7 +5,6 @@ import StrapiImage from '@/components/StrapiImage';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import printJS from 'print-js';
 
 interface BlogPost {
     id: number;
@@ -36,8 +35,9 @@ const socialShareLinks = [
 export default function BlogPostDetail({ post }: BlogPostDetailProps) {
     const [copied, setCopied] = useState(false);
 
-    const handleAction = (action: string) => {
+    const handleAction = async (action: string) => {
         if (action === "print") {
+            const printJS = (await import('print-js')).default;
             printJS({
                 printable: 'contToPrint',
                 type: 'html',
