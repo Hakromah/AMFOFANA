@@ -31,7 +31,10 @@ export default function OpportunitiesPage({ opportunities = [] }: OpportunitiesP
     if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
 
-  const breadcrumbData = opportunities[0]?.breadcrumb_item?.[0];
+  // const breadcrumbData = opportunities[0]?.breadcrumb_item?.[0];
+
+  const academicBreadcrumb = opportunities.find(s => s.breadcrumb_item && s.breadcrumb_item.length > 0);
+    const breadcrumbData = academicBreadcrumb?.breadcrumb_item?.[0];
 
   return (
     <div className="w-full min-h-screen bg-background lg:pb-20">
