@@ -48,7 +48,6 @@ export default function BlogPage({ initialPosts = [] }: BlogPageProps) {
         setSearchQuery(e.target.value);
         setVisibleCount(6);
     };
-
     return (
         <div className="w-full bg-[#E8F1FF]/30 min-h-screen">
             {/* Header */}
@@ -82,7 +81,7 @@ export default function BlogPage({ initialPosts = [] }: BlogPageProps) {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     {filteredPosts.slice(0, visibleCount).map((post) => (
                                         <article key={post.id} className="flex flex-col group">
-                                            {/* Image Container post.id was here*/}
+                                            {/* Image Container */}
                                             <Link href={`/blog/${post.slug}`} className="block relative h-64 w-full rounded-2xl overflow-hidden mb-5">
                                                 <StrapiImage
                                                     src={post.image}
@@ -109,7 +108,7 @@ export default function BlogPage({ initialPosts = [] }: BlogPageProps) {
                                                         {post.title}
                                                     </Link>
                                                 </h3>
-                                                
+
                                                 <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
                                                     {post.excerpt}
                                                 </p>

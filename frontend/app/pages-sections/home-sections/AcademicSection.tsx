@@ -20,7 +20,7 @@ import 'swiper/css/navigation';
 gsap.registerPlugin(ScrollTrigger);
 
 const fallbackPrograms: AcademicProgram[] = [
-    { id: 1, category: 'Kindergarten', title: 'Kindergarten', image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', description: 'Global education system has become one of our early childhood program focuses on "Learning through Play." We prioritize...', sortOrder: 1, header: 'Kindergarten', subheader: 'Kindergarten' },
+    { id: 1, category: 'Kindergarten', title: 'Kindergarten life is good foe children', image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', description: 'Global education system has become one of our early childhood program focuses on "Learning through Play." We prioritize...', sortOrder: 1, header: 'Kindergarten', subheader: 'Kindergarten' },
     { id: 2, category: 'Elementary', title: 'Elementary', image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', description: 'Global education system has become one of our early childhood program focuses on "Learning through Play." We prioritize...', sortOrder: 2, header: 'Elementary', subheader: 'Elementary' },
     { id: 3, category: 'Junior High', title: 'Junior High', image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', description: 'Global education system has become one of our early childhood program focuses on "Learning through Play." We prioritize...', sortOrder: 3, header: 'Junior High', subheader: 'Junior High' },
     { id: 4, category: 'Vocational Training', title: 'Vocational Training', image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', description: 'Global education system has become one of our early childhood program focuses on "Learning through Play." We prioritize...', sortOrder: 4, header: 'Vocational Training', subheader: 'Vocational Training' },
@@ -60,7 +60,7 @@ export default function AcademicSection({ programs: programsProp }: AcademicSect
             ease: "power3.out"
         })
             .fromTo(".academic-tabs .button",
-                { y: 20, autoAlpha: 0 },
+                { y: 20, autoAlpha: 0, },
                 { y: 0, autoAlpha: 1, duration: 0.6, stagger: 0.05, ease: "power2.out" },
                 "-=0.4"
             )
@@ -73,8 +73,8 @@ export default function AcademicSection({ programs: programsProp }: AcademicSect
     }, { scope: containerRef });
 
     return (
-        <section ref={containerRef} className="overflow-clip py-[clamp(20px,5vw,80px)] bg-primary h-full text-white overflow-hidden">
-            <div className="container mx-auto h-full max-w-1920 px-5 md:px-[clamp(20px,3vw,60px)]">
+        <section ref={containerRef} className="overflow-hidden py-[clamp(20px,5vw,80px)] bg-primary h-full text-white">
+            <div className="container  mx-auto h-full max-w-1920 px-5 md:px-[clamp(20px,3vw,60px)]">
                 {/* Header */}
                 <div className='w-full h-full mb-14 max-md:mb-6'>
                     <div className="academic-header flex flex-col md:flex-row justify-between items-start md:items-end pb-5 md:mb-12 gap-8">
@@ -106,7 +106,7 @@ export default function AcademicSection({ programs: programsProp }: AcademicSect
                                     <ArrowRight className="h-5 w-5 group-hover/next:translate-x-1 transition-all duration-500" />
                                 </Button>
                             </div>
-                            <Link href="/academic" className="group/all relative flex lg:hover:text-white items-center gap-2 text-white/80 duration-500 font-medium lg:before:absolute lg:before:w-0 lg:before:h-[1px] lg:before:bottom-[-2px] lg:before:left-0 lg:hover:before:w-full lg:before:bg-white lg:before:transition-all lg:before:duration-500 ml-4">
+                            <Link href="/academic" className="group/all relative flex lg:hover:text-white items-center gap-2 text-white/80 duration-500 font-medium lg:before:absolute lg:before:w-0 lg:before:h-px lg:before:-bottom-0.5 lg:before:left-0 lg:hover:before:w-full lg:before:bg-white lg:before:transition-all lg:before:duration-500 ml-4">
                                 All Programs <ArrowUpRight className="h-4 w-4 lg:group-hover/all:rotate-45 transition-all  lg:group-hover/all:text-white text-white/80 duration-500" />
                             </Link>
                         </div>
@@ -114,12 +114,12 @@ export default function AcademicSection({ programs: programsProp }: AcademicSect
 
                     {/* Tabs */}
 
-                    <div className="academic-tabs flex items-center justify-start gap-x-8 border-b border-white/20 overflow-x-auto [-webkit-overflow-scrolling:touch] scrollbar-thin pb-2 sm:pb-[17px]">
+                    <div className="academic-tabs flex items-center justify-start gap-x-8 border-b border-white/20 overflow-x-auto! [-webkit-overflow-scrolling:touch] scrollbar-thin pb-2 sm:pb-[17px] overflow-y-hidden">
                         {allCategories.map((cat) => (
                             <button
                                 key={cat}
                                 onClick={() => setActiveTab(cat)}
-                                className={`button text-nowrap h-fit cursor-pointer text-base h-full font-medium transition-all duration-500 relative py-2 after:duration-500 sm:after:absolute sm:after:bottom-[-17px] after:left-0 after:w-0 after:h-[2px] after:bg-white
+                                className={`button text-nowrap h-fit cursor-pointer text-base font-medium transition-all duration-500 relative py-2 after:duration-500 sm:after:absolute sm:after:bottom-[-17px] after:left-0 after:w-0 after:h-0.5 after:bg-white
                                 ${activeTab === cat ? 'text-white opacity-100  sm:after:w-full duration-500 after:duration-500' : 'text-white/60 lg:hover:text-white'}`}>
                                 {cat}
                             </button>
@@ -127,7 +127,7 @@ export default function AcademicSection({ programs: programsProp }: AcademicSect
                     </div>
                 </div>
 
-
+               <div className='overflow-hidden w-full h-fit relative'>
                 {/* Swiper */}
                 <Swiper
                     onSwiper={setSwiperInstance}
@@ -145,11 +145,11 @@ export default function AcademicSection({ programs: programsProp }: AcademicSect
                             slidesPerView: 4,
                         },
                     }}
-                    className="academic-swiper w-full !overflow-visible"
+                    className="academic-swiper w-full overflow-visible!"
                 >
                     {filteredPrograms.map((program) => (
                         <SwiperSlide key={program.id} className="h-full">
-                            <a href='/academic' className='block w-full h-full'>
+                            <a href={`/academic/${program.title.toLowerCase().replace(/ /g, '-')}`} className='block w-full h-full'>
                                 <div className="group/card bg-white rounded-[15px] p-3 overflow-hidden h-[501px] max-sm:h-[400px] flex flex-col group cursor-pointer transition-transform duration-300">
                                     <div className=" relative h-60 max-xs:h-[220px] w-full overflow-hidden rounded-[12px]">
                                         <StrapiImage
@@ -157,19 +157,19 @@ export default function AcademicSection({ programs: programsProp }: AcademicSect
                                             alt={program.title}
                                             fill
                                             unoptimized
-                                            className="object-cover transition-transform duration-500 lg:group-hover/card:scale-110"
+                                            className="object-cover transition-transform duration-500 lg:group-hover/card:scale-110 h-60 max-xs:h-[220px]"
                                         />
                                         <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-300" />
                                     </div>
 
-                                    <div className="pb-6  pt-3 flex flex-col flex-grow text-primary">
+                                    <div className="pb-6  pt-3 flex flex-col grow text-primary">
                                         <h3 className="text-[clamp(20px,2vw,25px)] font-semibold mb-3 line-clamp-2">{program.title}</h3>
-                                        <p className="text-[#4B5563] text-[clamp(16px,1.5vw,18px)] line-clamp-3 leading-relaxed mb-6 flex-grow">
+                                        <p className="text-[#4B5563] text-[clamp(16px,1.5vw,18px)] line-clamp-2 leading-relaxed mb-6 grow">
                                             {program.description}
                                         </p>
 
                                         <div className="mt-auto">
-                                            <Button className="w-full rounded-full font-bold bg-[#2857AE]/10 lg:hover:bg-primary lg:hover:text-white text-primary text-[clamp(16px,1.5vw,18px)] italic font-bold transition-all duration-500 border border-primary">
+                                            <Button className="w-full rounded-full font-bold bg-[#2857AE]/10 lg:hover:bg-primary lg:hover:text-white text-primary text-[clamp(16px,1.5vw,18px)] italic transition-all duration-500 border border-primary">
                                                 Explore Curriculum
                                             </Button>
                                         </div>
@@ -179,6 +179,7 @@ export default function AcademicSection({ programs: programsProp }: AcademicSect
                         </SwiperSlide>
                     ))}
                 </Swiper>
+              </div>
             </div>
         </section>
     );

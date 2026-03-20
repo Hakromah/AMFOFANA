@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import Image from "next/image";
+//import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -12,7 +12,16 @@ gsap.registerPlugin(ScrollTrigger);
 interface VideoSectionProps {
     videoSectionData?: VideoSectionData | null;
 }
-
+  // Helper for splitting text
+    const SplitText = ({ text, className = "", wordClass = "reveal-word" }: { text: string, className?: string, wordClass?: string }) => (
+        <>
+            {text.split(" ").map((word, i) => (
+                <span key={i} className={`${wordClass} inline-block mr-[0.3em] ${className}`}>
+                    {word}
+                </span>
+            ))}
+        </>
+    );
 export default function VideoSection({ videoSectionData }: VideoSectionProps) {
     const containerRef = useRef<HTMLElement>(null);
     const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -54,9 +63,9 @@ export default function VideoSection({ videoSectionData }: VideoSectionProps) {
             // 1. Scale Video from 75% to 100%
             tl.fromTo(videoContainerRef.current,
                 {
-                    width: "75%",
+                    width: "95%",
                     borderRadius: "2rem",
-                    height: "60%" // Start height
+                    height: "95%" // Start height
                 },
                 {
                     width: "100%",
@@ -90,16 +99,7 @@ export default function VideoSection({ videoSectionData }: VideoSectionProps) {
 
     }, { scope: containerRef });
 
-    // Helper for splitting text
-    const SplitText = ({ text, className = "", wordClass = "reveal-word" }: { text: string, className?: string, wordClass?: string }) => (
-        <>
-            {text.split(" ").map((word, i) => (
-                <span key={i} className={`${wordClass} inline-block mr-[0.3em] ${className}`}>
-                    {word}
-                </span>
-            ))}
-        </>
-    );
+  
 
     return (
         <section ref={containerRef} className="overflow-clip sm:h-screen h-full bg-white flex flex-col justify-center items-center relative z-10">
@@ -131,12 +131,12 @@ export default function VideoSection({ videoSectionData }: VideoSectionProps) {
                     {/* Text Content Overlay */}
                     <div
                         ref={textRef}
-                        className="absolute max-sm:left-0 bottom-0 sm:bottom-5 sm:right-0 p-[clamp(20px,5vw,80px)] max-w-2xl text-white video-overlay-text opacity-100 sm:opacity-0" // Visible on mobile, hidden on desktop (animated)
+                        className="absolute max-sm:left-0 bottom-0 sm:bottom-5 sm:right-0 p-[clamp(20px,5vw,80px)] overflow-hidden max-w-2xl text-white video-overlay-text opacity-100 sm:opacity-0" // Visible on mobile, hidden on desktop (animated)
                     >
-                        <p className="text-[clamp(14px,2vw,16px)] font-semibold uppercase tracking-widest mb-2 sm:mb-4 opacity-80 decoration-clone">
+                        <p className="text-[clamp(14px,2vw,16px)] font-semibold uppercase tracking-widest mb-2 sm:mb-4 opacity-80 box-decoration-clone">
                             <SplitText text={videoSectionData?.overlaySubtitle || "A Message from the Leadership"} wordClass="overlay-reveal-word" />
                         </p>
-                        <blockquote className="text-[clamp(16px,2vw,30px)] font-bold leading-tight mb-2 sm:mb-6">
+                        <blockquote className="text-[clamp(16px,2vw,25px)] font-bold leading-tight mb-2 sm:mb-6">
                             <SplitText text={videoSectionData?.overlayQuote || "\"Our mission is to ensure every student leaves our halls with both knowledge and wisdom.\""} wordClass="overlay-reveal-word" />
                         </blockquote>
                         <p className="text-[clamp(16px,2vw,20px)] text-lg font-medium italic">

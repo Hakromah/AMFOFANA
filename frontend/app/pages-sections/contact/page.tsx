@@ -1,9 +1,8 @@
 "use client"
 import React from 'react';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MapPin, Phone, Mail, Clock, Send, Facebook, Instagram, Linkedin, Twitter, Youtube, ArrowRight } from 'lucide-react';
+import { Send } from 'lucide-react';
 import Breadcrumb from '@/components/Breadcrumb';
 import Link from 'next/link';
 import {
@@ -180,31 +179,27 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
                                         <form onSubmit={handleSubmit} className="space-y-6">
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <div className="space-y-2">
-                                                    <label htmlFor="firstName" className="text-sm font-medium">First Name</label>
-                                                    <Input id="firstName" placeholder="John" required />
+
+                                                    <Input id="firstName" placeholder="firstName" required />
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <label htmlFor="lastName" className="text-sm font-medium">Last Name</label>
-                                                    <Input id="lastName" placeholder="Doe" required />
+                                                    <Input id="lastName" placeholder="lastName" required />
                                                 </div>
                                             </div>
 
                                             <div className="space-y-2">
-                                                <label htmlFor="email" className="text-sm font-medium">Email Address</label>
-                                                <Input id="email" type="email" placeholder="john@example.com" required />
+                                                <Input id="email" type="email" placeholder="E-mail" required />
                                             </div>
 
                                             <div className="space-y-2">
-                                                <label htmlFor="subject" className="text-sm font-medium">Subject</label>
                                                 <Input id="subject" placeholder="Inquiry about admissions" required />
                                             </div>
 
                                             <div className="space-y-2">
-                                                <label htmlFor="message" className="text-sm font-medium">Message</label>
                                                 <textarea
                                                     id="message"
-                                                    className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                                    placeholder="How can we help you?"
+                                                    className="flex min-h-[120px] max-h-40 w-full rounded-md border border-primary/20 lg:hover:border-primary duration-500 focus:duration-500 fous:border-primary bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                                                    placeholder="Write your message here"
                                                     required
                                                 ></textarea>
                                             </div>

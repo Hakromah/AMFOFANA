@@ -426,7 +426,7 @@ export interface AboutPageData {
    historyTitle: string;
    historyBody: string;
    historyImage: string;
-   stats: { students: string; years: string; programs: string; awards: string };
+   stats: { students: number; years: number; programs: number; awards: number };
    missionText: string;
    visionText: string;
    values: Array<{ title: string; description: string }>;

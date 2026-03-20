@@ -31,7 +31,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ title, description, image, alt 
                     <span>/</span>
                     <p className=''>{title}</p>
                 </div>
-                <h1 className="text-[clamp(1.5rem,3vw,4rem)] md:text-6xl font-bold mb-4 font-sans">{title}</h1>
+                <h1 className="text-[clamp(1.5rem,3vw,4rem)] md:text-5xl font-bold mb-4 font-sans">{title}</h1>
                 {description && (
                     <p className="text-[clamp(1rem,3vw,1.2rem)] lg:max-w-2xl mx-auto font-light">
                         {description}

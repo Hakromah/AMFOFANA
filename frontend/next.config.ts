@@ -17,7 +17,9 @@ const nextConfig = {
       },
       {
         protocol:"https",
-        hostname:"outgoing-fruit-84aa9644f7.media.strapiapp.com",
+        // hostname:"outgoing-fruit-84aa9644f7.media.strapiapp.com",
+           hostname:"reliable-sparkle-c20c5a5fa1.media.strapiapp.com"
+
       }
     ],
   },
