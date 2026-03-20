@@ -192,11 +192,7 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
                                 {post.excerpt || "A.M. Fofana continues to create platforms that inspire excellence beyond the classroom."}
                             </h2>
 
- {/* Dynamically rendered HTML content */}
-                            <div
-                                className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-600 prose-p:leading-relaxed prose-img:rounded-xl prose-img:w-full prose-img:h-64 prose-img:object-cover [&_img]:rounded-xl [&_img]:w-full [&_img]:h-64 [&_img]:object-cover [&_div]:grid [&_div]:grid-cols-1 [&_div]:md:grid-cols-2 [&_div]:gap-4 [&_div]:my-8"
-                                dangerouslySetInnerHTML={{ __html: processedContent }}
-                            />
+                          
 
                             {/* Conditional Scholarship CTA */}
                               {post.category.toLowerCase() === "scholarship" && (

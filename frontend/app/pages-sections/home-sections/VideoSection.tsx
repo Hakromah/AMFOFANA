@@ -131,12 +131,12 @@ export default function VideoSection({ videoSectionData }: VideoSectionProps) {
                     {/* Text Content Overlay */}
                     <div
                         ref={textRef}
-                        className="absolute max-sm:left-0 bottom-0 sm:bottom-5 sm:right-0 p-[clamp(20px,5vw,80px)] max-w-2xl text-white video-overlay-text opacity-100 sm:opacity-0" // Visible on mobile, hidden on desktop (animated)
+                        className="absolute max-sm:left-0 bottom-0 sm:bottom-5 sm:right-0 p-[clamp(20px,5vw,80px)] overflow-hidden max-w-2xl text-white video-overlay-text opacity-100 sm:opacity-0" // Visible on mobile, hidden on desktop (animated)
                     >
                         <p className="text-[clamp(14px,2vw,16px)] font-semibold uppercase tracking-widest mb-2 sm:mb-4 opacity-80 box-decoration-clone">
                             <SplitText text={videoSectionData?.overlaySubtitle || "A Message from the Leadership"} wordClass="overlay-reveal-word" />
                         </p>
-                        <blockquote className="text-[clamp(16px,2vw,30px)] font-bold leading-tight mb-2 sm:mb-6">
+                        <blockquote className="text-[clamp(16px,2vw,25px)] font-bold leading-tight mb-2 sm:mb-6">
                             <SplitText text={videoSectionData?.overlayQuote || "\"Our mission is to ensure every student leaves our halls with both knowledge and wisdom.\""} wordClass="overlay-reveal-word" />
                         </blockquote>
                         <p className="text-[clamp(16px,2vw,20px)] text-lg font-medium italic">

@@ -82,7 +82,7 @@ export default function BlogPage({ initialPosts = [] }: BlogPageProps) {
                                     {filteredPosts.slice(0, visibleCount).map((post) => (
                                         <article key={post.id} className="flex flex-col group">
                                             {/* Image Container */}
-                                            <Link href={`/blog/${post.id}`} className="block relative h-64 w-full rounded-2xl overflow-hidden mb-5">
+                                            <Link href={`/blog/${post.slug}`} className="block relative h-64 w-full rounded-2xl overflow-hidden mb-5">
                                                 <StrapiImage
                                                     src={post.image}
                                                     alt={post.title}
@@ -104,7 +104,7 @@ export default function BlogPage({ initialPosts = [] }: BlogPageProps) {
                                                 </div>
 
                                                 <h3 className="text-xl font-bold text-gray-900 mb-3 leading-tight group-hover:text-[#2857AE] transition-colors">
-                                                    <Link href={`/blog/${post.id}`}>
+                                                    <Link href={`/blog/${post.slug}`}>
                                                         {post.title}
                                                     </Link>
                                                 </h3>

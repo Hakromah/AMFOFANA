@@ -133,6 +133,90 @@ export async function fetchHeroSlides(): Promise<HeroSlide[]> {
 
 // // ─── Blog Posts ───────────────────────────────────────────────────────────────
 
+// export async function fetchBlogPosts(params?: {
+//    page?: number;
+//    pageSize?: number;
+//    category?: string;
+// }): Promise<{ posts: BlogPost[]; total: number }> {
+//    try {
+//       const filters =
+//          params?.category && params.category !== 'All'
+//             ? `&filters[category][$eq]=${encodeURIComponent(params.category)}`
+//             : '';
+//       const pagination = `&pagination[page]=${params?.page ?? 1}&pagination[pageSize]=${params?.pageSize ?? 100}`;
+
+//       // We use the [populate]=* syntax for the component to ensure its nested image comes through
+//       // const populate = `blog-posts?populate[0]=image&populate[1]=breadcrumb_item.image&sort=date:desc`;
+//       const populate = `populate[0]=image&populate[1]=breadcrumb_item.image`;
+
+//       const { data } = await strapi.get<StrapiListResponse<StrapiBlogPost>>(
+//          `/blog-posts?${populate}&sort=date:desc${filters}${pagination}`
+//       );
+
+//       return {
+//          posts: data.data.map((item) => ({
+//             id: item.id,
+//             title: item.title,
+//             excerpt: item.excerpt,
+//             content: richTextToString(item.content),
+//             date: formatDate(item.date),
+//             category: item.category,
+//             author: item.author,
+//             image: mediaUrl(item.image),
+//             slug: item.slug || String(item.id),
+//             // Map the breadcrumb array
+//             breadcrumb_item: (item.breadcrumb_item ?? []).map((bc) => ({
+//                id: bc.id,
+//                breadcrumb_title: bc.breadcrumb_title,
+//                description: bc.description,
+//                imageUrl: mediaUrl(bc.image),
+//             })),
+//          })),
+//          total: data.meta.pagination.total,
+//       };
+//    } catch (err) {
+//       console.error('[Strapi] fetchBlogPosts error:', err);
+//       return { posts: [], total: 0 };
+//    }
+// }
+
+// export async function fetchBlogPostById(id: string): Promise<BlogPost | null> {
+//    try {
+//       // Consistent populate syntax for the single item fetch
+//       const populate = `populate=image&populate[1]=breadcrumb_item.image`;
+
+//       const { data } = await strapi.get<StrapiListResponse<StrapiBlogPost>>(
+//          `/blog-posts?filters[id][$eq]=${id}&${populate}`
+//       );
+
+//       if (!data.data.length) return null;
+//       const item = data.data[0];
+
+//       return {
+//          id: item.id,
+//          title: item.title,
+//          excerpt: item.excerpt,
+//          content: richTextToString(item.content),
+//          date: formatDate(item.date),
+//          category: item.category,
+//          author: item.author,
+//          image: mediaUrl(item.image),
+//          slug: item.slug || String(item.id),
+//          // Map the breadcrumb array
+//          breadcrumb_item: (item.breadcrumb_item ?? []).map((bc) => ({
+//             id: bc.id,
+//             breadcrumb_title: bc.breadcrumb_title,
+//             description: bc.description,
+//             imageUrl: mediaUrl(bc.image),
+//          })),
+//       };
+//    } catch (err) {
+//       console.error('[Strapi] fetchBlogPostById error:', err);
+//       return null;
+//    }
+// }
+
+
 export async function fetchBlogPosts(params?: {
    page?: number;
    pageSize?: number;
@@ -180,41 +264,47 @@ export async function fetchBlogPosts(params?: {
    }
 }
 
-export async function fetchBlogPostById(id: string): Promise<BlogPost | null> {
+export async function fetchBlogPostBySlug(slug: string): Promise<BlogPost | null> {
+   const populate = `populate[0]=image&populate[1]=breadcrumb_item.image`;
+
    try {
-      // Consistent populate syntax for the single item fetch
-      const populate = `populate=image&populate[1]=breadcrumb_item.image`;
-
-      const { data } = await strapi.get<StrapiListResponse<StrapiBlogPost>>(
-         `/blog-posts?filters[id][$eq]=${id}&${populate}`
+      // Strategy 1: filter by slug field
+      const { data: bySlug } = await strapi.get<StrapiListResponse<StrapiBlogPost>>(
+         `/blog-posts?filters[slug][$eq]=${encodeURIComponent(slug)}&${populate}`
       );
-
-      if (!data.data.length) return null;
-      const item = data.data[0];
-
-      return {
-         id: item.id,
-         title: item.title,
-         excerpt: item.excerpt,
-         content: richTextToString(item.content),
-         date: formatDate(item.date),
-         category: item.category,
-         author: item.author,
-         image: mediaUrl(item.image),
-         slug: item.slug || String(item.id),
-         // Map the breadcrumb array
-         breadcrumb_item: (item.breadcrumb_item ?? []).map((bc) => ({
-            id: bc.id,
-            breadcrumb_title: bc.breadcrumb_title,
-            description: bc.description,
-            imageUrl: mediaUrl(bc.image),
-         })),
-      };
-   } catch (err) {
-      console.error('[Strapi] fetchBlogPostById error:', err);
-      return null;
+      if (bySlug.data.length) return normalizeBlogPost(bySlug.data[0]);
+   } catch {
+      // ignore, try next strategy
    }
+
+   try {
+      // Strategy 2: filter by documentId (Strapi v5 stable identifier)
+      const { data: byDocId } = await strapi.get<StrapiListResponse<StrapiBlogPost>>(
+         `/blog-posts?filters[documentId][$eq]=${encodeURIComponent(slug)}&${populate}`
+      );
+      if (byDocId.data.length) return normalizeBlogPost(byDocId.data[0]);
+   } catch {
+      // ignore, try next strategy
+   }
+
+   try {
+      // Strategy 3: fall back to numeric id (handles old /blog/4 style URLs in cache)
+      if (/^\d+$/.test(slug)) {
+         const { data: byId } = await strapi.get<StrapiListResponse<StrapiBlogPost>>(
+            `/blog-posts?filters[id][$eq]=${slug}&${populate}`
+         );
+         if (byId.data.length) return normalizeBlogPost(byId.data[0]);
+      }
+   } catch {
+      // ignore
+   }
+
+   console.error(`[Strapi] fetchBlogPostBySlug: no post found for "${slug}"`);
+   return null;
 }
+
+
+
 
 // export async function fetchBlogPosts(params?: {
 //    page?: number;

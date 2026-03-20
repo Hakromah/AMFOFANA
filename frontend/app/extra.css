@@ -215,3 +215,9 @@ svg.pulse-svg {
  .icon-x:before{content:'\006f';}
  .icon-youtube-2:before{content:'\0070';}
  .icon-youtube:before{content:'\0071';}
+
+
+ .overlay-reveal-word {
+    display: inline-block; /* ✅ Allows GSAP transforms but still wraps */
+    white-space: normal;   /* ✅ Don't lock words to single line */
+}
