@@ -11,5 +11,3 @@ export default async function Page() {
     const { posts } = await fetchBlogPosts({ pageSize: 100 });
     return <BlogPage initialPosts={posts} />;
 }
-
-

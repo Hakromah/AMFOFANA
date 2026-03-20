@@ -48,7 +48,6 @@ export default function BlogPage({ initialPosts = [] }: BlogPageProps) {
         setSearchQuery(e.target.value);
         setVisibleCount(6);
     };
-console.log("all Data.",initialPosts)
     return (
         <div className="w-full bg-[#E8F1FF]/30 min-h-screen">
             {/* Header */}

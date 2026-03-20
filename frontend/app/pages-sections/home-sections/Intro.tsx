@@ -4,7 +4,7 @@ import StrapiImage from '@/components/StrapiImage';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Swiper as SwiperType } from 'swiper';
 import { Autoplay, Navigation, Controller, EffectCreative } from 'swiper/modules';
-import { ArrowRight, ArrowLeft } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Link } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { HeroSlide } from '@/types/strapi';
 
@@ -60,14 +60,14 @@ export default function Intro({ slides: slidesProp }: IntroProps) {
     const [secondSwiper, setSecondSwiper] = useState<SwiperType | null>(null);
     const progressContent = useRef<HTMLDivElement>(null);
 
-    const onAutoplayTimeLeft = (s: any, time: number, progress: number) => {
+    const onAutoplayTimeLeft = (s: unknown, time: number, progress: number) => {
         if (progressContent.current) {
             progressContent.current.style.width = `${(1 - progress) * 100}%`;
         }
     };
 
     return (
-        <section className="overflow-clip w-full md:h-[calc(100vh-var(--header-height))] 3xl:max-h-[1100px] relative overflow-hidden">
+        <section className="overflow-clip w-full md:h-[calc(100vh-var(--header-height))] 3xl:max-h-[1100px] relative">
             <div className="absolute inset-0 w-full h-full">
                 <Swiper
                     onSwiper={setSecondSwiper}
@@ -129,8 +129,9 @@ export default function Intro({ slides: slidesProp }: IntroProps) {
                             <SwiperSlide key={index} className='group/slide w-full h-full'>
                                 <div className="w-full ">
                                     <div className="space-y-4">
-                                        <h1
-                                            className="w-full group-[&.swiper-slide-active]/slide:translate-y-0 xl:tracking-[-3px] tracking-normal translate-y-5 opacity-0 group-[&.swiper-slide-active]/slide:opacity-100 group-[&.swiper-slide-active]/slide:delay-500 transition-all duration-500 text-[clamp(25px,4vw,80px)] font-semibold leading-[clamp(45px,6vw,90px)] font-sans bg-clip-text text-transparent bg-[linear-gradient(90deg,#FFF_54.33%,#2857AE_100%)] pb-2"
+                                       
+                                         <h1
+                                            className="w-full group-[&.swiper-slide-active]/slide:translate-y-0 line-clamp-2 xl:tracking-[-3px] tracking-normal translate-y-5 opacity-0 group-[&.swiper-slide-active]/slide:opacity-100 group-[&.swiper-slide-active]/slide:delay-500 transition-all duration-500 text-[clamp(25px,4vw,60px)] font-semibold leading-[clamp(45px,6vw,75px)] font-sans bg-clip-text text-transparent bg-[linear-gradient(90deg,#FFF_54.33%,#2857AE_100%)] pb-2"
                                         >
                                             {slide.subtitle} <br />
                                             {slide.title}
@@ -144,9 +145,13 @@ export default function Intro({ slides: slidesProp }: IntroProps) {
                                     {(slide.ctaPrimaryVisible || slide.ctaSecondaryVisible) && (
                                         <div className="flex gap-4 max-xs:flex-col max-xs:flex-wrap pt-8 ">
                                             {slide.ctaPrimaryVisible && (
-                                                <Button size="lg" className="rounded-full max-xs:w-fit cursor-pointer bg-primary hover:bg-primary/90 text-white h-12 px-8 text-lg group-[&.swiper-slide-active]/slide:translate-y-0 translate-y-5 opacity-0 group-[&.swiper-slide-active]/slide:opacity-100 group-[&.swiper-slide-active]/slide:delay-700 transition-all duration-500">
-                                                    {slide.ctaPrimaryLabel}
-                                                </Button>
+                                               
+                                            <Button size="lg" className="rounded-full max-xs:w-fit cursor-pointer bg-primary lg:hover:bg-primary/90 text-white h-12 px-8 text-lg group-[&.swiper-slide-active]/slide:translate-y-0 translate-y-5 opacity-0 group-[&.swiper-slide-active]/slide:opacity-100 group-[&.swiper-slide-active]/slide:delay-700 transition-all duration-500">
+                                                   <a href='academic' className='block h-fit w-fit'>
+                                                  {slide.ctaPrimaryLabel} </a>
+                                           </Button>
+                                        
+                                              
                                             )}
                                             {slide.ctaSecondaryVisible && (
                                                 <Button variant="outline" size="lg" className="cursor-pointer  max-xs:w-fit rounded-full bg-transparent text-white border-white hover:bg-white/20 hover:text-white h-12 px-8 text-lg group-[&.swiper-slide-active]/slide:translate-y-0 translate-y-5 opacity-0 group-[&.swiper-slide-active]/slide:opacity-100 xs:group-[&.swiper-slide-active]/slide:delay-700 max-xs:group-[&.swiper-slide-active]/slide:delay-900 transition-all duration-500">

@@ -147,7 +147,7 @@ export default function Navbar({ navbarData, contactInfo }: NavbarProps) {
             >
               <div className="flex items-center max-xs:gap-2 gap-4">
                 {/* Dynamic Logo */}
-                <div className="relative w-[40px] h-[40px] md:w-[57px] md:h-[57px]">
+                <div className="relative w-10 h-10 md:w-[57px] md:h-[57px]">
                   <StrapiImage
                     src={navbarData?.logo || "/logo/fofana.png"}
                     alt="A.M. Fofana Logo"
@@ -177,7 +177,7 @@ export default function Navbar({ navbarData, contactInfo }: NavbarProps) {
                         md:static md:w-auto md:h-full md:pointer-events-auto md:opacity-100
                         ${isMobileMenuOpen
                   ? "max-md:h-[calc(100vh-80px)] max-md:opacity-100 max-md:pointer-events-auto max-md:border-b max-md:shadow-xl max-md:overflow-y-auto"
-                  : "max-md:h-0 max-md:opacity-0 max-md:pointer-events-none max-md:border-b-0 max-md:shadow-none max-md:overflow-hidden md:p-0 max-md:overflow-hidden"
+                  : "max-md:h-0 max-md:opacity-0 max-md:pointer-events-none max-md:border-b-0 max-md:shadow-none md:p-0 max-md:overflow-hidden"
                 }
                     `}
             >
@@ -225,7 +225,7 @@ export default function Navbar({ navbarData, contactInfo }: NavbarProps) {
                                         `}
                             >
                               <div className="h-full w-full max-md:overflow-hidden md:bg-white md:relative md:rounded-bl-[10px] md:shadow-sm md:rounded-br-[10px]">
-                                <div className="flex flex-col max-md:w-full h-full md:p-5 md:gap-2 max-md:gap-[1px]">
+                                <div className="flex flex-col max-md:w-full h-full md:p-5 md:gap-2 max-md:gap-px">
                                   {item.subItems.map((sub: any) => (
                                     <Link
                                          key={sub.label || sub.name}
@@ -242,7 +242,7 @@ export default function Navbar({ navbarData, contactInfo }: NavbarProps) {
 
                                       <div className="w-[25px] max-md:hidden h-[25px] absolute right-3 duration-500 scale-75 group-hover/item:scale-100 group-hover/item:opacity-100 opacity-0 top-1/2 -translate-y-1/2 bg-primary rounded-full flex justify-center items-center">
                                         <svg
-                                          className="w-[10px] h-[10px] scale-75 duration-500 group-hover/item:scale-100 group-hover/item:opacity-100 origin-center opacity-0"
+                                          className="w-2.5 h-2.5 scale-75 duration-500 group-hover/item:scale-100 group-hover/item:opacity-100 origin-center opacity-0"
                                           xmlns="http://www.w3.org/2000/svg"
                                           viewBox="0 0 13 13"
                                           fill="none"
@@ -306,8 +306,8 @@ export default function Navbar({ navbarData, contactInfo }: NavbarProps) {
                 <span
                   className={`
                         ${isMobileMenuOpen
-                      ? "bg-[var(--color-primary)] relative  duration-300 translate-y-[8px] h-[2px] rotate-[45deg] opacity-100"
-                      : "bg-[var(--color-primary)] h-[2px] relative opacity-100 duration-300"
+                      ? "bg-(--color-primary) relative  duration-300 translate-y-2 h-0.5 rotate-45 opacity-100"
+                      : "bg-(--color-primary) h-0.5 relative opacity-100 duration-300"
                     }
                     `}
                 ></span>
@@ -322,8 +322,8 @@ export default function Navbar({ navbarData, contactInfo }: NavbarProps) {
                 <span
                   className={`
                         ${isMobileMenuOpen
-                      ? "bg-(--color-primary) relative  duration-300 translate-y-[-8px] h-[2px] rotate-[-45deg] opacity-100"
-                      : "bg-(--color-primary) h-[2px] relative opacity-100 duration-300"
+                      ? "bg-(--color-primary) relative  duration-300 -translate-y-2 h-0.5 -rotate-45 opacity-100"
+                      : "bg-(--color-primary) h-0.5 relative opacity-100 duration-300"
                     }
                     `}
                 ></span>{" "}

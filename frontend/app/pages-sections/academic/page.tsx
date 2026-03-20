@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import StrapiImage from '@/components/StrapiImage';
 import { Button } from '@/components/ui/button';
-import { FileText, Download, ArrowRight, CheckCircle } from 'lucide-react';
+import { FileText, CheckCircle } from 'lucide-react';
 import Breadcrumb from '@/components/Breadcrumb';
 import type { AcademicSection, AcademicResource, SchoolCalendar } from '@/types/strapi';
 
