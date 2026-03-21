@@ -183,10 +183,10 @@ export default function TimetableManagement() {
                             <BookOpen size={20} />
                           </div>
                           <div>
-                            <h3 className="font-black text-slate-900 uppercase italic tracking-tight">{entry.subject.name}</h3>
+                            <h3 className="font-black text-slate-900 uppercase italic tracking-tight">{entry.subject?.name || 'No Subject'}</h3>
                             <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
                               <Layers size={12} className="text-slate-300" />
-                              {entry.classe.name}
+                              {entry.classe?.name || 'No Class'}
                             </div>
                           </div>
                         </div>
@@ -199,9 +199,9 @@ export default function TimetableManagement() {
                             onClick={() => {
                               setEditingEntry(entry);
                               form.reset({
-                                classId: String(entry.classe.id),
-                                subjectId: String(entry.subject.id),
-                                dayOfWeek: entry.dayOfWeek,
+                                classId: entry.classe?.id ? String(entry.classe.id) : '',
+                                subjectId: entry.subject?.id ? String(entry.subject.id) : '',
+                                dayOfWeek: entry.dayOfWeek || 'MONDAY',
                                 startTime: entry.startTime,
                                 endTime: entry.endTime,
                               });

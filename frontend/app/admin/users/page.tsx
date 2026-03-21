@@ -101,7 +101,12 @@ export default function UserManagement() {
       setLoading(true);
       try {
          const response = await api.get('/admin/users');
-         setUsers(response.data);
+         const mappedUsers = response.data.map((u: any) => ({
+            ...u,
+            role: u.schoolRole,
+            name: u.username || u.name,
+         }));
+         setUsers(mappedUsers);
       } catch (error) {
          toast.error('Registry sync failed');
          console.log(error)

@@ -41,7 +41,7 @@ export default function LoginPage() {
    const onSubmit = async (values: z.infer<typeof formSchema>) => {
       setIsLoading(true);
       try {
-         await api.post('/auth/login', values, { withCredentials: true });
+         await api.post('/auth/local', { identifier: values.email, password: values.password }, { withCredentials: true });
 
          const role = getUserRole();
          if (!role) {

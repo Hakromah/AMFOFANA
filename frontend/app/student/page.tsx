@@ -40,7 +40,9 @@ export default function StudentDashboard() {
     courseCount: 0,
     attendance: 0,
     materials: 0,
-    averageGrade: 'N/A'
+    averageGrade: 'N/A',
+    upcomingExam: null as any,
+    recentActivity: [] as any[],
   });
   const [studentName, setStudentName] = useState('Student');
   const [loading, setLoading] = useState(true);
@@ -163,15 +165,29 @@ export default function StudentDashboard() {
           <Card className="border-none shadow-sm rounded-[2.5rem] bg-slate-900 text-white p-8 overflow-hidden relative group">
             <div className="relative z-10">
               <h2 className="text-lg font-black uppercase tracking-widest mb-4">Exam Reminder</h2>
-              <div className="flex items-center gap-4 bg-white/10 p-4 rounded-3xl backdrop-blur-sm border border-white/10">
-                <div className="bg-blue-500 p-3 rounded-2xl">
-                  <Clock size={20} />
+              
+              {stats.upcomingExam ? (
+                <div className="flex items-center gap-4 bg-white/10 p-4 rounded-3xl backdrop-blur-sm border border-white/10">
+                  <div className="bg-blue-500 p-3 rounded-2xl">
+                    <Clock size={20} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-blue-200 uppercase tracking-widest">{stats.upcomingExam.name}</p>
+                    <p className="text-sm font-medium">{new Date(stats.upcomingExam.date).toLocaleDateString()} • {stats.upcomingExam.time?.slice(0, 5) || '12:00'}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs font-bold text-blue-200 uppercase tracking-widest">Calculus Finals</p>
-                  <p className="text-sm font-medium">In 2 days • 09:00 AM</p>
+              ) : (
+                <div className="flex items-center gap-4 bg-white/5 p-4 rounded-3xl backdrop-blur-sm border border-white/5">
+                  <div className="bg-slate-800 p-3 rounded-2xl">
+                    <CheckCircle size={20} className="text-slate-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No Upcoming Exams</p>
+                    <p className="text-sm font-medium text-slate-500">You're all caught up!</p>
+                  </div>
                 </div>
-              </div>
+              )}
+
               <Button className="w-full mt-6 bg-white text-slate-900 hover:bg-blue-500 hover:text-white rounded-2xl h-12 font-black uppercase text-[10px] tracking-widest transition-all">
                 Study Guide
               </Button>
@@ -182,21 +198,24 @@ export default function StudentDashboard() {
           <Card className="border-none shadow-sm rounded-[2.5rem] bg-white p-8">
             <h2 className="text-xs font-black uppercase text-slate-400 tracking-widest mb-6">Recent Activity</h2>
             <div className="space-y-6">
-              {[
-                { title: 'New Grade Released', time: '1h ago', type: 'grade' },
-                { title: 'English Material Uploaded', time: '3h ago', type: 'file' },
-              ].map((activity, i) => (
-                <div key={i} className="flex items-center justify-between group cursor-pointer">
-                  <div className="flex items-center gap-4">
-                    <div className="w-2 h-2 rounded-full bg-blue-500 ring-4 ring-blue-50" />
-                    <div>
-                      <p className="text-sm font-bold text-slate-800 tracking-tight">{activity.title}</p>
-                      <p className="text-[10px] text-slate-400 font-medium">{activity.time}</p>
+              {stats.recentActivity.length > 0 ? (
+                stats.recentActivity.map((activity, i) => (
+                  <div key={i} className="flex items-center justify-between group cursor-pointer">
+                    <div className="flex items-center gap-4">
+                      <div className="w-2 h-2 rounded-full bg-blue-500 ring-4 ring-blue-50" />
+                      <div>
+                        <p className="text-sm font-bold text-slate-800 tracking-tight">{activity.title}</p>
+                        <p className="text-[10px] text-slate-400 font-medium">
+                          {new Date(activity.timestamp).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
+                    <ChevronRight size={14} className="text-slate-300 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
                   </div>
-                  <ChevronRight size={14} className="text-slate-300 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
-                </div>
-              ))}
+                ))
+              ) : (
+                <div className="text-center py-4 text-slate-400 text-sm font-medium">No recent activity</div>
+              )}
             </div>
           </Card>
         </div>

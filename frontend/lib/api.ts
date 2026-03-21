@@ -1,7 +1,8 @@
 import axios from 'axios';
 import qs from 'qs';
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+// Changed from Spring Boot (8080) → Strapi (1337, using 127.0.0.1 to avoid IPv6 mapping issues typical on Windows)
+const baseURL = `${process.env.NEXT_PUBLIC_STRAPI_URL || 'http://127.0.0.1:1337'}/api`;
 
 const api = axios.create({
   baseURL: baseURL,

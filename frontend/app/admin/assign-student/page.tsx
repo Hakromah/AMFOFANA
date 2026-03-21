@@ -153,7 +153,7 @@ export default function AdvancedAssignStudentPage() {
                           <SelectContent className="rounded-2xl border-slate-100 shadow-2xl">
                             {students.map((student) => (
                               <SelectItem key={student.id} value={String(student.id)} className="font-bold p-3">
-                                {student.name}
+                                {student.username || student.name || student.email}
                               </SelectItem>
                             ))}
                           </SelectContent>

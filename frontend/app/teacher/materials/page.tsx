@@ -36,8 +36,8 @@ export default function TeacherMaterialsPage() {
   const fetchData = async () => {
     try {
       const [matRes, classRes] = await Promise.all([
-        api.get('/api/teacher/materials'),             // ADDED /api
-        api.get('/api/teacher/materials/my-classes')  // New authorized endpoint for teachers
+        api.get('/teacher/materials'),
+        api.get('/teacher/materials/my-classes')
       ]);
       setMaterials(matRes.data);
       setClasses(classRes.data);
@@ -66,8 +66,7 @@ export default function TeacherMaterialsPage() {
 
     setUploading(true);
     try {
-      // FIX: Add /api to the path
-      await api.post('/api/teacher/materials/upload', formData, {
+      await api.post('/teacher/materials/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -103,7 +102,7 @@ export default function TeacherMaterialsPage() {
   const handleDelete = async (id: number) => {
     const tid = toast.loading("Removing resource...");
     try {
-      await api.delete(`/api/teacher/materials/${id}`);
+      await api.delete(`/teacher/materials/${id}`);
       toast.success("Resource deleted", { id: tid });
       fetchData();
     } catch (e) {
@@ -112,13 +111,21 @@ export default function TeacherMaterialsPage() {
     }
   };
 
+  const getFullUrl = (url: string) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    const baseUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://127.0.0.1:1337';
+    return `${baseUrl}${url}`;
+  };
+
   const handleDownload = async (mat: any) => {
     if (!mat.fileUrl) return;
     const tid = toast.loading("Preparing download...");
 
     try {
+      const fullUrl = getFullUrl(mat.fileUrl);
       // 1. Fetch the file data directly
-      const response = await fetch(mat.fileUrl);
+      const response = await fetch(fullUrl);
       if (!response.ok) throw new Error('Network response was not ok');
 
       const blob = await response.blob();
@@ -144,7 +151,7 @@ export default function TeacherMaterialsPage() {
     } catch (err) {
       console.error("Download error:", err);
       // Fallback: just open the URL in a new tab if fetch fails
-      window.open(mat.fileUrl, '_blank');
+      window.open(getFullUrl(mat.fileUrl), '_blank');
       toast.dismiss(tid);
     }
   };
@@ -211,7 +218,7 @@ export default function TeacherMaterialsPage() {
                         variant="outline"
                         onClick={() => {
                           const isPdf = mat.fileType?.includes('pdf') || mat.fileName?.toLowerCase().endsWith('.pdf');
-                          let previewUrl = mat.fileUrl.replace('/upload/', '/upload/f_auto/');
+                          let previewUrl = getFullUrl(mat.fileUrl).replace('/upload/', '/upload/f_auto/');
                           if (isPdf && !previewUrl.toLowerCase().endsWith('.pdf')) {
                             previewUrl += '.pdf';
                           }

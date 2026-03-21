@@ -150,7 +150,7 @@ export default function AdvancedAssignTeacherPage() {
                           <SelectContent className="rounded-2xl border-slate-100 shadow-2xl">
                             {teachers.map((teacher) => (
                               <SelectItem key={teacher.id} value={String(teacher.id)} className="font-bold p-3">
-                                {teacher.name}
+                                {teacher.username || teacher.name || teacher.email}
                               </SelectItem>
                             ))}
                           </SelectContent>

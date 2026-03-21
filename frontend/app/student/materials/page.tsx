@@ -30,8 +30,8 @@ export default function StudentMaterialsPage() {
   useEffect(() => {
     const fetchEnrolledClasses = async () => {
       try {
-        // This hits the endpoint that returns List<Classe> for the logged-in student
-        const res = await api.get('/api/student/materials/my-classes');
+        // Use the existing student classes endpoint
+        const res = await api.get('/student/classes');
         setClasses(res.data || []);
       } catch (err) {
         console.error("Failed to load classes:", err);
@@ -49,8 +49,8 @@ export default function StudentMaterialsPage() {
     setFetchingMaterials(true);
     setSelectedClassId(classId);
     try {
-      // Hits @GetMapping("/list/{classId}") in StudentMaterialController
-      const res = await api.get(`/api/student/materials/list/${classId}`);
+      // Fetch materials for a specific class ID explicitly via Strapi
+      const res = await api.get(`/student/materials/${classId}`);
       setMaterials(res.data);
     } catch (error: any) {
       console.error("Material Fetch Error:", error);
@@ -85,13 +85,21 @@ export default function StudentMaterialsPage() {
     </div>
   );
 
+  const getFullUrl = (url: string) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    const baseUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://192.168.1.137:1337';
+    return `${baseUrl}${url}`;
+  };
+
   const handleDownload = async (mat: any) => {
     if (!mat.fileUrl) return;
     const tid = toast.loading("Preparing download...");
 
     try {
+      const fullUrl = getFullUrl(mat.fileUrl);
       // 1. Fetch the file data directly
-      const response = await fetch(mat.fileUrl);
+      const response = await fetch(fullUrl);
       if (!response.ok) throw new Error('Network response was not ok');
 
       const blob = await response.blob();
@@ -103,8 +111,9 @@ export default function StudentMaterialsPage() {
       const link = document.createElement('a');
       link.href = url;
 
-      // Use the clean filename from your database
-      const fileName = mat.fileName || 'document.pdf';
+      // Use the clean filename from your database, or reliably extract the filename from the URL to preserve things like .docx
+      const extractedName = mat.fileUrl ? mat.fileUrl.split('/').pop() : 'document.pdf';
+      const fileName = mat.fileName || extractedName;
       link.setAttribute('download', fileName);
 
       document.body.appendChild(link);
@@ -117,7 +126,8 @@ export default function StudentMaterialsPage() {
     } catch (err) {
       console.error("Download error:", err);
       // Fallback: just open the URL in a new tab if fetch fails
-      window.open(mat.fileUrl, '_blank');
+      const fullUrl = getFullUrl(mat.fileUrl);
+      window.open(fullUrl, '_blank');
       toast.dismiss(tid);
     }
   };
@@ -198,12 +208,16 @@ export default function StudentMaterialsPage() {
                           <Button
                             variant="outline"
                             onClick={() => {
+                              if (!mat.fileUrl) {
+                                toast.error("File URL is missing for this material.");
+                                return;
+                              }
                               const isPdf = mat.fileType?.includes('pdf') || mat.fileName?.toLowerCase().endsWith('.pdf');
                               let previewUrl = mat.fileUrl.replace('/upload/', '/upload/f_auto/');
                               if (isPdf && !previewUrl.toLowerCase().endsWith('.pdf')) {
                                 previewUrl += '.pdf';
                               }
-                              window.open(previewUrl, "_blank", 'noopener,noreferrer');
+                              window.open(getFullUrl(previewUrl), "_blank", 'noopener,noreferrer');
                             }}
                             className="rounded-2xl border-slate-100 text-slate-400 hover:text-blue-600 font-black text-[10px] tracking-widest h-10 px-4 uppercase"
                           >

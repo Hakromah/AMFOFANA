@@ -58,7 +58,8 @@ export default function AdminExamsPage() {
   // Filter Logic: Search by subject, teacher, or class
   const filteredExams = exams.filter(exam =>
     exam.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    exam.teacher?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    exam.teacher?.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    exam.teacher?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     exam.classe?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -128,9 +129,9 @@ export default function AdminExamsPage() {
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-[10px] font-black text-slate-500">
-                      {exam.teacher?.name?.[0]}{exam.teacher?.name?.[0]}
+                      {(exam.teacher?.username || exam.teacher?.name || 'UN').substring(0, 2).toUpperCase()}
                     </div>
-                    <span className="font-bold text-xs text-slate-700">{exam.teacher?.name}</span>
+                    <span className="font-bold text-xs text-slate-700">{exam.teacher?.username || exam.teacher?.name || 'Unknown'}</span>
                   </div>
                 </TableCell>
 

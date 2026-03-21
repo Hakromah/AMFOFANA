@@ -25,18 +25,22 @@ export default function AdminMaterialsPage() {
    const fetchData = async () => {
       setLoading(true);
       try {
-         const endpoint = query
-            ? `/api/admin/materials/search?q=${query}`
-            : '/api/admin/materials';
-
          // ✅ Fetches registry data and your custom analytics logic
          const [matRes, analyticsRes] = await Promise.all([
-            api.get(endpoint),
-            api.get('/api/admin/materials/analytics/downloads-per-class')
+            api.get('/admin/materials'),
+            api.get('/admin/materials/analytics')
          ]);
 
-         setMaterials(matRes.data);
-         setAnalytics(analyticsRes.data);
+         const rawData = matRes.data || [];
+         const filtered = query 
+           ? rawData.filter((m: any) => 
+               m.fileName?.toLowerCase().includes(query.toLowerCase()) || 
+               m.title?.toLowerCase().includes(query.toLowerCase())
+             )
+           : rawData;
+
+         setMaterials(filtered);
+         setAnalytics(analyticsRes.data || []);
       } catch (err) {
          toast.error('System synchronization failed');
          console.error(err);
@@ -64,10 +68,21 @@ export default function AdminMaterialsPage() {
       }
    };
 
+   const getValidUrl = (m: any) => {
+      let raw = m.fileUrl || m.file?.url;
+      if (!raw) return null;
+      if (raw.startsWith('/')) {
+         raw = (process.env.NEXT_PUBLIC_STRAPI_URL || 'http://127.0.0.1:1337') + raw;
+      }
+      return raw;
+   };
+
    const handlePreview = (m: any) => {
-      if (!m.fileUrl) return;
-      const isPdf = m.fileType?.includes('pdf') || m.fileName?.toLowerCase().endsWith('.pdf');
-      let previewUrl = m.fileUrl.replace('/upload/', '/upload/f_auto,q_auto/');
+      const actualUrl = getValidUrl(m);
+      if (!actualUrl) return;
+      
+      const isPdf = m.fileType?.includes('pdf') || m.fileName?.toLowerCase().endsWith('.pdf') || m.file?.mime?.includes('pdf');
+      let previewUrl = actualUrl.replace('/upload/', '/upload/f_auto,q_auto/');
 
       if (isPdf && !previewUrl.toLowerCase().endsWith('.pdf')) {
          previewUrl = `${previewUrl}.pdf`;
@@ -76,11 +91,12 @@ export default function AdminMaterialsPage() {
    };
 
    const handleDownload = async (mat: any) => {
-      if (!mat.fileUrl) return;
+      const actualUrl = getValidUrl(mat);
+      if (!actualUrl) return;
       const tid = toast.loading("Preparing download...");
 
       try {
-         const response = await fetch(mat.fileUrl);
+         const response = await fetch(actualUrl);
          if (!response.ok) throw new Error('Network response was not ok');
          const blob = await response.blob();
          const url = window.URL.createObjectURL(blob);
@@ -95,7 +111,7 @@ export default function AdminMaterialsPage() {
          toast.success("Download started", { id: tid });
       } catch (err) {
          console.error("Download error:", err);
-         window.open(mat.fileUrl, '_blank');
+         window.open(actualUrl, '_blank');
          toast.dismiss(tid);
       }
    };
@@ -203,11 +219,16 @@ export default function AdminMaterialsPage() {
                                     <p className="text-slate-400 font-bold text-xs italic line-clamp-2 mb-6">{m.title}</p>
 
                                     <div className="flex flex-wrap gap-2 mb-6">
-                                       {m.targetClasses.map((c: any) => (
-                                          <Badge key={c.id} className="bg-slate-50 text-slate-400 border-none font-black text-[9px] uppercase italic">
-                                             {c.name}
+                                       {(m.targetClasses || (m.classe ? [m.classe] : [])).map((c: any) => (
+                                          <Badge key={c.id || 'no-class'} className="bg-slate-50 text-slate-400 border-none font-black text-[9px] uppercase italic">
+                                             {c.name || 'Unassigned'}
                                           </Badge>
                                        ))}
+                                       {!(m.targetClasses?.length || m.classe) && (
+                                          <Badge className="bg-slate-50 text-slate-400 border-none font-black text-[9px] uppercase italic">
+                                             No Class
+                                          </Badge>
+                                       )}
                                     </div>
                                  </div>
 

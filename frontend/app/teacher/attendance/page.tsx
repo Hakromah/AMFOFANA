@@ -29,6 +29,7 @@ import { Progress } from '@/components/ui/progress';
 interface Student {
   id: number;
   name: string;
+  username?: string;
   userId: string;
 }
 
@@ -122,14 +123,10 @@ export default function TeacherAttendancePage() {
       const studentRes = await api.get(`/teacher/classes/${selectedClass}/students`);
       setStudents(studentRes.data);
 
-      // Map existing record statuses to state
-      // Note: This assumes session.records contains studentId and present status
-      // You may need an additional API call: await api.get(`/teacher/attendance/${session.id}`)
-      const detailRes = await api.get(`/teacher/attendance/${session.id}`);
-
-      setAttendance(detailRes.data.records.map((r: any) => ({
-        studentId: r.student.id,
-        present: r.present
+      // Map existing record statuses to state directly from the session parameter
+      setAttendance(session.records.map((r: any) => ({
+        studentId: r.studentId,
+        present: r.status === 'PRESENT'
       })));
 
       setView('mark');
@@ -148,7 +145,10 @@ export default function TeacherAttendancePage() {
     const payload = {
       classId: parseInt(selectedClass),
       date: new Date().toISOString().split('T')[0],
-      records: attendance,
+      records: attendance.map(a => ({
+        studentId: a.studentId,
+        status: a.present ? 'PRESENT' : 'ABSENT'
+      })),
     };
 
     try {
@@ -259,7 +259,7 @@ export default function TeacherAttendancePage() {
                             #{student.userId || student.id}
                           </TableCell>
                           <TableCell className="font-black text-slate-800 text-sm tracking-tight capitalize">
-                            {student.name}
+                            {student.username || student.name}
                           </TableCell>
                           <TableCell className="text-right pr-8">
                             <div className="flex justify-end items-center gap-4">

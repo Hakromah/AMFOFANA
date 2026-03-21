@@ -176,10 +176,10 @@ export default function TeacherDashboard() {
               <div key={i} className="p-4 border-b border-slate-50 flex items-center justify-between hover:bg-slate-50 transition-colors">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-500 text-xs">
-                    {r.student.name.substring(0, 2).toUpperCase()}
+                    {(r.student.username || r.student.name || 'UN').substring(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-slate-700">{r.student.name}</p>
+                    <p className="text-sm font-bold text-slate-700">{r.student.username || r.student.name}</p>
                     <p className="text-[10px] text-slate-400 font-black uppercase">{r.exam.name} • {r.exam.term}</p>
                   </div>
                 </div>

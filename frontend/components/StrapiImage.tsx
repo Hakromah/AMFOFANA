@@ -30,7 +30,8 @@ export default function StrapiImage({ src, ...props }: ImageProps) {
    // const isStrapiSrc = srcStr.startsWith(STRAPI_URL) || srcStr.includes("localhost:1337");
    const isStrapiSrc =
       srcStr.includes("strapiapp.com") ||
-      srcStr.includes("localhost:1337") ||
+      srcStr.includes(":1337") ||
+      srcStr.includes(STRAPI_URL) ||
       srcStr.startsWith("/"); // relative paths
 
    return <NextImage src={src} {...props} unoptimized={isStrapiSrc || !!props.unoptimized} />;

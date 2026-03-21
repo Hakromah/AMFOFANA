@@ -72,13 +72,13 @@ export default function StudentResultsPage() {
 
    // --- FILTER LOGIC ---
    const uniqueSemesters = useMemo(() => {
-      const sems = results.map(r => r.exam?.semester).filter(Boolean);
+      const sems = results.map(r => r.semester).filter(Boolean);
       return Array.from(new Set(sems));
    }, [results]);
 
    const filteredResults = useMemo(() => {
       if (selectedSemester === 'all') return results;
-      return results.filter(r => r.exam?.semester === selectedSemester);
+      return results.filter(r => r.semester === selectedSemester);
    }, [results, selectedSemester]);
 
    // --- SELECTION LOGIC ---
@@ -103,7 +103,7 @@ export default function StudentResultsPage() {
    const highestScore = results.length > 0 ? Math.max(...results.map(r => r.marks)) : 0;
 
    const chartData = results.map(r => ({
-      name: r.exam.name,
+      name: r.examName || 'Exam',
       myScore: r.marks,
       classAvg: r.classAverage || 0,
    }));
@@ -196,9 +196,9 @@ export default function StudentResultsPage() {
          startY: (doc as any).lastAutoTable.finalY + 20,
          head: [["Subject", "Term/Exam", "Semester", "Score", "Grade"]],
          body: dataToExport.map(r => [
-            r.exam.name,
-            r.exam.term || 'N/A',
-            r.exam.semester || 'N/A',
+            r.examName || 'N/A',
+            r.term || 'N/A',
+            r.semester || 'N/A',
             `${r.marks}%`,
             calculateLetterGrade(r.marks)
          ]),
@@ -348,16 +348,16 @@ export default function StudentResultsPage() {
                                  />
                               </TableCell>
                               <TableCell className="font-semibold py-4 text-slate-700">
-                                 {r.exam.name}
-                                 <div className="text-[10px] text-slate-400 font-bold uppercase">{r.exam.classe.name}</div>
+                                 {r.examName || 'N/A'}
+                                 <div className="text-[10px] text-slate-400 font-bold uppercase">{r.className || 'N/A'}</div>
                               </TableCell>
                               <TableCell>
                                  <div className="flex items-center gap-2">
                                     <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold uppercase border border-blue-200">
-                                       {r.exam.term || 'N/A'}
+                                       {r.term || 'N/A'}
                                     </span>
                                     <span className="text-[10px] text-slate-500 font-bold">
-                                       {r.exam.semester}
+                                       {r.semester || 'N/A'}
                                     </span>
                                  </div>
                               </TableCell>

@@ -25,7 +25,8 @@ import api from '@/lib/api';
 interface Student {
   id: number;
   userId: string;    // The 12-digit unique ID
-  name: string;
+  username?: string;
+  name?: string;
   email: string;
   gender: string;
   phoneNumber: string;
@@ -86,9 +87,12 @@ export default function TeacherStudentsPage() {
   // 3. Client-side Search Logic
   const filteredStudents = students.filter((student) => {
     const searchLower = searchTerm.toLowerCase();
+    const nameStr = (student.username || student.name || '').toLowerCase();
+    const idStr = (student.userId || '').toLowerCase();
+    
     return (
-      student.name.toLowerCase().includes(searchLower) ||
-      student.userId.toLowerCase().includes(searchLower)
+      nameStr.includes(searchLower) ||
+      idStr.includes(searchLower)
     );
   });
 
@@ -148,7 +152,7 @@ export default function TeacherStudentsPage() {
               filteredStudents.map((student) => (
                 <TableRow key={student.id}>
                   <TableCell className="font-mono">{student.userId}</TableCell>
-                  <TableCell className="font-medium">{student.name}</TableCell>
+                  <TableCell className="font-medium">{student.username || student.name}</TableCell>
                   <TableCell>{student.gender}</TableCell>
                   <TableCell>{student.email}</TableCell>
                   <TableCell>{student.phoneNumber}</TableCell>

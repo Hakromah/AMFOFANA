@@ -42,7 +42,7 @@ export default function RegisterPage() {
     setIsLoading(true);
     toast.loading('Creating your account...');
     try {
-      await api.post('/auth/register', values);
+      await api.post('/auth/local/register', values);
       toast.success('Registration Successful', {
         description: 'Please login with your new credentials.',
       });

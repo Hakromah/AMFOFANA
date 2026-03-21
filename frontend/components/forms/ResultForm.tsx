@@ -227,7 +227,7 @@ export default function ResultForm({ result, existingResults, onFinished }: Resu
                 <SelectContent>
                   {filteredStudents.length > 0 ? (
                     filteredStudents.map((s) => (
-                      <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                      <SelectItem key={s.id} value={String(s.id)}>{s.username || s.name}</SelectItem>
                     ))
                   ) : (
                     <div className="p-2 text-xs text-center text-muted-foreground">All students in this class are already graded for this exam.</div>

@@ -87,11 +87,13 @@ export default function TeacherExamsPage() {
    // --- CRUD ACTIONS ---
    const onSubmit = async (values: z.infer<typeof formSchema>) => {
       const selectedSubject = subjects.find(s => String(s.id) === values.subjectId);
+      const formatTime = (t: string) => t.length === 5 ? `${t}:00.000` : t.length === 8 ? `${t}.000` : t;
+
       const payload = {
          name: selectedSubject?.name || 'Exam',
          date: values.date,
-         startTime: values.startTime,
-         endTime: values.endTime,
+         startTime: formatTime(values.startTime),
+         endTime: formatTime(values.endTime),
          semester: values.semester,
          term: values.term,
          weight: parseInt(values.weight),
@@ -290,7 +292,7 @@ export default function TeacherExamsPage() {
                                  <SelectContent className="rounded-xl border-none shadow-xl">
                                     <SelectItem value="QUIZ_1" className="font-bold">Quiz 1</SelectItem>
                                     <SelectItem value="MIDTERM" className="font-bold">Midterm</SelectItem>
-                                    <SelectItem value="FINAL_EXAM" className="font-bold">Final Exam</SelectItem>
+                                    <SelectItem value="FINAL" className="font-bold">Final Exam</SelectItem>
                                  </SelectContent></Select>
                            </FormItem>
                         )} />
