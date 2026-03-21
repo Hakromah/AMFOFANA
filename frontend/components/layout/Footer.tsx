@@ -3,11 +3,13 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Facebook, Instagram, Linkedin, Twitter, Youtube } from 'lucide-react';
+import { Facebook, Instagram, Linkedin, Twitter, Youtube, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import StrapiImage from '@/components/StrapiImage';
 import type { FooterData, ContactInfoData } from '@/types/strapi';
+import api from '@/lib/api';
+import { toast } from 'sonner';
 
 const fallbackSocialLinks = [
   { name: "facebook", href: "#" },
@@ -25,6 +27,34 @@ interface FooterProps {
 
 export default function Footer({ footerData, contactInfo }: FooterProps) {
   const socialLinks = contactInfo?.socialLinks ?? fallbackSocialLinks;
+  
+  const [email, setEmail] = React.useState('');
+  const [isSubscribing, setIsSubscribing] = React.useState(false);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+
+    setIsSubscribing(true);
+    const tid = toast.loading("Subscribing...");
+    
+    try {
+      await api.post('/newsletter-subscriptions', {
+        data: { email }
+      });
+      toast.success("Successfully subscribed to our newsletter!", { id: tid });
+      setEmail('');
+    } catch (err: any) {
+      console.error(err);
+      if (err.response?.status === 400 && err.response?.data?.error?.message?.includes('unique')) {
+         toast.error("This email is already subscribed!", { id: tid });
+      } else {
+         toast.error("Failed to subscribe. Please try again.", { id: tid });
+      }
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
 
   return (
     <footer className="bg-[#2857AE] text-white pt-[clamp(20px,3vw,60px)] pb-[clamp(20px,3vw,40px)]">
@@ -50,16 +80,20 @@ export default function Footer({ footerData, contactInfo }: FooterProps) {
           </div>
 
           {/* Subscription Form */}
-          <div className="w-full max-w-md bg-white rounded-lg p-2 flex">
+          <form onSubmit={handleSubscribe} className="w-full max-w-md bg-white rounded-lg p-2 flex">
             <Input
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter Your E-mail"
+              disabled={isSubscribing}
+              required
               className="border-0 bg-transparent text-black focus-visible:ring-0 placeholder:text-gray-400"
             />
-            <Button className="bg-[#2857AE] hover:bg-[#1e4287] text-white px-6 py-2 rounded-md">
-              Subscribe
+            <Button type="submit" disabled={isSubscribing} className="bg-[#2857AE] hover:bg-[#1e4287] text-white px-6 py-2 rounded-md transition-all">
+              {isSubscribing ? <Loader2 className="h-4 w-4 animate-spin" /> : "Subscribe"}
             </Button>
-          </div>
+          </form>
         </div>
 
         {/* Main Grid */}

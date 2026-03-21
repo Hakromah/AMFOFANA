@@ -711,6 +711,8 @@ export async function fetchContactInfo(): Promise<ContactInfoData | null> {
          phones: (c.phones ?? []).map((p) => String(p.phones)),
          emails: (c.email ?? []).map((e) => e.address),
          officeHours: c.office_hours,
+         latitude: c.latitude,
+         longitude: c.longitude,
          socialLinks: c.social_links ?? [],
          breadcrumb_item: (c.breadcrumb_item ?? []).map((bc) => ({
             id: bc.id,

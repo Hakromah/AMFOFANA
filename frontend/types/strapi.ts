@@ -259,6 +259,8 @@ export interface StrapiContactInfo {
    phones: Array<{ phones: string | number }>;
    email: Array<{ address: string }>;
    office_hours: string;
+   latitude?: number;
+   longitude?: number;
    social_links: Array<{ name: string; href: string }>;
    breadcrumb_item: Array<{
       id: number;
@@ -447,6 +449,8 @@ export interface ContactInfoData {
    phones: string[];
    emails: string[];
    officeHours: string;
+   latitude?: number;
+   longitude?: number;
    socialLinks: Array<{ name: string; href: string }>;
    breadcrumb_item: BreadcrumbItem[];
 }
