@@ -50,7 +50,14 @@ export default {
           'getSemesterTranscript', 'getDashboardStats'
         ].map(act => `api::school-student.school-student.${act}`);
 
-        const allActions = [...schoolAdminActions, ...schoolAuthActions, ...schoolTeacherActions, ...schoolStudentActions];
+        const allActions = [
+          ...schoolAdminActions, 
+          ...schoolAuthActions, 
+          ...schoolTeacherActions, 
+          ...schoolStudentActions,
+          'api::contact-message.contact-message.create',
+          'api::newsletter-subscription.newsletter-subscription.create'
+        ];
 
         for (const action of allActions) {
           const authPermission = await strapi.db.query('plugin::users-permissions.permission').findOne({
@@ -66,6 +73,31 @@ export default {
             });
             strapi.log.info(`[ACL Matrix] Granted Authenticated access to ${action}`);
           }
+        }
+      }
+
+      // Automatically assign public submission permissions for the Contact Form
+      const publicRole = await strapi.db.query('plugin::users-permissions.role').findOne({
+        where: { type: 'public' },
+      });
+
+      if (publicRole) {
+        const publicActions = [
+            'api::contact-message.contact-message.create',
+            'api::newsletter-subscription.newsletter-subscription.create'
+        ];
+        
+        for (const publicAction of publicActions) {
+            const publicPermission = await strapi.db.query('plugin::users-permissions.permission').findOne({
+            where: { role: publicRole.id, action: publicAction },
+            });
+
+            if (!publicPermission) {
+            await strapi.db.query('plugin::users-permissions.permission').create({
+                data: { role: publicRole.id, action: publicAction },
+            });
+            strapi.log.info(`[ACL Matrix] Granted Public access to ${publicAction}`);
+            }
         }
       }
 

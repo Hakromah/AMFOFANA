@@ -36,6 +36,12 @@
       "type": "component",
       "component": "shared.readcrumb",
       "repeatable": true
+    },
+    "latitude": {
+      "type": "decimal"
+    },
+    "longitude": {
+      "type": "decimal"
     }
   }
 }
