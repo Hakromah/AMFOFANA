@@ -9,8 +9,11 @@
 export default (config: any, { strapi }: { strapi: any }) => {
   return async (ctx: any, next: () => Promise<void>) => {
     const token = ctx.cookies.get('accessToken');
+    const isAuthRoute = ctx.request.url && ctx.request.url.includes('/auth/local');
     
-    if (token && !ctx.request.header.authorization) {
+    // Do not inject the token if hitting auth gateways.
+    // Strapi natively throws 403 Forbidden if a logged-in user tries to bypass the login route.
+    if (token && !ctx.request.header.authorization && !isAuthRoute) {
       ctx.request.header.authorization = `Bearer ${token}`;
     }
     
