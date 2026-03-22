@@ -20,6 +20,7 @@ import api from '@/lib/api';
 import { getUserRole } from '@/lib/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AxiosError } from 'axios';
+import Cookies from 'js-cookie';
 
 const formSchema = z.object({
    email: z.string().email({ message: 'Please enter a valid email.' }),
@@ -41,7 +42,16 @@ export default function LoginPage() {
    const onSubmit = async (values: z.infer<typeof formSchema>) => {
       setIsLoading(true);
       try {
-         await api.post('/auth/local', { identifier: values.email, password: values.password }, { withCredentials: true });
+         const response = await api.post('/auth/local', { identifier: values.email, password: values.password }, { withCredentials: true });
+
+         // Capture the JWT manually since Third-Party Cookies get blocked when NextJS and Strapi operate on separate domains in production
+         if (response.data?.jwt) {
+            Cookies.set('accessToken', response.data.jwt, { expires: 1, path: '/' });
+         }
+         if (response.data?.user) {
+            const returnedRole = response.data.user.schoolRole || response.data.user.role?.name || "STUDENT";
+            Cookies.set('userRole', returnedRole, { expires: 1, path: '/' });
+         }
 
          const role = getUserRole();
          if (!role) {
@@ -68,17 +78,23 @@ export default function LoginPage() {
             }
          }, 1000);
 
-      } catch (error) {
+      } catch (error: any) {
+         const strapiError = error.response?.data?.error?.message || error.message;
+
          if (error instanceof AxiosError && (error.response?.status === 400 || error.response?.status === 401)) {
             // Handle "Bad credentials" specifically without logging the full error
             toast.error('Login Failed', {
-               description: 'Invalid email or password. Please try again.',
+               description: strapiError || 'Invalid email or password. Please try again.',
+            });
+         } else if (error instanceof AxiosError && error.response?.status === 403) {
+            toast.error('Access Forbidden (403)', {
+               description: strapiError || 'Your account may be blocked, unconfirmed, or the server CORS policy rejected the request.',
             });
          } else {
             // Log other, unexpected errors
             console.error("Login failed:", error);
-            toast.error('Login Failed', {
-               description: 'An unexpected error occurred. Please try again later.',
+            toast.error('Login Error', {
+               description: strapiError || 'An unexpected error occurred. Please try again later.',
             });
          }
       } finally {
