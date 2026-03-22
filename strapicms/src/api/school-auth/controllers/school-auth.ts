@@ -16,11 +16,15 @@ export default {
       httpOnly: true,
       maxAge: 0,
       path: '/',
+      secure: true,
+      sameSite: 'none',
     });
     ctx.cookies.set('userRole', '', {
       httpOnly: false,
       maxAge: 0,
       path: '/',
+      secure: true,
+      sameSite: 'none',
     });
     ctx.body = { message: 'Logout successful' };
   },

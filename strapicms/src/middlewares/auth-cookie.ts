@@ -30,19 +30,19 @@ export default (config: any, { strapi }: { strapi: any }) => {
       // Attach the HTTP-only JWT token
       ctx.cookies.set('accessToken', jwt, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: true,
         maxAge: 24 * 60 * 60 * 1000, // 1 day
         path: '/',
-        sameSite: 'lax',
+        sameSite: 'none',
       });
 
       // Attach the readable role string for the frontend Next.js router
       ctx.cookies.set('userRole', role, {
         httpOnly: false,
-        secure: process.env.NODE_ENV === 'production',
+        secure: true,
         maxAge: 24 * 60 * 60 * 1000,
         path: '/',
-        sameSite: 'lax',
+        sameSite: 'none',
       });
     }
   };
