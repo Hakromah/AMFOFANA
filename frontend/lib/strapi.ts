@@ -1,5 +1,5 @@
 import axios from 'axios';
-const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'https://reliable-sparkle-c20c5a5fa1.strapiapp.com';
+const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'https://ambitious-bubble-123f76e3bb.strapiapp.com';
 //const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
 const strapi = axios.create({
   baseURL: `${strapiUrl}/api`,

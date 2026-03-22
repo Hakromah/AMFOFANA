@@ -22,12 +22,10 @@ const nextConfig = {
         port: '1337',
         pathname: '/uploads/**',
       },
-      // {
-      //   protocol:"https",
-      //   // hostname:"outgoing-fruit-84aa9644f7.media.strapiapp.com",
-      //      hostname:"reliable-sparkle-c20c5a5fa1.media.strapiapp.com"
-
-      // }
+      {
+        protocol:"https",
+        hostname:"ambitious-bubble-123f76e3bb.media.strapiapp.com"
+      }
     ],
   },
 };
