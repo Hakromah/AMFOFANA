@@ -206,21 +206,31 @@ export default () => ({
   },
 
   async createTimetable(data: any) {
-    const payload = {
-      ...data,
-      classe: data.classe?.id || data.classe,
-      subject: data.subject?.id || data.subject,
-    };
-    return strapi.entityService.create('api::timetable-entry.timetable-entry', { data: payload });
+    const classeId = data.classe?.id || (typeof data.classe === 'number' ? data.classe : null);
+    const subjectId = data.subject?.id || (typeof data.subject === 'number' ? data.subject : null);
+    return strapi.entityService.create('api::timetable-entry.timetable-entry', {
+      data: {
+        dayOfWeek: data.dayOfWeek,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        ...(classeId ? { classe: { connect: [{ id: classeId }] } } : {}),
+        ...(subjectId ? { subject: { connect: [{ id: subjectId }] } } : {}),
+      } as any,
+    });
   },
 
   async updateTimetable(id: number, data: any) {
-    const payload = {
-      ...data,
-      classe: data.classe?.id || data.classe,
-      subject: data.subject?.id || data.subject,
-    };
-    return strapi.entityService.update('api::timetable-entry.timetable-entry', id, { data: payload });
+    const classeId = data.classe?.id || (typeof data.classe === 'number' ? data.classe : null);
+    const subjectId = data.subject?.id || (typeof data.subject === 'number' ? data.subject : null);
+    return strapi.entityService.update('api::timetable-entry.timetable-entry', id, {
+      data: {
+        dayOfWeek: data.dayOfWeek,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        ...(classeId ? { classe: { connect: [{ id: classeId }] } } : {}),
+        ...(subjectId ? { subject: { connect: [{ id: subjectId }] } } : {}),
+      } as any,
+    });
   },
 
   async deleteTimetable(id: number) {
