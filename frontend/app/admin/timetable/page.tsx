@@ -110,9 +110,10 @@ export default function TimetableManagement() {
       }
       fetchData();
       setIsDialogOpen(false);
-    } catch (e) {
-      toast.error("Schedule conflict or server error");
-      console.log(e);
+    } catch (e: any) {
+      const msg = e?.response?.data?.error?.message || e?.message || 'Server error';
+      toast.error(`Failed: ${msg}`);
+      console.error('Timetable submit error:', e?.response?.data || e);
     }
   };
 

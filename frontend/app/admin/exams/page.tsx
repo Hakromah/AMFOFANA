@@ -123,7 +123,7 @@ export default function AdminExamsPage() {
               <TableRow key={exam.id} className="hover:bg-blue-50/10 transition-colors border-slate-50">
                 <TableCell className="pl-10 py-6">
                   <div className="font-black text-slate-900 italic uppercase text-sm">{exam.name}</div>
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{exam.classe.name}</div>
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{exam.classe?.name || 'No Class'}</div>
                 </TableCell>
 
                 <TableCell>

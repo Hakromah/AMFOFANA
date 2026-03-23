@@ -16,6 +16,7 @@ import api from '@/lib/api';
 import { toast } from 'sonner';
 import ClientOnly from './ClientOnly';
 import { motion, AnimatePresence } from 'framer-motion';
+import Cookies from 'js-cookie';
 
 interface MenuItem {
    name: string;
@@ -83,6 +84,11 @@ export default function Sidebar({ menuItems }: SidebarProps) {
       const tid = toast.loading('Terminating session...');
       try {
          await api.post('/auth/logout', {});
+         
+         // Manually clear the First-Party NextJS cookies since the Strapi network headers can't touch them natively
+         Cookies.remove('accessToken', { path: '/' });
+         Cookies.remove('userRole', { path: '/' });
+         
          toast.success('Signed out safely', { id: tid });
          window.location.href = '/login';
       } catch (error) {
