@@ -92,12 +92,15 @@ export default function TimetableManagement() {
   }, []);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    // Strapi `time` field requires HH:MM:SS — browser <input type="time"> only gives HH:MM
+    const toStrapiTime = (t: string) => (t && t.length === 5 ? `${t}:00` : t);
+
     const payload = {
       classe: { id: parseInt(values.classId) },
       subject: { id: parseInt(values.subjectId) },
       dayOfWeek: values.dayOfWeek,
-      startTime: values.startTime,
-      endTime: values.endTime,
+      startTime: toStrapiTime(values.startTime),
+      endTime: toStrapiTime(values.endTime),
     };
 
     try {
@@ -113,7 +116,7 @@ export default function TimetableManagement() {
     } catch (e: any) {
       const msg = e?.response?.data?.error?.message || e?.message || 'Server error';
       toast.error(`Failed: ${msg}`);
-      console.error('Timetable submit error:', e?.response?.data || e);
+      console.error('Timetable error — status:', e?.response?.status, '| data:', JSON.stringify(e?.response?.data), '| msg:', e?.message);
     }
   };
 
