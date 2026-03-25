@@ -131,91 +131,6 @@ export async function fetchHeroSlides(): Promise<HeroSlide[]> {
 }
 
 
-// // ─── Blog Posts ───────────────────────────────────────────────────────────────
-
-// export async function fetchBlogPosts(params?: {
-//    page?: number;
-//    pageSize?: number;
-//    category?: string;
-// }): Promise<{ posts: BlogPost[]; total: number }> {
-//    try {
-//       const filters =
-//          params?.category && params.category !== 'All'
-//             ? `&filters[category][$eq]=${encodeURIComponent(params.category)}`
-//             : '';
-//       const pagination = `&pagination[page]=${params?.page ?? 1}&pagination[pageSize]=${params?.pageSize ?? 100}`;
-
-//       // We use the [populate]=* syntax for the component to ensure its nested image comes through
-//       // const populate = `blog-posts?populate[0]=image&populate[1]=breadcrumb_item.image&sort=date:desc`;
-//       const populate = `populate[0]=image&populate[1]=breadcrumb_item.image`;
-
-//       const { data } = await strapi.get<StrapiListResponse<StrapiBlogPost>>(
-//          `/blog-posts?${populate}&sort=date:desc${filters}${pagination}`
-//       );
-
-//       return {
-//          posts: data.data.map((item) => ({
-//             id: item.id,
-//             title: item.title,
-//             excerpt: item.excerpt,
-//             content: richTextToString(item.content),
-//             date: formatDate(item.date),
-//             category: item.category,
-//             author: item.author,
-//             image: mediaUrl(item.image),
-//             slug: item.slug || String(item.id),
-//             // Map the breadcrumb array
-//             breadcrumb_item: (item.breadcrumb_item ?? []).map((bc) => ({
-//                id: bc.id,
-//                breadcrumb_title: bc.breadcrumb_title,
-//                description: bc.description,
-//                imageUrl: mediaUrl(bc.image),
-//             })),
-//          })),
-//          total: data.meta.pagination.total,
-//       };
-//    } catch (err) {
-//       console.error('[Strapi] fetchBlogPosts error:', err);
-//       return { posts: [], total: 0 };
-//    }
-// }
-
-// export async function fetchBlogPostById(id: string): Promise<BlogPost | null> {
-//    try {
-//       // Consistent populate syntax for the single item fetch
-//       const populate = `populate=image&populate[1]=breadcrumb_item.image`;
-
-//       const { data } = await strapi.get<StrapiListResponse<StrapiBlogPost>>(
-//          `/blog-posts?filters[id][$eq]=${id}&${populate}`
-//       );
-
-//       if (!data.data.length) return null;
-//       const item = data.data[0];
-
-//       return {
-//          id: item.id,
-//          title: item.title,
-//          excerpt: item.excerpt,
-//          content: richTextToString(item.content),
-//          date: formatDate(item.date),
-//          category: item.category,
-//          author: item.author,
-//          image: mediaUrl(item.image),
-//          slug: item.slug || String(item.id),
-//          // Map the breadcrumb array
-//          breadcrumb_item: (item.breadcrumb_item ?? []).map((bc) => ({
-//             id: bc.id,
-//             breadcrumb_title: bc.breadcrumb_title,
-//             description: bc.description,
-//             imageUrl: mediaUrl(bc.image),
-//          })),
-//       };
-//    } catch (err) {
-//       console.error('[Strapi] fetchBlogPostById error:', err);
-//       return null;
-//    }
-// }
-
 
 export async function fetchBlogPosts(params?: {
    page?: number;
@@ -306,67 +221,7 @@ export async function fetchBlogPostBySlug(slug: string): Promise<BlogPost | null
 
 
 
-// export async function fetchBlogPosts(params?: {
-//    page?: number;
-//    pageSize?: number;
-//    category?: string;
-// }): Promise<{ posts: BlogPost[]; total: number }> {
-//    try {
-//       const filters =
-//          params?.category && params.category !== 'All'
-//             ? `&filters[category][$eq]=${encodeURIComponent(params.category)}`
-//             : '';
-//       const pagination = `&pagination[page]=${params?.page ?? 1}&pagination[pageSize]=${params?.pageSize ?? 100}`;
-//       const { data } = await strapi.get<StrapiListResponse<StrapiBlogPost>>(
-//          `/blog-posts?populate=image&sort=date:desc${filters}${pagination}`
-//       );
-//       return {
-//          posts: data.data.map((item) => ({
-//             id: item.id,
-//             title: item.title,
-//             excerpt: item.excerpt,
-//             content: richTextToString(item.content),
-//             date: formatDate(item.date),
-//             category: item.category,
-//             author: item.author,
-//             image: mediaUrl(item.image),
-//             slug: item.slug || String(item.id),
-//          })),
-//          total: data.meta.pagination.total,
-//       };
-//    } catch (err) {
-//       console.error('[Strapi] fetchBlogPosts error:', err);
-//       return { posts: [], total: 0 };
-//    }
-// }
-
-// export async function fetchBlogPostById(id: string): Promise<BlogPost | null> {
-//    try {
-//       // Strapi v5: try fetching by numeric id first
-//       const { data } = await strapi.get<StrapiListResponse<StrapiBlogPost>>(
-//          `/blog-posts?filters[id][$eq]=${id}&populate=image`
-//       );
-//       if (!data.data.length) return null;
-//       const item = data.data[0];
-//       return {
-//          id: item.id,
-//          title: item.title,
-//          excerpt: item.excerpt,
-//          content: richTextToString(item.content),
-//          date: formatDate(item.date),
-//          category: item.category,
-//          author: item.author,
-//          image: mediaUrl(item.image),
-//          slug: item.slug || String(item.id)
-
-//       };
-//    } catch {
-//       return null;
-//    }
-// }
-
-// ─── Staff ────────────────────────────────────────────────────────────────────
-
+// ─── Staff Members ───────────────────────────────────────────────────────────
 export async function fetchStaffMembers(filter?: {
    featured?: boolean;
    leadership?: boolean;
@@ -399,29 +254,6 @@ export async function fetchStaffMembers(filter?: {
    }
 }
 
-// const { data } = await strapi.get<StrapiListResponse<StrapiStaffMember>>(
-//    `/staff-members?populate=image&populate[1]=breadcrumb_item.image&sort=sort_order:asc${filterStr}`
-// );
-// return data.data.map((item) => ({
-//    id: item.id,
-//    name: item.name,
-//    role: item.role,
-//    email: item.email,
-//    bio: item.bio,
-//    image: mediaUrl(item.image),
-//    isLeadership: item.is_leadership,
-//    isFeatured: item.is_featured,
-//    heading: item.heading,
-//    // Mapping the breadcrumb component
-//    breadcrumb_item: (item.breadcrumb_item ?? []).map((bc) => ({
-//       id: bc.id,
-//       breadcrumb_title: bc.breadcrumb_title,
-//       description: bc.description,
-//       imageUrl: mediaUrl(bc.image),
-//    })),
-// }));
-
-// ─── Testimonials ─────────────────────────────────────────────────────────────
 
 export async function fetchTestimonials(): Promise<Testimonial[]> {
    try {
