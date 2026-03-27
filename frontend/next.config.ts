@@ -24,7 +24,7 @@ const nextConfig = {
       },
       {
         protocol:"https",
-        hostname:"ambitious-bubble-123f76e3bb.media.strapiapp.com"
+        hostname:"engaging-heart-abbd6e0d5c.media.strapiapp.com"
       }
     ],
   },
