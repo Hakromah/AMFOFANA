@@ -17,7 +17,7 @@ export default function StudentLayout({
   ];
 
   return (
-    <div className="flex">
+    <div className="flex max-md:flex-col">
       <Sidebar menuItems={menuItems} />
       <main className="flex-1">{children}</main>
     </div>
