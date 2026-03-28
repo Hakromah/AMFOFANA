@@ -99,7 +99,7 @@ export default function Intro({ slides: slidesProp }: IntroProps) {
                     ))}
                 </Swiper>
             </div>
-            <div className="container bg-transparent! max-md:pt-[clamp(200px,4vw,300px)] max-w-[1920px] relative z-10 h-full grid grid-cols-1 items-end pb-5 justify-center">
+            <div className="container bg-transparent! max-md:pt-[clamp(200px,4vw,300px)] max-w-[1920px] mx-auto relative z-10 h-full grid grid-cols-1 items-end pb-5 justify-center">
                 <div className="w-full px-[clamp(20px,5vw,60px)] grid grid-cols-1 gap-[clamp(30px,3vw,135px)]">
                     <Swiper
                         onSwiper={setFirstSwiper}

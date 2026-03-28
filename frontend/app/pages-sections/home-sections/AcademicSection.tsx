@@ -74,7 +74,7 @@ export default function AcademicSection({ programs: programsProp }: AcademicSect
 
     return (
         <section ref={containerRef} className="overflow-hidden py-[clamp(20px,5vw,80px)] bg-primary h-full text-white">
-            <div className="container  mx-auto h-full max-w-1920 px-5 md:px-[clamp(20px,3vw,60px)]">
+            <div className="container  mx-auto h-full max-w-[1920px] px-5 md:px-[clamp(20px,3vw,60px)]">
                 {/* Header */}
                 <div className='w-full h-full mb-14 max-md:mb-6'>
                     <div className="academic-header flex flex-col md:flex-row justify-between items-start md:items-end pb-5 md:mb-12 gap-8">

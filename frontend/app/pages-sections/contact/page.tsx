@@ -82,7 +82,7 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
 
             {/* Contact Content */}
             <section className="py-[clamp(25px,3vw,80px)]">
-                <div className="container mx-auto max-w-1920 px-5 md:px-[clamp(20px,5vw,60px)]">
+                <div className="container mx-auto max-w-[1920px] px-5 md:px-[clamp(20px,5vw,60px)]">
                     {/* Top Cards Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-sm:gap-5 mb-[clamp(30px,3vw,80px)]">
                         {/* Address Card */}
@@ -193,7 +193,7 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
                                         Contact Form
                                     </Button>
                                 </SheetTrigger>
-                                <SheetContent side="bottom" className="h-[90vh] sm:h-auto sm:max-w-xl mx-auto rounded-t-[20px] px-0">
+                                <SheetContent side="bottom" className="sm:max-w-xl w-[calc(100%-2rem)] px-0 overflow-y-auto">
                                     <div className="px-6 py-6 h-full overflow-y-auto">
                                         <SheetHeader className="mb-6 text-left">
                                             <SheetTitle className="text-2xl font-bold text-[#2857AE]">Send us a Message</SheetTitle>
