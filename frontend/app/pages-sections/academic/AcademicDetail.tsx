@@ -4,7 +4,8 @@ import React from 'react';
 import Breadcrumb from '@/components/Breadcrumb';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, BookOpen, Users, Trophy, Download, GraduationCap } from 'lucide-react';
+import { CheckCircle, BookOpen, Users, Trophy, Download, GraduationCap, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 interface CurriculumItem {
     subject: string;
@@ -30,6 +31,7 @@ export default function AcademicDetail({ program }: { program: ProgramData }) {
                 image={program.image}
                 alt={`${program.title} Banner`}
             />
+
             <div className="max-sm:pt-7 max-sm:pb-2.5 sm:py-[clamp(20px,5vw,100px)]">
                 <div className="container mx-auto max-w-[1920px] px-5 md:px-[clamp(20px,5vw,60px)]">
                     <div className="grid lg:grid-cols-2 gap-[clamp(20px,4vw,60px)] items-center">
