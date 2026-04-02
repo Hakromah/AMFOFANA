@@ -35,14 +35,15 @@ const config: Core.Config.Middlewares = [
   },
   'strapi::poweredBy',
   'strapi::query',
+  //'strapi::body',
   {
     name: 'strapi::body',
     config: {
-      formLimit: '256mb', // increase from default
-      jsonLimit: '256mb',
-      textLimit: '256mb',
+      formLimit: '10mb',
+      jsonLimit: '10mb',
+      textLimit: '10mb',
       formidable: {
-        maxFileSize: 250 * 1024 * 1024, // 250mb
+        maxFileSize: 10 * 1024 * 1024, // 10mb
       },
     },
   },
