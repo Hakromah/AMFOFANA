@@ -45,7 +45,7 @@ export default function ReportsPage() {
 
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center gap-4 bg-[#f8fafc]">
-      <Loader2 className="animate-spin text-blue-600" size={40} />
+      <Loader2 className="animate-spin text-primary" size={40} />
       <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 text-center leading-relaxed">
         Aggregating Institutional <br /> Intelligence...
       </p>
@@ -57,12 +57,12 @@ export default function ReportsPage() {
       {/* Header Section */}
       <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div className="space-y-2">
-          <div className="flex items-center gap-2 text-blue-600">
+          <div className="flex items-center gap-2 text-primary">
             <TrendingUp size={18} />
             <span className="text-[10px] font-black uppercase tracking-[0.4em]">Live Analytics Hub</span>
           </div>
           <h1 className="text-5xl font-black text-slate-900 tracking-tighter sm:text-7xl italic uppercase">
-            School <span className="text-blue-600">Report.</span>
+            School <span className="text-primary">Report.</span>
           </h1>
         </div>
         <div className="flex gap-3">
@@ -130,13 +130,13 @@ export default function ReportsPage() {
 
             <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100 flex flex-col justify-between">
               <div>
-                <div className="h-12 w-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-6">
+                <div className="h-12 w-12 bg-blue-50 rounded-2xl flex items-center justify-center text-primary mb-6">
                   <BookOpen size={24} />
                 </div>
                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Academic Assessments</p>
                 <h3 className="text-5xl font-black text-slate-900 tracking-tighter italic">{report?.totalExams}</h3>
               </div>
-              <Badge className="w-fit bg-blue-100 text-blue-600 border-none mt-6 font-black text-[9px] tracking-widest">TERM 2026 ACTIVE</Badge>
+              <Badge className="w-fit bg-blue-100 text-primary border-none mt-6 font-black text-[9px] tracking-widest">TERM 2026 ACTIVE</Badge>
             </div>
 
             <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100 flex flex-col justify-between">
@@ -175,7 +175,7 @@ export default function ReportsPage() {
 // Sub-component for individual statistics
 function StatCard({ label, value, icon: Icon, color, sub }: any) {
   const colorMap: any = {
-    blue: "bg-blue-50 text-blue-600",
+    blue: "bg-blue-50 text-primary",
     amber: "bg-amber-50 text-amber-600",
     rose: "bg-rose-50 text-rose-600",
   };

@@ -93,7 +93,7 @@ export default function AdvancedAssignTeacherPage() {
 
   if (dataLoading) return (
     <div className="h-screen flex flex-col items-center justify-center gap-4 bg-[#f8fafc]">
-      <Loader2 className="animate-spin text-blue-600" size={40} />
+      <Loader2 className="animate-spin text-primary" size={40} />
       <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Loading Registry...</p>
     </div>
   );
@@ -105,13 +105,13 @@ export default function AdvancedAssignTeacherPage() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-center gap-2 text-blue-600"
+          className="flex items-center justify-center gap-2 text-primary"
         >
           <ShieldCheck size={18} />
           <span className="text-[10px] font-black uppercase tracking-[0.4em]">Administrative Authority</span>
         </motion.div>
         <h1 className="text-5xl font-black text-slate-900 tracking-tighter sm:text-7xl italic uppercase">
-          Teacher <span className="text-blue-600">Deployment.</span>
+          Teacher <span className="text-primary">Deployment.</span>
         </h1>
         <p className="text-slate-400 font-bold text-sm uppercase tracking-widest max-w-xl mx-auto leading-loose">
           Establish links between academic staff and class registries to authorize exam management.
@@ -162,7 +162,7 @@ export default function AdvancedAssignTeacherPage() {
 
                   <div className="flex justify-center">
                     <div className="bg-blue-50 p-3 rounded-full">
-                      <ArrowRight className="text-blue-600 rotate-90 lg:rotate-0" size={20} />
+                      <ArrowRight className="text-primary rotate-90 lg:rotate-0" size={20} />
                     </div>
                   </div>
 
@@ -226,12 +226,12 @@ export default function AdvancedAssignTeacherPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-6 bg-slate-50 rounded-4xl border border-slate-100 space-y-2">
-                  <Users className="text-blue-600" size={24} />
+                  <Users className="text-primary" size={24} />
                   <p className="text-3xl font-black text-slate-900 tracking-tighter italic">{teachers.length}</p>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Faculty</p>
                 </div>
                 <div className="p-6 bg-slate-50 rounded-4xl border border-slate-100 space-y-2">
-                  <Landmark className="text-blue-600" size={24} />
+                  <Landmark className="text-primary" size={24} />
                   <p className="text-3xl font-black text-slate-900 tracking-tighter italic">{classes.length}</p>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Available Classes</p>
                 </div>

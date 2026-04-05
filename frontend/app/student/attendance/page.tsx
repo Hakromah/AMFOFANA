@@ -84,7 +84,7 @@ export default function StudentAttendancePage() {
    if (loading) {
       return (
          <div className="h-[80vh] w-full flex flex-col items-center justify-center space-y-4">
-            <Loader2 className="animate-spin text-blue-600" size={40} />
+            <Loader2 className="animate-spin text-primary" size={40} />
             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Decrypting Registry...</p>
          </div>
       );
@@ -95,8 +95,8 @@ export default function StudentAttendancePage() {
          {/* Header Section */}
          <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
-               <h1 className="text-4xl font-black text-slate-900 tracking-tighter sm:text-5xl">
-                  Registry <span className="text-blue-600">Pulse</span>
+               <h1 className="text-[clamp(1.2rem,2.5vw+1rem,3rem)] font-black text-slate-900 tracking-tighter">
+                  Registry <span className="text-primary">Pulse</span>
                </h1>
                <p className="text-slate-500 font-bold text-[10px] uppercase tracking-[0.3em] mt-2">
                   Academic Tracking • Term 2 Year 2026
@@ -105,13 +105,13 @@ export default function StudentAttendancePage() {
 
             <div className="flex items-center gap-3 w-full md:w-auto">
                <Select onValueChange={setMonthFilter} defaultValue="all">
-                  <SelectTrigger className="w-full md:w-[200px] h-12 rounded-2xl border-none bg-white shadow-sm font-bold text-slate-600 px-5">
+                  <SelectTrigger className="w-full md:w-[200px] h-12 rounded-xl border-none bg-white shadow-sm font-bold text-primary border md:hover:border-primary duration-500 transition-colors  px-5">
                      <div className="flex items-center gap-2">
-                        <Filter size={14} className="text-blue-600" />
+                        <Filter size={14} className="text-primary" />
                         <SelectValue placeholder="Filter by Month" />
                      </div>
                   </SelectTrigger>
-                  <SelectContent className="rounded-2xl border-none shadow-2xl">
+                  <SelectContent className="rounded-xl border-none shadow-2xl">
                      <SelectItem value="all" className="font-bold">All Months</SelectItem>
                      <SelectItem value="0" className="font-bold">January</SelectItem>
                      <SelectItem value="1" className="font-bold">February</SelectItem>
@@ -120,22 +120,22 @@ export default function StudentAttendancePage() {
                   </SelectContent>
                </Select>
 
-               <Button className="p-3 bg-white rounded-2xl shadow-sm hover:bg-slate-50 transition-colors">
-                  <Download size={20} className="text-slate-400" />
+               <Button className="group/download p-3 bg-white  border border-primary/10 rounded-xl text-white shadow-sm md:hover:border-primary duration-500 transition-colors">
+                  <Download size={20} className='text-primary  duration-500 transition-colors' />
                </Button>
             </div>
          </header>
 
          {/* Stats Cards */}
          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="md:col-span-2 border-none shadow-xl rounded-[2.5rem] bg-slate-900 text-white p-8 relative overflow-hidden">
+            <Card className="md:col-span-2 border-none shadow-xl rounded-3xl bg-slate-900 text-white p-8 relative overflow-hidden">
                <div className="relative z-10 flex flex-col h-full justify-between gap-8">
                   <div className="flex justify-between items-start">
                      <div>
                         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1">Attendance Rate</p>
                         <h2 className="text-6xl font-black italic tracking-tighter">{rate}%</h2>
                      </div>
-                     <Badge className="bg-blue-500/20 text-blue-400 border-none font-black px-4 py-1 uppercase text-[9px]">Live Data</Badge>
+                     <Badge className="bg-primary/20 text-blue-400 border-none font-black px-4 py-1 uppercase text-[9px]">Live Data</Badge>
                   </div>
 
                   <div className="space-y-3">
@@ -149,8 +149,8 @@ export default function StudentAttendancePage() {
                <CheckCircle2 className="absolute -right-12 -bottom-12 text-white/5" size={240} />
             </Card>
 
-            <Card className="border-none shadow-sm rounded-[2.5rem] bg-white p-8 flex flex-col justify-center gap-4 border border-slate-100">
-               <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+            <Card className="border md:hover:border-primary duration-500 shadow-sm rounded-3xl bg-white p-8 flex flex-col justify-center gap-4 border-slate-100">
+               <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white">
                   <Clock size={24} />
                </div>
                <div>
@@ -164,13 +164,13 @@ export default function StudentAttendancePage() {
          </div>
 
          {/* Registry Table */}
-         <Card className="border-none shadow-sm rounded-[3rem] bg-white overflow-hidden border border-slate-100">
+         <Card className="border md:hover:border-primary duration-500 shadow-sm rounded-3xl bg-white overflow-hidden border-slate-100">
             <Table>
                <TableHeader className="bg-slate-50/50">
                   <TableRow className="hover:bg-transparent border-none">
-                     <TableHead className="pl-10 py-6 font-black uppercase text-[10px] tracking-widest text-slate-400">Registry Date</TableHead>
-                     <TableHead className="font-black uppercase text-[10px] tracking-widest text-slate-400">Class Session</TableHead>
-                     <TableHead className="text-right pr-10 font-black uppercase text-[10px] tracking-widest text-slate-400">Status</TableHead>
+                     <TableHead className="pl-10 py-6 font-black uppercase text-[10px] tracking-widest text-primary">Registry Date</TableHead>
+                     <TableHead className="font-black uppercase text-[10px] tracking-widest text-primary">Class Session</TableHead>
+                     <TableHead className="text-right pr-10 font-black uppercase text-[10px] tracking-widest text-primary">Status</TableHead>
                   </TableRow>
                </TableHeader>
                <TableBody>
@@ -180,7 +180,7 @@ export default function StudentAttendancePage() {
                         <TableRow key={session.id} className="border-slate-50 hover:bg-blue-50/10 transition-all duration-300">
                            <TableCell className="pl-10 py-6">
                               <div className="flex items-center gap-3">
-                                 <div className="p-2 bg-slate-50 rounded-lg text-slate-400 border border-slate-100">
+                                 <div className="p-2 bg-primary rounded-lg text-white border border-slate-100">
                                     <Calendar size={14} />
                                  </div>
                                  <span className="font-black text-slate-700 tracking-tight">
@@ -206,7 +206,7 @@ export default function StudentAttendancePage() {
                      <TableRow>
                         <TableCell colSpan={3} className="h-64 text-center">
                            <div className="flex flex-col items-center justify-center gap-2">
-                              <Calendar className="text-slate-200 mb-2" size={40} />
+                              <Calendar className="text-primary mb-2" size={40} />
                               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">No Registry Data Found</p>
                            </div>
                         </TableCell>

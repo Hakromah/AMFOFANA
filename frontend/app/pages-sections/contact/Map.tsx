@@ -61,11 +61,11 @@ export default function Map({ lat, lng }: MapProps) {
                     <div className="text-center">
                         <h3 className="font-bold text-[#2857AE]">A.M. Fofana High School</h3>
                         <p>Fish Market, Monrovia</p>
-                        {/* <a href="https://maps.google.com/?q=6.280628622957243,-10.766005500256005" target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 underline mt-1 block">
+                        {/* <a href="https://maps.google.com/?q=6.280628622957243,-10.766005500256005" target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline mt-1 block">
                             Get Directions
                         </a> */}
 
-                        <a href={`https://maps.google.com/?q=${latitude},${longitude}`} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 underline mt-1 block">
+                        <a href={`https://maps.google.com/?q=${latitude},${longitude}`} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline mt-1 block">
                             Get Directions
                         </a>
                     </div>

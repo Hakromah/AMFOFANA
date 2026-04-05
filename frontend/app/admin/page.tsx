@@ -196,7 +196,7 @@ export default function AdminDashboard() {
 
 function StatCard({ title, value, icon: Icon, color, sub }: any) {
   const colorMap: any = {
-    blue: "bg-blue-600 text-blue-600",
+    blue: "bg-blue-600 text-primary",
     emerald: "bg-emerald-500 text-emerald-500",
     amber: "bg-amber-500 text-amber-500",
     rose: "bg-rose-500 text-rose-500"

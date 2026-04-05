@@ -40,11 +40,11 @@ export default function TeacherClassesPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 max-w-7xl mx-auto">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
           <div className="flex items-center gap-2 mb-2">
-            <School className="text-blue-600 w-5 h-5" />
-            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-600">Assignment Ledger</h2>
+            <School className="text-primary w-5 h-5" />
+            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Assignment Ledger</h2>
           </div>
           <h1 className="text-5xl font-black text-slate-900 tracking-tighter italic">
-            My <span className="text-blue-600">Classrooms.</span>
+            My <span className="text-primary">Classrooms.</span>
           </h1>
           <p className="mt-4 text-slate-500 font-medium max-w-2xl text-base bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100 inline-block">
             Manage your assigned cohorts, access quick actions, and jump directly into grading protocols.
@@ -78,18 +78,18 @@ export default function TeacherClassesPage() {
             >
               <Card className="border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden relative">
                 <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-indigo-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
-                
+
                 <CardContent className="p-8">
                   <div className="flex justify-between items-start mb-8">
-                    <div className="bg-slate-50 p-4 rounded-3xl group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
-                      <Users size={28} className="text-slate-400 group-hover:text-blue-600 transition-colors" />
+                    <div className="bg-slate-50 p-4 rounded-3xl group-hover:bg-blue-50 group-hover:text-primary transition-colors">
+                      <Users size={28} className="text-slate-400 group-hover:text-primary transition-colors" />
                     </div>
                     <span className="bg-slate-100 text-slate-500 font-black text-[9px] uppercase tracking-[0.2em] px-4 py-2 rounded-2xl">
                       COHORT #{cls.id}
                     </span>
                   </div>
 
-                  <h3 className="text-3xl font-black text-slate-800 tracking-tighter mb-2 group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-3xl font-black text-slate-800 tracking-tighter mb-2 group-hover:text-primary transition-colors">
                     {cls.name}
                   </h3>
                   <p className="text-xs font-bold text-slate-400 mb-8 flex items-center gap-2">

@@ -156,17 +156,17 @@ export default function TeacherMaterialsPage() {
     }
   };
 
-  if (loading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-blue-600" size={40} /></div>;
+  if (loading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-primary" size={40} /></div>;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10 space-y-10">
       <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div className="space-y-2">
-          <div className="flex items-center gap-2 text-blue-600 font-black text-[10px] uppercase tracking-[0.4em]">
+          <div className="flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-[0.4em]">
             <Monitor size={14} /> Curriculum Management
           </div>
           <h1 className="text-5xl font-black text-slate-900 tracking-tighter sm:text-7xl italic uppercase">
-            Learning <span className="text-blue-600">Assets.</span>
+            Learning <span className="text-primary">Assets.</span>
           </h1>
         </div>
         <Button onClick={() => setIsUploadOpen(true)} className="bg-slate-900 hover:bg-blue-600 text-white rounded-3xl h-14 px-8 font-black shadow-xl">
@@ -182,7 +182,7 @@ export default function TeacherMaterialsPage() {
               <Card className="rounded-[2.5rem] border-none shadow-sm bg-white p-8 hover:shadow-2xl transition-all h-full flex flex-col justify-between group">
                 <div>
                   <div className="flex justify-between items-start mb-6">
-                    <div className="h-14 w-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                    <div className="h-14 w-14 rounded-2xl bg-blue-50 flex items-center justify-center text-primary group-hover:bg-blue-600 group-hover:text-white transition-all">
                       <FileText size={24} />
                     </div>
                     <Button onClick={() => handleDelete(mat.id)} variant="ghost" size="icon" className="text-slate-300 hover:text-rose-500 rounded-full transition-colors">
@@ -224,7 +224,7 @@ export default function TeacherMaterialsPage() {
                           }
                           window.open(previewUrl, "_blank", 'noopener,noreferrer');
                         }}
-                        className="rounded-2xl border-slate-100 text-slate-400 hover:text-blue-600 font-black text-[10px] tracking-widest h-10 px-4 uppercase"
+                        className="rounded-2xl border-slate-100 text-slate-400 hover:text-primary font-black text-[10px] tracking-widest h-10 px-4 uppercase"
                       >
                         <Eye size={14} className="mr-2" /> Preview
                       </Button>
@@ -247,7 +247,7 @@ export default function TeacherMaterialsPage() {
       <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
         <DialogContent className="rounded-[3rem] p-10 sm:max-w-[500px] border-none shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="text-3xl font-black italic tracking-tighter uppercase">Upload <span className="text-blue-600">Resource.</span></DialogTitle>
+            <DialogTitle className="text-3xl font-black italic tracking-tighter uppercase">Upload <span className="text-primary">Resource.</span></DialogTitle>
             <DialogDescription className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-2 italic">Select files for classroom deployment.</DialogDescription>
           </DialogHeader>
 
@@ -272,7 +272,7 @@ export default function TeacherMaterialsPage() {
 
             <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-slate-100 rounded-[2.5rem] cursor-pointer hover:bg-slate-50 transition-all group">
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <FileUp className={`w-10 h-10 mb-2 ${file ? 'text-blue-600' : 'text-slate-200 group-hover:text-blue-600'}`} />
+                <FileUp className={`w-10 h-10 mb-2 ${file ? 'text-primary' : 'text-slate-200 group-hover:text-primary'}`} />
                 <p className="text-[11px] font-black uppercase text-slate-400 tracking-tighter italic">
                   {file ? file.name : 'Select PDF, DOCX, or Image'}
                 </p>

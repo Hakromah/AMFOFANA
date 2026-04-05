@@ -96,7 +96,7 @@ export default function AdvancedAssignStudentPage() {
 
   if (dataLoading) return (
     <div className="h-screen flex flex-col items-center justify-center gap-4 bg-[#f8fafc]">
-      <Loader2 className="animate-spin text-blue-600" size={40} />
+      <Loader2 className="animate-spin text-primary" size={40} />
       <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Loading Academic Data...</p>
     </div>
   );
@@ -108,13 +108,13 @@ export default function AdvancedAssignStudentPage() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-center gap-2 text-blue-600"
+          className="flex items-center justify-center gap-2 text-primary"
         >
           <ShieldCheck size={18} />
           <span className="text-[10px] font-black uppercase tracking-[0.4em]">Registrar Authority</span>
         </motion.div>
         <h1 className="text-5xl font-black text-slate-900 tracking-tighter sm:text-7xl italic uppercase">
-          Student <span className="text-blue-600">Enrollment.</span>
+          Student <span className="text-primary">Enrollment.</span>
         </h1>
         <p className="text-slate-400 font-bold text-sm uppercase tracking-widest max-w-2xl mx-auto leading-loose">
           Assign students to their respective academic groups to enable timetable syncing and grade tracking.
@@ -169,7 +169,7 @@ export default function AdvancedAssignStudentPage() {
                     </div>
                     <div className="relative bg-white px-4">
                       <div className="bg-blue-50 p-3 rounded-full border border-blue-100">
-                        <ArrowRight className="text-blue-600 rotate-90 lg:rotate-0" size={20} />
+                        <ArrowRight className="text-primary rotate-90 lg:rotate-0" size={20} />
                       </div>
                     </div>
                   </div>
@@ -229,17 +229,17 @@ export default function AdvancedAssignStudentPage() {
             <div className="space-y-8">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-black text-slate-900 italic tracking-tight uppercase leading-none">Intelligence Hub</h2>
-                <Badge className="bg-blue-100 text-blue-600 border-none font-black text-[9px] px-3 tracking-[0.2em] uppercase">System Verified</Badge>
+                <Badge className="bg-blue-100 text-primary border-none font-black text-[9px] px-3 tracking-[0.2em] uppercase">System Verified</Badge>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-2 group hover:bg-blue-600 transition-all duration-500">
-                  <GraduationCap className="text-blue-600 group-hover:text-white transition-colors" size={28} />
+                  <GraduationCap className="text-primary group-hover:text-white transition-colors" size={28} />
                   <p className="text-4xl font-black text-slate-900 tracking-tighter italic group-hover:text-white transition-colors">{students.length}</p>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-blue-100 transition-colors">Total Students</p>
                 </div>
                 <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-2 group hover:bg-blue-600 transition-all duration-500">
-                  <Landmark className="text-blue-600 group-hover:text-white transition-colors" size={28} />
+                  <Landmark className="text-primary group-hover:text-white transition-colors" size={28} />
                   <p className="text-4xl font-black text-slate-900 tracking-tighter italic group-hover:text-white transition-colors">{classes.length}</p>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-blue-100 transition-colors">Class Groups</p>
                 </div>

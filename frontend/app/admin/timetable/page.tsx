@@ -126,7 +126,7 @@ export default function TimetableManagement() {
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic">
-            Weekly <span className="text-blue-600">Schedule</span>
+            Weekly <span className="text-primary">Schedule</span>
           </h1>
           <p className="text-slate-500 font-bold text-[10px] uppercase tracking-[0.3em] mt-2">
             Admin Management Portal • Term 2 2026
@@ -175,7 +175,7 @@ export default function TimetableManagement() {
                     <div className="flex flex-col md:flex-row md:items-center">
                       {/* Time Block */}
                       <div className="bg-slate-50 p-6 md:w-48 flex flex-col justify-center items-center border-r border-slate-100">
-                        <Clock className="text-blue-600 mb-2" size={18} />
+                        <Clock className="text-primary mb-2" size={18} />
                         <span className="font-black text-slate-900 text-sm tracking-tighter">{entry.startTime}</span>
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">to {entry.endTime}</span>
                       </div>
@@ -183,7 +183,7 @@ export default function TimetableManagement() {
                       {/* Content Block */}
                       <div className="p-6 flex-1 flex flex-col md:flex-row justify-between items-center gap-4">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600">
+                          <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-primary">
                             <BookOpen size={20} />
                           </div>
                           <div>
@@ -199,7 +199,7 @@ export default function TimetableManagement() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="rounded-xl hover:bg-blue-50 hover:text-blue-600"
+                            className="rounded-xl hover:bg-blue-50 hover:text-primary"
                             onClick={() => {
                               setEditingEntry(entry);
                               form.reset({
@@ -248,7 +248,7 @@ export default function TimetableManagement() {
         <DialogContent className="rounded-[2.5rem] border-none shadow-2xl p-8 max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-2xl font-black italic tracking-tighter">
-              {editingEntry ? 'Modify' : 'New'} <span className="text-blue-600">Entry</span>
+              {editingEntry ? 'Modify' : 'New'} <span className="text-primary">Entry</span>
             </DialogTitle>
             <DialogDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">
               Configure session parameters for the school schedule.

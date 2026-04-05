@@ -219,7 +219,7 @@ export default function StudentMaterialsPage() {
                               }
                               window.open(getFullUrl(previewUrl), "_blank", 'noopener,noreferrer');
                             }}
-                            className="rounded-2xl border-slate-100 text-slate-400 hover:text-blue-600 font-black text-[10px] tracking-widest h-10 px-4 uppercase"
+                            className="rounded-2xl border-slate-100 text-slate-400 hover:text-primary font-black text-[10px] tracking-widest h-10 px-4 uppercase"
                           >
                             <Eye size={14} className="mr-2" /> Preview
                           </Button>

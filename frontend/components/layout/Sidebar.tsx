@@ -84,11 +84,11 @@ export default function Sidebar({ menuItems }: SidebarProps) {
       const tid = toast.loading('Terminating session...');
       try {
          await api.post('/auth/logout', {});
-         
+
          // Manually clear the First-Party NextJS cookies since the Strapi network headers can't touch them natively
          Cookies.remove('accessToken', { path: '/' });
          Cookies.remove('userRole', { path: '/' });
-         
+
          toast.success('Signed out safely', { id: tid });
          window.location.href = '/login';
       } catch (error) {
@@ -107,7 +107,7 @@ export default function Sidebar({ menuItems }: SidebarProps) {
                </div>
                <div className="flex flex-col">
                   <span className="font-black text-xl tracking-tighter text-slate-900 leading-none italic">AMF</span>
-                  <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest mt-1">Registry.</span>
+                  <span className="text-[10px] font-black text-primary uppercase tracking-widest mt-1">Registry.</span>
                </div>
             </div>
             <div className="relative p-2 bg-slate-50 rounded-xl">
@@ -144,7 +144,7 @@ export default function Sidebar({ menuItems }: SidebarProps) {
                               >
                                  {/* Active Indicator */}
                                  {isActive && (
-                                    <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-full bg-blue-500" />
+                                    <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-full bg-primary" />
                                  )}
 
                                  <span
@@ -153,8 +153,7 @@ export default function Sidebar({ menuItems }: SidebarProps) {
                                  >
                                     {getIcon(item.name)}
                                  </span>
-
-                                 <span className="text-xs font-semibold tracking-wide uppercase">
+                                 <span className="text-sm font-medium">
                                     {item.name}
                                  </span>
                               </div>
@@ -218,7 +217,7 @@ export default function Sidebar({ menuItems }: SidebarProps) {
 
          {/* User Card Footer */}
          <div className="p-5 mt-auto border-t border-slate-50 bg-slate-50/30">
-            <div className="bg-slate-900 rounded-[2.5rem] p-6 shadow-2xl relative overflow-hidden">
+            <div className="bg-slate-900 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
                <div className="flex items-center gap-4 mb-6 relative z-10">
                   <div className="relative">
                      <div className="bg-slate-800 p-2 rounded-2xl border border-slate-700">
@@ -242,7 +241,7 @@ export default function Sidebar({ menuItems }: SidebarProps) {
                </div>
                <Button
                   onClick={handleLogout}
-                  className="w-full justify-center gap-2 bg-white/5 hover:bg-rose-600 hover:text-white text-slate-400 border border-white/10 rounded-2xl transition-all h-11 text-[10px] font-black uppercase tracking-[0.2em]"
+                  className="w-full justify-center gap-2 bg-white/5 md:hover:bg-primary md:hover:text-white text-slate-400 border duration-500 border-white/10 rounded-2xl transition-all h-11 text-[10px] font-black uppercase tracking-[0.2em]"
                >
                   <LogOut className="w-3.5 h-3.5" /> Close Session
                </Button>
@@ -388,7 +387,7 @@ export default function Sidebar({ menuItems }: SidebarProps) {
 //                </div>
 //                <div className="flex flex-col">
 //                   <span className="font-black text-xl tracking-tighter text-slate-900 leading-none">AMF</span>
-//                   <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest mt-1">Registry</span>
+//                   <span className="text-[10px] font-black text-primary uppercase tracking-widest mt-1">Registry</span>
 //                </div>
 //             </div>
 //             <div className="relative p-2 hover:bg-slate-100 rounded-xl transition-colors">
@@ -648,12 +647,12 @@ export default function Sidebar({ menuItems }: SidebarProps) {
 //                </div>
 //                <div className="flex flex-col">
 //                   <span className="font-black text-xl tracking-tighter text-slate-900 leading-none">AMF</span>
-//                   <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest mt-1">Registry</span>
+//                   <span className="text-[10px] font-black text-primary uppercase tracking-widest mt-1">Registry</span>
 //                </div>
 //             </div>
 
 //             <div className="relative group cursor-pointer p-2 hover:bg-slate-100 rounded-xl transition-colors">
-//                <Bell className="w-5 h-5 text-slate-400 group-hover:text-blue-600 transition-colors" />
+//                <Bell className="w-5 h-5 text-slate-400 group-hover:text-primary transition-colors" />
 //                {draftCount > 0 && (
 //                   <span className="absolute top-1.5 right-1.5 flex h-3 w-3">
 //                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
@@ -681,7 +680,7 @@ export default function Sidebar({ menuItems }: SidebarProps) {
 //                                  }`}
 //                            >
 //                               <div className="flex items-center gap-3">
-//                                  <span className={isActive ? "text-white" : "text-slate-400 group-hover:text-blue-600"}>
+//                                  <span className={isActive ? "text-white" : "text-slate-400 group-hover:text-primary"}>
 //                                     {getIcon(item.name)}
 //                                  </span>
 //                                  <span className="font-semibold text-sm">{item.name}</span>
@@ -714,7 +713,7 @@ export default function Sidebar({ menuItems }: SidebarProps) {
 
 //          <div className="p-4 mt-auto">
 //             <div className="bg-slate-900 rounded-3xl p-5 shadow-2xl relative overflow-hidden group">
-//                <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl" />
+//                <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl" />
 //                <div className="flex items-center gap-3 mb-6 relative z-10">
 //                   <div className="relative">
 //                      <div className="bg-slate-800 p-1.5 rounded-2xl border border-slate-700">
@@ -753,7 +752,7 @@ export default function Sidebar({ menuItems }: SidebarProps) {
 //          <ClientOnly>
 //             <div className="md:hidden p-4 bg-white border-b flex items-center justify-between sticky top-0 z-50">
 //                <div className="flex items-center gap-2">
-//                   <School className="h-6 w-6 text-blue-600" />
+//                   <School className="h-6 w-6 text-primary" />
 //                   <span className="font-black text-lg tracking-tighter">AMF</span>
 //                </div>
 //                <Sheet>

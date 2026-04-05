@@ -187,10 +187,10 @@ export default function TeacherAttendancePage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-1">
           <h1 className="text-4xl font-black text-slate-900 tracking-tighter">
-            Academic <span className="text-blue-600">Registry</span>
+            Academic <span className="text-primary">Registry</span>
           </h1>
           <p className="text-slate-500 font-bold text-[10px] uppercase tracking-[0.3em] flex items-center gap-2">
-            <Calendar size={14} className="text-blue-600" />
+            <Calendar size={14} className="text-primary" />
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
         </div>
@@ -237,7 +237,7 @@ export default function TeacherAttendancePage() {
             <Card className="lg:col-span-2 border-none shadow-sm rounded-[2.5rem] bg-white overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
               <CardHeader className="border-b border-slate-50 p-8 flex flex-row items-center justify-between">
                 <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Class Registry</CardTitle>
-                <Badge className="bg-blue-50 text-blue-600 border-none font-black px-4 py-1 rounded-full uppercase text-[9px]">
+                <Badge className="bg-blue-50 text-primary border-none font-black px-4 py-1 rounded-full uppercase text-[9px]">
                   {students.length} Enrolled
                 </Badge>
               </CardHeader>
@@ -322,7 +322,7 @@ export default function TeacherAttendancePage() {
                   <Button
                     onClick={handleSubmitAttendance}
                     disabled={submitting}
-                    className="w-full h-16 bg-blue-600 hover:bg-blue-500 text-white round-3xl font-black uppercase text-[10px] tracking-[0.2em] transition-all shadow-xl shadow-blue-900/40 border-none"
+                    className="w-full h-16 bg-blue-600 hover:bg-primary text-white round-3xl font-black uppercase text-[10px] tracking-[0.2em] transition-all shadow-xl shadow-blue-900/40 border-none"
                   >
                     {submitting ? <Loader2 className="animate-spin" /> : (
                       isEditing ? <><Save size={18} className="mr-2" /> Update Session</> : <><Save size={18} className="mr-2" /> Finalize Registry</>
@@ -348,7 +348,7 @@ export default function TeacherAttendancePage() {
             {history.length > 0 ? history.map((session, idx) => (
               <Card key={session.id} className="border-none shadow-sm rounded-4xl bg-white p-8 group hover:shadow-xl transition-all duration-500">
                 <div className="flex justify-between items-start mb-6">
-                  <div className="bg-slate-50 p-4 rounded-2xl group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                  <div className="bg-slate-50 p-4 rounded-2xl group-hover:bg-blue-50 group-hover:text-primary transition-colors">
                     <Calendar size={24} />
                   </div>
                   <Badge className="bg-slate-100 text-slate-500 border-none font-black text-[9px] uppercase tracking-tighter">

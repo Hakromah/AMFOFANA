@@ -18,11 +18,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
                <nav>
                   <ul className="flex items-center gap-6 text-sm">
-                     <li><Link className="hover:text-blue-600" href="/">Home</Link></li>
-                     <li><Link className="hover:text-blue-600" href="/about">About</Link></li>
-                     <li><Link className="hover:text-blue-600" href="/teachers">Teachers</Link></li>
-                     <li><Link className="hover:text-blue-600" href="/gallery">Gallery</Link></li>
-                     <li><Link className="hover:text-blue-600" href="/contact">Contact</Link></li>
+                     <li><Link className="hover:text-primary" href="/">Home</Link></li>
+                     <li><Link className="hover:text-primary" href="/about">About</Link></li>
+                     <li><Link className="hover:text-primary" href="/teachers">Teachers</Link></li>
+                     <li><Link className="hover:text-primary" href="/gallery">Gallery</Link></li>
+                     <li><Link className="hover:text-primary" href="/contact">Contact</Link></li>
                   </ul>
                </nav>
             </div>

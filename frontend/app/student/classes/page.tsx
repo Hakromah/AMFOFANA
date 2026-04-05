@@ -8,8 +8,8 @@ import {
   Mail,
   GraduationCap,
   Loader2,
-  Calendar,
   LayoutGrid,
+    Calendar as CalendarIcon,
   List as ListIcon
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -55,7 +55,7 @@ export default function StudentClassesPage() {
   if (loading) {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center space-y-4 bg-slate-50/50">
-        <Loader2 className="animate-spin text-blue-600" size={40} />
+        <Loader2 className="animate-spin text-primary" size={40} />
         <p className="text-xs font-black uppercase tracking-widest text-slate-400">Synchronizing Registry...</p>
       </div>
     );
@@ -66,21 +66,21 @@ export default function StudentClassesPage() {
       {/* Header Section */}
       <div className="max-w-7xl mx-auto mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-2">
-          <div className="flex items-center gap-2 text-blue-600 font-black text-[10px] uppercase tracking-[0.3em]">
+          <div className="flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-[0.3em]">
             <GraduationCap size={16} />
             Academic Portal
           </div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tighter sm:text-5xl">
-            My <span className="text-blue-600">Curriculum</span>
+          <h1 className="text-[clamp(1.2rem,2.5vw+1rem,3rem)] font-black text-slate-900 tracking-tighter">
+            My <span className="text-primary">Curriculum</span>
           </h1>
           <p className="text-slate-500 font-medium max-w-md">
             View your active enrollments and connect with your course instructors.
           </p>
         </div>
-
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="rounded-xl font-bold uppercase text-[10px] tracking-widest border-slate-200">
-            <Calendar className="mr-2" size={14} /> Schedule
+         <div className="flex gap-3">
+          <Button className="bg-white border border-primary/0 md:hover:border-primary duration-500 hover:bg-slate-50 text-slate-900 rounded-2xl px-6 h-12 font-bold shadow-sm">
+            <CalendarIcon size={18} className="mr-1 text-primary" />
+            Schedule
           </Button>
         </div>
       </div>
@@ -97,12 +97,12 @@ export default function StudentClassesPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className="group border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white">
+                  <Card className="group border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-3xl overflow-hidden bg-white">
                     <CardContent className="p-0">
                       {/* Card Top: Visual Accent */}
                       <div className="h-32 bg-slate-900 p-8 flex justify-between items-start relative overflow-hidden">
                         <div className="z-10">
-                          <Badge className="bg-blue-500/20 text-blue-400 border-none mb-3 backdrop-blur-md font-bold">
+                          <Badge className="bg-primary/20 text-blue-400 border-none mb-3 backdrop-blur-md font-bold">
                             Active Session
                           </Badge>
                           <h3 className="text-white text-xl font-black tracking-tight leading-none uppercase">
@@ -120,9 +120,10 @@ export default function StudentClassesPage() {
                           <div className="space-y-3">
                             {c.teachers && c.teachers.length > 0 ? (
                               c.teachers.map((teacher) => (
-                                <div key={teacher.id} className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100 group-hover:bg-blue-50/50 group-hover:border-blue-100 transition-colors">
+                                <div key={teacher.id} className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-primary/20 group-hover:bg-blue-50/50 md:hover:border-primary cursor-pointer duration-500 transition-colors">
+                                  <a href="mailto:{teacher.email}" className='flex items-center w-full justify-between'>
                                   <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-blue-600 transition-colors">
+                                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-primary transition-colors">
                                       <User size={18} />
                                     </div>
                                     <div>
@@ -130,9 +131,10 @@ export default function StudentClassesPage() {
                                       <p className="text-[10px] font-medium text-slate-500">{teacher.email}</p>
                                     </div>
                                   </div>
-                                  <Button variant="ghost" size="icon" className="rounded-full hover:bg-white hover:text-blue-600">
+                                  <Button variant="ghost" size="icon" className="rounded-full hover:bg-white hover:text-primary">
                                     <Mail size={16} />
                                   </Button>
+                                  </a>
                                 </div>
                               ))
                             ) : (
@@ -143,7 +145,7 @@ export default function StudentClassesPage() {
                           </div>
                         </div>
 
-                        <Button className="w-full bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-600 font-black uppercase text-[10px] tracking-[0.2em] h-12 rounded-2xl transition-all border-none">
+                        <Button className="w-full bg-slate-100 md:hover:bg-primary duration-500 hover:text-white text-slate-600 font-black uppercase text-[10px] tracking-[0.2em] h-12 rounded-2xl transition-all border-none">
                           Course Materials
                         </Button>
                       </div>
@@ -157,7 +159,7 @@ export default function StudentClassesPage() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center py-20 bg-white rounded-[3rem] border border-dashed border-slate-200"
+              className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200"
             >
               <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
                 <LayoutGrid className="text-slate-300" size={32} />

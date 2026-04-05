@@ -104,12 +104,12 @@ export default function AdvancedSettingsPage() {
       {/* Header Section */}
       <header className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div className="space-y-2">
-          <div className="flex items-center gap-2 text-blue-600">
+          <div className="flex items-center gap-2 text-primary">
             <Settings2 size={18} />
             <span className="text-[10px] font-black uppercase tracking-[0.4em]">System Configuration</span>
           </div>
           <h1 className="text-5xl font-black text-slate-900 tracking-tighter sm:text-7xl italic uppercase">
-            Admin <span className="text-blue-600">Settings.</span>
+            Admin <span className="text-primary">Settings.</span>
           </h1>
         </div>
       </header>
@@ -123,7 +123,7 @@ export default function AdvancedSettingsPage() {
         >
           <div className="space-y-1">
             <h2 className="text-2xl font-black text-slate-900 italic tracking-tight uppercase flex items-center gap-3">
-              <User className="text-blue-600" /> Identity Profile
+              <User className="text-primary" /> Identity Profile
             </h2>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Public information and system identification</p>
           </div>
@@ -140,7 +140,7 @@ export default function AdvancedSettingsPage() {
                         <FormItem>
                           <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Full Name</FormLabel>
                           <div className="relative group">
-                            <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-600 transition-colors" size={18} />
+                            <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors" size={18} />
                             <FormControl>
                               <Input placeholder="John Doe" {...field} className="h-14 pl-14 rounded-2xl bg-slate-50 border-none font-bold text-slate-700 focus-visible:ring-2 focus-visible:ring-blue-600/20" />
                             </FormControl>
@@ -157,7 +157,7 @@ export default function AdvancedSettingsPage() {
                         <FormItem>
                           <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Professional Email</FormLabel>
                           <div className="relative group">
-                            <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-600 transition-colors" size={18} />
+                            <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors" size={18} />
                             <FormControl>
                               <Input placeholder="admin@school.com" {...field} className="h-14 pl-14 rounded-2xl bg-slate-50 border-none font-bold text-slate-700 focus-visible:ring-2 focus-visible:ring-blue-600/20" />
                             </FormControl>
@@ -204,7 +204,7 @@ export default function AdvancedSettingsPage() {
                           <FormControl>
                             <Input type={showCurrentPwd ? "text" : "password"} {...field} className="h-14 pl-14 pr-12 rounded-2xl bg-slate-50 border-none font-bold text-slate-700" />
                           </FormControl>
-                          <button type="button" onClick={() => setShowCurrentPwd(!showCurrentPwd)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600">
+                          <button type="button" onClick={() => setShowCurrentPwd(!showCurrentPwd)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary">
                             {showCurrentPwd ? <EyeOff size={18} /> : <Eye size={18} />}
                           </button>
                         </div>
@@ -224,7 +224,7 @@ export default function AdvancedSettingsPage() {
                           <FormControl>
                             <Input type={showNewPwd ? "text" : "password"} {...field} className="h-14 pl-14 pr-12 rounded-2xl bg-slate-50 border-none font-bold text-slate-700" />
                           </FormControl>
-                          <button type="button" onClick={() => setShowNewPwd(!showNewPwd)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600">
+                          <button type="button" onClick={() => setShowNewPwd(!showNewPwd)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary">
                             {showNewPwd ? <EyeOff size={18} /> : <Eye size={18} />}
                           </button>
                         </div>
@@ -243,11 +243,11 @@ export default function AdvancedSettingsPage() {
 
               <div className="p-6 bg-blue-50 rounded-4xl flex items-center gap-4 border border-blue-100">
                 <div className="bg-white p-3 rounded-2xl shadow-sm">
-                  <BellRing className="text-blue-600" size={20} />
+                  <BellRing className="text-primary" size={20} />
                 </div>
                 <div>
                   <p className="text-[11px] font-black text-blue-900 uppercase tracking-tight italic">Notification Relay</p>
-                  <p className="text-[10px] text-blue-600 font-bold opacity-80 mt-0.5">Push alerts for system events are active.</p>
+                  <p className="text-[10px] text-primary font-bold opacity-80 mt-0.5">Push alerts for system events are active.</p>
                 </div>
               </div>
             </CardContent>
@@ -262,8 +262,8 @@ export default function AdvancedSettingsPage() {
           <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Verified Secure Session • 2026 AMF Registry</span>
         </div>
         <div className="flex gap-6">
-          <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest cursor-pointer hover:underline">Privacy Policy</span>
-          <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest cursor-pointer hover:underline">System Logs</span>
+          <span className="text-[10px] font-black text-primary uppercase tracking-widest cursor-pointer hover:underline">Privacy Policy</span>
+          <span className="text-[10px] font-black text-primary uppercase tracking-widest cursor-pointer hover:underline">System Logs</span>
         </div>
       </footer>
     </div>

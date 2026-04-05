@@ -465,7 +465,7 @@ export default function UserManagement() {
                               <TableCell className="text-right">
                                  <div className="flex items-center justify-end gap-2">
                                     <Popover>
-                                       <PopoverTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:bg-blue-50"><Info size={18} /></Button></PopoverTrigger>
+                                       <PopoverTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-blue-50"><Info size={18} /></Button></PopoverTrigger>
                                        <PopoverContent className="w-80 rounded-3xl p-5 shadow-2xl border-slate-100">
                                           <div className="space-y-4">
                                              <div className="flex items-center justify-between border-b pb-2">
@@ -605,7 +605,7 @@ export default function UserManagement() {
                                  onChange={handleFileUpload}
                               />
                               <div className="w-20 h-20 rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                                 <Download className="text-blue-600" size={32} />
+                                 <Download className="text-primary" size={32} />
                               </div>
                               <p className="font-black text-slate-700 uppercase text-xs tracking-widest">Select CSV Registry</p>
                            </div>
@@ -676,7 +676,7 @@ export default function UserManagement() {
 
                   {!importSummary && (
                      <div className="pt-4 border-t border-slate-100">
-                        <Button variant="ghost" onClick={downloadTemplate} className="w-full text-blue-600 hover:bg-blue-50 font-black uppercase text-[10px] tracking-widest h-12 rounded-2xl gap-2 transition-colors">
+                        <Button variant="ghost" onClick={downloadTemplate} className="w-full text-primary hover:bg-blue-50 font-black uppercase text-[10px] tracking-widest h-12 rounded-2xl gap-2 transition-colors">
                            <Download size={16} /> Download CSV Sample
                         </Button>
                      </div>
@@ -699,11 +699,11 @@ export default function UserManagement() {
                   <div className="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-3xl p-10 hover:border-blue-400 transition-colors bg-slate-50/50 relative group">
                      <Input type="file" accept=".csv" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileUpload} disabled={importing} />
                      <div className="w-16 h-16 rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        {importing ? <Loader2 className="animate-spin text-blue-600" /> : <FileUp className="text-blue-600" size={32} />}
+                        {importing ? <Loader2 className="animate-spin text-primary" /> : <FileUp className="text-primary" size={32} />}
                      </div>
                      <p className="font-black text-slate-700 uppercase text-[10px] tracking-widest">Drop CSV Registry</p>
                   </div>
-                  <Button variant="ghost" onClick={downloadTemplate} className="w-full text-blue-600 hover:bg-blue-50 font-black uppercase text-[10px] tracking-widest h-12 rounded-2xl">
+                  <Button variant="ghost" onClick={downloadTemplate} className="w-full text-primary hover:bg-blue-50 font-black uppercase text-[10px] tracking-widest h-12 rounded-2xl">
                      <Download size={16} /> Download Template
                   </Button>
                </div>

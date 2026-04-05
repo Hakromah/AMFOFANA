@@ -49,7 +49,7 @@ export default function StudentExamsPage() {
 
    if (loading) return (
       <div className="h-screen flex flex-col items-center justify-center gap-4">
-         <Loader2 className="animate-spin text-blue-600" size={40} />
+         <Loader2 className="animate-spin text-primary" size={40} />
          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 italic">Syncing Academic Calendar...</p>
       </div>
    );
@@ -59,12 +59,12 @@ export default function StudentExamsPage() {
          {/* Header Section */}
          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>
-               <h1 className="text-5xl font-black text-slate-900 tracking-tighter italic">Exam <span className="text-blue-600">Pulse.</span></h1>
+               <h1 className="text-5xl font-black text-slate-900 tracking-tighter italic">Exam <span className="text-primary">Pulse.</span></h1>
                <p className="text-slate-500 font-bold text-sm mt-2 uppercase tracking-widest text-[10px]">Upcoming Assessments & Grading Status</p>
             </div>
 
             <Card className="border-none shadow-sm rounded-2xl bg-white px-6 py-4 flex items-center gap-4 border border-slate-100">
-               <div className="p-3 bg-blue-50 rounded-xl text-blue-600">
+               <div className="p-3 bg-blue-50 rounded-xl text-primary">
                   <BookOpen size={20} />
                </div>
                <div>

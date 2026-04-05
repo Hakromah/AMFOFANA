@@ -106,7 +106,7 @@ export default function TeacherDashboard() {
       <div className="relative overflow-hidden bg-slate-900 rounded-3xl p-8 text-white min-h-[320px] flex items-center shadow-2xl">
         <div className="relative z-10 w-full flex flex-col md:flex-row justify-between items-center gap-6">
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-black uppercase tracking-widest mb-6 border border-blue-500/30">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 text-blue-300 text-[10px] font-black uppercase tracking-widest mb-6 border border-blue-500/30">
               <CheckCircle2 className="w-3 h-3 text-blue-400" />
               Academic Registry Live
             </div>
@@ -186,7 +186,7 @@ export default function TeacherDashboard() {
                 <div className="text-right flex items-center gap-8">
                   <div>
                     <p className="text-lg font-black text-slate-800">{r.marks}%</p>
-                    <p className="text-[10px] font-bold text-blue-600 uppercase text-right">{r.grade || 'Auto'}</p>
+                    <p className="text-[10px] font-bold text-primary uppercase text-right">{r.grade || 'Auto'}</p>
                   </div>
                   <ArrowRight size={14} className="text-slate-200" />
                 </div>
@@ -261,7 +261,7 @@ export default function TeacherDashboard() {
               {/* Mandatory Title for Accessibility */}
               <DialogTitle className="sr-only">Student Global Search</DialogTitle>
               <div className="flex items-center gap-4">
-                <Search className="w-6 h-6 text-blue-600" />
+                <Search className="w-6 h-6 text-primary" />
                 <Input
                   autoFocus
                   placeholder="Find student by ID or Name..."
@@ -269,7 +269,7 @@ export default function TeacherDashboard() {
                   value={searchQuery}
                   onChange={(e) => handleSearch(e.target.value)}
                 />
-                {isSearching ? <Loader2 className="w-5 h-5 animate-spin text-blue-600" /> : <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(false)}><X size={20} /></Button>}
+                {isSearching ? <Loader2 className="w-5 h-5 animate-spin text-primary" /> : <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(false)}><X size={20} /></Button>}
               </div>
             </DialogHeader>
             <div className="max-h-[400px] overflow-y-auto p-4">
@@ -279,7 +279,7 @@ export default function TeacherDashboard() {
                     <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-colors"><User size={20} /></div>
                     <div className="text-left"><p className="font-bold text-slate-700">{s.name}</p><p className="text-xs text-slate-400 font-mono">{s.userId}</p></div>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-blue-600 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-primary transition-transform group-hover:translate-x-1" />
                 </button>
               )) : searchQuery.length > 1 ? (
                 <div className="py-12 text-center text-slate-400 flex flex-col items-center gap-2">
@@ -425,10 +425,10 @@ export default function TeacherDashboard() {
 //       <div className="relative overflow-hidden bg-slate-900 rounded-3xl p-8 text-white min-h-[320px] flex items-center shadow-2xl">
 //         <div className="relative z-10 w-full flex flex-col md:flex-row justify-between items-center gap-6">
 //           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
-//             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-black uppercase tracking-widest mb-6 border border-blue-500/30">
+//             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 text-blue-300 text-[10px] font-black uppercase tracking-widest mb-6 border border-blue-500/30">
 //               <span className="relative flex h-2 w-2">
 //                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-//                 <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+//                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
 //               </span>
 //               Registry Live
 //             </div>
@@ -554,7 +554,7 @@ export default function TeacherDashboard() {
 //               <DialogTitle className="sr-only">Student Global Search</DialogTitle>
 
 //               <div className="flex items-center gap-4">
-//                 <Search className="w-6 h-6 text-blue-600" />
+//                 <Search className="w-6 h-6 text-primary" />
 //                 <Input
 //                   autoFocus
 //                   placeholder="Search student by Name or ID (Ctrl+K)..."
@@ -562,7 +562,7 @@ export default function TeacherDashboard() {
 //                   value={searchQuery}
 //                   onChange={(e) => handleSearch(e.target.value)}
 //                 />
-//                 {isSearching && <Loader2 className="w-5 h-5 animate-spin text-blue-600" />}
+//                 {isSearching && <Loader2 className="w-5 h-5 animate-spin text-primary" />}
 //                 {/* <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(false)}><X size={20} /></Button> */}
 //               </div>
 //             </DialogHeader>
@@ -588,7 +588,7 @@ export default function TeacherDashboard() {
 //                           <p className="text-xs text-slate-400 font-mono">{s.userId}</p>
 //                         </div>
 //                       </div>
-//                       <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-blue-600 transition-transform group-hover:translate-x-1" />
+//                       <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-primary transition-transform group-hover:translate-x-1" />
 //                     </button>
 //                   ))}
 //                 </div>

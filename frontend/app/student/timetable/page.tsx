@@ -61,7 +61,7 @@ export default function UserTimetablePage() {
    if (loading) {
       return (
          <div className="h-screen w-full flex flex-col items-center justify-center space-y-4 bg-slate-50/50">
-            <Loader2 className="animate-spin text-blue-600" size={40} />
+            <Loader2 className="animate-spin text-primary" size={40} />
             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Syncing Schedule...</p>
          </div>
       );
@@ -72,16 +72,16 @@ export default function UserTimetablePage() {
          {/* Header Section */}
          <header className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>
-               <Badge className="bg-blue-600/10 text-blue-600 hover:bg-blue-600/10 border-none px-4 py-1 mb-4 rounded-full text-[10px] font-black uppercase tracking-widest">
+               <Badge className="bg-blue-600/10 text-primary hover:bg-blue-600/10 border-none px-4 py-1 mb-4 rounded-full text-[10px] font-black uppercase tracking-widest">
                   Registry Active • 2026
                </Badge>
-               <h1 className="text-5xl font-black text-slate-900 tracking-tighter sm:text-6xl">
-                  Weekly <span className="text-blue-600 italic">Schedule.</span>
+               <h1 className="text-[clamp(1.2rem,2.5vw+1rem,3rem)] font-black text-slate-900 tracking-tighter">
+                  Weekly <span className="text-primary italic">Schedule.</span>
                </h1>
             </div>
 
-            <div className="flex items-center gap-4 bg-white p-4 rounded-4xl shadow-sm border border-slate-100">
-               <div className="w-10 h-10 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+            <div className="flex items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100 md:hover:border-primary duration-500 cursor-pointer">
+               <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-primary">
                   <Calendar size={20} />
                </div>
                <div>
@@ -100,7 +100,7 @@ export default function UserTimetablePage() {
                      onClick={() => setActiveDay(day)}
                      className={`px-8 py-4 rounded-3xl font-black text-[11px] tracking-[0.2em] transition-all whitespace-nowrap border-2 ${activeDay === day
                         ? 'bg-slate-900 text-white border-slate-900 shadow-xl shadow-slate-200 scale-105'
-                        : 'bg-white text-slate-400 border-transparent hover:border-slate-100 hover:text-slate-600'
+                        : 'bg-white text-slate-400 border-transparent hover:border-slate-100 md:hover:text-white duration-500'
                         }`}
                   >
                      {day}
@@ -121,7 +121,7 @@ export default function UserTimetablePage() {
                      className="grid gap-6"
                   >
                      {filteredSchedule.map((session) => (
-                        <Card key={session.id} className="border-none shadow-sm rounded-[2.5rem] overflow-hidden bg-white border border-slate-100/50 group hover:shadow-xl transition-all duration-500">
+                        <Card key={session.id} className="border-none shadow-sm rounded-3xl overflow-hidden bg-white border border-slate-100/50 group hover:shadow-xl transition-all duration-500">
                            <CardContent className="p-0">
                               <div className="flex flex-col md:flex-row items-stretch">
                                  {/* Left: Time Indicator */}
@@ -137,7 +137,7 @@ export default function UserTimetablePage() {
                                  {/* Right: Content Details */}
                                  <div className="p-8 flex-1 flex flex-col md:flex-row justify-between items-center gap-8">
                                     <div className="flex items-center gap-6">
-                                       <div className="w-16 h-16 rounded-[1.8rem] bg-blue-50 flex items-center justify-center text-blue-600 transition-transform group-hover:scale-110 duration-500">
+                                       <div className="w-16 h-16 rounded-[1.2rem] bg-blue-50 flex items-center justify-center text-primary transition-transform group-hover:scale-110 duration-500">
                                           <BookOpen size={28} />
                                        </div>
                                        <div>
@@ -162,7 +162,7 @@ export default function UserTimetablePage() {
                                     </div>
 
                                     <div className="flex items-center gap-4">
-                                       <div className="h-12 w-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 cursor-help hover:bg-slate-900 hover:text-white transition-all duration-300">
+                                       <div className="h-12 w-12 rounded-xl bg-primary border border-slate-100 flex items-center justify-center text-white cursor-help hover:bg-slate-900 hover:text-white transition-all duration-300">
                                           <Info size={20} />
                                        </div>
                                     </div>
@@ -178,8 +178,8 @@ export default function UserTimetablePage() {
                      animate={{ opacity: 1 }}
                      className="flex flex-col items-center justify-center py-32 px-10 text-center bg-white rounded-[4rem] border-2 border-dashed border-slate-100"
                   >
-                     <div className="w-24 h-24 bg-slate-50 rounded-[2.5rem] flex items-center justify-center mb-8">
-                        <Calendar className="text-slate-200" size={48} />
+                     <div className="w-24 h-24 bg-primary rounded-3xl flex items-center justify-center mb-8">
+                        <Calendar className="text-white" size={48} />
                      </div>
                      <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-3">SCHEDULE EMPTY</h3>
                      <p className="text-slate-400 font-bold max-w-sm text-sm uppercase tracking-widest leading-loose">

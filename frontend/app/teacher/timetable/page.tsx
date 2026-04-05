@@ -61,7 +61,7 @@ export default function UserTimetablePage() {
   if (loading) {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center space-y-4 bg-slate-50/50">
-        <Loader2 className="animate-spin text-blue-600" size={40} />
+        <Loader2 className="animate-spin text-primary" size={40} />
         <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Syncing Schedule...</p>
       </div>
     );
@@ -72,16 +72,16 @@ export default function UserTimetablePage() {
       {/* Header Section */}
       <header className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
-          <Badge className="bg-blue-600/10 text-blue-600 hover:bg-blue-600/10 border-none px-4 py-1 mb-4 rounded-full text-[10px] font-black uppercase tracking-widest">
+          <Badge className="bg-blue-600/10 text-primary hover:bg-blue-600/10 border-none px-4 py-1 mb-4 rounded-full text-[10px] font-black uppercase tracking-widest">
             Registry Active • 2026
           </Badge>
           <h1 className="text-5xl font-black text-slate-900 tracking-tighter sm:text-6xl">
-            Weekly <span className="text-blue-600 italic">Schedule.</span>
+            Weekly <span className="text-primary italic">Schedule.</span>
           </h1>
         </div>
 
         <div className="flex items-center gap-4 bg-white p-4 rounded-4xl shadow-sm border border-slate-100">
-          <div className="w-10 h-10 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+          <div className="w-10 h-10 bg-blue-50 rounded-2xl flex items-center justify-center text-primary">
             <Calendar size={20} />
           </div>
           <div>
@@ -137,7 +137,7 @@ export default function UserTimetablePage() {
                       {/* Right: Content Details */}
                       <div className="p-8 flex-1 flex flex-col md:flex-row justify-between items-center gap-8">
                         <div className="flex items-center gap-6">
-                          <div className="w-16 h-16 rounded-[1.8rem] bg-blue-50 flex items-center justify-center text-blue-600 transition-transform group-hover:scale-110 duration-500">
+                          <div className="w-16 h-16 rounded-[1.8rem] bg-blue-50 flex items-center justify-center text-primary transition-transform group-hover:scale-110 duration-500">
                             <BookOpen size={28} />
                           </div>
                           <div>

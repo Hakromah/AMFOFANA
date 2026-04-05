@@ -68,7 +68,7 @@ export default function AdminExamsPage() {
 
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center gap-4">
-      <Loader2 className="animate-spin text-blue-600" size={40} />
+      <Loader2 className="animate-spin text-primary" size={40} />
       <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Loading Master Registry...</p>
     </div>
   );
@@ -79,10 +79,10 @@ export default function AdminExamsPage() {
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <ShieldCheck className="text-blue-600" size={20} />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-600">Authority Access</span>
+            <ShieldCheck className="text-primary" size={20} />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Authority Access</span>
           </div>
-          <h1 className="text-5xl font-black text-slate-900 tracking-tighter italic">Global <span className="text-blue-600">Exams.</span></h1>
+          <h1 className="text-5xl font-black text-slate-900 tracking-tighter italic">Global <span className="text-primary">Exams.</span></h1>
         </div>
 
         <div className="flex gap-3">
@@ -97,7 +97,7 @@ export default function AdminExamsPage() {
 
       {/* Search & Filter Bar */}
       <div className="max-w-7xl mx-auto relative group">
-        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={20} />
+        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={20} />
         <Input
           placeholder="Search by subject, teacher, or classroom..."
           className="h-16 pl-16 pr-8 rounded-4xl border-none shadow-sm bg-white font-bold text-slate-600 placeholder:text-slate-300 focus-visible:ring-blue-600"
@@ -142,7 +142,7 @@ export default function AdminExamsPage() {
                 </TableCell>
 
                 <TableCell>
-                  <Badge className={`rounded-lg px-3 py-1 font-black text-[9px] tracking-widest border-none ${exam.closed ? 'bg-slate-100 text-slate-400' : 'bg-blue-100 text-blue-600'}`}>
+                  <Badge className={`rounded-lg px-3 py-1 font-black text-[9px] tracking-widest border-none ${exam.closed ? 'bg-slate-100 text-slate-400' : 'bg-blue-100 text-primary'}`}>
                     {exam.closed ? 'FINISHED' : 'PENDING'}
                   </Badge>
                 </TableCell>

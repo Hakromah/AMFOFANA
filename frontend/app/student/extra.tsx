@@ -68,7 +68,7 @@ export default function StudentDashboard() {
    if (loading) {
       return (
          <div className="h-screen flex flex-col items-center justify-center gap-4 bg-[#fcfcfd]">
-            <Loader2 className="animate-spin text-blue-600" size={40} />
+            <Loader2 className="animate-spin text-primary" size={40} />
             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Syncing Profile...</p>
          </div>
       );
@@ -80,7 +80,7 @@ export default function StudentDashboard() {
          <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
                <h1 className="text-4xl font-black text-slate-900 tracking-tighter sm:text-5xl">
-                  Welcome back, <span className="text-blue-600">{(studentName || 'Student').split(' ')[0]}</span> 👋
+                  Welcome back, <span className="text-primary">{(studentName || 'Student').split(' ')[0]}</span> 👋
                </h1>
                <p className="text-slate-500 font-medium mt-1 uppercase text-[10px] tracking-[0.2em]">
                   System Status: <span className="text-emerald-500">Active</span> • Term 2 Year 2026
@@ -91,7 +91,7 @@ export default function StudentDashboard() {
                   onClick={() => router.push('/student/schedule')}
                   className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 rounded-2xl px-6 h-12 font-bold shadow-sm"
                >
-                  <CalendarIcon size={18} className="mr-2 text-blue-600" />
+                  <CalendarIcon size={18} className="mr-2 text-primary" />
                   Schedule
                </Button>
             </div>
@@ -100,7 +100,7 @@ export default function StudentDashboard() {
          {/* Stats Grid */}
          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {[
-               { label: 'Active Courses', value: stats.courseCount, icon: BookOpen, color: 'text-blue-600', bg: 'bg-blue-50' },
+               { label: 'Active Courses', value: stats.courseCount, icon: BookOpen, color: 'text-primary', bg: 'bg-blue-50' },
                { label: 'Attendance', value: `${stats.attendance}%`, icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50' },
                { label: 'Resources', value: stats.materials, icon: FileText, color: 'text-amber-600', bg: 'bg-amber-50' },
                { label: 'Avg. Grade', value: stats.averageGrade, icon: Award, color: 'text-indigo-600', bg: 'bg-indigo-50' },
@@ -165,7 +165,7 @@ export default function StudentDashboard() {
                      <h2 className="text-lg font-black uppercase tracking-widest mb-4 italic">Exam Reminder</h2>
                      {extras.nextExam ? (
                         <div className="flex items-center gap-4 bg-white/10 p-4 rounded-3xl backdrop-blur-sm border border-white/10">
-                           <div className="bg-blue-500 p-3 rounded-2xl">
+                           <div className="bg-primary p-3 rounded-2xl">
                               <Clock size={20} />
                            </div>
                            <div>
@@ -180,7 +180,7 @@ export default function StudentDashboard() {
                      )}
                      <Button
                         onClick={() => router.push('/student/exams')}
-                        className="w-full mt-6 bg-white text-slate-900 hover:bg-blue-500 hover:text-white rounded-2xl h-12 font-black uppercase text-[10px] tracking-widest transition-all"
+                        className="w-full mt-6 bg-white text-slate-900 hover:bg-primary hover:text-white rounded-2xl h-12 font-black uppercase text-[10px] tracking-widest transition-all"
                      >
                         GO TO EXAM HUB
                      </Button>
@@ -199,13 +199,13 @@ export default function StudentDashboard() {
                               onClick={() => router.push(activity.type === 'file' ? '/student/materials' : '/student/results')}
                            >
                               <div className="flex items-center gap-4">
-                                 <div className={`w-2 h-2 rounded-full ${activity.type === 'grade' ? 'bg-emerald-500' : 'bg-blue-500'} ring-4 ${activity.type === 'grade' ? 'ring-emerald-50' : 'ring-blue-50'}`} />
+                                 <div className={`w-2 h-2 rounded-full ${activity.type === 'grade' ? 'bg-emerald-500' : 'bg-primary'} ring-4 ${activity.type === 'grade' ? 'ring-emerald-50' : 'ring-blue-50'}`} />
                                  <div>
                                     <p className="text-sm font-bold text-slate-800 tracking-tight">{activity.title}</p>
                                     <p className="text-[10px] text-slate-400 font-medium uppercase">{activity.time}</p>
                                  </div>
                               </div>
-                              <ChevronRight size={14} className="text-slate-300 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+                              <ChevronRight size={14} className="text-slate-300 group-hover:text-primary group-hover:translate-x-1 transition-all" />
                            </div>
                         ))
                      ) : (

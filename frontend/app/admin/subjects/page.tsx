@@ -114,7 +114,7 @@ export default function AdvancedSubjectsPage() {
 
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center gap-4 bg-[#f8fafc]">
-      <Loader2 className="animate-spin text-blue-600" size={40} />
+      <Loader2 className="animate-spin text-primary" size={40} />
       <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Syncing Catalog...</p>
     </div>
   );
@@ -126,12 +126,12 @@ export default function AdvancedSubjectsPage() {
         {/* Advanced Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-blue-600">
+            <div className="flex items-center gap-2 text-primary">
               <Library size={18} />
               <span className="text-[10px] font-black uppercase tracking-[0.3em]">Curriculum Master</span>
             </div>
             <h1 className="text-5xl font-black text-slate-900 tracking-tighter sm:text-6xl italic">
-              Academic <span className="text-blue-600">Catalog.</span>
+              Academic <span className="text-primary">Catalog.</span>
             </h1>
           </div>
           <Button
@@ -144,7 +144,7 @@ export default function AdvancedSubjectsPage() {
 
         {/* Dynamic Search Bar */}
         <div className="relative group max-w-2xl">
-          <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={20} />
+          <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={20} />
           <Input
             placeholder="Search catalog by subject name..."
             className="h-16 pl-16 pr-8 rounded-4xl border-none shadow-sm bg-white font-bold text-slate-600 focus-visible:ring-blue-600"
@@ -170,7 +170,7 @@ export default function AdvancedSubjectsPage() {
               >
                 <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 h-full flex flex-col justify-between">
                   <div className="flex justify-between items-start mb-8">
-                    <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-500">
+                    <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-primary group-hover:bg-blue-600 group-hover:text-white transition-colors duration-500">
                       <BookOpen size={28} />
                     </div>
 
@@ -195,7 +195,7 @@ export default function AdvancedSubjectsPage() {
                     <Badge className="bg-slate-100 text-slate-500 hover:bg-slate-100 border-none rounded-lg font-black text-[9px] px-3 py-1">
                       ID: #{subject.id}
                     </Badge>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tighter leading-none italic uppercase group-hover:text-blue-600 transition-colors">
+                    <h3 className="text-2xl font-black text-slate-900 tracking-tighter leading-none italic uppercase group-hover:text-primary transition-colors">
                       {subject.name}
                     </h3>
 
@@ -232,7 +232,7 @@ export default function AdvancedSubjectsPage() {
         <DialogContent className="rounded-[3rem] p-10 border-none shadow-2xl sm:max-w-[450px]">
           <DialogHeader>
             <DialogTitle className="text-3xl font-black italic tracking-tighter text-slate-900">
-              {editingSubject ? 'Edit' : 'Create'} <span className="text-blue-600">Subject.</span>
+              {editingSubject ? 'Edit' : 'Create'} <span className="text-primary">Subject.</span>
             </DialogTitle>
             <DialogDescription className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mt-2">
               Configuration for curriculum identification.

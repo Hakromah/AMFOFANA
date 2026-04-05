@@ -178,7 +178,7 @@ export default function TeacherExamsPage() {
 
    if (loading) return (
       <div className="h-screen flex flex-col items-center justify-center gap-4">
-         <Loader2 className="animate-spin text-blue-600" size={40} />
+         <Loader2 className="animate-spin text-primary" size={40} />
          <p className="text-xs font-black uppercase tracking-widest text-slate-400">Loading Exam Center...</p>
       </div>
    );
@@ -188,7 +188,7 @@ export default function TeacherExamsPage() {
          {/* Header */}
          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 max-w-7xl mx-auto">
             <div>
-               <h1 className="text-5xl font-black text-slate-900 tracking-tighter italic">Exam <span className="text-blue-600">Center.</span></h1>
+               <h1 className="text-5xl font-black text-slate-900 tracking-tighter italic">Exam <span className="text-primary">Center.</span></h1>
                <p className="text-slate-500 font-bold text-sm mt-2 uppercase tracking-widest text-[10px]">Registry & Assessments • 2026</p>
             </div>
             <Button onClick={() => { setEditingExam(null); form.reset(); setIsDialogOpen(true); }} className="bg-slate-900 hover:bg-blue-600 rounded-2xl h-14 px-8 font-black transition-all shadow-xl">
@@ -236,7 +236,7 @@ export default function TeacherExamsPage() {
                               <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="rounded-xl"><MoreHorizontal size={20} /></Button></DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="rounded-2xl p-2 border-slate-100 shadow-2xl">
                                  <DropdownMenuItem onClick={() => toggleStatus(exam)} className="rounded-xl font-black text-[10px] p-3 uppercase tracking-widest">
-                                    <Power size={14} className="mr-2 text-blue-600" /> {exam.closed ? "Re-open" : "Close Exam"}
+                                    <Power size={14} className="mr-2 text-primary" /> {exam.closed ? "Re-open" : "Close Exam"}
                                  </DropdownMenuItem>
                                  <DropdownMenuItem disabled={exam.locked} onClick={() => onOpenEdit(exam)} className="rounded-xl font-black text-[10px] p-3 uppercase tracking-widest">
                                     <Pencil size={14} className="mr-2 text-amber-500" /> Edit
@@ -267,7 +267,7 @@ export default function TeacherExamsPage() {
             <DialogContent className="sm:max-w-[550px] rounded-[3rem] p-10 border-none shadow-2xl">
                <DialogHeader>
                   <DialogTitle className="text-3xl font-black italic tracking-tighter">
-                     {editingExam ? 'Edit' : 'Create'} <span className="text-blue-600">Assessment.</span>
+                     {editingExam ? 'Edit' : 'Create'} <span className="text-primary">Assessment.</span>
                   </DialogTitle>
                   <DialogDescription className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-2">Configure weight and timing for the assessment.</DialogDescription>
                </DialogHeader>
