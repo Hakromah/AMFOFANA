@@ -1,5 +1,6 @@
 import { Tabs, router } from 'expo-router';
-import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/context/AuthContext';
 
 function PortalButton() {
@@ -26,14 +27,18 @@ function PortalButton() {
 }
 
 export default function PublicLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tabs
       screenOptions={{
         tabBarStyle: {
           backgroundColor: '#0f172a',
           borderTopColor: '#1e293b',
-          height: 64,
-          paddingBottom: 10,
+          // height = visible tab area (56px) + device bottom system bar inset
+          height: 56 + insets.bottom,
+          paddingBottom: insets.bottom + 4,
+          paddingTop: 6,
         },
         tabBarActiveTintColor: '#3b82f6',
         tabBarInactiveTintColor: '#475569',
@@ -46,67 +51,35 @@ export default function PublicLayout() {
     >
       <Tabs.Screen
         name="index"
-        options={{
-          title: 'AMF School',
-          tabBarLabel: 'Home',
-          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>🏠</Text>,
-        }}
+        options={{ title: 'AMF School', tabBarLabel: 'Home', tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>🏠</Text> }}
       />
       <Tabs.Screen
         name="about"
-        options={{
-          title: 'About Us',
-          tabBarLabel: 'About',
-          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>ℹ️</Text>,
-        }}
+        options={{ title: 'About Us', tabBarLabel: 'About', tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>ℹ️</Text> }}
       />
       <Tabs.Screen
         name="programs"
-        options={{
-          title: 'Programs',
-          tabBarLabel: 'Programs',
-          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>🎓</Text>,
-        }}
+        options={{ title: 'Programs', tabBarLabel: 'Programs', tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>🎓</Text> }}
       />
       <Tabs.Screen
         name="blog"
-        options={{
-          title: 'News & Blog',
-          tabBarLabel: 'News',
-          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>📰</Text>,
-        }}
+        options={{ title: 'News & Blog', tabBarLabel: 'News', tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>📰</Text> }}
       />
       <Tabs.Screen
         name="gallery"
-        options={{
-          title: 'Gallery',
-          tabBarLabel: 'Gallery',
-          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>🖼️</Text>,
-        }}
+        options={{ title: 'Gallery', tabBarLabel: 'Gallery', tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>🖼️</Text> }}
       />
       <Tabs.Screen
         name="staff"
-        options={{
-          title: 'Our Staff',
-          tabBarLabel: 'Staff',
-          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>👥</Text>,
-        }}
+        options={{ title: 'Our Staff', tabBarLabel: 'Staff', tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>👥</Text> }}
       />
       <Tabs.Screen
         name="opportunities"
-        options={{
-          title: 'Opportunities',
-          tabBarLabel: 'Apply',
-          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>🌟</Text>,
-        }}
+        options={{ title: 'Opportunities', tabBarLabel: 'Apply', tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>🌟</Text> }}
       />
       <Tabs.Screen
         name="contact"
-        options={{
-          title: 'Contact Us',
-          tabBarLabel: 'Contact',
-          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>📞</Text>,
-        }}
+        options={{ title: 'Contact Us', tabBarLabel: 'Contact', tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>📞</Text> }}
       />
     </Tabs>
   );
