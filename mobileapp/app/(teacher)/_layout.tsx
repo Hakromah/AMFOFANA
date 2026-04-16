@@ -1,24 +1,37 @@
 import { Tabs } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/context/AuthContext';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 
-export default function TeacherLayout() {
+function LogoutButton() {
   const { logout } = useAuth();
+  return (
+    <TouchableOpacity onPress={logout} style={s.logoutBtn}>
+      <Text style={s.logoutText}>Sign Out</Text>
+    </TouchableOpacity>
+  );
+}
+
+export default function TeacherLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tabs
       screenOptions={{
-        tabBarStyle: { backgroundColor: '#0f172a', borderTopColor: '#1e293b', height: 60, paddingBottom: 8 },
+        tabBarStyle: {
+          backgroundColor: '#0f172a',
+          borderTopColor: '#1e293b',
+          height: 56 + insets.bottom,
+          paddingBottom: insets.bottom + 4,
+          paddingTop: 6,
+        },
         tabBarActiveTintColor: '#10b981',
         tabBarInactiveTintColor: '#475569',
         tabBarLabelStyle: { fontSize: 10, fontWeight: '700' },
         headerStyle: { backgroundColor: '#0f172a' },
         headerTintColor: '#fff',
         headerTitleStyle: { fontWeight: '900', fontSize: 18 },
-        headerRight: () => (
-          <TouchableOpacity onPress={logout} style={styles.logoutBtn}>
-            <Text style={styles.logoutText}>Sign Out</Text>
-          </TouchableOpacity>
-        ),
+        headerRight: () => <LogoutButton />,
       }}
     >
       <Tabs.Screen name="index" options={{ title: 'Dashboard', tabBarLabel: 'Home', tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 18 }}>⌂</Text> }} />
@@ -33,7 +46,8 @@ export default function TeacherLayout() {
     </Tabs>
   );
 }
-const styles = StyleSheet.create({
+
+const s = StyleSheet.create({
   logoutBtn: { marginRight: 16, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: '#1e293b', borderRadius: 10 },
   logoutText: { color: '#ef4444', fontSize: 12, fontWeight: '800' },
 });

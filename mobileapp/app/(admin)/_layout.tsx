@@ -1,6 +1,7 @@
 import { Drawer } from 'expo-router/drawer';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import { useRouter, useSegments } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 
 const ADMIN_ROUTES = [
@@ -17,12 +18,12 @@ const ADMIN_ROUTES = [
 
 function CustomDrawerContent({ navigation }: any) {
   const { logout, user } = useAuth();
-  const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   return (
     <View style={styles.drawerContainer}>
-      {/* Header */}
-      <View style={styles.drawerHeader}>
+      {/* Header — respects top notch */}
+      <View style={[styles.drawerHeader, { paddingTop: Math.max(insets.top, 24) + 16 }]}>
         <View style={styles.drawerAvatar}>
           <Text style={styles.drawerAvatarText}>
             {(user?.name || user?.username || 'A').charAt(0).toUpperCase()}
@@ -50,8 +51,11 @@ function CustomDrawerContent({ navigation }: any) {
         ))}
       </ScrollView>
 
-      {/* Logout */}
-      <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
+      {/* Logout — sits above system bottom bar */}
+      <TouchableOpacity
+        style={[styles.logoutBtn, { marginBottom: insets.bottom + 12 }]}
+        onPress={logout}
+      >
         <Text style={styles.logoutText}>🚪 Sign Out</Text>
       </TouchableOpacity>
     </View>
@@ -85,51 +89,40 @@ export default function AdminLayout() {
 const styles = StyleSheet.create({
   drawerContainer: { flex: 1, backgroundColor: '#0f172a' },
   drawerHeader: {
-    padding: 24,
-    paddingTop: 60,
+    paddingHorizontal: 24,
+    paddingBottom: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#1e293b',
     alignItems: 'flex-start',
   },
   drawerAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 18,
+    width: 56, height: 56, borderRadius: 18,
     backgroundColor: '#2563eb',
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'center', alignItems: 'center',
     marginBottom: 12,
   },
   drawerAvatarText: { color: '#fff', fontSize: 22, fontWeight: '900' },
   drawerName: { color: '#f8fafc', fontSize: 16, fontWeight: '800', marginBottom: 6 },
   drawerRoleBadge: {
-    backgroundColor: '#1e3a5f',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
+    backgroundColor: '#1e3a5f', paddingHorizontal: 10,
+    paddingVertical: 4, borderRadius: 8,
   },
   drawerRoleText: { color: '#60a5fa', fontSize: 10, fontWeight: '800', letterSpacing: 1.5 },
   drawerNav: { flex: 1, paddingTop: 12 },
   drawerItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    gap: 14,
-    borderRadius: 14,
-    marginHorizontal: 8,
-    marginVertical: 2,
+    flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: 20, paddingVertical: 14,
+    gap: 14, borderRadius: 14,
+    marginHorizontal: 8, marginVertical: 2,
   },
   drawerItemIcon: { fontSize: 18 },
   drawerItemLabel: { color: '#cbd5e1', fontSize: 14, fontWeight: '600' },
   logoutBtn: {
-    margin: 20,
+    marginHorizontal: 20,
     backgroundColor: '#1e293b',
-    padding: 16,
-    borderRadius: 16,
+    padding: 16, borderRadius: 16,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#334155',
+    borderWidth: 1, borderColor: '#334155',
   },
   logoutText: { color: '#ef4444', fontSize: 14, fontWeight: '800' },
 });
