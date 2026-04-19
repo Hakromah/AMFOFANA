@@ -107,7 +107,7 @@ export default function AdminExamsPage() {
       </div>
 
       {/* Master Registry Table */}
-      <div className="bg-white rounded-[3rem] shadow-sm border border-slate-100 overflow-hidden max-w-7xl mx-auto">
+      <div className="bg-white rounded-[3rem] shadow-sm border border-slate-100 md:hover:border-primary duration-500 transition-colors overflow-hidden max-w-7xl mx-auto">
         <Table>
           <TableHeader className="bg-slate-50/50">
             <TableRow className="border-none">

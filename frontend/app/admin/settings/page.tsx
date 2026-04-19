@@ -128,7 +128,7 @@ export default function AdvancedSettingsPage() {
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Public information and system identification</p>
           </div>
 
-          <Card className="rounded-[2.5rem] border-none shadow-2xl overflow-hidden bg-white">
+          <Card className="rounded-[2.5rem] border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-2xl overflow-hidden bg-white">
             <CardContent className="p-10">
               <Form {...profileForm}>
                 <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-8">
@@ -189,7 +189,7 @@ export default function AdvancedSettingsPage() {
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Credential management and session security</p>
           </div>
 
-          <Card className="rounded-[2.5rem] border-none shadow-2xl overflow-hidden bg-white">
+          <Card className="rounded-[2.5rem] border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-2xl overflow-hidden bg-white">
             <CardContent className="p-10">
               <Form {...passwordForm}>
                 <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-6">

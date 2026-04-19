@@ -113,7 +113,7 @@ export default function AdvancedAssignStudentPage() {
           <ShieldCheck size={18} />
           <span className="text-[10px] font-black uppercase tracking-[0.4em]">Registrar Authority</span>
         </motion.div>
-        <h1 className="text-5xl font-black text-slate-900 tracking-tighter sm:text-7xl italic uppercase">
+        <h1 className="text-[clamp(1rem,3.5vw,4rem)] font-black text-slate-900 tracking-tighter sm:text-7xl italic uppercase">
           Student <span className="text-primary">Enrollment.</span>
         </h1>
         <p className="text-slate-400 font-bold text-sm uppercase tracking-widest max-w-2xl mx-auto leading-loose">
@@ -129,10 +129,10 @@ export default function AdvancedAssignStudentPage() {
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
         >
-          <Card className="rounded-[3rem] border-none shadow-2xl overflow-hidden bg-white h-full">
+          <Card className="rounded-[3rem] max-md:rounded-2xl border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-2xl overflow-hidden bg-white h-full">
             <CardContent className="p-10 space-y-8">
               <div className="space-y-2">
-                <h2 className="text-2xl font-black text-slate-900 italic tracking-tight uppercase">Enrollment Console</h2>
+                <h2 className="text-[clamp(1rem,3vw,4rem)]  font-black text-slate-900 italic tracking-tight uppercase">Enrollment Console</h2>
                 <div className="h-1.5 w-16 bg-blue-600 rounded-full" />
               </div>
 
@@ -150,7 +150,7 @@ export default function AdvancedAssignStudentPage() {
                               <SelectValue placeholder="Search student registry..." />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="rounded-2xl border-slate-100 shadow-2xl">
+                          <SelectContent className="rounded-2xl max-md:rounded-xl border-slate-100 shadow-2xl">
                             {students.map((student) => (
                               <SelectItem key={student.id} value={String(student.id)} className="font-bold p-3">
                                 {student.username || student.name || student.email}
@@ -182,11 +182,11 @@ export default function AdvancedAssignStudentPage() {
                         <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Target Class Allocation</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
-                            <SelectTrigger className="h-16 rounded-2xl bg-slate-50 border-none font-bold text-slate-700 shadow-sm transition-all focus:ring-2 focus:ring-blue-600/20">
+                            <SelectTrigger className="h-16 rounded-2xl max-md:rounded-xl bg-slate-50 border-none font-bold text-slate-700 shadow-sm transition-all focus:ring-2 focus:ring-blue-600/20">
                               <SelectValue placeholder="Identify target group..." />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="rounded-2xl border-slate-100 shadow-2xl">
+                          <SelectContent className="rounded-2xl max-md:rounded-xl border-slate-100 shadow-2xl">
                             {classes.map((c) => (
                               <SelectItem key={c.id} value={String(c.id)} className="font-bold p-3">
                                 {c.name}
@@ -202,7 +202,7 @@ export default function AdvancedAssignStudentPage() {
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full h-16 bg-slate-900 hover:bg-blue-600 text-white font-black rounded-3xl transition-all shadow-xl shadow-slate-200 uppercase text-[11px] tracking-[0.3em] group"
+                    className="w-full h-16 bg-slate-900 md:hover:bg-primary text-white font-black rounded-3xl transition-all shadow-xl shadow-slate-200 uppercase text-[11px] tracking-[0.3em] group"
                   >
                     {isLoading ? (
                       <Loader2 className="animate-spin" />
@@ -225,7 +225,7 @@ export default function AdvancedAssignStudentPage() {
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
         >
-          <div className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-sm flex-1 flex flex-col justify-between">
+          <div className="bg-white rounded-[3rem] p-10 border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm flex-1 flex flex-col justify-between">
             <div className="space-y-8">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-black text-slate-900 italic tracking-tight uppercase leading-none">Intelligence Hub</h2>
@@ -233,12 +233,12 @@ export default function AdvancedAssignStudentPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-2 group hover:bg-blue-600 transition-all duration-500">
+                <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-2 group md:hover:bg-primary transition-all duration-500">
                   <GraduationCap className="text-primary group-hover:text-white transition-colors" size={28} />
                   <p className="text-4xl font-black text-slate-900 tracking-tighter italic group-hover:text-white transition-colors">{students.length}</p>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-blue-100 transition-colors">Total Students</p>
                 </div>
-                <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-2 group hover:bg-blue-600 transition-all duration-500">
+                <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-2 group md:hover:bg-primary transition-all duration-500">
                   <Landmark className="text-primary group-hover:text-white transition-colors" size={28} />
                   <p className="text-4xl font-black text-slate-900 tracking-tighter italic group-hover:text-white transition-colors">{classes.length}</p>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-blue-100 transition-colors">Class Groups</p>

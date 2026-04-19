@@ -97,7 +97,7 @@ export default function StudentClassesPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className="group border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-3xl overflow-hidden bg-white">
+                  <Card className="group border border-slate-100 md:hover:border-primary shadow-sm hover:shadow-xl transition-all duration-500 rounded-3xl overflow-hidden bg-white">
                     <CardContent className="p-0">
                       {/* Card Top: Visual Accent */}
                       <div className="h-32 bg-slate-900 p-8 flex justify-between items-start relative overflow-hidden">
@@ -159,7 +159,7 @@ export default function StudentClassesPage() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200"
+              className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200 md:hover:border-primary duration-500 transition-colors"
             >
               <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
                 <LayoutGrid className="text-slate-300" size={32} />

@@ -128,7 +128,7 @@ export default function ReportsPage() {
               <p className="text-sm font-bold opacity-60">Total Active Classes</p>
             </div>
 
-            <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100 flex flex-col justify-between">
+            <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100 md:hover:border-primary duration-500 transition-colors flex flex-col justify-between">
               <div>
                 <div className="h-12 w-12 bg-blue-50 rounded-2xl flex items-center justify-center text-primary mb-6">
                   <BookOpen size={24} />
@@ -139,7 +139,7 @@ export default function ReportsPage() {
               <Badge className="w-fit bg-blue-100 text-primary border-none mt-6 font-black text-[9px] tracking-widest">TERM 2026 ACTIVE</Badge>
             </div>
 
-            <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100 flex flex-col justify-between">
+            <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100 md:hover:border-primary duration-500 transition-colors flex flex-col justify-between">
               <div>
                 <div className="h-12 w-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 mb-6">
                   <FileText size={24} />
@@ -183,7 +183,7 @@ function StatCard({ label, value, icon: Icon, color, sub }: any) {
   return (
     <motion.div
       whileHover={{ y: -5 }}
-      className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 transition-all duration-300"
+      className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 md:hover:border-primary duration-500 transition-colors"
     >
       <div className={`h-14 w-14 ${colorMap[color]} rounded-2xl flex items-center justify-center mb-6`}>
         <Icon size={28} />

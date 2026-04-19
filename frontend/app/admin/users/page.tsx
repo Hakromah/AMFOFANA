@@ -308,7 +308,7 @@ export default function UserManagement() {
          {/* 2. ANALYTICS ROW (The Design Upgrade) */}
          <div className="grid lg:grid-cols-3 gap-8">
             {/* User Distribution Chart */}
-            <Card className="lg:col-span-1 border-none shadow-sm rounded-3xl bg-white overflow-hidden">
+            <Card className="lg:col-span-1 border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm rounded-3xl bg-white overflow-hidden">
                <CardHeader className="bg-slate-900 text-white py-4 flex flex-row items-center justify-between">
                   <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2">
                      <PieChart size={14} className="text-blue-400" /> User Matrix
@@ -360,7 +360,7 @@ export default function UserManagement() {
             </Card>
 
             {/* Enrollment Inspector (Selective Lookup) */}
-            <Card className="lg:col-span-2 border-none shadow-sm bg-white rounded-3xl overflow-hidden">
+            <Card className="lg:col-span-2 border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm bg-white rounded-3xl overflow-hidden">
                <CardHeader className="bg-slate-900 text-white py-4">
                   <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2">
                      <Search size={14} className="text-blue-400" /> Enrollment Inspector
@@ -411,7 +411,7 @@ export default function UserManagement() {
 
          {/* 3. SEARCH & ROLE FILTERS */}
          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
-            <Card className="border-none shadow-sm bg-white overflow-hidden p-4">
+            <Card className="border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm bg-white overflow-hidden p-4">
                <div className="flex flex-col md:flex-row gap-4">
                   <div className="relative flex-1">
                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -427,7 +427,7 @@ export default function UserManagement() {
          </motion.div>
 
          {/* 4. MAIN REGISTRY TABLE (Staggered Entrance) */}
-         <Card className="border-none shadow-sm bg-white overflow-hidden rounded-3xl">
+         <Card className="border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm bg-white overflow-hidden rounded-3xl">
             <Table>
                <TableHeader className="bg-slate-50/50">
                   <TableRow className="border-slate-100 hover:bg-transparent">

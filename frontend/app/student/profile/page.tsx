@@ -140,7 +140,7 @@ export default function RedesignedStudentProfile() {
 
                {/* Left Column: Fixed Registry Metadata */}
                <div className="lg:col-span-4 space-y-8">
-                  <Card className="rounded-[2.5rem] border-none shadow-sm bg-white p-8 space-y-8">
+                  <Card className="rounded-[2.5rem] border shadow-sm bg-white p-8 space-y-8 border-slate-100 md:hover:border-primary duration-500 transition-colors">
                      <div className="flex items-center gap-2 text-slate-400">
                         <Info size={16} />
                         <span className="text-[10px] font-black uppercase tracking-widest">Permanent Records</span>
@@ -166,7 +166,7 @@ export default function RedesignedStudentProfile() {
 
                {/* Right Column: Editable Profile & Security */}
                <div className="lg:col-span-8 space-y-8">
-                  <Card className="rounded-[3rem] border-none shadow-xl bg-white overflow-hidden">
+                  <Card className="rounded-[3rem] border shadow-xl bg-white overflow-hidden border-slate-100 md:hover:border-primary duration-500 transition-colors">
                      <CardContent className="p-10">
                         <div className="flex items-center gap-3 mb-10">
                            <div className="h-2 w-10 bg-indigo-600 rounded-full" />
@@ -184,7 +184,7 @@ export default function RedesignedStudentProfile() {
                                  <ProfileField form={profileForm} name="address" label="Residential Address" icon={MapPin} fullWidth />
                               </div>
 
-                              <Button type="submit" className="w-full h-16 bg-slate-900 hover:bg-indigo-600 text-white font-black rounded-[1.5rem] transition-all shadow-xl uppercase text-[11px] tracking-[0.2em]">
+                              <Button type="submit" className="w-full h-16 bg-slate-900 md:hover:bg-primary text-white font-black rounded-3xl transition-all duration-500 shadow-xl uppercase text-[11px] tracking-[0.2em]">
                                  <Save className="mr-3" size={18} /> Update Academic Portfolio
                               </Button>
                            </form>
@@ -226,7 +226,7 @@ export default function RedesignedStudentProfile() {
                                     </FormItem>
                                  )} />
 
-                                 <Button type="submit" className="md:col-span-2 h-14 bg-rose-600 hover:bg-slate-900 text-white font-black rounded-2xl transition-all uppercase text-[10px] tracking-widest">
+                                 <Button type="submit" className="md:col-span-2 h-14 bg-rose-600 md:hover:bg-primary text-white font-black rounded-2xl transition-all duration-500 uppercase text-[10px] tracking-widest">
                                     Revise Security Credentials
                                  </Button>
                               </form>

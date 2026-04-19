@@ -63,8 +63,8 @@ export default function StudentExamsPage() {
                <p className="text-slate-500 font-bold text-sm mt-2 uppercase tracking-widest text-[10px]">Upcoming Assessments & Grading Status</p>
             </div>
 
-            <Card className="border-none shadow-sm rounded-2xl bg-white px-6 py-4 flex items-center gap-4 border border-slate-100">
-               <div className="p-3 bg-blue-50 rounded-xl text-primary">
+            <Card className="shadow-sm rounded-2xl bg-white px-6 py-4 flex items-center gap-4 border border-slate-100 md:hover:border-primary duration-500 transition-colors">
+               <div className="p-3 bg-blue-50 rounded-xl text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-500">
                   <BookOpen size={20} />
                </div>
                <div>
@@ -75,7 +75,7 @@ export default function StudentExamsPage() {
          </div>
 
          {/* Main Registry Table */}
-         <div className="bg-white rounded-[3rem] shadow-sm border border-slate-100 overflow-hidden max-w-7xl mx-auto">
+         <div className="bg-white rounded-[3rem] shadow-sm border border-slate-100 md:hover:border-primary duration-500 transition-colors overflow-hidden max-w-7xl mx-auto">
             <Table>
                <TableHeader className="bg-slate-50/50">
                   <TableRow className="border-none">
@@ -87,7 +87,7 @@ export default function StudentExamsPage() {
                </TableHeader>
                <TableBody>
                   {currentExams.map((exam) => (
-                     <TableRow key={exam.id} className="hover:bg-blue-50/10 transition-colors border-slate-50 group">
+                     <TableRow key={exam.id} className="hover:bg-blue-50/10 transition-colors duration-500 border-slate-50 group">
                         <TableCell className="pl-10 py-6">
                            <div className="font-black text-slate-900 italic uppercase text-sm tracking-tight">{exam.name}</div>
                            <div className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mt-1">Class: {exam.classe.name}</div>
@@ -135,7 +135,7 @@ export default function StudentExamsPage() {
                <div className="flex gap-2">
                   <Button
                      variant="outline"
-                     className="rounded-xl h-10 w-10 p-0 border-slate-200"
+                     className="rounded-xl h-10 w-10 p-0 border-slate-200 md:hover:border-primary md:hover:text-primary duration-500 transition-colors"
                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                      disabled={currentPage === 1}
                   >
@@ -143,7 +143,7 @@ export default function StudentExamsPage() {
                   </Button>
                   <Button
                      variant="outline"
-                     className="rounded-xl h-10 w-10 p-0 border-slate-200"
+                     className="rounded-xl h-10 w-10 p-0 border-slate-200 md:hover:border-primary md:hover:text-primary duration-500 transition-colors"
                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                      disabled={currentPage === totalPages}
                   >
@@ -154,7 +154,7 @@ export default function StudentExamsPage() {
          </div>
 
          {/* Info Card */}
-         <Card className="max-w-7xl mx-auto border-none bg-blue-600 text-white rounded-[2.5rem] p-8 shadow-xl shadow-blue-200 relative overflow-hidden">
+         <Card className="max-w-7xl mx-auto border border-blue-500 md:hover:border-white duration-500 transition-colors bg-blue-600 text-white rounded-[2.5rem] p-8 shadow-xl shadow-blue-200 relative overflow-hidden">
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                <div className="flex items-center gap-6">
                   <div className="bg-white/20 p-4 rounded-3xl backdrop-blur-md">
@@ -165,7 +165,7 @@ export default function StudentExamsPage() {
                      <p className="text-blue-100 text-xs font-medium mt-1">Check your schedule regularly. Teachers may lock assessments upon semester completion.</p>
                   </div>
                </div>
-               <Button variant="outline" className="bg-white/10 border-white/20 hover:bg-white/20 text-white rounded-2xl h-12 px-6 font-black text-[10px] uppercase tracking-widest">
+               <Button variant="outline" className="bg-white/10 border-white/20 md:hover:border-white duration-500 hover:bg-white/20 text-white rounded-2xl h-12 px-6 font-black text-[10px] uppercase tracking-widest transition-colors">
                   Download Regulations
                </Button>
             </div>

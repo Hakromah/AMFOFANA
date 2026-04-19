@@ -170,7 +170,7 @@ export default function TimetableManagement() {
               .filter(item => item.dayOfWeek === selectedDay)
               .sort((a, b) => a.startTime.localeCompare(b.startTime))
               .map((entry) => (
-                <Card key={entry.id} className="border-none shadow-sm rounded-3xl bg-white overflow-hidden group hover:shadow-md transition-all border border-slate-100/50">
+                <Card key={entry.id} className="border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm rounded-3xl bg-white overflow-hidden group hover:shadow-md">
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row md:items-center">
                       {/* Time Block */}
@@ -234,7 +234,7 @@ export default function TimetableManagement() {
               ))}
 
             {timetable.filter(item => item.dayOfWeek === selectedDay).length === 0 && (
-              <div className="h-64 flex flex-col items-center justify-center border-2 border-dashed border-slate-100 rounded-[3rem] text-slate-300">
+              <div className="h-64 flex flex-col items-center justify-center border-2 border-dashed border-slate-100 md:hover:border-primary duration-500 transition-colors rounded-[3rem] text-slate-300">
                 <CalendarIcon size={48} className="mb-4 opacity-20" />
                 <p className="font-black uppercase text-xs tracking-widest">No classes scheduled for {selectedDay}</p>
               </div>

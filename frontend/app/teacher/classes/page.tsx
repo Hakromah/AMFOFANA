@@ -60,7 +60,7 @@ export default function TeacherClassesPage() {
           </div>
         </div>
       ) : classes.length === 0 ? (
-        <div className="max-w-7xl mx-auto bg-white rounded-[3rem] p-24 text-center border border-slate-100 shadow-sm flex flex-col items-center">
+        <div className="max-w-7xl mx-auto bg-white rounded-[3rem] p-24 text-center border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm flex flex-col items-center">
           <div className="bg-slate-50 p-8 rounded-full mb-8">
             <School size={64} className="text-slate-200" />
           </div>
@@ -76,7 +76,7 @@ export default function TeacherClassesPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
             >
-              <Card className="border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden relative">
+              <Card className="border border-slate-100 md:hover:border-primary transition-colors duration-500 shadow-sm hover:shadow-2xl rounded-[2.5rem] bg-white group overflow-hidden relative">
                 <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-indigo-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
 
                 <CardContent className="p-8">
@@ -107,7 +107,7 @@ export default function TeacherClassesPage() {
                     </a>
                   </div>
 
-                  <Button className="w-full h-14 rounded-3xl bg-slate-900 hover:bg-blue-600 text-white font-black uppercase text-[10px] tracking-[0.15em] transition-all group-hover:shadow-xl group-hover:shadow-blue-200" asChild>
+                  <Button className="w-full h-14 rounded-3xl bg-slate-900 md:hover:bg-blue-600 duration-500 text-white font-black uppercase text-[10px] tracking-[0.15em] transition-all group-hover:shadow-xl group-hover:shadow-blue-200" asChild>
                     <a href={`/teacher/timetables`}>
                       View Schedule <ArrowRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" />
                     </a>

@@ -121,7 +121,7 @@ export default function UserTimetablePage() {
                      className="grid gap-6"
                   >
                      {filteredSchedule.map((session) => (
-                        <Card key={session.id} className="border-none shadow-sm rounded-3xl overflow-hidden bg-white border border-slate-100/50 group hover:shadow-xl transition-all duration-500">
+                        <Card key={session.id} className="border border-slate-100/50 md:hover:border-primary shadow-sm rounded-3xl overflow-hidden bg-white group hover:shadow-xl transition-all duration-500">
                            <CardContent className="p-0">
                               <div className="flex flex-col md:flex-row items-stretch">
                                  {/* Left: Time Indicator */}
@@ -176,7 +176,7 @@ export default function UserTimetablePage() {
                   <motion.div
                      initial={{ opacity: 0 }}
                      animate={{ opacity: 1 }}
-                     className="flex flex-col items-center justify-center py-32 px-10 text-center bg-white rounded-[4rem] border-2 border-dashed border-slate-100"
+                     className="flex flex-col items-center justify-center py-32 px-10 text-center bg-white rounded-[4rem] border-2 border-dashed border-slate-100 md:hover:border-primary duration-500 transition-colors"
                   >
                      <div className="w-24 h-24 bg-primary rounded-3xl flex items-center justify-center mb-8">
                         <Calendar className="text-white" size={48} />

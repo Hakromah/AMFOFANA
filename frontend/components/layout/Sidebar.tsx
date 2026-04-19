@@ -17,7 +17,6 @@ import { toast } from 'sonner';
 import ClientOnly from './ClientOnly';
 import { motion, AnimatePresence } from 'framer-motion';
 import Cookies from 'js-cookie';
-
 interface MenuItem {
    name: string;
    href: string;
@@ -52,6 +51,12 @@ export default function Sidebar({ menuItems }: SidebarProps) {
    const [userData, setUserData] = useState<{ name: string; role: string } | null>(null);
    const [draftCount, setDraftCount] = useState(0);
    const [isOnline, setIsOnline] = useState(false);
+   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+   // Close the mobile menu automatically when the pathname changes (user clicks a link)
+   useEffect(() => {
+      setIsMobileMenuOpen(false);
+   }, [pathname]);
 
    useEffect(() => {
       const fetchSidebarData = async () => {
@@ -163,8 +168,6 @@ export default function Sidebar({ menuItems }: SidebarProps) {
                   </nav>
                </div>
             </div>
-
-
             {/* <div>
                <p className="px-5 text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] mb-5">
                   {userData?.role || 'Guest'} Navigation
@@ -266,7 +269,7 @@ export default function Sidebar({ menuItems }: SidebarProps) {
                   </div>
                   <span className="font-black text-lg tracking-tighter uppercase italic">AMF</span>
                </div>
-               <Sheet>
+               <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                   <SheetTrigger asChild>
                      <Button variant="ghost" size="icon" className="relative rounded-2xl bg-slate-50 border border-slate-100">
                         <Menu className="h-6 w-6 text-slate-600" />
@@ -283,7 +286,6 @@ export default function Sidebar({ menuItems }: SidebarProps) {
       </>
    );
 }
-
 
 // /* eslint-disable @typescript-eslint/no-explicit-any */
 // 'use client';

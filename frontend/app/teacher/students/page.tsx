@@ -100,7 +100,7 @@ export default function TeacherStudentsPage() {
     <div className="p-8">
       <h1 className="text-3xl font-bold mb-8">My Students</h1>
 
-      <Card className="mb-8">
+      <Card className="mb-8 border border-slate-200 md:hover:border-primary duration-500 transition-colors shadow-sm">
         <CardHeader>
           <CardTitle>Filter & Search</CardTitle>
         </CardHeader>

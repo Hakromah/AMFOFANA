@@ -253,7 +253,7 @@ export default function AdminResultsPage() {
       </div>
 
       {/* FILTER CONTROLS */}
-      <Card className="bg-slate-50 border-slate-200 shadow-sm">
+      <Card className="bg-slate-50 border border-slate-200 md:hover:border-primary duration-500 transition-colors shadow-sm">
         <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-1">
@@ -300,7 +300,7 @@ export default function AdminResultsPage() {
       </Card>
 
       {/* MAIN DATA TABLE */}
-      <Card className="border-slate-200 shadow-xl overflow-hidden">
+      <Card className="border border-slate-200 md:hover:border-primary duration-500 transition-colors shadow-xl overflow-hidden">
         <Table>
           <TableHeader className="bg-slate-100/80">
             <TableRow>

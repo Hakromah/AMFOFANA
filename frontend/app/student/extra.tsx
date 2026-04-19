@@ -89,7 +89,7 @@ export default function StudentDashboard() {
             <div className="flex gap-3">
                <Button
                   onClick={() => router.push('/student/schedule')}
-                  className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 rounded-2xl px-6 h-12 font-bold shadow-sm"
+                  className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 md:hover:border-primary transition-colors duration-500 rounded-2xl px-6 h-12 font-bold shadow-sm"
                >
                   <CalendarIcon size={18} className="mr-2 text-primary" />
                   Schedule
@@ -111,7 +111,7 @@ export default function StudentDashboard() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1 }}
                >
-                  <Card className="border-none shadow-sm rounded-4 overflow-hidden bg-white group hover:shadow-md transition-shadow">
+                  <Card className="border border-slate-100 md:hover:border-primary duration-500 shadow-sm rounded-4 overflow-hidden bg-white group hover:shadow-md transition-all">
                      <CardContent className="p-6">
                         <div className="flex justify-between items-start">
                            <div className={`p-3 rounded-2xl ${item.bg} ${item.color}`}>
@@ -131,7 +131,7 @@ export default function StudentDashboard() {
 
          <div className="grid gap-6 lg:grid-cols-3">
             {/* Main Chart Section */}
-            <Card className="lg:col-span-2 border-none shadow-sm rounded-[2.5rem] bg-white p-8">
+            <Card className="lg:col-span-2 border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm rounded-[2.5rem] bg-white p-8">
                <div className="flex items-center justify-between mb-8">
                   <div>
                      <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight italic">Attendance Pulse</h2>
@@ -160,7 +160,7 @@ export default function StudentDashboard() {
 
             {/* Sidebar Info - INTEGRATED DYNAMIC DATA */}
             <div className="space-y-6">
-               <Card className="border-none shadow-sm rounded-[2.5rem] bg-slate-900 text-white p-8 overflow-hidden relative group">
+               <Card className="border border-slate-800 md:hover:border-primary duration-500 transition-colors shadow-sm rounded-[2.5rem] bg-slate-900 text-white p-8 overflow-hidden relative group">
                   <div className="relative z-10">
                      <h2 className="text-lg font-black uppercase tracking-widest mb-4 italic">Exam Reminder</h2>
                      {extras.nextExam ? (
@@ -180,7 +180,7 @@ export default function StudentDashboard() {
                      )}
                      <Button
                         onClick={() => router.push('/student/exams')}
-                        className="w-full mt-6 bg-white text-slate-900 hover:bg-primary hover:text-white rounded-2xl h-12 font-black uppercase text-[10px] tracking-widest transition-all"
+                        className="w-full mt-6 bg-white text-slate-900 md:hover:bg-primary md:hover:text-white duration-500 rounded-2xl h-12 font-black uppercase text-[10px] tracking-widest transition-all"
                      >
                         GO TO EXAM HUB
                      </Button>
@@ -188,7 +188,7 @@ export default function StudentDashboard() {
                   <BookOpen className="absolute -right-8 -bottom-8 text-white/5" size={180} />
                </Card>
 
-               <Card className="border-none shadow-sm rounded-[2.5rem] bg-white p-8">
+               <Card className="border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm rounded-[2.5rem] bg-white p-8">
                   <h2 className="text-xs font-black uppercase text-slate-400 tracking-widest mb-6">Recent Activity</h2>
                   <div className="space-y-6">
                      {extras.recentActivities.length > 0 ? (

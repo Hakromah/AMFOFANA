@@ -234,7 +234,7 @@ export default function TeacherAttendancePage() {
         view === 'mark' ? (
           /* MARKING VIEW */
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <Card className="lg:col-span-2 border-none shadow-sm rounded-[2.5rem] bg-white overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <Card className="lg:col-span-2 border border-transparent md:hover:border-primary duration-500 transition-colors shadow-sm rounded-[2.5rem] bg-white overflow-hidden animate-in fade-in slide-in-from-bottom-4">
               <CardHeader className="border-b border-slate-50 p-8 flex flex-row items-center justify-between">
                 <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Class Registry</CardTitle>
                 <Badge className="bg-blue-50 text-primary border-none font-black px-4 py-1 rounded-full uppercase text-[9px]">
@@ -284,7 +284,7 @@ export default function TeacherAttendancePage() {
             </Card>
 
             <div className="space-y-6">
-              <Card className="border-none shadow-xl rounded-[2.5rem] bg-slate-900 text-white p-8">
+              <Card className="border border-slate-800 md:hover:border-primary duration-500 transition-colors shadow-xl rounded-[2.5rem] bg-slate-900 text-white p-8">
                 <div className="space-y-8">
                   <div className="flex items-center gap-4">
                     <div className="p-4 bg-white/10 rounded-2xl">
@@ -322,7 +322,7 @@ export default function TeacherAttendancePage() {
                   <Button
                     onClick={handleSubmitAttendance}
                     disabled={submitting}
-                    className="w-full h-16 bg-blue-600 hover:bg-primary text-white round-3xl font-black uppercase text-[10px] tracking-[0.2em] transition-all shadow-xl shadow-blue-900/40 border-none"
+                    className="w-full h-16 bg-blue-600 md:hover:bg-primary text-white round-3xl font-black uppercase text-[10px] tracking-[0.2em] transition-all duration-500 shadow-xl shadow-blue-900/40 border-none"
                   >
                     {submitting ? <Loader2 className="animate-spin" /> : (
                       isEditing ? <><Save size={18} className="mr-2" /> Update Session</> : <><Save size={18} className="mr-2" /> Finalize Registry</>
@@ -346,7 +346,7 @@ export default function TeacherAttendancePage() {
           /* HISTORY VIEW */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {history.length > 0 ? history.map((session, idx) => (
-              <Card key={session.id} className="border-none shadow-sm rounded-4xl bg-white p-8 group hover:shadow-xl transition-all duration-500">
+              <Card key={session.id} className="border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm rounded-4xl bg-white p-8 group hover:shadow-xl">
                 <div className="flex justify-between items-start mb-6">
                   <div className="bg-slate-50 p-4 rounded-2xl group-hover:bg-blue-50 group-hover:text-primary transition-colors">
                     <Calendar size={24} />
@@ -386,7 +386,7 @@ export default function TeacherAttendancePage() {
         )
       ) : (
         /* EMPTY STATE */
-        <div className="h-[500px] flex flex-col items-center justify-center bg-white rounded-[4rem] border border-dashed border-slate-200">
+        <div className="h-[500px] flex flex-col items-center justify-center bg-white rounded-[4rem] border border-dashed border-slate-200 md:hover:border-primary duration-500 transition-colors">
           <div className="p-8 bg-slate-50 rounded-full mb-6">
             <Users size={64} className="text-slate-200" />
           </div>

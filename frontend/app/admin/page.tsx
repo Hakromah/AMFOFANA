@@ -91,7 +91,7 @@ export default function AdminDashboard() {
 
       <div className="grid lg:grid-cols-3 gap-8">
         {/* ANALYTICS: USER DISTRIBUTION */}
-        <Card className="lg:col-span-1 border-none shadow-sm rounded-3xl overflow-hidden bg-white">
+        <Card className="lg:col-span-1 border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm rounded-3xl overflow-hidden bg-white">
           <CardHeader className="border-b border-slate-50">
             <CardTitle className="text-lg font-bold">User Matrix</CardTitle>
           </CardHeader>
@@ -130,7 +130,7 @@ export default function AdminDashboard() {
         </Card>
 
         {/* BAR CHART - INFRASTRUCTURE */}
-        <Card className="lg:col-span-2 border-none shadow-sm rounded-3xl overflow-hidden bg-white">
+        <Card className="lg:col-span-2 border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm rounded-3xl overflow-hidden bg-white">
           <CardHeader className="border-b border-slate-50">
             <CardTitle className="text-lg font-bold">Academic Infrastructure</CardTitle>
           </CardHeader>
@@ -155,7 +155,7 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
-        <Card className="border-none shadow-2xl overflow-hidden bg-slate-900 rounded-3xl">
+        <Card className="border border-slate-800 md:hover:border-primary duration-500 transition-colors shadow-2xl overflow-hidden bg-slate-900 rounded-3xl">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Activity className="w-5 h-5 text-blue-400" />
@@ -204,7 +204,7 @@ function StatCard({ title, value, icon: Icon, color, sub }: any) {
 
   return (
     <motion.div whileHover={{ y: -5 }} transition={{ type: "spring", stiffness: 300 }}>
-      <Card className="border-none shadow-sm relative overflow-hidden bg-white rounded-3xl">
+      <Card className="border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm relative overflow-hidden bg-white rounded-3xl">
         <div className={`absolute top-0 left-0 w-2 h-full ${colorMap[color].split(' ')[0]}`} />
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{title}</CardTitle>
