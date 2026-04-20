@@ -114,8 +114,8 @@ export default function TeacherDashboard() {
               <CheckCircle2 className="w-3 h-3 text-blue-400" />
               Academic Registry Live
             </div>
-            <h1 className="text-4xl font-black mb-2 tracking-tight">Welcome back,</h1>
-            <h2 className="text-5xl text-blue-400 font-extrabold mb-4">{stats.teacherName || 'Educator'}</h2>
+            <h1 className="text-[clamp(1.2rem,2.5vw+1rem,3rem)] font-black mb-2 tracking-tight">Welcome back,</h1>
+            <h2 className="text-[clamp(1.2rem,2.5vw+1rem,4rem)] text-blue-400 font-extrabold mb-4">{stats.teacherName || 'Educator'}</h2>
             <p className="text-slate-400 text-lg max-w-md leading-relaxed">System synchronized. You have <span className="text-white font-bold">{stats.classes} classes</span> active this semester.</p>
           </motion.div>
 
@@ -150,7 +150,7 @@ export default function TeacherDashboard() {
           { label: 'Academic Materials', val: stats.exams, icon: FileText, color: 'bg-amber-500' }
         ].map((item, i) => (
           <motion.div key={i} whileHover={{ y: -5 }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-            <Card className="border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm bg-white relative overflow-hidden">
+            <Card className="border border-slate-100 py-3 md:hover:border-primary duration-500 transition-colors shadow-sm bg-white relative overflow-hidden">
               <div className={`absolute top-0 left-0 w-1.5 h-full ${item.color}`} />
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{item.label}</CardTitle>
@@ -201,13 +201,13 @@ export default function TeacherDashboard() {
 
         {/* UPCOMING TIMELINE */}
         <div className="space-y-6">
-        <Card className="border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm bg-white overflow-hidden">
+        <Card className="border border-slate-100 py-3 md:hover:border-primary duration-500 transition-colors shadow-sm bg-white overflow-hidden">
             <CardHeader className="pb-2 border-b bg-slate-50/50">
               <CardTitle className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-blue-500" /> Upcoming Timeline
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-4 space-y-4">
+            <CardContent className="pt-4 space-y-4 w-full">
               {upcomingExams.map((ex, i) => (
                 <div key={i} className={`p-3 rounded-xl border ${i === 0 ? 'bg-blue-600 text-white shadow-lg border-blue-700' : 'bg-slate-50 border-slate-100'}`}>
                   <p className={`text-[9px] font-black uppercase ${i === 0 ? 'text-blue-100' : 'text-slate-400'}`}>{ex.term || 'Unknown Term'}</p>

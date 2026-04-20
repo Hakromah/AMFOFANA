@@ -117,7 +117,7 @@ export default function GradebookPage() {
       <div className="p-8 space-y-6">
          <div className="flex justify-between items-center">
             <div>
-               <h1 className="text-3xl font-bold tracking-tight">Gradebook</h1>
+               <h1 className="text-[clamp(1.3rem,1vw+0.5rem,2rem)] font-bold tracking-tight">Gradebook</h1>
                <p className="text-muted-foreground">Monitor and export student performance.</p>
             </div>
 
@@ -129,10 +129,10 @@ export default function GradebookPage() {
                )}
 
                <Select onValueChange={setSelectedClassId}>
-                  <SelectTrigger className="w-[250px]">
+                  <SelectTrigger className="w-[250px] border-border hover:border-primary transition-colors duration-300">
                      <SelectValue placeholder="Select a Class" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="border-border hover:border-primary transition-colors duration-300">
                      {classes.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
                   </SelectContent>
                </Select>

@@ -97,10 +97,10 @@ export default function TeacherStudentsPage() {
   });
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-8">My Students</h1>
+    <div className="p-[clamp(1.3rem,1vw+0.5rem,2rem)]">
+      <h1 className="text-[clamp(1rem,2.5vw+1rem,2rem)] font-bold mb-[clamp(1rem,2vw+1rem,1.5rem)]">My Students</h1>
 
-      <Card className="mb-8 border border-slate-200 md:hover:border-primary duration-500 transition-colors shadow-sm">
+      <Card className="mb-[clamp(1rem,2vw+1rem,1.5rem)] border py-3 border-slate-200 md:hover:border-primary duration-500 transition-colors shadow-sm">
         <CardHeader>
           <CardTitle>Filter & Search</CardTitle>
         </CardHeader>
@@ -112,14 +112,13 @@ export default function TeacherStudentsPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="max-w-sm"
           />
-
           {/* Class Filter Dropdown */}
           <Select value={selectedClassId} onValueChange={setSelectedClassId}>
-            <SelectTrigger className="w-[280px]">
+            <SelectTrigger className="w-[280px] border-border lg:hover:border-primary transition-colors duration-300">
               <SelectValue placeholder="All My Classes" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Classes / All Students</SelectItem>
+            <SelectContent className="border-border hover:border-primary transition-colors duration-300">
+              <SelectItem value="all" >All Classes / All Students</SelectItem>
               {classes.map((c) => (
                 <SelectItem key={c.id} value={String(c.id)}>
                   {c.name} - {c.grade}

@@ -68,7 +68,7 @@ export default function UserTimetablePage() {
    }
 
    return (
-      <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10 space-y-10">
+      <div className="md:min-h-screen bg-[#F8FAFC] p-6 lg:p-10 space-y-10">
          {/* Header Section */}
          <header className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>

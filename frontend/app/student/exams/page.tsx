@@ -55,11 +55,11 @@ export default function StudentExamsPage() {
    );
 
    return (
-      <div className="p-6 lg:p-10 bg-[#f8fafc] min-h-screen space-y-8">
+      <div className="p-6 lg:p-10 bg-[#f8fafc] md:min-h-screen space-y-[clamp(1rem,2vw+1rem,2rem)]">
          {/* Header Section */}
          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>
-               <h1 className="text-5xl font-black text-slate-900 tracking-tighter italic">Exam <span className="text-primary">Pulse.</span></h1>
+               <h1 className="text-[clamp(1.2rem,2.5vw+1rem,3rem)] font-black text-slate-900 tracking-tighter italic">Exam <span className="text-primary">Pulse.</span></h1>
                <p className="text-slate-500 font-bold text-sm mt-2 uppercase tracking-widest text-[10px]">Upcoming Assessments & Grading Status</p>
             </div>
 
@@ -75,7 +75,7 @@ export default function StudentExamsPage() {
          </div>
 
          {/* Main Registry Table */}
-         <div className="bg-white rounded-[3rem] shadow-sm border border-slate-100 md:hover:border-primary duration-500 transition-colors overflow-hidden max-w-7xl mx-auto">
+         <div className="bg-white rounded-[clamp(1rem,2vw+1rem,2rem)] shadow-sm border border-slate-100 md:hover:border-primary duration-500 transition-colors overflow-hidden max-w-7xl mx-auto">
             <Table>
                <TableHeader className="bg-slate-50/50">
                   <TableRow className="border-none">
@@ -154,7 +154,7 @@ export default function StudentExamsPage() {
          </div>
 
          {/* Info Card */}
-         <Card className="max-w-7xl mx-auto border border-blue-500 md:hover:border-white duration-500 transition-colors bg-blue-600 text-white rounded-[2.5rem] p-8 shadow-xl shadow-blue-200 relative overflow-hidden">
+         <Card className="max-w-7xl mx-auto border border-blue-500 md:hover:border-white duration-500 transition-colors bg-blue-600 text-white rounded-[clamp(1rem,2vw+1rem,2rem)] p-8 shadow-xl shadow-blue-200 relative overflow-hidden">
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                <div className="flex items-center gap-6">
                   <div className="bg-white/20 p-4 rounded-3xl backdrop-blur-md">

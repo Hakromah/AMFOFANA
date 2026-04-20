@@ -159,17 +159,17 @@ export default function TeacherMaterialsPage() {
   if (loading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-primary" size={40} /></div>;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10 space-y-10">
-      <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+    <div className="md:min-h-screen bg-[#F8FAFC] p-[clamp(1.5rem,2vw+0.5rem,3rem)] lg:p-10 space-y-[clamp(1rem,2vw+0.5rem,3rem)]">
+      <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-[clamp(1rem,2vw+0.5rem,3rem)]">
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-[0.4em]">
             <Monitor size={14} /> Curriculum Management
           </div>
-          <h1 className="text-5xl font-black text-slate-900 tracking-tighter sm:text-7xl italic uppercase">
+          <h1 className="text-[clamp(1.3rem,2vw+0.5rem,3rem)] font-black text-slate-900 tracking-tighter italic uppercase">
             Learning <span className="text-primary">Assets.</span>
           </h1>
         </div>
-        <Button onClick={() => setIsUploadOpen(true)} className="bg-slate-900 hover:bg-blue-600 text-white rounded-3xl h-14 px-8 font-black shadow-xl">
+        <Button onClick={() => setIsUploadOpen(true)} className="bg-slate-900 hover:bg-blue-600 text-white rounded-[clamp(1rem,2vw+0.5rem,3rem)] h-14 px-8 font-black shadow-xl">
           <Plus size={20} className="mr-2" /> PUBLISH RESOURCE
         </Button>
       </header>
@@ -179,7 +179,7 @@ export default function TeacherMaterialsPage() {
         <AnimatePresence mode="popLayout">
           {materials.map((mat) => (
             <motion.div key={mat.id} layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}>
-              <Card className="rounded-[2.5rem] border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm bg-white p-8 hover:shadow-2xl h-full flex flex-col justify-between group">
+              <Card className="rounded-[clamp(1rem,2vw+0.5rem,3rem)] border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm bg-white p-8 hover:shadow-2xl h-full flex flex-col justify-between group">
                 <div>
                   <div className="flex justify-between items-start mb-6">
                     <div className="h-14 w-14 rounded-2xl bg-blue-50 flex items-center justify-center text-primary group-hover:bg-blue-600 group-hover:text-white transition-all">
@@ -202,7 +202,7 @@ export default function TeacherMaterialsPage() {
                     ))}
                   </div>
                   {/* The Footer Section */}
-                  <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                  <div className="flex items-center justify-between py-5 border-t flex-wrap border-slate-50">
                     <div className="flex flex-col gap-1 text-[10px] font-black text-slate-300 uppercase tracking-widest">
                       <div className="flex items-center gap-1.5">
                         <Calendar size={12} /> {new Date(mat.createdAt).toLocaleDateString()}
@@ -212,7 +212,7 @@ export default function TeacherMaterialsPage() {
                       </div>
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-5 pt-3">
                       {/* PREVIEW BUTTON: No attachment flags, just f_auto and conditional .pdf */}
                       <Button
                         variant="outline"

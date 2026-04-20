@@ -184,11 +184,11 @@ export default function TeacherExamsPage() {
    );
 
    return (
-      <div className="p-6 lg:p-10 bg-[#f8fafc] min-h-screen space-y-8">
+      <div className="p-6 lg:p-10 bg-[#f8fafc] md:min-h-screen space-y-[clamp(1.3rem,1vw+0.5rem,2rem)]">
          {/* Header */}
          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 max-w-7xl mx-auto">
             <div>
-               <h1 className="text-5xl font-black text-slate-900 tracking-tighter italic">Exam <span className="text-primary">Center.</span></h1>
+               <h1 className="text-[clamp(1.3rem,2.5vw+1rem,2rem)] font-black text-slate-900 tracking-tighter italic">Exam <span className="text-primary">Center.</span></h1>
                <p className="text-slate-500 font-bold text-sm mt-2 uppercase tracking-widest text-[10px]">Registry & Assessments • 2026</p>
             </div>
             <Button onClick={() => { setEditingExam(null); form.reset(); setIsDialogOpen(true); }} className="bg-slate-900 hover:bg-blue-600 rounded-2xl h-14 px-8 font-black transition-all shadow-xl">
@@ -197,7 +197,7 @@ export default function TeacherExamsPage() {
          </div>
 
          {/* Table Card */}
-         <div className="bg-white rounded-[3rem] shadow-sm border border-slate-100 md:hover:border-primary duration-500 transition-colors overflow-hidden max-w-7xl mx-auto">
+         <div className="bg-white rounded-[clamp(1.3rem,1vw+0.5rem,2rem)] shadow-sm border border-slate-100 md:hover:border-primary duration-500 transition-colors overflow-hidden max-w-7xl mx-auto">
             <Table>
                <TableHeader className="bg-slate-50/50">
                   <TableRow className="border-none">

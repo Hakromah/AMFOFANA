@@ -62,9 +62,9 @@ export default function StudentClassesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-6 lg:p-10">
+    <div className="md:min-h-screen bg-[#f8fafc] p-6 lg:p-10">
       {/* Header Section */}
-      <div className="max-w-7xl mx-auto mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div className="max-w-7xl mx-auto mb-[clamp(1.3rem,1.5vw+1rem,2rem)] flex flex-col md:flex-row md:items-end justify-between gap-6 max-md:gap-5">
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-[0.3em]">
             <GraduationCap size={16} />

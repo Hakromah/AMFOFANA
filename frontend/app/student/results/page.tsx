@@ -230,19 +230,19 @@ export default function StudentResultsPage() {
    }
 
    return (
-      <div className="p-8 space-y-8 max-w-7xl mx-auto">
+      <div className="p-8 space-y-[clamp(1.3rem,2vw+1rem,2rem)] max-w-7xl mx-auto">
          {/* HEADER */}
          <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-6">
             <div>
-               <h1 className="text-3xl font-bold tracking-tight">Academic Portal</h1>
+               <h1 className="text-[clamp(1.2rem,2.5vw+1rem,3rem)] font-black text-slate-900 tracking-tighter italic">Academic <span className="text-primary">Portal.</span></h1>
                <p className="text-muted-foreground">Welcome, {results[0]?.student?.name || 'Student'}. View your growth and performance.</p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center flex-wrap gap-4">
                <Button onClick={downloadTranscript} className="gap-2 border border-blue-600 md:hover:border-white bg-blue-600 md:hover:bg-primary duration-500 transition-colors h-11">
                   <FileCheck className="w-4 h-4" />
                   {selectedRows.size > 0 ? `Export Selected (${selectedRows.size})` : 'Export Transcript'}
                </Button>
-               <div className="flex items-center gap-4 bg-primary/5 p-4 rounded-xl border border-primary/10">
+               <div className="flex items-center gap-4 bg-primary/5 p-4 rounded-xl border border-primary/10 md:hover:border-primary duration-300">
                   <div className="text-right">
                      <p className="text-xs uppercase text-muted-foreground font-bold">Overall Average</p>
                      <p className="text-3xl font-black text-primary">{averageScore}%</p>
@@ -259,7 +259,7 @@ export default function StudentResultsPage() {
                <span className="text-sm font-bold uppercase">Filter Results:</span>
             </div>
             <Select value={selectedSemester} onValueChange={(val) => { setSelectedSemester(val); setSelectedRows(new Set()); }}>
-               <SelectTrigger className="w-[200px] bg-white border border-slate-200 md:hover:border-primary duration-500 transition-colors">
+               <SelectTrigger className="md:w-[200px] w-full bg-white border border-slate-200 md:hover:border-primary duration-500 transition-colors">
                   <SelectValue placeholder="All Semesters" />
                </SelectTrigger>
                <SelectContent>
@@ -271,7 +271,7 @@ export default function StudentResultsPage() {
 
          {/* ANALYTICS GRID */}
          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card className="lg:col-span-2 shadow-sm border-slate-200/60">
+            <Card className="lg:col-span-2 shadow-sm border-slate-200/60 py-5">
                <CardHeader className="flex flex-row items-center justify-between">
                   <div className="flex items-center gap-2">
                      <TrendingUp className="w-5 h-5 text-blue-500" />
@@ -294,7 +294,7 @@ export default function StudentResultsPage() {
             </Card>
 
             <div className="flex flex-col gap-4">
-               <Card className="bg-primary text-primary-foreground border border-transparent md:hover:border-blue-300 duration-500 transition-colors shadow-lg">
+               <Card className="bg-primary text-primary-foreground border py-2 border-transparent md:hover:border-blue-300 duration-500 transition-colors shadow-lg">
                   <CardHeader className="pb-2">
                      <CardTitle className="text-primary-foreground/70 text-xs font-bold uppercase">Peak Performance</CardTitle>
                   </CardHeader>
@@ -304,7 +304,7 @@ export default function StudentResultsPage() {
                   </CardContent>
                </Card>
 
-               <Card className="flex-1 border md:hover:border-primary duration-500 transition-colors border-dashed">
+               <Card className="flex-1 border md:hover:border-primary py-3 duration-500 transition-colors border-dashed">
                   <CardHeader className="pb-2">
                      <CardTitle className="text-xs font-bold text-muted-foreground uppercase">Evaluations</CardTitle>
                   </CardHeader>

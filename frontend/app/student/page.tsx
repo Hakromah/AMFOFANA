@@ -66,7 +66,7 @@ export default function StudentDashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#fcfcfd] p-5 md:p-[clamp(1rem,2.5vw+1rem,2rem)] lg:p-10 space-y-8">
+    <div className="min-h-screen bg-[#fcfcfd] p-5 md:p-[clamp(1rem,2.5vw+1rem,2rem)] lg:p-10 space-y-[clamp(1rem,1.5vw+1rem,2rem)]">
       {/* Welcome Header */}
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>

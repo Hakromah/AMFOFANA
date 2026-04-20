@@ -103,8 +103,8 @@ export default function RedesignedStudentProfile() {
    );
 
    return (
-      <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10 space-y-10">
-         <div className="max-w-7xl mx-auto space-y-10">
+      <div className="md:min-h-screen bg-[#F8FAFC] p-6 lg:p-10 space-y-10">
+         <div className="max-w-7xl mx-auto space-y-[clamp(1rem,2vw+1rem,2rem)]">
 
             {/* Header Hero Section */}
             <div className="relative bg-white rounded-[3rem] p-8 md:p-12 shadow-sm border border-slate-100 overflow-hidden">
@@ -115,7 +115,7 @@ export default function RedesignedStudentProfile() {
                      <div className="w-32 h-32 md:w-44 md:h-44 rounded-[3rem] bg-indigo-600 flex items-center justify-center text-white text-6xl font-black italic shadow-2xl">
                         {studentData?.name?.charAt(0)}
                      </div>
-                     <Button className="absolute -bottom-2 -right-2 bg-white p-3 rounded-2xl shadow-xl hover:scale-110 transition-transform text-indigo-600 border border-slate-100">
+                     <Button className="absolute -bottom-2 -right-2 bg-white p-3 rounded-[clamp(1rem,2vw+1rem,2rem)] shadow-xl hover:scale-110 transition-transform text-indigo-600 border border-slate-100">
                         <Camera size={20} />
                      </Button>
                   </div>
@@ -127,7 +127,7 @@ export default function RedesignedStudentProfile() {
                            <BadgeCheck size={12} /> Verified Account
                         </Badge>
                      </div>
-                     <h1 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter italic uppercase">{studentData?.name}</h1>
+                     <h1 className="text-[clamp(1.2rem,2.5vw+1rem,3rem)] font-black text-slate-900 tracking-tighter italic uppercase">{studentData?.name}</h1>
                      <div className="flex flex-wrap justify-center md:justify-start gap-6 text-slate-400 font-bold text-[11px] uppercase tracking-widest">
                         <span className="flex items-center gap-2"><GraduationCap size={16} className="text-indigo-500" /> ID: {studentData?.userId}</span>
                         <span className="flex items-center gap-2"><Globe size={16} className="text-indigo-500" /> {studentData?.email}</span>
@@ -184,7 +184,7 @@ export default function RedesignedStudentProfile() {
                                  <ProfileField form={profileForm} name="address" label="Residential Address" icon={MapPin} fullWidth />
                               </div>
 
-                              <Button type="submit" className="w-full h-16 bg-slate-900 md:hover:bg-primary text-white font-black rounded-3xl transition-all duration-500 shadow-xl uppercase text-[11px] tracking-[0.2em]">
+                              <Button type="submit" className="w-full h-16 bg-slate-900 md:hover:bg-primary text-white font-black rounded-[clamp(1rem,2vw+1rem,3rem)] transition-all duration-500 shadow-xl uppercase text-[11px] tracking-[0.2em]">
                                  <Save className="mr-3" size={18} /> Update Academic Portfolio
                               </Button>
                            </form>
@@ -205,7 +205,7 @@ export default function RedesignedStudentProfile() {
                                        <FormLabel className="text-[10px] font-black uppercase text-slate-400 ml-1">Current Key</FormLabel>
                                        <div className="relative">
                                           <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-                                          <FormControl><Input type={showCurrentPwd ? "text" : "password"} {...field} className="h-14 pl-12 pr-12 rounded-2xl bg-slate-50 border-none font-bold" /></FormControl>
+                                          <FormControl><Input type={showCurrentPwd ? "text" : "password"} {...field} className="h-14 pl-12 pr-12 rounded-[clamp(1rem,2vw+1rem,2rem)] bg-slate-50 border-none font-bold md:hover:bg-indigo-50/50 md:hover:ring-2 md:hover:ring-indigo-600/20 transition-all duration-300" /></FormControl>
                                           <button type="button" onClick={() => setShowCurrentPwd(!showCurrentPwd)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
                                              {showCurrentPwd ? <EyeOff size={16} /> : <Eye size={16} />}
                                           </button>
@@ -218,7 +218,7 @@ export default function RedesignedStudentProfile() {
                                        <FormLabel className="text-[10px] font-black uppercase text-slate-400 ml-1">New Access Key</FormLabel>
                                        <div className="relative">
                                           <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-                                          <FormControl><Input type={showNewPwd ? "text" : "password"} {...field} className="h-14 pl-12 pr-12 rounded-2xl bg-slate-50 border-none font-bold" /></FormControl>
+                                          <FormControl><Input type={showNewPwd ? "text" : "password"} {...field} className="h-14 pl-12 pr-12 rounded-[clamp(1rem,2vw+1rem,2rem)] bg-slate-50 border-none font-bold md:hover:bg-indigo-50/50 md:hover:ring-2 md:hover:ring-indigo-600/20 transition-all duration-300" /></FormControl>
                                           <button type="button" onClick={() => setShowNewPwd(!showNewPwd)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
                                              {showNewPwd ? <EyeOff size={16} /> : <Eye size={16} />}
                                           </button>
@@ -226,7 +226,7 @@ export default function RedesignedStudentProfile() {
                                     </FormItem>
                                  )} />
 
-                                 <Button type="submit" className="md:col-span-2 h-14 bg-rose-600 md:hover:bg-primary text-white font-black rounded-2xl transition-all duration-500 uppercase text-[10px] tracking-widest">
+                                 <Button type="submit" className="md:col-span-2 h-14 bg-rose-600 md:hover:bg-primary text-white font-black rounded-[clamp(1rem,2vw+1rem,2rem)] transition-all duration-500 uppercase text-[10px] tracking-widest">
                                     Revise Security Credentials
                                  </Button>
                               </form>
@@ -240,13 +240,12 @@ export default function RedesignedStudentProfile() {
       </div>
    );
 }
-
 // --- HELPER COMPONENTS ---
 
 function MetadataItem({ label, value, icon: Icon }: any) {
    return (
       <div className="flex items-center gap-4 group">
-         <div className="p-3 rounded-2xl bg-slate-50 text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+         <div className="p-3 rounded-[clamp(1rem,2vw+1rem,2rem)] bg-slate-50 text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
             <Icon size={18} />
          </div>
          <div>
@@ -267,7 +266,7 @@ function ProfileField({ form, name, label, icon: Icon, fullWidth }: any) {
                   <Icon size={18} />
                </div>
                <FormControl>
-                  <Input {...field} className="h-14 pl-14 rounded-2xl bg-slate-50 border-none font-bold text-slate-700 focus-visible:ring-2 focus-visible:ring-indigo-600/10" />
+                  <Input {...field} className="h-14 pl-14 rounded-[clamp(1rem,2vw+1rem,2rem)] bg-slate-50 border-none font-bold text-slate-700 focus-visible:ring-2 focus-visible:ring-indigo-600/10 md:hover:bg-indigo-50/50 md:hover:ring-2 md:hover:ring-indigo-600/20 transition-all duration-300" />
                </FormControl>
             </div>
             <FormMessage className="text-[10px] font-bold" />
@@ -410,7 +409,7 @@ function ProfileField({ form, name, label, icon: Icon, fullWidth }: any) {
 //                      <div className="w-32 h-32 md:w-40 md:h-40 rounded-[2.5rem] bg-indigo-600 flex items-center justify-center text-white text-5xl font-black italic shadow-2xl">
 //                         {studentData?.name?.charAt(0)}
 //                      </div>
-//                      <Button className="absolute bottom-2 right-2 bg-white p-3 rounded-2xl shadow-xl hover:scale-110 transition-transform text-indigo-600 border border-indigo-50">
+//                      <Button className="absolute bottom-2 right-2 bg-white p-3 rounded-[clamp(1rem,2vw+1rem,2rem)] shadow-xl hover:scale-110 transition-transform text-indigo-600 border border-indigo-50">
 //                         <Camera size={20} />
 //                      </Button>
 //                   </div>
@@ -448,7 +447,7 @@ function ProfileField({ form, name, label, icon: Icon, fullWidth }: any) {
 //                               <FormField control={profileForm.control} name="name" render={({ field }) => (
 //                                  <FormItem className="md:col-span-2">
 //                                     <FormLabel className="text-[10px] font-black uppercase text-slate-400">Full Academic Name</FormLabel>
-//                                     <FormControl><Input {...field} className="h-14 rounded-2xl bg-slate-50 border-none font-bold focus:ring-2 focus:ring-indigo-500/20" /></FormControl>
+//                                     <FormControl><Input {...field} className="h-14 rounded-[clamp(1rem,2vw+1rem,2rem)] bg-slate-50 border-none font-bold focus:ring-2 focus:ring-indigo-500/20" /></FormControl>
 //                                     <FormMessage />
 //                                  </FormItem>
 //                               )} />
@@ -456,7 +455,7 @@ function ProfileField({ form, name, label, icon: Icon, fullWidth }: any) {
 //                               <FormField control={profileForm.control} name="email" render={({ field }) => (
 //                                  <FormItem>
 //                                     <FormLabel className="text-[10px] font-black uppercase text-slate-400">Communication Email</FormLabel>
-//                                     <FormControl><Input {...field} className="h-14 rounded-2xl bg-slate-50 border-none font-bold" /></FormControl>
+//                                     <FormControl><Input {...field} className="h-14 rounded-[clamp(1rem,2vw+1rem,2rem)] bg-slate-50 border-none font-bold" /></FormControl>
 //                                     <FormMessage />
 //                                  </FormItem>
 //                               )} />
@@ -464,7 +463,7 @@ function ProfileField({ form, name, label, icon: Icon, fullWidth }: any) {
 //                               <FormField control={profileForm.control} name="phoneNumber" render={({ field }) => (
 //                                  <FormItem>
 //                                     <FormLabel className="text-[10px] font-black uppercase text-slate-400">Contact Number</FormLabel>
-//                                     <FormControl><Input {...field} placeholder="+00 000 000" className="h-14 rounded-2xl bg-slate-50 border-none font-bold" /></FormControl>
+//                                     <FormControl><Input {...field} placeholder="+00 000 000" className="h-14 rounded-[clamp(1rem,2vw+1rem,2rem)] bg-slate-50 border-none font-bold" /></FormControl>
 //                                     <FormMessage />
 //                                  </FormItem>
 //                               )} />
@@ -472,7 +471,7 @@ function ProfileField({ form, name, label, icon: Icon, fullWidth }: any) {
 //                               <FormField control={profileForm.control} name="birthCity" render={({ field }) => (
 //                                  <FormItem>
 //                                     <FormLabel className="text-[10px] font-black uppercase text-slate-400">Birth City</FormLabel>
-//                                     <FormControl><Input {...field} className="h-14 rounded-2xl bg-slate-50 border-none font-bold" /></FormControl>
+//                                     <FormControl><Input {...field} className="h-14 rounded-[clamp(1rem,2vw+1rem,2rem)] bg-slate-50 border-none font-bold" /></FormControl>
 //                                     <FormMessage />
 //                                  </FormItem>
 //                               )} />
@@ -480,13 +479,13 @@ function ProfileField({ form, name, label, icon: Icon, fullWidth }: any) {
 //                               <FormField control={profileForm.control} name="address" render={({ field }) => (
 //                                  <FormItem className="md:col-span-2">
 //                                     <FormLabel className="text-[10px] font-black uppercase text-slate-400">Residential Address</FormLabel>
-//                                     <FormControl><Input {...field} className="h-14 rounded-2xl bg-slate-50 border-none font-bold" /></FormControl>
+//                                     <FormControl><Input {...field} className="h-14 rounded-[clamp(1rem,2vw+1rem,2rem)] bg-slate-50 border-none font-bold" /></FormControl>
 //                                     <FormMessage />
 //                                  </FormItem>
 //                               )} />
 
 //                               <div className="md:col-span-2 pt-4">
-//                                  <Button type="submit" className="w-full h-14 bg-slate-900 hover:bg-indigo-600 text-white font-black rounded-2xl transition-all shadow-lg uppercase text-[11px] tracking-[0.2em]">
+//                                  <Button type="submit" className="w-full h-14 bg-slate-900 hover:bg-indigo-600 text-white font-black rounded-[clamp(1rem,2vw+1rem,2rem)] transition-all shadow-lg uppercase text-[11px] tracking-[0.2em]">
 //                                     <Save className="mr-2 h-4 w-4" /> Save Portfolio Changes
 //                                  </Button>
 //                               </div>
@@ -512,7 +511,7 @@ function ProfileField({ form, name, label, icon: Icon, fullWidth }: any) {
 //                                     <FormLabel className="text-[10px] font-black uppercase text-slate-400">Current Password</FormLabel>
 //                                     <div className="relative">
 //                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-//                                        <FormControl><Input type={showCurrentPwd ? "text" : "password"} {...field} className="h-14 pl-12 pr-12 rounded-2xl bg-slate-50 border-none font-bold" /></FormControl>
+//                                        <FormControl><Input type={showCurrentPwd ? "text" : "password"} {...field} className="h-14 pl-12 pr-12 rounded-[clamp(1rem,2vw+1rem,2rem)] bg-slate-50 border-none font-bold" /></FormControl>
 //                                        <button type="button" onClick={() => setShowCurrentPwd(!showCurrentPwd)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600">
 //                                           {showCurrentPwd ? <EyeOff size={18} /> : <Eye size={18} />}
 //                                        </button>
@@ -526,7 +525,7 @@ function ProfileField({ form, name, label, icon: Icon, fullWidth }: any) {
 //                                     <FormLabel className="text-[10px] font-black uppercase text-slate-400">New Access Key</FormLabel>
 //                                     <div className="relative">
 //                                        <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-//                                        <FormControl><Input type={showNewPwd ? "text" : "password"} {...field} className="h-14 pl-12 pr-12 rounded-2xl bg-slate-50 border-none font-bold" /></FormControl>
+//                                        <FormControl><Input type={showNewPwd ? "text" : "password"} {...field} className="h-14 pl-12 pr-12 rounded-[clamp(1rem,2vw+1rem,2rem)] bg-slate-50 border-none font-bold" /></FormControl>
 //                                        <button type="button" onClick={() => setShowNewPwd(!showNewPwd)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600">
 //                                           {showNewPwd ? <EyeOff size={18} /> : <Eye size={18} />}
 //                                        </button>
@@ -535,7 +534,7 @@ function ProfileField({ form, name, label, icon: Icon, fullWidth }: any) {
 //                                  </FormItem>
 //                               )} />
 
-//                               <Button type="submit" className="w-full h-14 bg-rose-600 hover:bg-slate-900 text-white font-black rounded-2xl transition-all shadow-xl shadow-rose-200 uppercase text-[10px] tracking-widest">
+//                               <Button type="submit" className="w-full h-14 bg-rose-600 hover:bg-slate-900 text-white font-black rounded-[clamp(1rem,2vw+1rem,2rem)] transition-all shadow-xl shadow-rose-200 uppercase text-[10px] tracking-widest">
 //                                  Revise Credentials
 //                               </Button>
 //                            </form>
@@ -544,7 +543,7 @@ function ProfileField({ form, name, label, icon: Icon, fullWidth }: any) {
 //                         <Separator className="my-8" />
 
 //                         <div className="bg-indigo-50 rounded-3xl p-6 flex items-start gap-4">
-//                            <div className="bg-white p-3 rounded-2xl shadow-sm text-indigo-600">
+//                            <div className="bg-white p-3 rounded-[clamp(1rem,2vw+1rem,2rem)] shadow-sm text-indigo-600">
 //                               <Calendar size={20} />
 //                            </div>
 //                            <div>

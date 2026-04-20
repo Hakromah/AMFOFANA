@@ -182,11 +182,11 @@ export default function TeacherAttendancePage() {
   const attendanceRate = students.length > 0 ? Math.round((presentCount / students.length) * 100) : 0;
 
   return (
-    <div className="p-6 lg:p-10 bg-[#f8fafc] min-h-screen space-y-8">
+    <div className="p-6 lg:p-10 bg-[#f8fafc] md:min-h-screen space-y-[clamp(1.3rem,1vw+0.5rem,2rem)]">
       {/* Dynamic Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-[clamp(1.3rem,1vw+0.5rem,2rem)]">
         <div className="space-y-1">
-          <h1 className="text-4xl font-black text-slate-900 tracking-tighter">
+          <h1 className="text-[clamp(1rem,2.5vw+1rem,2rem)] font-black text-slate-900 tracking-tighter">
             Academic <span className="text-primary">Registry</span>
           </h1>
           <p className="text-slate-500 font-bold text-[10px] uppercase tracking-[0.3em] flex items-center gap-2">
@@ -195,12 +195,12 @@ export default function TeacherAttendancePage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto">
+        <div className="flex items-center gap-3 w-full md:w-auto lg:hover:border-primary border rounded-full border-primary/0 duration-300">
           <Select value={selectedClass} onValueChange={handleClassChange}>
-            <SelectTrigger className="w-full md:w-[300px] h-12 rounded-2xl shadow-sm border-none bg-white font-black uppercase text-[10px] tracking-widest">
+            <SelectTrigger className="w-full md:w-[300px] h-12 rounded-[clamp(1rem,1vw+0.5rem,2rem)] shadow-sm border-none bg-white font-black uppercase text-[10px] tracking-widest">
               <SelectValue placeholder="Select Class Session" />
             </SelectTrigger>
-            <SelectContent className="rounded-2xl border-none shadow-2xl">
+            <SelectContent className="rounded-[clamp(1rem,1vw+0.5rem,2rem)] border-none shadow-2xl">
               {classes.map((c) => (
                 <SelectItem key={c.id} value={String(c.id)} className="font-bold">
                   {c.name}
@@ -216,14 +216,14 @@ export default function TeacherAttendancePage() {
           <Button
             variant={view === 'mark' ? 'default' : 'outline'}
             onClick={() => setView('mark')}
-            className={`rounded-2xl font-black uppercase text-[10px] tracking-widest px-6 h-10 transition-all ${view === 'mark' ? 'bg-blue-600 shadow-lg shadow-blue-200' : 'bg-white'}`}
+            className={`rounded-[clamp(1rem,1vw+0.5rem,2rem)] font-black uppercase text-[10px] tracking-widest px-6 h-10 transition-all ${view === 'mark' ? 'bg-blue-600 shadow-lg shadow-blue-200' : 'bg-white'}`}
           >
             <PlusCircle size={14} className="mr-2" /> {isEditing ? 'Editing Session' : 'New Session'}
           </Button>
           <Button
             variant={view === 'history' ? 'default' : 'outline'}
             onClick={() => { setView('history'); fetchHistory(selectedClass); }}
-            className={`rounded-2xl font-black uppercase text-[10px] tracking-widest px-6 h-10 transition-all ${view === 'history' ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'bg-white'}`}
+            className={`rounded-[clamp(1rem,1vw+0.5rem,2rem)] font-black uppercase text-[10px] tracking-widest px-6 h-10 transition-all ${view === 'history' ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'bg-white'}`}
           >
             <History size={14} className="mr-2" /> View History
           </Button>
@@ -287,7 +287,7 @@ export default function TeacherAttendancePage() {
               <Card className="border border-slate-800 md:hover:border-primary duration-500 transition-colors shadow-xl rounded-[2.5rem] bg-slate-900 text-white p-8">
                 <div className="space-y-8">
                   <div className="flex items-center gap-4">
-                    <div className="p-4 bg-white/10 rounded-2xl">
+                    <div className="p-4 bg-white/10 rounded-[clamp(1rem,1vw+0.5rem,2rem)]">
                       <ClipboardCheck className="text-blue-400" size={24} />
                     </div>
                     <div>
@@ -348,7 +348,7 @@ export default function TeacherAttendancePage() {
             {history.length > 0 ? history.map((session, idx) => (
               <Card key={session.id} className="border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm rounded-4xl bg-white p-8 group hover:shadow-xl">
                 <div className="flex justify-between items-start mb-6">
-                  <div className="bg-slate-50 p-4 rounded-2xl group-hover:bg-blue-50 group-hover:text-primary transition-colors">
+                  <div className="bg-slate-50 p-4 rounded-[clamp(1rem,1vw+0.5rem,2rem)] group-hover:bg-blue-50 group-hover:text-primary transition-colors">
                     <Calendar size={24} />
                   </div>
                   <Badge className="bg-slate-100 text-slate-500 border-none font-black text-[9px] uppercase tracking-tighter">
@@ -386,12 +386,12 @@ export default function TeacherAttendancePage() {
         )
       ) : (
         /* EMPTY STATE */
-        <div className="h-[500px] flex flex-col items-center justify-center bg-white rounded-[4rem] border border-dashed border-slate-200 md:hover:border-primary duration-500 transition-colors">
-          <div className="p-8 bg-slate-50 rounded-full mb-6">
+        <div className="h-[500px] flex flex-col items-center justify-center bg-white rounded-[clamp(1.5rem,1vw+0.5rem,2rem)] border border-dashed border-slate-200 md:hover:border-primary duration-500 transition-colors">
+          <div className="p-8 bg-slate-50 rounded-[clamp(1rem,1vw+0.5rem,2rem)] mb-6">
             <Users size={64} className="text-slate-200" />
           </div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tighter uppercase">Select a Class</h2>
-          <p className="text-slate-400 text-sm font-medium mt-2">Initialize your curriculum session to begin registry control.</p>
+          <h2 className="text-[clamp(1rem,1vw+0.5rem,2rem)] font-black text-slate-800 tracking-tighter uppercase">Select a Class</h2>
+          <p className="text-slate-400 text-sm font-medium mt-2 text-center">Initialize your curriculum session to begin registry control.</p>
         </div>
       )}
     </div>

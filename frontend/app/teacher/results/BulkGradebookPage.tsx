@@ -130,11 +130,11 @@ export default function BulkGradebookPage() {
    };
 
    return (
-      <div className="p-8 space-y-6">
+      <div className="p-[clamp(1.3rem,1vw+0.5rem,2rem)] space-y-[clamp(1.3rem,1vw+0.5rem,2rem)]">
          {/* HEADER SECTION */}
          <div className="flex justify-between items-center">
             <div>
-               <h1 className="text-3xl font-bold tracking-tight">Bulk Marks Entry</h1>
+               <h1 className="text-[clamp(1.3rem,1vw+0.5rem,2rem)] font-bold tracking-tight">Bulk Marks Entry</h1>
                <p className="text-muted-foreground">Quickly enter grades for the entire class.</p>
             </div>
 
@@ -159,10 +159,10 @@ export default function BulkGradebookPage() {
                )}
 
                <Select onValueChange={setSelectedClassId}>
-                  <SelectTrigger className="w-[220px]">
+                  <SelectTrigger className="w-[220px] border-border hover:border-primary transition-colors duration-300">
                      <SelectValue placeholder="Select Class" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="border-border hover:border-primary transition-colors duration-300">
                      {classes.map((c) => (
                         <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
                      ))}
@@ -176,7 +176,7 @@ export default function BulkGradebookPage() {
             <CardContent className="pt-6">
                <div className="rounded-md border overflow-x-auto">
                   <Table>
-                     <TableHeader className="bg-muted/50">
+                     <TableHeader className="bg-muted/50 py-3">
                         <TableRow>
                            <TableHead className="w-[200px]">Student Details</TableHead>
                            {exams.map((e) => (

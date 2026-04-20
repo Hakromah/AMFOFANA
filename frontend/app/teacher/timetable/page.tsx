@@ -68,20 +68,20 @@ export default function UserTimetablePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10 space-y-10">
+    <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10 space-y-[clamp(1.3rem,1vw+0.5rem,2rem)]">
       {/* Header Section */}
-      <header className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+      <header className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-[clamp(1.3rem,1vw+0.5rem,2rem)]">
         <div>
           <Badge className="bg-blue-600/10 text-primary hover:bg-blue-600/10 border-none px-4 py-1 mb-4 rounded-full text-[10px] font-black uppercase tracking-widest">
             Registry Active • 2026
           </Badge>
-          <h1 className="text-5xl font-black text-slate-900 tracking-tighter sm:text-6xl">
+          <h1 className="text-[clamp(1.3rem,2.5vw+1rem,2rem)] font-black text-slate-900 tracking-tighter sm:text-[clamp(1.3rem,2.5vw+1rem,2rem)]">
             Weekly <span className="text-primary italic">Schedule.</span>
           </h1>
         </div>
 
-        <div className="flex items-center gap-4 bg-white p-4 rounded-4xl shadow-sm border border-slate-100">
-          <div className="w-10 h-10 bg-blue-50 rounded-2xl flex items-center justify-center text-primary">
+        <div className="flex items-center gap-4 bg-white p-4 rounded-[clamp(1.3rem,1vw+0.5rem,2rem)] shadow-sm border border-primary/0 lg:hover:border-primary duration-300">
+          <div className="w-10 h-10 bg-blue-50 rounded-[clamp(1.3rem,1vw+0.5rem,2rem)] flex items-center justify-center text-primary">
             <Calendar size={20} />
           </div>
           <div>
@@ -98,7 +98,7 @@ export default function UserTimetablePage() {
             <Button
               key={day}
               onClick={() => setActiveDay(day)}
-              className={`px-8 py-4 rounded-3xl font-black text-[11px] tracking-[0.2em] transition-all whitespace-nowrap border-2 ${activeDay === day
+              className={`px-8 py-4 rounded-3xl font-black text-[11px] tracking-[0.2em] transition-all whitespace-nowrap border-2  ${activeDay === day
                 ? 'bg-slate-900 text-white border-slate-900 shadow-xl shadow-slate-200 scale-105'
                 : 'bg-white text-slate-400 border-transparent hover:border-slate-100 hover:text-slate-600'
                 }`}
@@ -181,7 +181,7 @@ export default function UserTimetablePage() {
               <div className="w-24 h-24 bg-slate-50 rounded-[2.5rem] flex items-center justify-center mb-8">
                 <Calendar className="text-slate-200" size={48} />
               </div>
-              <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-3">SCHEDULE EMPTY</h3>
+              <h3 className="text-[clamp(1.3rem,2.5vw+1rem,2rem)] font-black text-slate-900 tracking-tight mb-3">SCHEDULE EMPTY</h3>
               <p className="text-slate-400 font-bold max-w-sm text-sm uppercase tracking-widest leading-loose">
                 No classes registered for {activeDay.toLowerCase()}.
                 Enjoy your academic break.

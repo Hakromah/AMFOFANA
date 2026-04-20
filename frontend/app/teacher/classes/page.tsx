@@ -35,15 +35,15 @@ export default function TeacherClassesPage() {
   }, []);
 
   return (
-    <div className="p-6 lg:p-10 min-h-screen bg-[#f8fafc]">
+    <div className="p-6 lg:p-10 md:min-h-screen bg-[#f8fafc]">
       {/* Dynamic Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 max-w-7xl mx-auto">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-[clamp(1rem,2vw+1rem,2rem)] max-w-7xl mx-auto">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
           <div className="flex items-center gap-2 mb-2">
             <School className="text-primary w-5 h-5" />
             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Assignment Ledger</h2>
           </div>
-          <h1 className="text-5xl font-black text-slate-900 tracking-tighter italic">
+          <h1 className="text-[clamp(1.2rem,2.5vw+1rem,3rem)] font-black text-slate-900 tracking-tighter italic">
             My <span className="text-primary">Classrooms.</span>
           </h1>
           <p className="mt-4 text-slate-500 font-medium max-w-2xl text-base bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100 inline-block">
@@ -64,7 +64,7 @@ export default function TeacherClassesPage() {
           <div className="bg-slate-50 p-8 rounded-full mb-8">
             <School size={64} className="text-slate-200" />
           </div>
-          <h3 className="text-3xl font-black text-slate-700 tracking-tight mb-3">No Classes Assigned</h3>
+          <h3 className="text-[clamp(1.2rem,2.5vw+1rem,2rem)] font-black text-slate-700 tracking-tight mb-3">No Classes Assigned</h3>
           <p className="text-slate-400 font-medium text-lg max-w-md">You currently have no active cohorts assigned to you in the global registry.</p>
         </div>
       ) : (
@@ -84,7 +84,7 @@ export default function TeacherClassesPage() {
                     <div className="bg-slate-50 p-4 rounded-3xl group-hover:bg-blue-50 group-hover:text-primary transition-colors">
                       <Users size={28} className="text-slate-400 group-hover:text-primary transition-colors" />
                     </div>
-                    <span className="bg-slate-100 text-slate-500 font-black text-[9px] uppercase tracking-[0.2em] px-4 py-2 rounded-2xl">
+                    <span className="bg-slate-100 text-slate-500 font-black text-[9px] uppercase tracking-[0.2em] px-4 py-2 rounded-[clamp(1rem,2vw+1rem,2rem)]">
                       COHORT #{cls.id}
                     </span>
                   </div>

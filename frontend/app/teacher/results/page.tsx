@@ -211,16 +211,16 @@ export default function TeacherResultsPage() {
   const hasDrafts = results.some(r => r.status === 'DRAFT' && !r.exam.locked);
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex justify-between items-start">
+    <div className="p-[clamp(1.3rem,1vw+0.5rem,2rem)] space-y-[clamp(1.3rem,1vw+0.5rem,2rem)]">
+      <div className="flex justify-between items-start flex-wrap gap-5">
         <div>
-          <h1 className="text-3xl font-bold">Academic Gradebook</h1>
+          <h1 className="text-[clamp(1.3rem,1vw+0.5rem,2rem)] font-bold">Academic Gradebook</h1>
           <p className="text-muted-foreground font-medium">Manage assessment marks and semester aggregation.</p>
         </div>
         <div className="flex gap-3">
           <Select value={selectedClassId} onValueChange={setSelectedClassId}>
-            <SelectTrigger className="w-48"><SelectValue placeholder="Select Class" /></SelectTrigger>
-            <SelectContent>
+            <SelectTrigger className="w-48 border-border hover:border-primary transition-colors duration-300"><SelectValue placeholder="Select Class" /></SelectTrigger>
+            <SelectContent className="border-border hover:border-primary transition-colors duration-300">
               <SelectItem value="all">All Classes</SelectItem>
               {classes.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
             </SelectContent>
@@ -236,7 +236,7 @@ export default function TeacherResultsPage() {
 
       {selectedStudentForChart && (
         <Card className="border border-primary bg-primary/5 hover:border-blue-700 duration-500 transition-colors shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardHeader className="flex flex-row items-center flex-wrap justify-between pb-2">
             <div className="flex items-center gap-3">
               <TrendingUp className="w-5 h-5 text-primary" />
               <CardTitle>Analysis: {selectedStudentForChart.name}</CardTitle>
@@ -261,9 +261,9 @@ export default function TeacherResultsPage() {
 
       <Tabs defaultValue="list" className="w-full">
         <TabsList className="grid w-full grid-cols-3 max-w-md">
-          <TabsTrigger value="list" className="gap-2"><ListFilter className="w-4 h-4" /> List View</TabsTrigger>
-          <TabsTrigger value="gradebook" className="gap-2"><LayoutGrid className="w-4 h-4" /> Gradebook</TabsTrigger>
-          <TabsTrigger value="bulk" className="gap-2"><FileSpreadsheet className="w-4 h-4" /> Bulk Entry</TabsTrigger>
+          <TabsTrigger value="list" className="gap-2 hover:text-primary hover:bg-white/50 transition-all duration-300"><ListFilter className="w-4 h-4" /> List View</TabsTrigger>
+          <TabsTrigger value="gradebook" className="gap-2 hover:text-primary hover:bg-white/50 transition-all duration-300"><LayoutGrid className="w-4 h-4" /> Gradebook</TabsTrigger>
+          <TabsTrigger value="bulk" className="gap-2 hover:text-primary hover:bg-white/50 transition-all duration-300"><FileSpreadsheet className="w-4 h-4" /> Bulk Entry</TabsTrigger>
         </TabsList>
 
         <TabsContent value="list" className="space-y-4">

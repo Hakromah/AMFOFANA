@@ -134,14 +134,14 @@ export default function StudentMaterialsPage() {
 
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10 space-y-10">
+    <div className="md:min-h-screen bg-[#F8FAFC] p-6 lg:p-10 space-y-10">
       {/* Header Section */}
-      <header className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-end gap-6">
+      <header className="md:max-w-6xl mx-auto flex flex-col md:flex-row justify-between md:items-end gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-indigo-600 font-black text-[10px] uppercase tracking-[0.4em]">
             <Archive size={14} /> Knowledge Repository
           </div>
-          <h1 className="text-5xl font-black text-slate-900 tracking-tighter sm:text-7xl italic uppercase">
+          <h1 className="text-[clamp(1.2rem,2.5vw+1rem,3rem)] font-black text-slate-900 tracking-tighter sm:text-7xl italic uppercase">
             Study <span className="text-indigo-600">Assets.</span>
           </h1>
         </div>
