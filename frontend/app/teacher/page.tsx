@@ -61,23 +61,27 @@ export default function TeacherDashboard() {
           api.get('/auth/me')
         ]);
 
-        const totalStudents = classesRes.data.reduce((acc: number, curr: any) => acc + (curr.students?.length || 0), 0);
+        const classesList = Array.isArray(classesRes.data) ? classesRes.data : [];
+        const examsList = Array.isArray(examsRes.data) ? examsRes.data : [];
+        const resultsList = Array.isArray(resultsRes.data) ? resultsRes.data : [];
+
+        const totalStudents = classesList.reduce((acc: number, curr: any) => acc + (curr.students?.length || 0), 0);
 
         const now = new Date();
         now.setHours(0, 0, 0, 0);
-        const upcoming = examsRes.data
-          .filter((ex: any) => new Date(ex.date) >= now)
+        const upcoming = examsList
+          .filter((ex: any) => ex.date && new Date(ex.date) >= now)
           .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
           .slice(0, 3);
 
         setStats({
-          classes: classesRes.data.length,
+          classes: classesList.length,
           students: totalStudents,
-          exams: examsRes.data.length,
-          teacherName: userRes.data.name
+          exams: examsList.length,
+          teacherName: userRes.data?.name || ''
         });
-        setResultsData(resultsRes.data);
-        setRecentResults(resultsRes.data.slice(0, 5));
+        setResultsData(resultsList);
+        setRecentResults(resultsList.slice(0, 5));
         setUpcomingExams(upcoming);
       } catch (error) {
         console.error("Dashboard Sync Error", error);
@@ -206,11 +210,11 @@ export default function TeacherDashboard() {
             <CardContent className="pt-4 space-y-4">
               {upcomingExams.map((ex, i) => (
                 <div key={i} className={`p-3 rounded-xl border ${i === 0 ? 'bg-blue-600 text-white shadow-lg border-blue-700' : 'bg-slate-50 border-slate-100'}`}>
-                  <p className={`text-[9px] font-black uppercase ${i === 0 ? 'text-blue-100' : 'text-slate-400'}`}>{ex.term}</p>
-                  <p className="text-sm font-bold truncate">{ex.name}</p>
+                  <p className={`text-[9px] font-black uppercase ${i === 0 ? 'text-blue-100' : 'text-slate-400'}`}>{ex.term || 'Unknown Term'}</p>
+                  <p className="text-sm font-bold truncate">{ex.name || 'Unnamed Exam'}</p>
                   <div className="flex justify-between mt-2 text-[10px] font-bold">
-                    <span className="opacity-80">{ex.classe.name}</span>
-                    <span className="flex items-center gap-1"><Clock size={10} /> {ex.startTime}</span>
+                    <span className="opacity-80">{ex.classe?.name || 'Class Unassigned'}</span>
+                    <span className="flex items-center gap-1"><Clock size={10} /> {ex.startTime || 'TBD'}</span>
                   </div>
                 </div>
               ))}
