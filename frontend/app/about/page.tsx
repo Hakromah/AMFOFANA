@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { fetchAboutPage, fetchStaffMembers } from "@/lib/strapi-api";
 
 export const metadata: Metadata = {
-    title: "About Us",
+    title: "About US",
 };
 
 export default async function Page() {

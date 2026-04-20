@@ -20,7 +20,7 @@ export default async function Page() {
             <div className="relative -z-1">
                 <Breadcrumb
                     title={breadcrumbData?.breadcrumb_title || "Gallery"}
-                    description={breadcrumbData?.description || "Capturing moments of excellence, creativity, and community across our elementary, junior, and high school campus."}
+                    description={breadcrumbData?.description || "Capturing moments of excellence, creativity, and community across our elementary, junior, and high school campus in LIB."}
                     image={breadcrumbData?.imageUrl || "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?q=80&w=2070&auto=format&fit=crop"}
                     alt={breadcrumbData?.breadcrumb_title || "Gallery"}
                 />
