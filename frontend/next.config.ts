@@ -24,8 +24,9 @@ const nextConfig = {
         pathname: '/uploads/**',
       },
       {
-        protocol:"https",
-        hostname:"engaging-heart-abbd6e0d5c.media.strapiapp.com"
+        protocol: "https",
+        hostname: "diplomatic-splendor-66cebff67a.media.strapiapp.com"
+        // https://diplomatic-splendor-66cebff67a.strapiapp.com/admin
       }
     ],
   },
