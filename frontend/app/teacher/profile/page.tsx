@@ -91,7 +91,7 @@ export default function TeacherProfilePage() {
     <div className="p-8 space-y-8">
       <h1 className="text-3xl font-bold">My Profile</h1>
 
-      <Card>
+      <Card className="border border-slate-200 md:hover:border-primary duration-500 transition-colors shadow-sm">
         <CardHeader>
           <CardTitle>Update Profile</CardTitle>
         </CardHeader>
@@ -130,7 +130,7 @@ export default function TeacherProfilePage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border border-slate-200 md:hover:border-primary duration-500 transition-colors shadow-sm">
         <CardHeader>
           <CardTitle>Change Password</CardTitle>
         </CardHeader>

@@ -123,13 +123,13 @@ export default function AdvancedClassesPage() {
             <Shapes size={18} />
             <span className="text-[10px] font-black uppercase tracking-[0.4em]">Structure Management</span>
           </div>
-          <h1 className="text-5xl font-black text-slate-900 tracking-tighter sm:text-7xl italic uppercase">
+          <h1 className="text-[clamp(1rem,3.5vw,4rem)] font-black text-slate-900 tracking-tighter sm:text-[clamp(1rem,3.5vw,4rem)] italic uppercase">
             Class <span className="text-primary">Units.</span>
           </h1>
         </div>
         <Button
           onClick={() => setIsCreateDialogOpen(true)}
-          className="bg-slate-900 hover:bg-blue-600 text-white rounded-3xl h-14 px-8 font-black transition-all shadow-xl"
+          className="bg-slate-900 md:hover:bg-primary text-white rounded-3xl h-14 px-8 font-black transition-all shadow-xl"
         >
           <Plus size={20} className="mr-2" /> CREATE CLASS
         </Button>
@@ -166,7 +166,7 @@ export default function AdvancedClassesPage() {
                 <div className="absolute top-6 right-6 z-20">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="rounded-full bg-slate-50/50 hover:bg-white shadow-sm border border-slate-100">
+                      <Button variant="ghost" size="icon" className="rounded-full bg-slate-50/50 md:hover:bg-white shadow-sm border border-slate-100">
                         <MoreVertical size={18} className="text-slate-500" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -187,7 +187,7 @@ export default function AdvancedClassesPage() {
                   </DropdownMenu>
                 </div>
 
-                <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 h-full flex flex-col justify-between relative">
+                <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 md:hover:border-primary duration-500 hover:shadow-2xl hover:-translate-y-2 transition-all h-full flex flex-col justify-between relative">
                   <div>
                     <div className="w-14 h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-white mb-8">
                       <Landmark size={24} />
@@ -220,7 +220,6 @@ export default function AdvancedClassesPage() {
           </motion.div>
         </AnimatePresence>
       </main>
-
       {/* DIALOGS */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="rounded-[3rem] p-10 border-none shadow-2xl sm:max-w-[450px]">
@@ -267,7 +266,7 @@ export default function AdvancedClassesPage() {
 
       {selectedClass && (
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="rounded-[3rem] p-10 border-none shadow-2xl sm:max-w-[450px]">
+          <DialogContent className="rounded-[clamp(1rem,3.5vw,3rem)] p-10 border-none shadow-2xl sm:max-w-[450px]">
             <DialogHeader>
               <DialogTitle className="text-3xl font-black italic tracking-tighter">
                 Refine <span className="text-primary">Unit.</span>

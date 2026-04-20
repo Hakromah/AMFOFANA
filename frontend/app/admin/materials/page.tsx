@@ -192,7 +192,7 @@ export default function AdminMaterialsPage() {
                               animate={{ opacity: 1, scale: 1 }}
                               exit={{ opacity: 0, scale: 0.9 }}
                            >
-                              <Card className="rounded-[3rem] p-8 border-none shadow-sm bg-white hover:shadow-2xl transition-all group flex flex-col justify-between h-full relative overflow-hidden">
+                              <Card className="rounded-[3rem] p-8 border border-slate-100 md:hover:border-primary duration-500 shadow-sm bg-white hover:shadow-2xl transition-all group flex flex-col justify-between h-full relative overflow-hidden">
                                  <div className="absolute top-0 left-0 w-2 h-full bg-rose-600/10 group-hover:bg-rose-600 transition-colors" />
 
                                  <div>

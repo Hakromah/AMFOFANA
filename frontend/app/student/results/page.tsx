@@ -238,7 +238,7 @@ export default function StudentResultsPage() {
                <p className="text-muted-foreground">Welcome, {results[0]?.student?.name || 'Student'}. View your growth and performance.</p>
             </div>
             <div className="flex items-center gap-4">
-               <Button onClick={downloadTranscript} className="gap-2 bg-blue-600 hover:bg-blue-700 h-11">
+               <Button onClick={downloadTranscript} className="gap-2 border border-blue-600 md:hover:border-white bg-blue-600 md:hover:bg-primary duration-500 transition-colors h-11">
                   <FileCheck className="w-4 h-4" />
                   {selectedRows.size > 0 ? `Export Selected (${selectedRows.size})` : 'Export Transcript'}
                </Button>
@@ -259,7 +259,7 @@ export default function StudentResultsPage() {
                <span className="text-sm font-bold uppercase">Filter Results:</span>
             </div>
             <Select value={selectedSemester} onValueChange={(val) => { setSelectedSemester(val); setSelectedRows(new Set()); }}>
-               <SelectTrigger className="w-[200px] bg-white">
+               <SelectTrigger className="w-[200px] bg-white border border-slate-200 md:hover:border-primary duration-500 transition-colors">
                   <SelectValue placeholder="All Semesters" />
                </SelectTrigger>
                <SelectContent>
@@ -294,7 +294,7 @@ export default function StudentResultsPage() {
             </Card>
 
             <div className="flex flex-col gap-4">
-               <Card className="bg-primary text-primary-foreground border-none shadow-lg">
+               <Card className="bg-primary text-primary-foreground border border-transparent md:hover:border-blue-300 duration-500 transition-colors shadow-lg">
                   <CardHeader className="pb-2">
                      <CardTitle className="text-primary-foreground/70 text-xs font-bold uppercase">Peak Performance</CardTitle>
                   </CardHeader>
@@ -304,7 +304,7 @@ export default function StudentResultsPage() {
                   </CardContent>
                </Card>
 
-               <Card className="flex-1 border-dashed">
+               <Card className="flex-1 border md:hover:border-primary duration-500 transition-colors border-dashed">
                   <CardHeader className="pb-2">
                      <CardTitle className="text-xs font-bold text-muted-foreground uppercase">Evaluations</CardTitle>
                   </CardHeader>
@@ -317,7 +317,7 @@ export default function StudentResultsPage() {
          </div>
 
          {/* DETAILED RESULTS TABLE */}
-         <Card className="shadow-sm border-slate-200/60 overflow-hidden">
+         <Card className="shadow-sm border border-slate-200/60 md:hover:border-primary duration-500 transition-colors overflow-hidden">
             <div className="overflow-x-auto">
                <Table>
                   <TableHeader>
@@ -340,7 +340,7 @@ export default function StudentResultsPage() {
                         const isPassing = r.marks >= 50;
                         const isSelected = selectedRows.has(r.id);
                         return (
-                           <TableRow key={r.id} className={`group transition-colors ${isSelected ? 'bg-blue-50/50' : 'hover:bg-slate-50/50'}`}>
+                           <TableRow key={r.id} className={`group duration-500 transition-colors ${isSelected ? 'bg-blue-50/50' : 'md:hover:bg-slate-50/50 cursor-pointer'}`}>
                               <TableCell className="pl-6">
                                  <Checkbox
                                     checked={isSelected}
@@ -621,7 +621,7 @@ export default function StudentResultsPage() {
 
 //          {/* ANALYTICS GRID */}
 //          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-//             <Card className="lg:col-span-2 shadow-sm border-slate-200/60">
+//             <Card className="lg:col-span-2 shadow-sm border border-slate-200/60 md:hover:border-primary duration-500 transition-colors">
 //                <CardHeader className="flex flex-row items-center justify-between">
 //                   <div className="flex items-center gap-2">
 //                      <TrendingUp className="w-5 h-5 text-blue-500" />

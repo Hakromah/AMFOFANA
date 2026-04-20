@@ -147,7 +147,7 @@ export default function StudentMaterialsPage() {
         </div>
 
         <Select onValueChange={handleClassChange}>
-          <SelectTrigger className="w-72 h-16 rounded-4xl bg-white border-none shadow-xl font-black italic uppercase text-xs px-8 ring-offset-indigo-600 focus:ring-indigo-600 transition-all">
+          <SelectTrigger className="w-72 h-16 rounded-4xl bg-white border border-slate-100 md:hover:border-primary shadow-xl font-black italic uppercase text-xs px-8 ring-offset-indigo-600 focus:ring-indigo-600 transition-all duration-500">
             <SelectValue placeholder="SELECT SUBJECT GROUP" />
           </SelectTrigger>
           <SelectContent className="rounded-2xl border-none shadow-2xl">
@@ -180,7 +180,7 @@ export default function StudentMaterialsPage() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="col-span-full h-96 flex flex-col items-center justify-center bg-white rounded-[4rem] border-2 border-dashed border-slate-100 italic font-black text-slate-200 uppercase tracking-tighter text-4xl"
+                  className="col-span-full h-96 flex flex-col items-center justify-center bg-white rounded-[4rem] border-2 border-dashed border-slate-100 md:hover:border-primary duration-500 transition-colors italic font-black text-slate-200 uppercase tracking-tighter text-4xl"
                 >
                   Empty Unit Archives
                 </motion.div>
@@ -194,7 +194,7 @@ export default function StudentMaterialsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                 >
-                  <Card className="rounded-[3.5rem] p-10 bg-white border-none shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden h-full flex flex-col justify-between">
+                  <Card className="rounded-[3.5rem] p-10 bg-white border border-slate-100 md:hover:border-primary shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden h-full flex flex-col justify-between">
                     <div className="absolute -right-4 -top-4 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl group-hover:bg-indigo-500/10 transition-colors" />
 
                     <div>
@@ -219,14 +219,14 @@ export default function StudentMaterialsPage() {
                               }
                               window.open(getFullUrl(previewUrl), "_blank", 'noopener,noreferrer');
                             }}
-                            className="rounded-2xl border-slate-100 text-slate-400 hover:text-primary font-black text-[10px] tracking-widest h-10 px-4 uppercase"
+                            className="rounded-2xl border-slate-100 text-slate-400 md:hover:border-primary md:hover:text-primary duration-500 transition-colors font-black text-[10px] tracking-widest h-10 px-4 uppercase"
                           >
                             <Eye size={14} className="mr-2" /> Preview
                           </Button>
 
                           <Button
                             onClick={() => handleDownload(mat)}
-                            className="flex-1 h-12 rounded-2xl bg-rose-600 text-white font-black italic uppercase text-[10px] hover:bg-slate-900 shadow-xl shadow-rose-200 transition-all"
+                            className="flex-1 h-12 rounded-2xl bg-rose-600 text-white font-black italic uppercase text-[10px] md:hover:bg-primary duration-500 shadow-xl shadow-rose-200 transition-all"
                           >
                             <Download size={14} className="mr-2" /> Get
                           </Button>

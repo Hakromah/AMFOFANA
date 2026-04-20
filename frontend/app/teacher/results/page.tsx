@@ -235,7 +235,7 @@ export default function TeacherResultsPage() {
       </div>
 
       {selectedStudentForChart && (
-        <Card className="border-primary bg-primary/5">
+        <Card className="border border-primary bg-primary/5 hover:border-blue-700 duration-500 transition-colors shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div className="flex items-center gap-3">
               <TrendingUp className="w-5 h-5 text-primary" />

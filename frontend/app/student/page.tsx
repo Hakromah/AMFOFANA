@@ -99,8 +99,8 @@ export default function StudentDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
           >
-            <Card className="transition-shadow">
-              <CardContent className="px-4 shadow-sm rounded-2xl bg-white md:group-hover/card:shadow-md overflow-hidden md:px-[clamp(1rem,2.5vw+1rem,2rem)] py-4 md:py-[clamp(1rem,2.5vw+1rem,1.5rem)] border border-primary/0 md:group-hover/card:border-primary duration-500 ">
+            <Card className="transition-all duration-500 border border-transparent md:hover:border-primary rounded-2xl">
+              <CardContent className="px-4 shadow-sm rounded-2xl bg-white md:group-hover/card:shadow-md overflow-hidden md:px-[clamp(1rem,2.5vw+1rem,2rem)] py-4 md:py-[clamp(1rem,2.5vw+1rem,1.5rem)] border-primary/0 duration-500">
                 <div className="flex justify-between items-start">
                   <div className={`p-3 rounded-2xl ${item.bg} ${item.color}`}>
                     <item.icon size={24} />
@@ -162,7 +162,7 @@ export default function StudentDashboard() {
 
         {/* Sidebar Info */}
         <div className="space-y-6">
-          <Card className="border-none shadow-sm rounded-4 md:rounded-3xl bg-slate-900 text-white p-4 md:p-[clamp(1rem,2.5vw+1rem,2rem)] overflow-hidden relative group">
+          <Card className="border border-slate-800 md:hover:border-primary duration-500 transition-colors shadow-sm rounded-4 md:rounded-3xl bg-slate-900 text-white p-4 md:p-[clamp(1rem,2.5vw+1rem,2rem)] overflow-hidden relative group">
             <div className="relative z-10">
               <h2 className="text-lg font-black uppercase tracking-widest mb-4">Exam Reminder</h2>
 

@@ -110,7 +110,7 @@ export default function AdvancedAssignTeacherPage() {
           <ShieldCheck size={18} />
           <span className="text-[10px] font-black uppercase tracking-[0.4em]">Administrative Authority</span>
         </motion.div>
-        <h1 className="text-5xl font-black text-slate-900 tracking-tighter sm:text-7xl italic uppercase">
+        <h1 className="text-[clamp(1rem,3.5vw,4rem)] font-black text-slate-900 tracking-tighter sm:text-7xl italic uppercase">
           Teacher <span className="text-primary">Deployment.</span>
         </h1>
         <p className="text-slate-400 font-bold text-sm uppercase tracking-widest max-w-xl mx-auto leading-loose">
@@ -126,13 +126,12 @@ export default function AdvancedAssignTeacherPage() {
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
         >
-          <Card className="rounded-[3rem] border-none shadow-2xl overflow-hidden bg-white">
+          <Card className="rounded-[3rem] border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-2xl overflow-hidden bg-white">
             <CardContent className="p-10 space-y-8">
               <div className="space-y-2">
-                <h2 className="text-2xl font-black text-slate-900 italic tracking-tight uppercase">New Assignment</h2>
-                <div className="h-1 w-12 bg-blue-600 rounded-full" />
+                <h2 className="text-[clamp(16px,3vw,24px)] font-black text-slate-900 italic tracking-tight uppercase">New Assignment</h2>
+                <div className="h-1 w-12 bg-primary rounded-full" />
               </div>
-
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <FormField
@@ -194,8 +193,7 @@ export default function AdvancedAssignTeacherPage() {
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full h-16 bg-slate-900 hover:bg-blue-600 text-white font-black rounded-3xl transition-all shadow-xl shadow-slate-200 uppercase text-[11px] tracking-[0.3em] group"
-                  >
+                    className="w-full h-16 bg-slate-900 md:hover:bg-primary text-white font-black rounded-3xl transition-all shadow-xl shadow-slate-200 uppercase text-[11px] tracking-[0.3em] group">
                     {isLoading ? (
                       <Loader2 className="animate-spin" />
                     ) : (
@@ -217,7 +215,7 @@ export default function AdvancedAssignTeacherPage() {
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
         >
-          <div className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-sm h-full flex flex-col justify-between">
+          <div className="bg-white rounded-[3rem] p-10 border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm h-full flex flex-col justify-between">
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-black text-slate-900 italic tracking-tight uppercase">Quick Intelligence</h2>
@@ -247,15 +245,14 @@ export default function AdvancedAssignTeacherPage() {
                     "Syncing student timetables with instructor"
                   ].map((text, i) => (
                     <li key={i} className="flex items-center gap-3 p-4 bg-white border border-slate-50 rounded-2xl shadow-sm">
-                      <CheckCircle2 className="text-blue-500 shrink-0" size={18} />
+                      <CheckCircle2 className="text-primary shrink-0" size={18} />
                       <span className="text-xs font-bold text-slate-600">{text}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             </div>
-
-            <div className="mt-8 p-6 bg-blue-600 rounded-4xl text-white flex items-center justify-between shadow-xl shadow-blue-200">
+            <div className="mt-8 p-6 bg-primary rounded-4xl text-white flex items-center justify-between shadow-xl shadow-blue-200">
               <div>
                 <p className="font-black italic text-lg leading-none">Need bulk assignment?</p>
                 <p className="text-[10px] opacity-80 font-bold uppercase tracking-widest mt-1">Contact System Architect</p>

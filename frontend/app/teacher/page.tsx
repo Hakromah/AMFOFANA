@@ -117,7 +117,7 @@ export default function TeacherDashboard() {
 
           <Button
             onClick={() => setIsSearchOpen(true)}
-            className="hidden md:flex items-center gap-4 bg-white/10 hover:bg-white/20 border-white/10 rounded-2xl h-16 px-6 backdrop-blur-md transition-all group"
+            className="hidden md:flex items-center gap-4 bg-white/10 md:hover:bg-white/20 border border-white/10 md:hover:border-white duration-500 rounded-2xl h-16 px-6 backdrop-blur-md transition-all group"
           >
             <div className="text-left">
               <p className="text-[10px] font-black uppercase text-blue-400 font-mono">Registry Search</p>
@@ -146,7 +146,7 @@ export default function TeacherDashboard() {
           { label: 'Academic Materials', val: stats.exams, icon: FileText, color: 'bg-amber-500' }
         ].map((item, i) => (
           <motion.div key={i} whileHover={{ y: -5 }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-            <Card className="border-none shadow-sm bg-white relative overflow-hidden">
+            <Card className="border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm bg-white relative overflow-hidden">
               <div className={`absolute top-0 left-0 w-1.5 h-full ${item.color}`} />
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{item.label}</CardTitle>
@@ -161,7 +161,7 @@ export default function TeacherDashboard() {
       <div className="grid lg:grid-cols-3 gap-8">
 
         {/* RECENT ACTIVITY (recentResults Implemented) */}
-        <Card className="lg:col-span-2 border-none shadow-sm bg-white overflow-hidden">
+        <Card className="lg:col-span-2 border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm bg-white overflow-hidden">
           <CardHeader className="border-b bg-slate-50/50 flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-slate-400" />
@@ -173,7 +173,7 @@ export default function TeacherDashboard() {
           </CardHeader>
           <CardContent className="p-0">
             {recentResults.map((r, i) => (
-              <div key={i} className="p-4 border-b border-slate-50 flex items-center justify-between hover:bg-slate-50 transition-colors">
+              <div key={i} className="p-4 border-b border-slate-50 flex items-center justify-between md:hover:bg-blue-50/10 duration-500 transition-colors cursor-pointer group">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-500 text-xs">
                     {(r.student?.username || r.student?.name || 'UN').substring(0, 2).toUpperCase()}
@@ -197,7 +197,7 @@ export default function TeacherDashboard() {
 
         {/* UPCOMING TIMELINE */}
         <div className="space-y-6">
-          <Card className="border-none shadow-sm bg-white overflow-hidden">
+        <Card className="border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm bg-white overflow-hidden">
             <CardHeader className="pb-2 border-b bg-slate-50/50">
               <CardTitle className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-blue-500" /> Upcoming Timeline
@@ -218,11 +218,11 @@ export default function TeacherDashboard() {
           </Card>
 
           <div className="grid grid-cols-2 gap-3">
-            <Button className="h-14 flex flex-col gap-1 bg-slate-800" asChild>
-              <a href="/teacher/results"><GraduationCap size={16} /><span className="text-[9px] font-black">MARK ENTRY</span></a>
+            <Button className="h-14 flex flex-col gap-1 bg-slate-800 md:hover:bg-primary duration-500 transition-colors" asChild>
+              <a href="/teacher/results"><GraduationCap size={16} /><span className="text-[9px] font-black uppercase tracking-widest">MARK ENTRY</span></a>
             </Button>
-            <Button className="h-14 flex flex-col gap-1" asChild>
-              <a href="/teacher/exams"><Calendar size={16} /><span className="text-[9px] font-black">EXAMS</span></a>
+            <Button className="h-14 flex flex-col gap-1 md:hover:bg-primary duration-500 transition-colors" asChild>
+              <a href="/teacher/exams"><Calendar size={16} /><span className="text-[9px] font-black uppercase tracking-widest">EXAMS</span></a>
             </Button>
           </div>
         </div>

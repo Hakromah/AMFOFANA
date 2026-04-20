@@ -128,7 +128,7 @@ export default function StudentAttendancePage() {
 
          {/* Stats Cards */}
          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="md:col-span-2 border-none shadow-xl rounded-3xl bg-slate-900 text-white p-8 relative overflow-hidden">
+            <Card className="md:col-span-2 border border-slate-800 md:hover:border-primary duration-500 transition-colors shadow-xl rounded-3xl bg-slate-900 text-white p-8 relative overflow-hidden">
                <div className="relative z-10 flex flex-col h-full justify-between gap-8">
                   <div className="flex justify-between items-start">
                      <div>

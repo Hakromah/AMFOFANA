@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 //import Image from "next/image";
 //import { Button } from "@/components/ui/button";
 import { Phone, ChevronDown } from "lucide-react";
@@ -26,6 +27,9 @@ interface NavbarProps {
 export default function Navbar({ navbarData, contactInfo }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mobileSubmenu, setMobileSubmenu] = useState<string | null>(null);
+  const pathname = usePathname();
+
+  const isPortal = pathname?.startsWith('/student') || pathname?.startsWith('/teacher') || pathname?.startsWith('/admin');
   const lastScrollY = useRef(0);
   const isScrolledRef = useRef(false);
   const isVisibleRef = useRef(true);
@@ -133,7 +137,7 @@ export default function Navbar({ navbarData, contactInfo }: NavbarProps) {
   return (
     <header
       ref={headerRef}
-      className="sticky top-0 z-350 w-full border-b bg-white transition-transform duration-500"
+      className={`sticky top-0 z-350 w-full border-b bg-white transition-transform duration-500 ${isPortal ? 'max-md:hidden' : ''}`}
     >
       <div className="w-full h-full ">
         <div

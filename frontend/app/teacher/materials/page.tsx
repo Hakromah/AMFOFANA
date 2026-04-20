@@ -179,7 +179,7 @@ export default function TeacherMaterialsPage() {
         <AnimatePresence mode="popLayout">
           {materials.map((mat) => (
             <motion.div key={mat.id} layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}>
-              <Card className="rounded-[2.5rem] border-none shadow-sm bg-white p-8 hover:shadow-2xl transition-all h-full flex flex-col justify-between group">
+              <Card className="rounded-[2.5rem] border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm bg-white p-8 hover:shadow-2xl h-full flex flex-col justify-between group">
                 <div>
                   <div className="flex justify-between items-start mb-6">
                     <div className="h-14 w-14 rounded-2xl bg-blue-50 flex items-center justify-center text-primary group-hover:bg-blue-600 group-hover:text-white transition-all">
@@ -252,8 +252,8 @@ export default function TeacherMaterialsPage() {
           </DialogHeader>
 
           <div className="space-y-6 mt-6">
-            <Input placeholder="Resource Title" value={title} onChange={(e) => setTitle(e.target.value)} className="h-14 rounded-2xl bg-slate-50 border-none font-bold" />
-            <textarea placeholder="Instructional details..." value={description} onChange={(e) => setDescription(e.target.value)} className="w-full rounded-2xl bg-slate-50 border-none p-4 font-bold text-sm min-h-[100px]" />
+            <Input placeholder="Resource Title" value={title} onChange={(e) => setTitle(e.target.value)} className="h-14 rounded-2xl bg-slate-50 border-none font-bold text-slate-900 focus-visible:ring-2 focus-visible:ring-primary/20" />
+            <textarea placeholder="Instructional details..." value={description} onChange={(e) => setDescription(e.target.value)} className="w-full rounded-2xl bg-slate-50 border-none p-4 font-bold text-sm min-h-[120px] text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-slate-400 resize-none" />
 
             <div className="space-y-3">
               <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Deploy to Classes</p>
@@ -271,9 +271,9 @@ export default function TeacherMaterialsPage() {
             </div>
 
             <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-slate-100 rounded-[2.5rem] cursor-pointer hover:bg-slate-50 transition-all group">
-              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6 px-4 text-center max-w-full">
                 <FileUp className={`w-10 h-10 mb-2 ${file ? 'text-primary' : 'text-slate-200 group-hover:text-primary'}`} />
-                <p className="text-[11px] font-black uppercase text-slate-400 tracking-tighter italic">
+                <p className="text-[11px] font-black uppercase text-slate-400 tracking-tighter italic truncate w-full max-w-[250px]">
                   {file ? file.name : 'Select PDF, DOCX, or Image'}
                 </p>
               </div>
