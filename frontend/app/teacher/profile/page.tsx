@@ -88,10 +88,10 @@ export default function TeacherProfilePage() {
   };
 
   return (
-    <div className="p-8 space-y-8">
-      <h1 className="text-3xl font-bold">My Profile</h1>
+    <div className="p-[clamp(1.2rem,2vw+1rem,2rem)] space-y-[clamp(1.2rem,2vw+1rem,2rem)]">
+      <h1 className="text-[clamp(1.2rem,2vw+1rem,2rem)] font-bold">My Profile</h1>
 
-      <Card className="border border-slate-200 md:hover:border-primary duration-500 transition-colors shadow-sm">
+      <Card className="border border-slate-200 md:hover:border-primary py-4 duration-500 transition-colors shadow-sm">
         <CardHeader>
           <CardTitle>Update Profile</CardTitle>
         </CardHeader>
@@ -130,7 +130,7 @@ export default function TeacherProfilePage() {
         </CardContent>
       </Card>
 
-      <Card className="border border-slate-200 md:hover:border-primary duration-500 transition-colors shadow-sm">
+      <Card className="border border-slate-200 py-4 md:hover:border-primary duration-500 transition-colors shadow-sm">
         <CardHeader>
           <CardTitle>Change Password</CardTitle>
         </CardHeader>

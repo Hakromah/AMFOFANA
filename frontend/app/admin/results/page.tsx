@@ -233,11 +233,11 @@ export default function AdminResultsPage() {
   };
 
   return (
-    <div className="p-8 space-y-6 max-w-7xl mx-auto">
+    <div className="p-[clamp(1rem,2vw+1rem,2rem)] space-y-[clamp(1rem,2vw+1rem,2rem)] max-w-7xl mx-auto">
       {/* PAGE HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-slate-800 flex items-center gap-3">
+          <h1 className="text-[clamp(1.2rem,2vw+1rem,3rem)] font-black tracking-tight text-slate-800 flex items-center gap-3">
             <GraduationCap className="w-10 h-10 text-primary" /> Central Registry
           </h1>
           <p className="text-muted-foreground font-medium">Academic monitoring and official transcript issuance.</p>
@@ -254,7 +254,7 @@ export default function AdminResultsPage() {
 
       {/* FILTER CONTROLS */}
       <Card className="bg-slate-50 border border-slate-200 md:hover:border-primary duration-500 transition-colors shadow-sm">
-        <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        <CardContent className="py-[clamp(1rem,2vw+1rem,1.5rem)] grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-1">
               <Search className="w-3 h-3" /> Student Search

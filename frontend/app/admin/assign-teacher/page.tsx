@@ -99,7 +99,7 @@ export default function AdvancedAssignTeacherPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10 space-y-10">
+    <div className="min-h-screen bg-[#F8FAFC] p-[clamp(1rem,2vw+1rem,2rem)] space-y-[clamp(1rem,2vw+1rem,2rem)]">
       {/* Header */}
       <header className="max-w-6xl mx-auto text-center space-y-4">
         <motion.div
@@ -110,7 +110,7 @@ export default function AdvancedAssignTeacherPage() {
           <ShieldCheck size={18} />
           <span className="text-[10px] font-black uppercase tracking-[0.4em]">Administrative Authority</span>
         </motion.div>
-        <h1 className="text-[clamp(1rem,3.5vw,4rem)] font-black text-slate-900 tracking-tighter sm:text-7xl italic uppercase">
+        <h1 className="text-[clamp(1.4rem,3.5vw,4rem)] font-black text-slate-900 tracking-tighter sm:text-7xl italic uppercase">
           Teacher <span className="text-primary">Deployment.</span>
         </h1>
         <p className="text-slate-400 font-bold text-sm uppercase tracking-widest max-w-xl mx-auto leading-loose">
@@ -126,8 +126,8 @@ export default function AdvancedAssignTeacherPage() {
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
         >
-          <Card className="rounded-[3rem] border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-2xl overflow-hidden bg-white">
-            <CardContent className="p-10 space-y-8">
+          <Card className="rounded-[clamp(1rem,2vw+1rem,2rem)] border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-2xl overflow-hidden bg-white">
+            <CardContent className="p-[clamp(0rem,2vw+1rem,2rem)] space-y-[clamp(0rem,2vw+1rem,2rem)]">
               <div className="space-y-2">
                 <h2 className="text-[clamp(16px,3vw,24px)] font-black text-slate-900 italic tracking-tight uppercase">New Assignment</h2>
                 <div className="h-1 w-12 bg-primary rounded-full" />
@@ -142,11 +142,11 @@ export default function AdvancedAssignTeacherPage() {
                         <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Select Faculty Member</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
-                            <SelectTrigger className="h-14 rounded-2xl bg-slate-50 border-none font-bold text-slate-700 shadow-sm transition-all focus:ring-2 focus:ring-blue-600/20">
+                            <SelectTrigger className="h-14 rounded-[clamp(1rem,2vw+1rem,2rem)] bg-slate-50 border-none font-bold text-slate-700 shadow-sm transition-all focus:ring-2 focus:ring-blue-600/20">
                               <SelectValue placeholder="Choose Instructor" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="rounded-2xl border-slate-100 shadow-2xl">
+                          <SelectContent className="rounded-[clamp(1rem,2vw+1rem,2rem)] border-slate-100 shadow-2xl">
                             {teachers.map((teacher) => (
                               <SelectItem key={teacher.id} value={String(teacher.id)} className="font-bold p-3">
                                 {teacher.username || teacher.name || teacher.email}
@@ -215,10 +215,10 @@ export default function AdvancedAssignTeacherPage() {
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
         >
-          <div className="bg-white rounded-[3rem] p-10 border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm h-full flex flex-col justify-between">
+          <div className="bg-white rounded-[clamp(1rem,2vw+1rem,2rem)] p-[clamp(0rem,2vw+1rem,2rem)] border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm h-full flex flex-col justify-between">
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-black text-slate-900 italic tracking-tight uppercase">Quick Intelligence</h2>
+                <h2 className="text-[clamp(16px,3vw,24px)] font-black text-slate-900 italic tracking-tight uppercase">Quick Intelligence</h2>
                 <Badge className="bg-emerald-100 text-emerald-600 border-none font-black text-[9px] px-3 tracking-widest uppercase">Live Registry</Badge>
               </div>
 

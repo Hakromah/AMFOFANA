@@ -285,12 +285,12 @@ export default function UserManagement() {
    };
 
    return (
-      <div className="p-8 space-y-8 bg-slate-50/50 min-h-screen">
+      <div className="p-[clamp(1rem,2vw+1rem,2rem)] space-y-[clamp(1rem,2vw+1rem,2rem)] bg-slate-50/50 min-h-screen">
 
          {/* 1. TOP COMMAND HEADER */}
          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }}>
-               <h1 className="text-4xl font-black text-slate-900 tracking-tighter flex items-center gap-3 italic">
+               <h1 className="text-[clamp(1.2rem,2vw+1rem,2rem)] font-black text-slate-900 tracking-tighter flex items-center gap-3 italic">
                   REGISTRY COMMAND <Activity className="text-blue-500 animate-pulse" size={24} />
                </h1>
                <p className="text-slate-500 font-bold text-xs uppercase tracking-[0.3em]">Identity & Access Management</p>

@@ -116,14 +116,14 @@ export default function AdvancedClassesPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10 space-y-10">
+    <div className="min-h-screen bg-[#F8FAFC] p-[clamp(1rem,2vw+1rem,2rem)] space-y-[clamp(1rem,2vw+1rem,2rem)]">
       <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
           <div className="flex items-center gap-2 mb-2 text-primary">
             <Shapes size={18} />
             <span className="text-[10px] font-black uppercase tracking-[0.4em]">Structure Management</span>
           </div>
-          <h1 className="text-[clamp(1rem,3.5vw,4rem)] font-black text-slate-900 tracking-tighter sm:text-[clamp(1rem,3.5vw,4rem)] italic uppercase">
+          <h1 className="text-[clamp(1.2rem,2vw+1rem,2rem)] font-black text-slate-900 tracking-tighter sm:text-[clamp(1rem,3.5vw,4rem)] italic uppercase">
             Class <span className="text-primary">Units.</span>
           </h1>
         </div>
@@ -140,7 +140,7 @@ export default function AdvancedClassesPage() {
           <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={20} />
           <Input
             placeholder="Search classes by name or grade level..."
-            className="h-16 pl-16 pr-8 rounded-4xl border-none shadow-sm bg-white font-bold text-slate-600 focus-visible:ring-blue-600"
+            className="h-16 pl-16 pr-8 rounded-4xl boder-[1px] border-primary/0 lg:hover:border-primary duration-500  shadow-sm bg-white font-bold text-slate-600 focus-visible:ring-blue-600"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />

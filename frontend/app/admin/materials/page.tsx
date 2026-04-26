@@ -117,14 +117,14 @@ export default function AdminMaterialsPage() {
    };
 
    return (
-      <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10 space-y-10">
+      <div className="min-h-screen bg-[#F8FAFC] p-[clamp(1rem,2vw+1rem,2rem)] space-y-[clamp(1rem,2vw+1rem,2rem)]">
          {/* 1. Header Section */}
          <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-end gap-6">
             <div className="space-y-2">
                <div className="flex items-center gap-2 text-rose-600 font-black text-[10px] uppercase tracking-[0.4em]">
                   <HardDrive size={14} /> Global Asset Registry
                </div>
-               <h1 className="text-5xl font-black text-slate-900 tracking-tighter sm:text-7xl italic uppercase leading-none">
+               <h1 className="text-[clamp(1.2rem,2vw+1rem,3rem)] font-black text-slate-900 tracking-tighter  italic uppercase leading-none">
                   Material <span className="text-rose-600">Admin.</span>
                </h1>
             </div>
@@ -134,13 +134,13 @@ export default function AdminMaterialsPage() {
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                   <Input
                      placeholder="Filter archives..."
-                     className="pl-12 h-14 rounded-2xl border-none shadow-lg bg-white font-bold"
+                     className="pl-12 h-14 rounded-[clamp(1rem,2vw+1rem,2rem)] border-none shadow-lg bg-white font-bold"
                      value={query}
                      onChange={e => setQuery(e.target.value)}
                      onKeyDown={(e) => e.key === 'Enter' && fetchData()}
                   />
                </div>
-               <Button onClick={fetchData} className="h-14 px-8 bg-slate-900 text-white rounded-2xl font-black italic hover:bg-rose-600 transition-colors">
+               <Button onClick={fetchData} className="h-14 px-8 bg-slate-900 text-white rounded-[clamp(1rem,2vw+1rem,2rem)] font-black italic hover:bg-rose-600 transition-colors">
                   EXECUTE
                </Button>
             </div>
@@ -150,7 +150,7 @@ export default function AdminMaterialsPage() {
          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-4">
             {analytics.length > 0 ? (
                analytics.map((item, idx) => (
-                  <Card key={idx} className="p-6 rounded-4xl border-none shadow-sm bg-white flex items-center justify-between border-l-4 border-rose-500">
+                  <Card key={idx} className="p-6 rounded-[clamp(1rem,2vw+1rem,2rem)] shadow-sm border border-primary/0 lg:hover:border-primary duration-300 bg-white flex items-center justify-between border-l-4">
                      <div>
                         <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">
                            {item.className}
@@ -160,7 +160,7 @@ export default function AdminMaterialsPage() {
                            <TrendingUp size={14} className="text-emerald-500" />
                         </div>
                      </div>
-                     <div className="h-10 w-10 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center">
+                     <div className="h-10 w-10 bg-rose-50 text-rose-600 rounded-[clamp(1rem,2vw+1rem,2rem)] flex items-center justify-center">
                         <BarChart3 size={20} />
                      </div>
                   </Card>
@@ -192,7 +192,7 @@ export default function AdminMaterialsPage() {
                               animate={{ opacity: 1, scale: 1 }}
                               exit={{ opacity: 0, scale: 0.9 }}
                            >
-                              <Card className="rounded-[3rem] p-8 border border-slate-100 md:hover:border-primary duration-500 shadow-sm bg-white hover:shadow-2xl transition-all group flex flex-col justify-between h-full relative overflow-hidden">
+                              <Card className="rounded-[clamp(1rem,2vw+1rem,2rem)] p-8 border border-primary/0 lg:hover:border-primary duration-500 shadow-sm bg-white hover:shadow-2xl transition-all group flex flex-col justify-between h-full relative overflow-hidden">
                                  <div className="absolute top-0 left-0 w-2 h-full bg-rose-600/10 group-hover:bg-rose-600 transition-colors" />
 
                                  <div>

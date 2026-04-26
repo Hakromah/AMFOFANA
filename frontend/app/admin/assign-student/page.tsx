@@ -102,7 +102,7 @@ export default function AdvancedAssignStudentPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10 space-y-12">
+    <div className="min-h-screen bg-[#F8FAFC] p-[clamp(0rem,2vw+1rem,2rem)] lg:p-[clamp(0rem,2vw+1rem,2rem)] space-y-[clamp(0rem,2vw+1rem,2rem)]">
       {/* Header Section */}
       <header className="max-w-6xl mx-auto text-center space-y-4">
         <motion.div
@@ -113,7 +113,7 @@ export default function AdvancedAssignStudentPage() {
           <ShieldCheck size={18} />
           <span className="text-[10px] font-black uppercase tracking-[0.4em]">Registrar Authority</span>
         </motion.div>
-        <h1 className="text-[clamp(1rem,3.5vw,4rem)] font-black text-slate-900 tracking-tighter sm:text-7xl italic uppercase">
+        <h1 className="text-[clamp(1.2rem,3.5vw,4rem)] font-black text-slate-900 tracking-tighter italic uppercase">
           Student <span className="text-primary">Enrollment.</span>
         </h1>
         <p className="text-slate-400 font-bold text-sm uppercase tracking-widest max-w-2xl mx-auto leading-loose">
@@ -121,7 +121,7 @@ export default function AdvancedAssignStudentPage() {
         </p>
       </header>
 
-      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-[clamp(1rem,2vw+1rem,2rem)] items-stretch">
 
         {/* Enrollment Console (Form) */}
         <motion.div
@@ -129,8 +129,8 @@ export default function AdvancedAssignStudentPage() {
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
         >
-          <Card className="rounded-[3rem] max-md:rounded-2xl border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-2xl overflow-hidden bg-white h-full">
-            <CardContent className="p-10 space-y-8">
+          <Card className="rounded-[clamp(1rem,2vw+1rem,2rem)] border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-2xl overflow-hidden bg-white h-full">
+            <CardContent className="p-[clamp(0rem,2vw+1rem,2rem)] space-y-[clamp(0rem,2vw+1rem,2rem)]">
               <div className="space-y-2">
                 <h2 className="text-[clamp(1rem,3vw,4rem)]  font-black text-slate-900 italic tracking-tight uppercase">Enrollment Console</h2>
                 <div className="h-1.5 w-16 bg-blue-600 rounded-full" />
@@ -225,10 +225,10 @@ export default function AdvancedAssignStudentPage() {
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
         >
-          <div className="bg-white rounded-[3rem] p-10 border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm flex-1 flex flex-col justify-between">
-            <div className="space-y-8">
+          <div className="bg-white rounded-[clamp(1rem,2vw+1rem,2rem)] p-[clamp(0rem,2vw+1rem,2rem)] border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm flex-1 flex flex-col justify-between">
+            <div className="space-y-[clamp(0rem,2vw+1rem,2rem)]">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-black text-slate-900 italic tracking-tight uppercase leading-none">Intelligence Hub</h2>
+                <h2 className="text-[clamp(1rem,3vw,4rem)]  font-black text-slate-900 italic tracking-tight uppercase leading-none">Intelligence Hub</h2>
                 <Badge className="bg-blue-100 text-primary border-none font-black text-[9px] px-3 tracking-[0.2em] uppercase">System Verified</Badge>
               </div>
 

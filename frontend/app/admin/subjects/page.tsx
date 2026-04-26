@@ -120,8 +120,8 @@ export default function AdvancedSubjectsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10">
-      <div className="max-w-7xl mx-auto space-y-10">
+    <div className="min-h-screen bg-[#F8FAFC] p-[clamp(1rem,2vw+1rem,2rem)] space-y-[clamp(1rem,2vw+1rem,2rem)]">
+      <div className="max-w-7xl mx-auto space-y-[clamp(1rem,2vw+1rem,2rem)]">
 
         {/* Advanced Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
@@ -130,7 +130,7 @@ export default function AdvancedSubjectsPage() {
               <Library size={18} />
               <span className="text-[10px] font-black uppercase tracking-[0.3em]">Curriculum Master</span>
             </div>
-            <h1 className="text-5xl font-black text-slate-900 tracking-tighter sm:text-6xl italic">
+            <h1 className="text-[clamp(1.2rem,2vw+1rem,2rem)] font-black text-slate-900 tracking-tighter sm:text-6xl italic">
               Academic <span className="text-primary">Catalog.</span>
             </h1>
           </div>
@@ -147,7 +147,7 @@ export default function AdvancedSubjectsPage() {
           <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={20} />
           <Input
             placeholder="Search catalog by subject name..."
-            className="h-16 pl-16 pr-8 rounded-4xl border-none shadow-sm bg-white font-bold text-slate-600 focus-visible:ring-blue-600"
+            className="h-16 pl-16 pr-8 rounded-4xl border border-primary/0 lg:hover:border-primary duration-500  shadow-sm bg-white font-bold text-slate-600 focus-visible:ring-blue-600"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -195,10 +195,9 @@ export default function AdvancedSubjectsPage() {
                     <Badge className="bg-slate-100 text-slate-500 hover:bg-slate-100 border-none rounded-lg font-black text-[9px] px-3 py-1">
                       ID: #{subject.id}
                     </Badge>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tighter leading-none italic uppercase group-hover:text-primary transition-colors">
+                    <h3 className="lg:text-[clamp(1rem,2vw+1rem,1.2rem)] text-lg font-black text-slate-900 tracking-tighter leading-none italic uppercase group-hover:text-primary transition-colors">
                       {subject.name}
                     </h3>
-
                     <div className="pt-6 border-t border-slate-50 flex items-center justify-between">
                       <div className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest">
                         <GraduationCap size={12} /> Standard

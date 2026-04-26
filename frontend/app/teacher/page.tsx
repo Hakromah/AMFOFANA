@@ -108,7 +108,7 @@ export default function TeacherDashboard() {
 
       {/* --- RESTORED HERO SECTION WITH CORRECT GLOBAL MAP ANIMATION --- */}
       <div className="relative overflow-hidden bg-slate-900 rounded-3xl p-8 text-white min-h-[320px] flex items-center shadow-2xl">
-        <div className="relative z-10 w-full flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="relative z-10 w-full flex flex-col md:flex-row justify-between md:items-center gap-6">
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 text-blue-300 text-[10px] font-black uppercase tracking-widest mb-6 border border-blue-500/30">
               <CheckCircle2 className="w-3 h-3 text-blue-400" />
@@ -166,10 +166,10 @@ export default function TeacherDashboard() {
 
         {/* RECENT ACTIVITY (recentResults Implemented) */}
         <Card className="lg:col-span-2 border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm bg-white overflow-hidden">
-          <CardHeader className="border-b bg-slate-50/50 flex flex-row items-center justify-between">
+          <CardHeader className="border-b bg-slate-50/50 pt-3 flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-slate-400" />
-              <CardTitle className="text-lg font-bold">Recent Registry Activity</CardTitle>
+              <CardTitle className="text-[clamp(1rem,2vw+0.5rem,1.2rem)] font-bold">Recent Registry Activity</CardTitle>
             </div>
             <Button variant="ghost" size="sm" className="text-xs font-bold" asChild>
               <a href="/teacher/results">View Log <ArrowRight className="ml-1 w-3 h-3" /></a>
@@ -222,10 +222,10 @@ export default function TeacherDashboard() {
           </Card>
 
           <div className="grid grid-cols-2 gap-3">
-            <Button className="h-14 flex flex-col gap-1 bg-slate-800 md:hover:bg-primary duration-500 transition-colors" asChild>
+            <Button className="h-14 flex sm:flex-col gap-1 bg-slate-800 md:hover:bg-primary duration-500 transition-colors" asChild>
               <a href="/teacher/results"><GraduationCap size={16} /><span className="text-[9px] font-black uppercase tracking-widest">MARK ENTRY</span></a>
             </Button>
-            <Button className="h-14 flex flex-col gap-1 md:hover:bg-primary duration-500 transition-colors" asChild>
+            <Button className="h-14 flex sm:flex-col gap-1 md:hover:bg-primary duration-500 transition-colors" asChild>
               <a href="/teacher/exams"><Calendar size={16} /><span className="text-[9px] font-black uppercase tracking-widest">EXAMS</span></a>
             </Button>
           </div>

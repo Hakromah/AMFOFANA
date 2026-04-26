@@ -61,11 +61,11 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="p-8 space-y-8 bg-[#f8fafc] min-h-screen">
+    <div className="p-[clamp(1rem,2vw+1rem,2rem)] space-y-[clamp(1rem,2vw+1rem,2rem)] bg-[#f8fafc] min-h-screen">
       {/* HEADER SECTION */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+          <h1 className="text-[clamp(1.2rem,2vw+1rem,2rem)] font-black text-slate-900 tracking-tight flex items-center gap-3">
             Admin Console <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
           </h1>
           <p className="text-slate-500 font-medium">Global Administrative Control Panel</p>
@@ -89,9 +89,9 @@ export default function AdminDashboard() {
         <StatCard title="Assessments" value={report?.totalExams} icon={BookOpen} color="rose" sub="Total Exams" />
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className="grid lg:grid-cols-3 gap-[clamp(1.2rem,2vw+1rem,2rem)]">
         {/* ANALYTICS: USER DISTRIBUTION */}
-        <Card className="lg:col-span-1 border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm rounded-3xl overflow-hidden bg-white">
+        <Card className="lg:col-span-1 py-3 border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm rounded-3xl overflow-hidden bg-white">
           <CardHeader className="border-b border-slate-50">
             <CardTitle className="text-lg font-bold">User Matrix</CardTitle>
           </CardHeader>
@@ -130,7 +130,7 @@ export default function AdminDashboard() {
         </Card>
 
         {/* BAR CHART - INFRASTRUCTURE */}
-        <Card className="lg:col-span-2 border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm rounded-3xl overflow-hidden bg-white">
+        <Card className="lg:col-span-2 border py-3 border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm rounded-3xl overflow-hidden bg-white">
           <CardHeader className="border-b border-slate-50">
             <CardTitle className="text-lg font-bold">Academic Infrastructure</CardTitle>
           </CardHeader>
@@ -154,15 +154,15 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        <Card className="border border-slate-800 md:hover:border-primary duration-500 transition-colors shadow-2xl overflow-hidden bg-slate-900 rounded-3xl">
+      <div className="grid md:grid-cols-2 gap-[clamp(1.2rem,2vw+1rem,2rem)]">
+        <Card className="border border-slate-800 py-5 md:hover:border-primary duration-500 transition-colors shadow-2xl overflow-hidden bg-slate-900 rounded-3xl">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Activity className="w-5 h-5 text-blue-400" />
               Management Quick-Links
             </CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-4 pb-8">
+          <CardContent className="grid grid-cols-2 gap-4">
             <QuickAction href="/admin/users" label="User Audit" color="blue" />
             <QuickAction href="/admin/timetable" label="Schedules" color="emerald" />
             <QuickAction href="/admin/reports" label="Analytics" color="amber" />
@@ -172,7 +172,7 @@ export default function AdminDashboard() {
 
         <motion.div
           whileHover={{ scale: 1.01 }}
-          className="rounded-3xl bg-gradient-to-br from-indigo-600 to-blue-700 p-8 text-white relative overflow-hidden shadow-2xl shadow-indigo-200"
+          className="rounded-3xl bg-gradient-to-br duration-300 from-indigo-600 to-blue-700 p-8 text-white relative overflow-hidden shadow-2xl shadow-indigo-200"
         >
           <ArrowUpRight className="absolute right-[-20px] top-[-20px] w-48 h-48 opacity-10 rotate-12" />
           <div className="relative z-10">
@@ -204,7 +204,7 @@ function StatCard({ title, value, icon: Icon, color, sub }: any) {
 
   return (
     <motion.div whileHover={{ y: -5 }} transition={{ type: "spring", stiffness: 300 }}>
-      <Card className="border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm relative overflow-hidden bg-white rounded-3xl">
+      <Card className="border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm relative overflow-hidden bg-white rounded-3xl py-4">
         <div className={`absolute top-0 left-0 w-2 h-full ${colorMap[color].split(' ')[0]}`} />
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{title}</CardTitle>

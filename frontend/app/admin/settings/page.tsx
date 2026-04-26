@@ -100,7 +100,7 @@ export default function AdvancedSettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10 space-y-12">
+    <div className="min-h-screen bg-[#F8FAFC] p-[clamp(1.2rem,2vw+1rem,2rem)] lg:p-[clamp(1.2rem,2vw+1rem,2rem)] space-y-[clamp(1.2rem,2vw+1rem,2rem)]">
       {/* Header Section */}
       <header className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div className="space-y-2">
@@ -108,7 +108,7 @@ export default function AdvancedSettingsPage() {
             <Settings2 size={18} />
             <span className="text-[10px] font-black uppercase tracking-[0.4em]">System Configuration</span>
           </div>
-          <h1 className="text-5xl font-black text-slate-900 tracking-tighter sm:text-7xl italic uppercase">
+          <h1 className="text-[clamp(1.1rem,2vw+1rem,2rem)] font-black text-slate-900 tracking-tighter  italic uppercase">
             Admin <span className="text-primary">Settings.</span>
           </h1>
         </div>
@@ -117,18 +117,18 @@ export default function AdvancedSettingsPage() {
       <main className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12">
         {/* Left: Profile Settings */}
         <motion.div
-          className="lg:col-span-7 space-y-8"
+          className="lg:col-span-7 space-y-[clamp(1.2rem,2vw+1rem,2rem)]"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
         >
           <div className="space-y-1">
-            <h2 className="text-2xl font-black text-slate-900 italic tracking-tight uppercase flex items-center gap-3">
+            <h2 className="text-[clamp(1.1rem,2vw+1rem,2rem)] font-black text-slate-900 italic tracking-tight uppercase flex items-center gap-3">
               <User className="text-primary" /> Identity Profile
             </h2>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Public information and system identification</p>
           </div>
 
-          <Card className="rounded-[2.5rem] border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-2xl overflow-hidden bg-white">
+          <Card className="rounded-[clamp(1.2rem,2vw+1rem,2rem)] border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-2xl overflow-hidden bg-white">
             <CardContent className="p-10">
               <Form {...profileForm}>
                 <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-8">
@@ -178,18 +178,18 @@ export default function AdvancedSettingsPage() {
 
         {/* Right: Security & Alerts */}
         <motion.div
-          className="lg:col-span-5 space-y-8"
+          className="lg:col-span-5 space-y-[clamp(1.2rem,2vw+1rem,2rem)]"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
         >
           <div className="space-y-1">
-            <h2 className="text-2xl font-black text-slate-900 italic tracking-tight uppercase flex items-center gap-3">
+            <h2 className="text-[clamp(1.2rem,2vw+1rem,2rem)] font-black text-slate-900 italic tracking-tight uppercase flex items-center gap-3">
               <ShieldCheck className="text-rose-600" /> Access Guard
             </h2>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Credential management and session security</p>
           </div>
 
-          <Card className="rounded-[2.5rem] border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-2xl overflow-hidden bg-white">
+          <Card className="rounded-[clamp(1.2rem,2vw+1rem,2rem)] border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-2xl overflow-hidden bg-white">
             <CardContent className="p-10">
               <Form {...passwordForm}>
                 <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-6">
@@ -241,8 +241,8 @@ export default function AdvancedSettingsPage() {
 
               <Separator className="my-8 bg-slate-100" />
 
-              <div className="p-6 bg-blue-50 rounded-4xl flex items-center gap-4 border border-blue-100">
-                <div className="bg-white p-3 rounded-2xl shadow-sm">
+              <div className="p-6 bg-blue-50 rounded-[clamp(1.2rem,2vw+1rem,2rem)] flex items-center gap-4 border border-blue-100">
+                <div className="bg-white p-3 rounded-[clamp(1.2rem,2vw+1rem,2rem)] shadow-sm">
                   <BellRing className="text-primary" size={20} />
                 </div>
                 <div>
@@ -256,7 +256,7 @@ export default function AdvancedSettingsPage() {
       </main>
 
       {/* Footer System Status */}
-      <footer className="max-w-5xl mx-auto flex items-center justify-between px-6 py-8 border-t border-slate-200">
+      <footer className="max-w-5xl mx-auto flex items-center flex-wrap gap-3 justify-between px-6  max-md:pt-3 md:py-8 border-t border-slate-200">
         <div className="flex items-center gap-3">
           <BadgeCheck className="text-emerald-500" size={20} />
           <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Verified Secure Session • 2026 AMF Registry</span>

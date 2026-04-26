@@ -74,7 +74,7 @@ export default function AdminExamsPage() {
   );
 
   return (
-    <div className="p-6 lg:p-10 bg-[#f8fafc] min-h-screen space-y-8">
+    <div className="p-[clamp(1rem,2vw+1rem,2rem)] bg-[#f8fafc] min-h-screen space-y-[clamp(1rem,2vw+1rem,2rem)]">
       {/* Admin Header */}
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
@@ -82,14 +82,14 @@ export default function AdminExamsPage() {
             <ShieldCheck className="text-primary" size={20} />
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Authority Access</span>
           </div>
-          <h1 className="text-5xl font-black text-slate-900 tracking-tighter italic">Global <span className="text-primary">Exams.</span></h1>
+          <h1 className="text-[clamp(1.2rem,2vw+1rem,2rem)] font-black text-slate-900 tracking-tighter italic">Global <span className="text-primary">Exams.</span></h1>
         </div>
 
-        <div className="flex gap-3">
-          <Button variant="outline" className="rounded-2xl border-slate-200 font-bold h-12 px-6">
+        <div className="flex gap-3 max-xs:flex-wrap">
+          <Button variant="outline" className="rounded-[clamp(1rem,2vw+1rem,2rem)] border-slate-200 font-bold h-12 px-6">
             <Download size={18} className="mr-2" /> EXPORT PDF
           </Button>
-          <Button onClick={handleLockSemester} className="bg-rose-600 hover:bg-rose-700 text-white rounded-2xl h-12 px-6 font-black shadow-lg shadow-rose-200">
+          <Button onClick={handleLockSemester} className="bg-rose-600 hover:bg-rose-700 text-white rounded-[clamp(1rem,2vw+1rem,2rem)] h-12 px-6 font-black shadow-lg shadow-rose-200">
             <Lock size={18} className="mr-2" /> FINALIZE SEMESTER
           </Button>
         </div>
@@ -100,14 +100,14 @@ export default function AdminExamsPage() {
         <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={20} />
         <Input
           placeholder="Search by subject, teacher, or classroom..."
-          className="h-16 pl-16 pr-8 rounded-4xl border-none shadow-sm bg-white font-bold text-slate-600 placeholder:text-slate-300 focus-visible:ring-blue-600"
+          className="h-16 pl-16 pr-8 rounded-[clamp(1rem,2vw+1rem,2rem)] border border-primary/0 lg:hover:border-primary duration-500 shadow-sm bg-white font-bold text-slate-600 placeholder:text-slate-300 focus-visible:ring-blue-600"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
       {/* Master Registry Table */}
-      <div className="bg-white rounded-[3rem] shadow-sm border border-slate-100 md:hover:border-primary duration-500 transition-colors overflow-hidden max-w-7xl mx-auto">
+      <div className="bg-white rounded-[clamp(1rem,2vw+1rem,2rem)] shadow-sm border border-slate-100 md:hover:border-primary duration-500 transition-colors overflow-hidden max-w-7xl mx-auto">
         <Table>
           <TableHeader className="bg-slate-50/50">
             <TableRow className="border-none">

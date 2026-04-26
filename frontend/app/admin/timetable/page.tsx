@@ -121,11 +121,11 @@ export default function TimetableManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fcfcfd] p-6 lg:p-10 space-y-8">
+    <div className="md:min-h-screen bg-[#fcfcfd] p-[clamp(0rem,2vw+1rem,2rem)] lg:p-[clamp(0rem,2vw+1rem,2rem)] space-y-[clamp(0rem,2vw+1rem,2rem)]">
       {/* Header */}
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic">
+          <h1 className="text-[clamp(1.2rem,3.5vw,4rem)] font-black text-slate-900 tracking-tighter italic">
             Weekly <span className="text-primary">Schedule</span>
           </h1>
           <p className="text-slate-500 font-bold text-[10px] uppercase tracking-[0.3em] mt-2">
@@ -146,7 +146,7 @@ export default function TimetableManagement() {
           <button
             key={day}
             onClick={() => setSelectedDay(day)}
-            className={`px-8 py-3 rounded-2xl font-black text-[11px] tracking-widest transition-all ${selectedDay === day
+            className={`px-8 py-3 rounded-[clamp(1rem,2vw+1rem,2rem)] font-black text-[11px] tracking-widest transition-all ${selectedDay === day
               ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
               : 'bg-white text-slate-400 hover:text-slate-600'
               }`}
