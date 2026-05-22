@@ -1,6 +1,4 @@
-/**
- * \`auth-cookie\` middleware
- */
+import type { Core } from '@strapi/strapi';
 
 export default (config: any, { strapi }: { strapi: any }) => {
   return async (ctx: any, next: () => Promise<void>) => {
@@ -18,31 +16,29 @@ export default (config: any, { strapi }: { strapi: any }) => {
       const jwt = ctx.body.jwt;
       const user = ctx.body.user;
 
-      // The login response body sanitizes custom User fields
-      // Query the database to ensure we get the user's actual schoolRole
-      const fullUser = (await strapi.entityService.findOne(
-        'plugin::users-permissions.user' as any,
-        user.id
-      )) as any;
+      // Strapi v5 Document Service API call
+      const fullUser = (await strapi.documents('plugin::users-permissions.user').findOne({
+        documentId: user.documentId || user.id,
+      })) as any;
 
       const role = fullUser?.schoolRole || 'STUDENT';
-
-      // Attach the HTTP-only JWT token
+	
+	// Attach the HTTP-only JWT token
       ctx.cookies.set('accessToken', jwt, {
         httpOnly: true,
-        secure: true,
+        secure: false, // <--- CHANGE THIS TO FALSE
         maxAge: 24 * 60 * 60 * 1000, // 1 day
         path: '/',
-        sameSite: 'none',
+        sameSite: 'lax', // <--- CHANGE THIS TO 'lax' FOR PROXY COMPATIBILITY
       });
 
       // Attach the readable role string for the frontend Next.js router
       ctx.cookies.set('userRole', role, {
         httpOnly: false,
-        secure: true,
+        secure: false, // <--- CHANGE THIS TO FALSE
         maxAge: 24 * 60 * 60 * 1000,
         path: '/',
-        sameSite: 'none',
+        sameSite: 'lax', // <--- CHANGE THIS TO 'lax'
       });
     }
   };
