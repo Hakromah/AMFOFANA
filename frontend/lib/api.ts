@@ -2,8 +2,7 @@ import axios from 'axios';
 import qs from 'qs';
 import Cookies from 'js-cookie';
 
-// Changed from Spring Boot (8080) → Strapi (1337, using 127.0.0.1 to avoid IPv6 mapping issues typical on Windows)
-const baseURL = `${process.env.NEXT_PUBLIC_STRAPI_URL || 'https://diplomatic-splendor-66cebff67a.strapiapp.com'}/api`;
+const baseURL = `${process.env.NEXT_PUBLIC_STRAPI_URL || 'https://api.hassanskdev.online'}/api`;
 
 const api = axios.create({
   baseURL: baseURL,

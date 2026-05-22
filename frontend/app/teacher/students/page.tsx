@@ -88,7 +88,7 @@ export default function TeacherStudentsPage() {
   const filteredStudents = students.filter((student) => {
     const searchLower = searchTerm.toLowerCase();
     const nameStr = (student.username || student.name || '').toLowerCase();
-    const idStr = (student.userId || '').toLowerCase();
+    const idStr = (student?.userId || '').toLowerCase();
     
     return (
       nameStr.includes(searchLower) ||
@@ -150,7 +150,7 @@ export default function TeacherStudentsPage() {
             ) : filteredStudents.length > 0 ? (
               filteredStudents.map((student) => (
                 <TableRow key={student.id}>
-                  <TableCell className="font-mono">{student.userId}</TableCell>
+                  <TableCell className="font-mono">{student?.userId || 'N/A'}</TableCell>
                   <TableCell className="font-medium">{student.username || student.name}</TableCell>
                   <TableCell>{student.gender}</TableCell>
                   <TableCell>{student.email}</TableCell>

@@ -98,7 +98,7 @@ export default function TeacherDashboard() {
     setIsSearching(true);
     try {
       const res = await api.get(`/teacher/results/filter?studentId=${query}`);
-      const uniqueStudents = Array.from(new Map(res.data.map((item: any) => [item.student.userId, item.student])).values());
+      const uniqueStudents = Array.from(new Map(res.data.map((item: any) => [item?.student?.userId, item?.student])).values());
       setSearchResults(uniqueStudents);
     } catch (e) { console.error(e); } finally { setIsSearching(false); }
   };

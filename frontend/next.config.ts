@@ -6,31 +6,29 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
-        port: '',
         pathname: '/**',
       },
       {
-        // Strapi local dev server (localhost)
+        // Whitelist your new production Strapi media domain
+        protocol: 'https',
+        hostname: 'api.hassanskdev.online',
+        pathname: '/uploads/**',
+      },
+      {
+        // Strapi local dev server (Keep this for local computer testing)
         protocol: 'http',
         hostname: 'localhost',
         port: '1337',
         pathname: '/uploads/**',
       },
       {
-        // Strapi network server (LAN IP)
-        protocol: 'http',
-        hostname: '192.168.1.137',
-        port: '1337',
-        pathname: '/uploads/**',
-      },
-      {
-        protocol: "https",
-        hostname: "diplomatic-splendor-66cebff67a.media.strapiapp.com"
-        // https://diplomatic-splendor-66cebff67a.strapiapp.com/admin
+        // Your old Strapi Cloud fallback pattern (Keep it just in case, but optional)
+        protocol: 'https',
+        hostname: 'diplomatic-splendor-66cebff67a.media.strapiapp.com',
+        pathname: '/**',
       }
     ],
   },
 };
 
-export default nextConfig;
-
+export default nextConfig

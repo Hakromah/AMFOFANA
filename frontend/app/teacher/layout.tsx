@@ -14,7 +14,7 @@ export default function TeacherLayout({
     { name: 'Exams', href: '/teacher/exams' },
     { name: 'Results Management', href: '/teacher/results' }, // Added
     { name: 'Upload Materials', href: '/teacher/materials' },
-    { name: 'Messages', href: '/teacher/messages' },
+//    { name: 'Messages', href: '/teacher/messages' },
     { name: 'Profile', href: '/teacher/profile' },
   ];
 

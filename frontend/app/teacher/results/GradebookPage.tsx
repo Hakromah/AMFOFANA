@@ -165,8 +165,8 @@ export default function GradebookPage() {
 
                            return (
                               <TableRow key={student.userId}>
-                                 <TableCell className="font-mono text-xs">{student.userId}</TableCell>
-                                 <TableCell className="font-medium">{student.name}</TableCell>
+                                 <TableCell className="font-mono text-xs">{student?.userId || 'N/A'}</TableCell>
+                                 <TableCell className="font-medium">{student.username || student.name || 'unkown student'}</TableCell>
                                  {exams.map(examName => (
                                     <TableCell
                                        key={examName}

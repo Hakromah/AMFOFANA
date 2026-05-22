@@ -191,7 +191,7 @@ export default function BulkGradebookPage() {
                            <TableRow key={student.id}>
                               <TableCell>
                                  <div className="font-medium">{student.name}</div>
-                                 <div className="text-[10px] font-mono text-muted-foreground uppercase">ID: {student.userId}</div>
+                                 <div className="text-[10px] font-mono text-muted-foreground uppercase">ID: {student?.userId || 'N/A'}</div>
                               </TableCell>
 
                               {exams.map((exam) => {
