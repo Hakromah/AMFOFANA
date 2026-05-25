@@ -118,7 +118,7 @@ export default function TeacherExamsPage() {
       if (!newYearName.trim()) return;
       const tid = toast.loading('Creating Academic Year...');
       try {
-         const res = await api.post('/academic-years', { name: newYearName.trim() });
+         const res = await api.post('/academic-years', { data: { name: newYearName.trim() } });
          toast.success('Academic Year created successfully', { id: tid });
          const created = res.data.data;
          await loadAcademicSessions();
@@ -135,8 +135,10 @@ export default function TeacherExamsPage() {
       const tid = toast.loading('Creating Semester...');
       try {
          const res = await api.post('/semesters', {
-            name: newSemesterName.trim(),
-            academicYear: parseInt(newSemesterYearId)
+            data: {
+               name: newSemesterName.trim(),
+               academicYear: parseInt(newSemesterYearId)
+            }
          });
          toast.success('Semester created successfully', { id: tid });
          const created = res.data.data;
@@ -154,8 +156,10 @@ export default function TeacherExamsPage() {
       const tid = toast.loading('Creating Term...');
       try {
          const res = await api.post('/terms', {
-            name: newTermName.trim(),
-            semester: parseInt(newTermSemesterId)
+            data: {
+               name: newTermName.trim(),
+               semester: parseInt(newTermSemesterId)
+            }
          });
          toast.success('Term created successfully', { id: tid });
          const created = res.data.data;
