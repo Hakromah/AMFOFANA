@@ -346,7 +346,7 @@ export default function TeacherExamsPage() {
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-6">
                      <FormField control={form.control} name="academicYearId" render={({ field }) => (
                         <FormItem>
-                           <div className="flex justify-between items-center">
+                           <div className="flex items-center gap-2">
                               <FormLabel className="text-[10px] font-black uppercase text-slate-400">Academic Year</FormLabel>
                               <Button type="button" onClick={() => setIsAddYearOpen(true)} variant="link" className="h-fit p-0 text-[10px] font-black text-blue-600 uppercase hover:no-underline">
                                  + Add Year
@@ -364,7 +364,7 @@ export default function TeacherExamsPage() {
                      <div className="grid grid-cols-2 gap-4">
                         <FormField control={form.control} name="semesterId" render={({ field }) => (
                            <FormItem>
-                              <div className="flex justify-between items-center">
+                              <div className="flex items-center gap-2">
                                  <FormLabel className="text-[10px] font-black uppercase text-slate-400">Semester</FormLabel>
                                  <Button type="button" onClick={() => {
                                     setNewSemesterYearId(form.watch('academicYearId'));
@@ -383,7 +383,7 @@ export default function TeacherExamsPage() {
                         )} />
                         <FormField control={form.control} name="termId" render={({ field }) => (
                            <FormItem>
-                              <div className="flex justify-between items-center">
+                              <div className="flex items-center gap-2">
                                  <FormLabel className="text-[10px] font-black uppercase text-slate-400">Term</FormLabel>
                                  <Button type="button" onClick={() => {
                                     setNewTermSemesterId(form.watch('semesterId'));
@@ -460,7 +460,7 @@ export default function TeacherExamsPage() {
                </DialogHeader>
                <div className="space-y-4 mt-4">
                   <div className="space-y-2">
-                     <FormLabel className="text-[10px] font-black uppercase text-slate-400">Year Name</FormLabel>
+                     <label className="text-[10px] font-black uppercase text-slate-400">Year Name</label>
                      <Input placeholder="e.g. 2026-2027" value={newYearName} onChange={(e) => setNewYearName(e.target.value)} className="rounded-xl bg-slate-50 border-none font-bold" />
                   </div>
                   <Button onClick={handleAddYear} className="w-full h-12 bg-blue-600 hover:bg-slate-900 text-white font-black rounded-xl uppercase text-[9px] tracking-wider" disabled={!newYearName}>
@@ -479,11 +479,11 @@ export default function TeacherExamsPage() {
                </DialogHeader>
                <div className="space-y-4 mt-4">
                   <div className="space-y-2">
-                     <FormLabel className="text-[10px] font-black uppercase text-slate-400">Semester Name</FormLabel>
+                     <label className="text-[10px] font-black uppercase text-slate-400">Semester Name</label>
                      <Input placeholder="e.g. Trimester 1" value={newSemesterName} onChange={(e) => setNewSemesterName(e.target.value)} className="rounded-xl bg-slate-50 border-none font-bold" />
                   </div>
                   <div className="space-y-2">
-                     <FormLabel className="text-[10px] font-black uppercase text-slate-400">Academic Year</FormLabel>
+                     <label className="text-[10px] font-black uppercase text-slate-400">Academic Year</label>
                      <Select onValueChange={setNewSemesterYearId} value={newSemesterYearId}>
                         <SelectTrigger className="rounded-xl bg-slate-50 border-none font-bold"><SelectValue placeholder="Select Year" /></SelectTrigger>
                         <SelectContent className="rounded-xl border-none shadow-xl">
@@ -507,11 +507,11 @@ export default function TeacherExamsPage() {
                </DialogHeader>
                <div className="space-y-4 mt-4">
                   <div className="space-y-2">
-                     <FormLabel className="text-[10px] font-black uppercase text-slate-400">Term Name</FormLabel>
+                     <label className="text-[10px] font-black uppercase text-slate-400">Term Name</label>
                      <Input placeholder="e.g. First Quarter" value={newTermName} onChange={(e) => setNewTermName(e.target.value)} className="rounded-xl bg-slate-50 border-none font-bold" />
                   </div>
                   <div className="space-y-2">
-                     <FormLabel className="text-[10px] font-black uppercase text-slate-400">Semester</FormLabel>
+                     <label className="text-[10px] font-black uppercase text-slate-400">Semester</label>
                      <Select onValueChange={setNewTermSemesterId} value={newTermSemesterId}>
                         <SelectTrigger className="rounded-xl bg-slate-50 border-none font-bold"><SelectValue placeholder="Select Semester" /></SelectTrigger>
                         <SelectContent className="rounded-xl border-none shadow-xl">
