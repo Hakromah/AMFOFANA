@@ -107,8 +107,8 @@ export default function ResultForm({ result, existingResults, onFinished }: Resu
 
     // Find IDs of students who already have a result for the selected exam
     const gradedStudentIds = existingResults
-      .filter((r: any) => String(r.exam.id) === watchExamId)
-      .map((r: any) => String(r.student.id));
+      .filter((r: any) => r?.exam?.id && String(r.exam.id) === watchExamId)
+      .map((r: any) => r?.student?.id ? String(r.student.id) : '');
 
     return students.filter((s: any) => !gradedStudentIds.includes(String(s.id)));
   }, [students, watchExamId, existingResults, result]);
@@ -181,7 +181,7 @@ export default function ResultForm({ result, existingResults, onFinished }: Resu
                 </FormControl>
                 <SelectContent>
                   {exams
-                    .filter(e => !form.watch('classId') || String(e.classe.id) === form.watch('classId'))
+                    .filter(e => !form.watch('classId') || (e?.classe?.id && String(e.classe.id) === form.watch('classId')))
                     .map((e) => (
                       <SelectItem key={e.id} value={String(e.id)}>
                         <div className="flex flex-col">

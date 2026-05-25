@@ -134,7 +134,7 @@ export default function TeacherResultsPage() {
   }, [selectedClassId, filterStudentId, fetchResultsList, fetchGradebookData]);
 
   const handleSubmitResults = async () => {
-    const draftResultIds = results.filter(r => r.status === 'DRAFT' && !r.exam.locked).map(r => r.id);
+    const draftResultIds = results.filter(r => r.status === 'DRAFT' && r?.exam && !r.exam.locked).map(r => r.id);
     if (draftResultIds.length === 0) {
       toast.info('No editable draft results to submit.');
       return;
