@@ -39,9 +39,9 @@ export default async function RootLayout({
   const preferences = cookieStore.get("preferences");
 
   const [footerData, contactInfo, navbarData] = await Promise.all([
-     fetchFooter(),
-     fetchContactInfo(),
-     fetchNavbar(),
+    fetchFooter(),
+    fetchContactInfo(),
+    fetchNavbar(),
   ]);
 
   return (

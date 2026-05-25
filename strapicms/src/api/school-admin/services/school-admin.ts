@@ -389,4 +389,145 @@ export default () => ({
       data: { password: hashed } as any,
     });
   },
+
+  async getStudentTranscript(studentId: number, filters: {
+    academicYearId?: number;
+    classId?: number;
+    semesterIds?: number[];
+    termIds?: number[];
+  }) {
+    // 1. Fetch Student details
+    const student = await strapi.entityService.findOne('plugin::users-permissions.user' as any, studentId, {
+      fields: ['id', 'userId', 'username', 'email', 'birthDate', 'phoneNumber'] as any,
+      populate: ['enrolledClasses'] as any
+    }) as any;
+    if (!student) throw new Error('Student not found');
+
+    // 2. Fetch School / Institutional Details (Contact Info + Navbar)
+    let schoolInfo = { name: 'AMF Academy', address: '', email: '', phone: '' };
+    try {
+      const contactInfo = await strapi.entityService.findMany('api::contact-info.contact-info' as any, {
+        populate: ['phones', 'email'] as any
+      }) as any;
+      
+      const realContact = Array.isArray(contactInfo) ? contactInfo[0] : contactInfo;
+      if (realContact) {
+        schoolInfo.address = realContact.address || '';
+        schoolInfo.phone = realContact.phones?.[0]?.phones || '';
+        schoolInfo.email = realContact.email?.[0]?.address || '';
+      }
+      
+      const navbar = await strapi.entityService.findMany('api::navbar.navbar' as any) as any;
+      const realNavbar = Array.isArray(navbar) ? navbar[0] : navbar;
+      if (realNavbar) {
+        schoolInfo.name = realNavbar.title || schoolInfo.name;
+      }
+    } catch (e) {
+      // Ignore if not found, fall back
+    }
+
+    // 3. Query Exam Results
+    const queryFilters: any = {
+      student: { id: studentId },
+      status: { $in: ['SUBMITTED', 'GRADED'] }
+    };
+
+    const examFilters: any = {};
+    if (filters.academicYearId) examFilters.academicYear = { id: filters.academicYearId };
+    if (filters.classId) examFilters.classe = { id: filters.classId };
+    if (filters.semesterIds && filters.semesterIds.length > 0) examFilters.semesterRel = { id: { $in: filters.semesterIds } };
+    if (filters.termIds && filters.termIds.length > 0) examFilters.termRel = { id: { $in: filters.termIds } };
+
+    if (Object.keys(examFilters).length > 0) {
+      queryFilters.exam = examFilters;
+    }
+
+    const results = await strapi.entityService.findMany('api::exam-result.exam-result', {
+      filters: queryFilters,
+      populate: {
+        exam: {
+          populate: ['subject', 'classe', 'academicYear', 'semesterRel', 'termRel']
+        }
+      } as any
+    }) as any[];
+
+    // 4. Map results
+    const transcriptResults = results.map(r => ({
+      id: r.id,
+      examId: r.exam?.id,
+      examName: r.exam?.name,
+      subjectCode: r.exam?.subject?.code,
+      subjectName: r.exam?.subject?.name || 'N/A',
+      className: r.exam?.classe?.name || 'N/A',
+      academicYear: r.exam?.academicYear?.name || r.exam?.academicYear?.year || 'N/A',
+      semester: r.exam?.semesterRel?.name || r.exam?.semester || 'N/A',
+      term: r.exam?.termRel?.name || r.exam?.term || 'N/A',
+      marks: r.marks,
+      letterGrade: r.letterGrade,
+      weight: r.exam?.weight || 0,
+      remarks: r.remarks || ''
+    }));
+
+    // 5. Calculate GPA and Average
+    let totalWeightedScore = 0;
+    let totalWeight = 0;
+    let totalScore = 0;
+    let scoreCount = 0;
+
+    for (const r of transcriptResults) {
+      if (r.marks != null) {
+        totalWeightedScore += r.marks * (r.weight || 1);
+        totalWeight += (r.weight || 1);
+        totalScore += r.marks;
+        scoreCount++;
+      }
+    }
+
+    const averageScore = scoreCount > 0 ? (totalScore / scoreCount).toFixed(2) : '0.00';
+    const weightedAverageScore = totalWeight > 0 ? (totalWeightedScore / totalWeight).toFixed(2) : '0.00';
+
+    // standard GPA mapping on a 4.0 scale
+    // AA/A: 4.0, BA/A-: 3.7, BB/B+: 3.3, B: 3.0, CB/B-: 2.7, CC/C+: 2.3, C: 2.0, DC/D: 1.0, FF/F: 0.0
+    const scoreToGPA = (score: number) => {
+      if (score >= 90) return 4.0;
+      if (score >= 85) return 3.7;
+      if (score >= 80) return 3.3;
+      if (score >= 75) return 3.0;
+      if (score >= 70) return 2.7;
+      if (score >= 65) return 2.3;
+      if (score >= 60) return 2.0;
+      if (score >= 50) return 1.0;
+      return 0.0;
+    };
+
+    let totalGPA = 0;
+    let gpaCount = 0;
+    for (const r of transcriptResults) {
+      if (r.marks != null) {
+        totalGPA += scoreToGPA(r.marks);
+        gpaCount++;
+      }
+    }
+    const gpa = gpaCount > 0 ? (totalGPA / gpaCount).toFixed(2) : '0.00';
+
+    return {
+      student: {
+        id: student.id,
+        userId: student.userId,
+        name: student.username,
+        email: student.email,
+        birthDate: student.birthDate,
+        phoneNumber: student.phoneNumber,
+        classes: (student.enrolledClasses || []).map((c: any) => c.name)
+      },
+      school: schoolInfo,
+      results: transcriptResults,
+      summary: {
+        averageScore: parseFloat(averageScore),
+        weightedAverageScore: parseFloat(weightedAverageScore),
+        gpa: parseFloat(gpa),
+        totalSubjectsCount: scoreCount
+      }
+    };
+  },
 });

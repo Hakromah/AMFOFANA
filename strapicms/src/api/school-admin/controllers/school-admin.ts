@@ -189,4 +189,34 @@ export default {
     );
     ctx.body = {};
   },
+
+  async generateTranscript(ctx: any) {
+    const { studentId, academicYearId, classId, semesterIds, termIds } = ctx.query;
+    
+    if (!studentId) {
+      ctx.status = 400;
+      ctx.body = { message: 'studentId is required' };
+      return;
+    }
+
+    const parsedStudentId = Number(studentId);
+    const parsedAcademicYearId = academicYearId ? Number(academicYearId) : undefined;
+    const parsedClassId = classId ? Number(classId) : undefined;
+    
+    const parseArray = (val: any) => {
+      if (!val) return undefined;
+      if (Array.isArray(val)) return val.map(Number);
+      return String(val).split(',').map(Number).filter(n => !isNaN(n));
+    };
+    
+    const parsedSemesterIds = parseArray(semesterIds);
+    const parsedTermIds = parseArray(termIds);
+
+    ctx.body = await strapi.service('api::school-admin.school-admin').getStudentTranscript(parsedStudentId, {
+      academicYearId: parsedAcademicYearId,
+      classId: parsedClassId,
+      semesterIds: parsedSemesterIds,
+      termIds: parsedTermIds
+    });
+  },
 };

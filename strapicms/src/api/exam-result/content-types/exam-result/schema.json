@@ -28,6 +28,9 @@
       "default": "DRAFT",
       "required": true
     },
+    "remarks": {
+      "type": "string"
+    },
     "exam": {
       "type": "relation",
       "relation": "manyToOne",

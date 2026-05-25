@@ -17,6 +17,7 @@ export default function AdminLayout({
     { name: 'Student Assignment', href: '/admin/assign-student' },
     { name: 'Timetable', href: '/admin/timetable' },
     { name: 'Reports', href: '/admin/reports' },
+    { name: 'Transcripts', href: '/admin/transcripts' },
     { name: 'Settings', href: '/admin/settings' },
   ];
 

@@ -29,12 +29,29 @@
       "required": true
     },
     "term": {
-      "type": "enumeration",
-      "enum": ["MIDTERM", "FINAL", "QUIZ_1", "QUIZ_2"]
+      "type": "string"
     },
     "semester": {
       "type": "string",
       "required": true
+    },
+    "academicYear": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::academic-year.academic-year",
+      "inversedBy": "exams"
+    },
+    "semesterRel": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::semester.semester",
+      "inversedBy": "exams"
+    },
+    "termRel": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::term.term",
+      "inversedBy": "exams"
     },
     "weight": {
       "type": "integer"

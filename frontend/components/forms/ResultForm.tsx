@@ -34,6 +34,7 @@ const formSchema = z.object({
     .refine((val) => !isNaN(Number(val)), { message: 'Score must be a number' })
     .refine((val) => Number(val) <= 100 && Number(val) >= 0, { message: 'Score must be 0-100' }),
   grade: z.string().optional(),
+  remarks: z.string().optional(),
 });
 
 interface ResultFormProps {
@@ -56,6 +57,7 @@ export default function ResultForm({ result, existingResults, onFinished }: Resu
       examId: result?.exam?.id ? String(result.exam.id) : '',
       marks: result?.marks ? String(result.marks) : '',
       grade: result?.grade || undefined,
+      remarks: result?.remarks || '',
     },
   });
 
@@ -119,6 +121,7 @@ export default function ResultForm({ result, existingResults, onFinished }: Resu
         student: { id: parseInt(values.studentId) },
         marks: parseFloat(values.marks),
         grade: values.grade || null,
+        remarks: values.remarks || '',
       };
 
       if (result) {
@@ -276,6 +279,18 @@ export default function ResultForm({ result, existingResults, onFinished }: Resu
             )}
           />
         </div>
+
+        <FormField
+          control={form.control}
+          name="remarks"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Teacher Remarks</FormLabel>
+              <FormControl><Input placeholder="Provide feedback or notes" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <Button type="submit" className="w-full" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

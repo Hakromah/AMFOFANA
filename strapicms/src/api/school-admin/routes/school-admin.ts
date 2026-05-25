@@ -49,6 +49,7 @@ export default {
     { method: 'GET',    path: '/admin/reports/semester-summary',   handler: 'school-admin.getSemesterGPA' },
     { method: 'PUT',    path: '/admin/semester/finalize',          handler: 'school-admin.finalizeSemester' },
     { method: 'PUT',    path: '/admin/semester/lock',              handler: 'school-admin.finalizeSemester' },
+    { method: 'GET',    path: '/admin/transcripts/generate',       handler: 'school-admin.generateTranscript' },
 
     // Profile & Password
     { method: 'PUT',    path: '/admin/profile',                    handler: 'school-admin.updateProfile' },

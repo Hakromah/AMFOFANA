@@ -106,11 +106,28 @@ export default () => ({
   // ─── Exams ────────────────────────────────────────────────────────
 
   async createExam(teacherId: number, data: any) {
+    let semesterName = data.semester || '';
+    let termName = data.term || '';
+
+    if (data.semesterRel) {
+      const sem = await strapi.entityService.findOne('api::semester.semester' as any, data.semesterRel);
+      if (sem) semesterName = (sem as any).name;
+    }
+    if (data.termRel) {
+      const trm = await strapi.entityService.findOne('api::term.term' as any, data.termRel);
+      if (trm) termName = (trm as any).name;
+    }
+
     const payload = {
       ...data,
       teacher: teacherId,
       classe: data.classe?.id || data.classe,
       subject: data.subject?.id || data.subject,
+      semester: semesterName,
+      term: termName,
+      academicYear: data.academicYear?.id || data.academicYear,
+      semesterRel: data.semesterRel?.id || data.semesterRel,
+      termRel: data.termRel?.id || data.termRel,
     };
     return strapi.entityService.create('api::school-exam.school-exam', {
       data: payload,
@@ -120,7 +137,7 @@ export default () => ({
   async getExamsByTeacher(teacherId: number) {
     return strapi.entityService.findMany('api::school-exam.school-exam', {
       filters: { teacher: { id: teacherId } },
-      populate: ['classe', 'subject'],
+      populate: ['classe', 'subject', 'academicYear', 'semesterRel', 'termRel'] as any,
     });
   },
 
@@ -128,11 +145,28 @@ export default () => ({
     const exam = await strapi.entityService.findOne('api::school-exam.school-exam', examId, { populate: ['teacher'] }) as any;
     if (exam.teacher?.id !== teacherId) throw new Error('Unauthorized');
     if (exam.locked) throw new Error('This exam is locked by admin');
+
+    let semesterName = data.semester || exam.semester;
+    let termName = data.term || exam.term;
+
+    if (data.semesterRel) {
+      const sem = await strapi.entityService.findOne('api::semester.semester' as any, data.semesterRel);
+      if (sem) semesterName = (sem as any).name;
+    }
+    if (data.termRel) {
+      const trm = await strapi.entityService.findOne('api::term.term' as any, data.termRel);
+      if (trm) termName = (trm as any).name;
+    }
     
     const payload = {
       ...data,
       classe: data.classe?.id || data.classe,
       subject: data.subject?.id || data.subject,
+      semester: semesterName,
+      term: termName,
+      academicYear: data.academicYear?.id || data.academicYear,
+      semesterRel: data.semesterRel?.id || data.semesterRel,
+      termRel: data.termRel?.id || data.termRel,
     };
     
     return strapi.entityService.update('api::school-exam.school-exam', examId, { data: payload });
