@@ -10,7 +10,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import api from '@/lib/api';
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import QRCode from 'qrcode';
 
@@ -102,161 +102,168 @@ export default function StudentTranscriptsPage() {
   // PDF Export logic (exact mirror of admin)
   const handleDownloadPDF = () => {
     if (!transcriptData) return;
-    const doc = new jsPDF() as any;
-    const s = transcriptData.student;
-    const sch = transcriptData.school;
-    const sum = transcriptData.summary;
-    const meta = transcriptData.metadata;
+    try {
+      const doc = new jsPDF() as any;
+      const s = transcriptData.student;
+      const sch = transcriptData.school;
+      const sum = transcriptData.summary;
+      const meta = transcriptData.metadata;
 
-    // Header Branding
-    doc.setFillColor(15, 23, 42); // slate-900
-    doc.rect(0, 0, 210, 45, 'F');
+      // Header Branding
+      doc.setFillColor(15, 23, 42); // slate-900
+      doc.rect(0, 0, 210, 45, 'F');
 
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('Helvetica', 'bold');
-    doc.setFontSize(20);
-    doc.text(sch.name.toUpperCase(), 14, 18);
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(20);
+      doc.text((sch.name || 'School').toUpperCase(), 14, 18);
 
-    doc.setFont('Helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(156, 163, 175); // gray-400
-    doc.text(`Official Academic Transcript • Registries System`, 14, 25);
-    doc.text(`Address: ${sch.address} | Email: ${sch.email} | Phone: ${sch.phone}`, 14, 32);
+      doc.setFont('Helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(156, 163, 175); // gray-400
+      doc.text(`Official Academic Transcript • Registries System`, 14, 25);
+      doc.text(`Address: ${sch.address || ''} | Email: ${sch.email || ''} | Phone: ${sch.phone || ''}`, 14, 32);
 
-    // Document Title
-    doc.setTextColor(15, 23, 42);
-    doc.setFont('Helvetica', 'bold');
-    doc.setFontSize(13);
-    doc.text("OFFICIAL STUDENT TRANSCRIPT", 14, 55);
-    doc.setDrawColor(226, 232, 240); // slate-200
-    doc.line(14, 58, 196, 58);
+      // Document Title
+      doc.setTextColor(15, 23, 42);
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.text('OFFICIAL STUDENT TRANSCRIPT', 14, 55);
+      doc.setDrawColor(226, 232, 240); // slate-200
+      doc.line(14, 58, 196, 58);
 
-    // Student Information Grid
-    doc.setFont('Helvetica', 'bold');
-    doc.setFontSize(9);
-    doc.text("STUDENT PROFILE", 14, 66);
+      // Student Information Grid
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text('STUDENT PROFILE', 14, 66);
 
-    doc.setFont('Helvetica', 'normal');
-    doc.setFontSize(9.5);
-    doc.text(`Name: ${s.name}`, 14, 72);
-    doc.text(`ID: ${s.userId || 'N/A'}`, 14, 78);
-    doc.text(`Email: ${s.email}`, 14, 84);
+      doc.setFont('Helvetica', 'normal');
+      doc.setFontSize(9.5);
+      doc.text(`Name: ${s.name || 'N/A'}`, 14, 72);
+      doc.text(`ID: ${s.userId || 'N/A'}`, 14, 78);
+      doc.text(`Email: ${s.email || 'N/A'}`, 14, 84);
 
-    doc.text(`Class: ${s.classes.join(', ') || 'N/A'}`, 120, 72);
-    const bDate = s.birthDate ? new Date(s.birthDate).toLocaleDateString() : 'N/A';
-    doc.text(`Birth Date: ${bDate}`, 120, 78);
-    doc.text(`Phone: ${s.phoneNumber || 'N/A'}`, 120, 84);
+      const classNames = (s.classes || []).join(', ') || 'N/A';
+      doc.text(`Class: ${classNames}`, 120, 72);
+      const bDate = s.birthDate ? new Date(s.birthDate).toLocaleDateString() : 'N/A';
+      doc.text(`Birth Date: ${bDate}`, 120, 78);
+      doc.text(`Phone: ${s.phoneNumber || 'N/A'}`, 120, 84);
 
-    // Metadata Grid (Reference Number, Date of Issue, Semesters, Terms)
-    doc.setFillColor(248, 250, 252); // slate-50
-    doc.rect(14, 90, 182, 18, 'F');
-    doc.setDrawColor(226, 232, 240);
-    doc.rect(14, 90, 182, 18, 'S');
+      // Metadata Grid (Reference Number, Date of Issue, Semesters, Terms)
+      doc.setFillColor(248, 250, 252); // slate-50
+      doc.rect(14, 90, 182, 18, 'F');
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(14, 90, 182, 18, 'S');
 
-    doc.setFont('Helvetica', 'bold');
-    doc.setFontSize(8);
-    doc.setTextColor(100, 116, 139); // slate-500
-    doc.text("REFERENCE NUMBER", 18, 95);
-    doc.text("DATE OF ISSUE", 70, 95);
-    doc.text("SEMESTERS", 110, 95);
-    doc.text("TERMS", 155, 95);
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139); // slate-500
+      doc.text('REFERENCE NUMBER', 18, 95);
+      doc.text('DATE OF ISSUE', 70, 95);
+      doc.text('SEMESTERS', 110, 95);
+      doc.text('TERMS', 155, 95);
 
-    doc.setTextColor(15, 23, 42); // slate-900
-    doc.text(meta.referenceNumber, 18, 101);
-    doc.text(meta.generationDate, 70, 101);
-    
-    const semsText = doc.splitTextToSize(meta.semesters.join(', ') || 'N/A', 40);
-    const termsText = doc.splitTextToSize(meta.terms.join(', ') || 'N/A', 35);
-    doc.text(semsText, 110, 101);
-    doc.text(termsText, 155, 101);
+      doc.setTextColor(15, 23, 42); // slate-900
+      doc.text(meta.referenceNumber || 'N/A', 18, 101);
+      doc.text(meta.generationDate || 'N/A', 70, 101);
+      
+      const semsText = doc.splitTextToSize((meta.semesters || []).join(', ') || 'N/A', 40);
+      const termsText = doc.splitTextToSize((meta.terms || []).join(', ') || 'N/A', 35);
+      doc.text(semsText, 110, 101);
+      doc.text(termsText, 155, 101);
 
-    // Results Table
-    doc.setFont('Helvetica', 'bold');
-    doc.setFontSize(9);
-    doc.text("ACADEMIC PERFORMANCE SUMMARY", 14, 116);
+      // Results Table
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text('ACADEMIC PERFORMANCE SUMMARY', 14, 116);
 
-    const tableBody = transcriptData.results.map((r: any) => [
-      r.subjectName,
-      r.className,
-      r.examName || '—',
-      `${r.semester} (${r.term})`,
-      `${r.marks}%`,
-      r.letterGrade,
-      r.remarks || '—'
-    ]);
+      const tableBody = (transcriptData.results || []).map((r: any) => [
+        r.subjectName || 'N/A',
+        r.className || 'N/A',
+        r.examName || '—',
+        `${r.semester || 'N/A'} (${r.term || 'N/A'})`,
+        `${r.marks != null ? r.marks : '—'}%`,
+        r.letterGrade || 'N/A',
+        r.remarks || '—'
+      ]);
 
-    autoTable(doc, {
-      startY: 120,
-      head: [['Subject Name', 'Class', 'Exam', 'Semester (Term)', 'Score', 'Grade', 'Remarks']],
-      body: tableBody,
-      theme: 'striped',
-      headStyles: { fillColor: [15, 23, 42], fontSize: 8.5, fontStyle: 'bold' },
-      bodyStyles: { fontSize: 8 },
-      columnStyles: {
-        0: { cellWidth: 35 },
-        1: { cellWidth: 15 },
-        2: { cellWidth: 25 },
-        3: { cellWidth: 35 },
-        4: { cellWidth: 15, halign: 'center' },
-        5: { cellWidth: 15, halign: 'center' },
-        6: { cellWidth: 42 }
+      autoTable(doc, {
+        startY: 120,
+        head: [['Subject Name', 'Class', 'Exam', 'Semester (Term)', 'Score', 'Grade', 'Remarks']],
+        body: tableBody,
+        theme: 'striped',
+        headStyles: { fillColor: [15, 23, 42] as any, fontSize: 8.5, fontStyle: 'bold' },
+        bodyStyles: { fontSize: 8 },
+        columnStyles: {
+          0: { cellWidth: 35 },
+          1: { cellWidth: 15 },
+          2: { cellWidth: 25 },
+          3: { cellWidth: 35 },
+          4: { cellWidth: 15, halign: 'center' },
+          5: { cellWidth: 15, halign: 'center' },
+          6: { cellWidth: 42 }
+        }
+      });
+
+      let currentY = doc.lastAutoTable?.finalY ? doc.lastAutoTable.finalY + 12 : 170;
+
+      // Check if summary + signature block will overflow the page (needs around 75mm)
+      if (currentY + 75 > 280) {
+        doc.addPage();
+        currentY = 20; // reset Y coordinate on the new page
       }
-    });
 
-    let currentY = (doc as any).lastAutoTable.finalY + 12;
+      // Summary Index Card
+      doc.setFillColor(15, 23, 42); // slate-900 (dark card like in UI)
+      doc.rect(14, currentY, 182, 28, 'F');
 
-    // Check if summary + signature block will overflow the page (needs around 75mm)
-    if (currentY + 75 > 280) {
-      doc.addPage();
-      currentY = 20; // reset Y coordinate on the new page
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text('ROSTER INDEX', 20, currentY + 8);
+      doc.text('AVERAGE PERFORMANCE', 70, currentY + 8);
+      doc.text('CUMULATIVE GPA', 135, currentY + 8);
+
+      doc.setFontSize(18);
+      doc.text(String(sum.totalSubjectsCount || 0), 20, currentY + 18);
+      doc.text(`${sum.weightedAverageScore || 0}%`, 70, currentY + 18);
+      doc.text(typeof sum.gpa === 'number' ? sum.gpa.toFixed(2) : '0.00', 135, currentY + 18);
+
+      doc.setFontSize(7.5);
+      doc.setTextColor(156, 163, 175);
+      doc.text('Evaluated Fields', 20, currentY + 24);
+      doc.text('Weighted Average Score', 70, currentY + 24);
+      doc.text('Out of 4.00 max', 135, currentY + 24);
+
+      // Signatures and QR Code Block
+      const sigY = currentY + 42;
+      doc.setTextColor(100, 116, 139); // slate-500
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(8);
+      
+      // Draw signature lines
+      doc.setDrawColor(226, 232, 240);
+      doc.line(14, sigY + 14, 74, sigY + 14);
+      doc.text('OFFICE OF THE REGISTRAR', 14, sigY + 19);
+
+      doc.line(136, sigY + 14, 196, sigY + 14);
+      doc.text('PRINCIPAL / DEAN SIGNATURE', 136, sigY + 19);
+
+      // Draw QR Code in the middle
+      if (qrCodeUrl) {
+        doc.addImage(qrCodeUrl, 'PNG', 93, sigY - 2, 24, 24);
+        doc.setFontSize(6.5);
+        doc.text('VERIFY AUTHENTICITY', 105, sigY + 26, { align: 'center' });
+      }
+
+      // Save
+      const safeName = (s.name || 'student').replace(/\s+/g, '_').toLowerCase();
+      doc.save(`transcript_${safeName}.pdf`);
+      toast.success('Official PDF Downloaded');
+    } catch (err) {
+      console.error('PDF generation failed:', err);
+      toast.error('PDF download failed. Please try again.');
     }
-
-    // Summary Index Card
-    doc.setFillColor(15, 23, 42); // slate-900 (dark card like in UI)
-    doc.rect(14, currentY, 182, 28, 'F');
-
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('Helvetica', 'bold');
-    doc.setFontSize(9);
-    doc.text("ROSTER INDEX", 20, currentY + 8);
-    doc.text("AVERAGE PERFORMANCE", 70, currentY + 8);
-    doc.text("CUMULATIVE GPA", 135, currentY + 8);
-
-    doc.setFontSize(18);
-    doc.text(String(sum.totalSubjectsCount), 20, currentY + 18);
-    doc.text(`${sum.weightedAverageScore}%`, 70, currentY + 18);
-    doc.text(sum.gpa.toFixed(2), 135, currentY + 18);
-
-    doc.setFontSize(7.5);
-    doc.setTextColor(156, 163, 175);
-    doc.text("Evaluated Fields", 20, currentY + 24);
-    doc.text("Weighted Average Score", 70, currentY + 24);
-    doc.text("Out of 4.00 max", 135, currentY + 24);
-
-    // Signatures and QR Code Block
-    const sigY = currentY + 42;
-    doc.setTextColor(100, 116, 139); // slate-500
-    doc.setFont('Helvetica', 'bold');
-    doc.setFontSize(8);
-    
-    // Draw signature lines
-    doc.setDrawColor(226, 232, 240);
-    doc.line(14, sigY + 14, 74, sigY + 14);
-    doc.text("OFFICE OF THE REGISTRAR", 14, sigY + 19);
-
-    doc.line(136, sigY + 14, 196, sigY + 14);
-    doc.text("PRINCIPAL / DEAN SIGNATURE", 136, sigY + 19);
-
-    // Draw QR Code in the middle
-    if (qrCodeUrl) {
-      doc.addImage(qrCodeUrl, 'PNG', 93, sigY - 2, 24, 24);
-      doc.setFontSize(6.5);
-      doc.text("VERIFY AUTHENTICITY", 105, sigY + 26, { align: 'center' });
-    }
-
-    // Save
-    doc.save(`transcript_${s.name.replace(/\s+/g, '_').toLowerCase()}.pdf`);
-    toast.success('Official PDF Downloaded');
   };
 
   const handlePrint = () => {
