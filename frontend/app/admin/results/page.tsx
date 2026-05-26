@@ -3,41 +3,26 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import {
-  Search,
-  UserCircle,
-  GraduationCap,
-  Loader2,
-  Lock,
-  FileCheck,
-  Filter,
-  CheckCircle2,
-  AlertCircle
+  Search, GraduationCap, Loader2, Lock, CheckCircle2, AlertCircle,
+  LayoutGrid, ListFilter, Download, UserCircle, BookOpen, RefreshCcw,
 } from 'lucide-react';
 import api from '@/lib/api';
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-// --- SHARED HELPERS ---
+// ── Grade helpers ─────────────────────────────────────────────────────────────
 const calculateLetterGrade = (marks: number | string): string => {
   const score = typeof marks === 'string' ? parseFloat(marks) : marks;
   if (isNaN(score)) return '-';
@@ -51,20 +36,188 @@ const calculateLetterGrade = (marks: number | string): string => {
   return 'FF';
 };
 
-export default function AdminResultsPage() {
-  const [results, setResults] = useState<any[]>([]);
-  const [classes, setClasses] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+const gradeColor = (score: number) => {
+  if (score >= 80) return 'text-emerald-600';
+  if (score >= 60) return 'text-amber-600';
+  return 'text-red-500';
+};
 
-  // Filters
-  const [studentQuery, setStudentQuery] = useState('');
+// ── A4 Landscape Gradebook PDF ────────────────────────────────────────────────
+const exportGradebookPDF = (
+  reportData: any[],
+  exams: any[],
+  className: string,
+  schoolName = 'A.M. FOFANA ISLAMIC & ENGLISH HIGH SCHOOL',
+) => {
+  if (reportData.length === 0) {
+    toast.error('No gradebook data to export.');
+    return;
+  }
+
+  try {
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' }) as any;
+    const pageW = doc.internal.pageSize.getWidth();
+    const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    // ── Dark header bar ──
+    doc.setFillColor(15, 23, 42);
+    doc.rect(0, 0, pageW, 28, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.text(schoolName.toUpperCase(), 14, 11);
+
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(156, 163, 175);
+    doc.text('Official Academic Grade Report  •  Results Management System', 14, 17);
+    doc.text(`Generated: ${date}`, 14, 22);
+
+    // Class badge (right side)
+    doc.setFillColor(37, 99, 235);
+    doc.roundedRect(pageW - 60, 6, 46, 16, 3, 3, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text(`CLASS: ${className}`, pageW - 37, 16, { align: 'center' });
+
+    // ── Section title ──
+    doc.setTextColor(15, 23, 42);
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.text('ACADEMIC PERFORMANCE MATRIX', 14, 38);
+
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(100, 116, 139);
+    doc.text(`Total students: ${reportData.length}   |   Total assessments: ${exams.length}`, 14, 44);
+
+    // ── Table columns ──
+    const head = [
+      ['#', 'Student Name', 'Student ID',
+        ...exams.map((e: any) => `${e?.name || '?'}\n(${e?.weight ?? 0}%)`),
+        'Wtd. Avg', 'Grade',
+      ],
+    ];
+
+    const body = reportData.map((student: any, idx: number) => {
+      const scores = exams.map((e: any) => {
+        const cell = student.marks[e.id];
+        return cell?.val ?? null;
+      });
+      const validScores = scores.filter((s: any) => s !== null) as number[];
+      const avg = validScores.length > 0
+        ? (validScores.reduce((a: number, b: number) => a + b, 0) / validScores.length)
+        : null;
+      const avgStr = avg !== null ? `${avg.toFixed(1)}%` : '-';
+      const grade = avg !== null ? calculateLetterGrade(avg) : '-';
+
+      return [
+        String(idx + 1),
+        student.name || 'Unknown',
+        student.userId || 'N/A',
+        ...scores.map((s: any) => (s !== null ? String(s) : '-')),
+        avgStr,
+        grade,
+      ];
+    });
+
+    autoTable(doc, {
+      startY: 48,
+      head,
+      body,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [15, 23, 42] as any,
+        textColor: [255, 255, 255],
+        fontSize: 7.5,
+        fontStyle: 'bold',
+        halign: 'center',
+        valign: 'middle',
+        cellPadding: { top: 4, bottom: 4, left: 3, right: 3 },
+      },
+      bodyStyles: {
+        fontSize: 8,
+        cellPadding: { top: 3.5, bottom: 3.5, left: 3, right: 3 },
+        valign: 'middle',
+      },
+      alternateRowStyles: { fillColor: [248, 250, 252] as any },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 8 },
+        1: { cellWidth: 38, fontStyle: 'bold' },
+        2: { cellWidth: 28, font: 'courier', fontSize: 7 },
+        // exam columns: auto width
+        [exams.length + 3]: { halign: 'center', cellWidth: 20, fontStyle: 'bold', textColor: [37, 99, 235] as any },
+        [exams.length + 4]: { halign: 'center', cellWidth: 14, fontStyle: 'bold' },
+      },
+      didParseCell: (data: any) => {
+        if (data.section === 'body') {
+          // Score columns (after #, name, id)
+          const colIdx = data.column.index;
+          if (colIdx >= 3 && colIdx < exams.length + 3) {
+            const raw = parseFloat(data.cell.raw as string);
+            if (!isNaN(raw)) {
+              if (raw < 50) {
+                data.cell.styles.textColor = [220, 38, 38]; // red
+                data.cell.styles.fontStyle = 'bold';
+              } else if (raw >= 80) {
+                data.cell.styles.textColor = [5, 150, 105]; // green
+              }
+              data.cell.styles.halign = 'center';
+            }
+          }
+          // Grade column
+          if (colIdx === exams.length + 4) {
+            const grade = data.cell.raw as string;
+            if (grade === 'FF' || grade === 'DD') data.cell.styles.textColor = [220, 38, 38];
+            else if (grade === 'AA' || grade === 'BA') data.cell.styles.textColor = [5, 150, 105];
+            data.cell.styles.halign = 'center';
+          }
+        }
+      },
+    });
+
+    // ── Footer ──
+    const finalY = doc.lastAutoTable?.finalY ?? 180;
+    const footerY = Math.max(finalY + 12, 185);
+
+    doc.setDrawColor(226, 232, 240);
+    doc.line(14, footerY, pageW - 14, footerY);
+    doc.setFontSize(7);
+    doc.setTextColor(156, 163, 175);
+    doc.setFont('Helvetica', 'normal');
+    doc.text(
+      `${schoolName}  |  Official Grade Report for ${className}  |  ${date}  |  Confidential – For internal use only`,
+      pageW / 2, footerY + 5, { align: 'center' }
+    );
+
+    doc.save(`GradeReport_${className.replace(/\s+/g, '_')}_${new Date().getFullYear()}.pdf`);
+    toast.success('Grade Report PDF exported successfully!');
+  } catch (err) {
+    console.error('PDF generation failed:', err);
+    toast.error('Export failed. Please try again.');
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+export default function AdminResultsPage() {
+  // ── State ────────────────────────────────────────────────────────────────────
+  const [classes, setClasses]           = useState<any[]>([]);
   const [selectedClassId, setSelectedClassId] = useState<string>('all');
+  const [loading, setLoading]           = useState(false);
+
+  // List View
+  const [results, setResults]           = useState<any[]>([]);
+  const [studentQuery, setStudentQuery] = useState('');
   const [selectedSemester, setSelectedSemester] = useState<string>('all');
 
-  // Selection State
-  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+  // Gradebook
+  const [exams, setExams]               = useState<any[]>([]);
+  const [reportData, setReportData]     = useState<any[]>([]);
+  const [gradebookLoading, setGradebookLoading] = useState(false);
 
-  // --- DYNAMIC DATA DERIVATION ---
+  // ── Derived ──────────────────────────────────────────────────────────────────
   const uniqueSemesters = useMemo(() => {
     const sems = results.map(r => r.exam?.semester).filter(Boolean);
     return Array.from(new Set(sems));
@@ -75,309 +228,363 @@ export default function AdminResultsPage() {
     return results.filter(r => r.exam?.semester === selectedSemester);
   }, [results, selectedSemester]);
 
-  // --- API ACTIONS ---
+  const selectedClassName = useMemo(() =>
+    classes.find(c => String(c.id) === selectedClassId)?.name || selectedClassId,
+    [classes, selectedClassId]
+  );
+
+  // ── API ──────────────────────────────────────────────────────────────────────
   const fetchResults = useCallback(async () => {
     setLoading(true);
-    setSelectedRows(new Set());
     const params = new URLSearchParams();
     if (studentQuery.trim()) params.append('studentQuery', studentQuery.trim());
     if (selectedClassId && selectedClassId !== 'all') params.append('classId', selectedClassId);
-
     try {
-      const response = await api.get(`/admin/results/filter?${params.toString()}`);
-      setResults(Array.isArray(response.data) ? response.data : []);
-    } catch (error: any) {
-      console.error("Fetch error:", error);
-      toast.error(`Search failed. Check server logs.`);
+      const res = await api.get(`/admin/results/filter?${params.toString()}`);
+      setResults(Array.isArray(res.data) ? res.data : []);
+    } catch (err: any) {
+      toast.error('Failed to fetch results.');
+      console.error(err);
     } finally {
       setLoading(false);
     }
   }, [studentQuery, selectedClassId]);
 
-  useEffect(() => {
-    const init = async () => {
-      try {
-        const classRes = await api.get('/admin/classes');
-        setClasses(classRes.data);
-      } catch (e) { console.error("Init error:", e); }
-    };
-    init();
-    fetchResults();
-  }, [fetchResults]);
-
-  // --- SELECTION HANDLERS ---
-  const toggleRow = (id: number) => {
-    const next = new Set(selectedRows);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    setSelectedRows(next);
-  };
-
-  const toggleAllVisible = () => {
-    if (selectedRows.size === filteredResults.length && filteredResults.length > 0) {
-      setSelectedRows(new Set());
-    } else {
-      setSelectedRows(new Set(filteredResults.map(r => r.id)));
-    }
-  };
-
-  // --- CONSISTENT TRANSCRIPT GENERATOR ---
-  const generateTranscriptPDF = () => {
-    const dataToExport = selectedRows.size > 0
-      ? results.filter(r => selectedRows.has(r.id))
-      : filteredResults;
-
-    if (dataToExport.length === 0) {
-      toast.error("No results available for transcript generation.");
+  const fetchGradebook = useCallback(async () => {
+    if (selectedClassId === 'all') {
+      setExams([]); setReportData([]);
       return;
     }
+    setGradebookLoading(true);
+    try {
+      const [resultsRes, examsRes] = await Promise.all([
+        api.get(`/admin/results/filter?classId=${selectedClassId}`),
+        api.get(`/admin/exams?classId=${selectedClassId}`),
+      ]);
 
-    const firstResult = dataToExport[0];
-    const student = firstResult.student;
-    const doc = new jsPDF();
-    const date = new Date().toLocaleDateString();
-    const schoolFullName = "AMF INTERNATIONAL EXCELLENCE SCHOOL";
+      const classExams: any[] = Array.isArray(examsRes.data) ? examsRes.data : [];
+      setExams(classExams);
 
-    // Stats Calculation for selected subset
-    const totalScore = dataToExport.reduce((acc, curr) => acc + (curr.marks || 0), 0);
-    const averageScore = (totalScore / dataToExport.length).toFixed(1);
-    const isPassingOverall = parseFloat(averageScore) >= 50;
+      const studentMap: any = {};
+      (Array.isArray(resultsRes.data) ? resultsRes.data : []).forEach((r: any) => {
+        const sId = r?.student?.userId || r?.student?.id || `unknown-${r?.id}`;
+        const studentName = r.student?.username || r.student?.name || 'Unknown Student';
+        const studentId   = r?.student?.id || null;
+        const examId      = r?.exam?.id;
+        if (!examId) return;
+        if (!studentMap[sId]) {
+          studentMap[sId] = { id: studentId, name: studentName, userId: sId, marks: {} };
+        }
+        studentMap[sId].marks[examId] = { val: r?.marks ?? 0, resultId: r?.id, isLocked: r?.exam?.locked || false };
+      });
 
-    // 1. Header & Branding (Sync with Student Portal)
-    doc.setFillColor(37, 99, 235); // Primary Blue
-    doc.rect(14, 12, 25, 25, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(10);
-    doc.text("AMF", 21, 22);
-    doc.text("ACADEMIC", 16, 28);
+      setReportData(Object.values(studentMap));
+    } catch (err) {
+      toast.error('Failed to load gradebook data.');
+      console.error(err);
+    } finally {
+      setGradebookLoading(false);
+    }
+  }, [selectedClassId]);
 
-    doc.setTextColor(30, 41, 59);
-    doc.setFontSize(18);
-    doc.setFont("helvetica", "bold");
-    doc.text(schoolFullName, 45, 20);
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(100);
-    doc.text("Official Academic Transcript | Administrative Record", 45, 26);
-    doc.text(`Generated on: ${date}`, 45, 31);
-    doc.setDrawColor(226, 232, 240);
-    doc.line(14, 42, 196, 42);
+  useEffect(() => {
+    api.get('/admin/classes').then(res => setClasses(res.data || [])).catch(() => {});
+  }, []);
 
-    // 2. Student Info Section
-    doc.setFontSize(12);
-    doc.setTextColor(30, 41, 59);
-    doc.setFont("helvetica", "bold");
-    doc.text("OFFICIAL STUDENT TRANSCRIPT", 14, 52);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      fetchResults();
+      fetchGradebook();
+    }, 300);
+    return () => clearTimeout(t);
+  }, [fetchResults, fetchGradebook]);
 
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Full Name:`, 14, 62);
-    doc.setFont("helvetica", "bold");
-    doc.text(student.name?.toUpperCase() || 'N/A', 45, 62);
-
-    doc.setFont("helvetica", "normal");
-    doc.text(`Student ID:`, 14, 68);
-    doc.setFont("helvetica", "bold");
-    doc.text(String(student.userId || 'N/A'), 45, 68);
-
-    doc.setFont("helvetica", "normal");
-    doc.text(`GPA Equivalent:`, 130, 62);
-    doc.text(`${averageScore}%`, 165, 62);
-    doc.text(`Academic Status:`, 130, 68);
-
-    doc.setTextColor(isPassingOverall ? 22 : 220, isPassingOverall ? 163 : 38, 74);
-    doc.text(isPassingOverall ? 'GOOD STANDING' : 'PROBATION', 165, 68);
-
-    // 3. Performance Summary Table
-    autoTable(doc, {
-      startY: 78,
-      head: [["Selected Evaluations", "Average Score", "Final Letter Grade"]],
-      body: [[dataToExport.length, `${averageScore}%`, calculateLetterGrade(averageScore)]],
-      theme: 'grid',
-      headStyles: { fillColor: [30, 41, 59] },
-      styles: { halign: 'center', fontSize: 11 }
-    });
-
-    // 4. Detailed Results Record
-    doc.setTextColor(30, 41, 59);
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.text("Examination Detailed Record", 14, (doc as any).lastAutoTable.finalY + 15);
-
-    autoTable(doc, {
-      startY: (doc as any).lastAutoTable.finalY + 20,
-      head: [["Semester", "Subject", "Term", "Weight", "Score", "Grade"]],
-      body: dataToExport.map(r => [
-        r.exam?.semester || 'N/A',
-        r.exam?.name || 'N/A',
-        r.exam?.term || 'N/A',
-        `${r.exam?.weight || 0}%`,
-        `${r.marks}%`,
-        r.grade || calculateLetterGrade(r.marks)
-      ]),
-      headStyles: { fillColor: [37, 99, 235] },
-      alternateRowStyles: { fillColor: [248, 250, 252] },
-      styles: { fontSize: 9 }
-    });
-
-    // 5. Verification Footer
-    const finalY = (doc as any).lastAutoTable.finalY + 35;
-    doc.setFontSize(8);
-    doc.setTextColor(150);
-    doc.line(14, finalY, 70, finalY);
-    doc.text("Authorized Administrator Signature", 14, finalY + 5);
-    doc.text("This document is a verified electronic copy issued by the AMF School Management System.", 14, doc.internal.pageSize.height - 10);
-
-    doc.save(`Official_Transcript_${student.userId}.pdf`);
-    toast.success("Transcript Generated Successfully");
-  };
-
+  // ── RENDER ───────────────────────────────────────────────────────────────────
   return (
-    <div className="p-[clamp(1rem,2vw+1rem,2rem)] space-y-[clamp(1rem,2vw+1rem,2rem)] max-w-7xl mx-auto">
-      {/* PAGE HEADER */}
+    <div className="p-[clamp(1rem,2vw+1rem,2rem)] space-y-[clamp(1rem,1.5vw+0.5rem,2rem)] max-w-7xl mx-auto">
+
+      {/* ── Page Header ── */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-[clamp(1.2rem,2vw+1rem,3rem)] font-black tracking-tight text-slate-800 flex items-center gap-3">
-            <GraduationCap className="w-10 h-10 text-primary" /> Central Registry
+          <div className="flex items-center gap-2 text-primary mb-1">
+            <GraduationCap size={18} />
+            <span className="text-[10px] font-black uppercase tracking-[0.4em]">Results Management</span>
+          </div>
+          <h1 className="text-[clamp(1.5rem,3vw,3.5rem)] font-black tracking-tight text-slate-900 italic uppercase">
+            Academic <span className="text-primary">Gradebook.</span>
           </h1>
-          <p className="text-muted-foreground font-medium">Academic monitoring and official transcript issuance.</p>
+          <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mt-1">
+            Monitor all published results and performance matrices.
+          </p>
         </div>
-        <Button
-          onClick={generateTranscriptPDF}
-          disabled={filteredResults.length === 0 || loading}
-          className="gap-2 bg-blue-600 hover:bg-blue-700 h-12 px-6 shadow-lg shadow-blue-200"
-        >
-          <FileCheck className="w-5 h-5" />
-          {selectedRows.size > 0 ? `Export Selected (${selectedRows.size})` : 'Export Visible Results'}
-        </Button>
+
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Class selector */}
+          <Select value={selectedClassId} onValueChange={setSelectedClassId}>
+            <SelectTrigger className="w-44 rounded-xl border-slate-200 bg-white font-bold h-12">
+              <SelectValue placeholder="Select Class" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl border-none shadow-xl">
+              <SelectItem value="all">All Classes</SelectItem>
+              {classes.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+
+          <Button
+            variant="outline"
+            className="rounded-xl h-12 w-12 p-0 border-slate-200"
+            onClick={() => { fetchResults(); fetchGradebook(); }}
+          >
+            <RefreshCcw size={16} className="text-slate-600" />
+          </Button>
+        </div>
       </div>
 
-      {/* FILTER CONTROLS */}
-      <Card className="bg-slate-50 border border-slate-200 md:hover:border-primary duration-500 transition-colors shadow-sm">
-        <CardContent className="py-[clamp(1rem,2vw+1rem,1.5rem)] grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-1">
-              <Search className="w-3 h-3" /> Student Search
-            </label>
-            <Input
-              placeholder="Name or User ID..."
-              className="bg-white"
-              value={studentQuery}
-              onChange={(e) => setStudentQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && fetchResults()}
-            />
-          </div>
+      {/* ── Tabs ── */}
+      <Tabs defaultValue="list" className="w-full">
+        <TabsList className="grid grid-cols-2 max-w-xs rounded-2xl bg-slate-100 p-1">
+          <TabsTrigger value="list" className="rounded-xl gap-2 font-bold text-xs uppercase tracking-wider data-[state=active]:bg-slate-900 data-[state=active]:text-white transition-all">
+            <ListFilter size={14} /> List View
+          </TabsTrigger>
+          <TabsTrigger value="gradebook" className="rounded-xl gap-2 font-bold text-xs uppercase tracking-wider data-[state=active]:bg-slate-900 data-[state=active]:text-white transition-all">
+            <LayoutGrid size={14} /> Gradebook
+          </TabsTrigger>
+        </TabsList>
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase text-slate-400">Classroom</label>
-            <Select value={selectedClassId} onValueChange={setSelectedClassId}>
-              <SelectTrigger className="bg-white"><SelectValue placeholder="All" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Global Search</SelectItem>
-                {classes.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-1">
-              <Filter className="w-3 h-3" /> Semester
-            </label>
-            <Select value={selectedSemester} onValueChange={(val) => { setSelectedSemester(val); setSelectedRows(new Set()); }}>
-              <SelectTrigger className="bg-white"><SelectValue placeholder="All" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Semesters</SelectItem>
-                {uniqueSemesters.map(sem => <SelectItem key={sem} value={sem}>{sem}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Button onClick={fetchResults} disabled={loading} variant="secondary" className="w-full font-bold">
-            {loading ? <Loader2 className="animate-spin mr-2" /> : <Search className="mr-2 w-4 h-4" />}
-            Filter Records
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* MAIN DATA TABLE */}
-      <Card className="border border-slate-200 md:hover:border-primary duration-500 transition-colors shadow-xl overflow-hidden">
-        <Table>
-          <TableHeader className="bg-slate-100/80">
-            <TableRow>
-              <TableHead className="w-[60px] pl-6">
-                <Checkbox
-                  checked={selectedRows.size === filteredResults.length && filteredResults.length > 0}
-                  onCheckedChange={toggleAllVisible}
+        {/* ════ LIST VIEW ════════════════════════════════════════════════════════ */}
+        <TabsContent value="list" className="space-y-4 mt-4">
+          {/* Filters bar */}
+          <Card className="border border-slate-100 rounded-2xl shadow-sm">
+            <CardContent className="py-4 grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1">
+                  <Search size={10} /> Student Search
+                </label>
+                <Input
+                  placeholder="Name or User ID..."
+                  className="rounded-xl border-slate-100 bg-slate-50 font-bold h-11"
+                  value={studentQuery}
+                  onChange={e => setStudentQuery(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && fetchResults()}
                 />
-              </TableHead>
-              <TableHead className="font-bold">Student Profile</TableHead>
-              <TableHead className="font-bold">Assessment Details</TableHead>
-              <TableHead className="text-center font-bold">Weight</TableHead>
-              <TableHead className="text-center font-bold">Score</TableHead>
-              <TableHead className="text-center font-bold">Grade</TableHead>
-              <TableHead className="pr-6 text-right font-bold">Outcome</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow><TableCell colSpan={7} className="h-64 text-center"><Loader2 className="w-10 h-10 animate-spin mx-auto text-primary" /></TableCell></TableRow>
-            ) : filteredResults.length > 0 ? filteredResults.map((r) => {
-              const isPassing = r.marks >= 50;
-              const isSelected = selectedRows.has(r.id);
-              return (
-                <TableRow key={r.id} className={`transition-colors ${isSelected ? "bg-blue-50/60" : "hover:bg-slate-50"}`}>
-                  <TableCell className="pl-6">
-                    <Checkbox checked={isSelected} onCheckedChange={() => toggleRow(r.id)} />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <UserCircle className="w-10 h-10 text-slate-200" />
-                      <div>
-                        <div className="font-bold text-slate-700">{r.student?.username || r.student?.name || 'unknown student'}</div>
-                        <div className="text-[10px] text-muted-foreground font-mono uppercase">{r.student?.userId}</div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="font-bold text-slate-800">{r.exam?.name}</div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[9px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-black uppercase">{r.exam?.term}</span>
-                      <span className="text-[9px] text-slate-400 font-bold uppercase">{r.exam?.semester}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-center font-bold text-slate-500">{r.exam?.weight}%</TableCell>
-                  <TableCell className="text-center">
-                    <span className={`text-lg font-black ${!isPassing ? 'text-red-500' : 'text-slate-900'}`}>{r.marks}%</span>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <div className="w-10 h-10 mx-auto flex items-center justify-center rounded-xl bg-slate-100 text-slate-700 font-black text-xs border border-slate-200">
-                      {r.grade || calculateLetterGrade(r.marks)}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right pr-6">
-                    <div className="flex flex-col items-end gap-1.5">
-                      {isPassing ? (
-                        <div className="flex items-center gap-1 text-emerald-600 bg-emerald-50 px-3 py-1 rounded-md text-[10px] font-black border border-emerald-100">
-                          <CheckCircle2 className="w-3 h-3" /> PASSED
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1 text-rose-600 bg-rose-50 px-3 py-1 rounded-md text-[10px] font-black border border-rose-100">
-                          <AlertCircle className="w-3 h-3" /> FAILED
-                        </div>
-                      )}
-                      {r.exam?.locked && <span className="flex items-center gap-1 text-[9px] text-slate-300 font-bold uppercase"><Lock className="w-2.5 h-2.5" /> Locked Record</span>}
-                    </div>
-                  </TableCell>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Semester</label>
+                <Select value={selectedSemester} onValueChange={setSelectedSemester}>
+                  <SelectTrigger className="rounded-xl border-slate-100 bg-slate-50 font-bold h-11">
+                    <SelectValue placeholder="All" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border-none shadow-xl">
+                    <SelectItem value="all">All Semesters</SelectItem>
+                    {uniqueSemesters.map(sem => <SelectItem key={sem} value={sem}>{sem}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button onClick={fetchResults} disabled={loading} className="h-11 rounded-xl font-black text-xs uppercase tracking-widest bg-slate-900 hover:bg-primary">
+                {loading ? <Loader2 size={14} className="animate-spin mr-2" /> : <Search size={14} className="mr-2" />}
+                Filter Records
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Results table */}
+          <Card className="border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-slate-900 hover:bg-slate-900 border-none">
+                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider py-4 pl-6">Student</TableHead>
+                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider">Class</TableHead>
+                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider">Assessment</TableHead>
+                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-center">Weight</TableHead>
+                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-center">Score</TableHead>
+                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-center">Grade</TableHead>
+                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-right pr-6">Status</TableHead>
                 </TableRow>
-              );
-            }) : (
-              <TableRow><TableCell colSpan={7} className="h-64 text-center text-muted-foreground italic">No student records found matching filters.</TableCell></TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </Card>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="h-64 text-center">
+                      <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+                    </TableCell>
+                  </TableRow>
+                ) : filteredResults.length > 0 ? filteredResults.map(r => {
+                  const isPassing = r.marks >= 50;
+                  return (
+                    <TableRow key={r.id} className="hover:bg-slate-50/70 border-slate-100">
+                      <TableCell className="pl-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center">
+                            <UserCircle size={20} className="text-slate-400" />
+                          </div>
+                          <div>
+                            <div className="font-bold text-slate-800 text-sm">{r.student?.username || r.student?.name || 'Unknown'}</div>
+                            <div className="text-[9px] font-mono text-slate-400 uppercase tracking-wider">{r.student?.userId}</div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-bold text-slate-600 text-sm">{r.exam?.classe?.name ?? '—'}</TableCell>
+                      <TableCell>
+                        <div className="font-bold text-slate-800 text-sm">{r.exam?.name}</div>
+                        <div className="flex gap-1.5 mt-0.5">
+                          <span className="text-[9px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-black uppercase">{r.exam?.term}</span>
+                          <span className="text-[9px] text-slate-400 font-bold uppercase">{r.exam?.semester}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center font-bold text-slate-500">{r.exam?.weight}%</TableCell>
+                      <TableCell className="text-center">
+                        <span className={`text-lg font-black ${gradeColor(r.marks)}`}>{r.marks}%</span>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="w-10 h-10 mx-auto flex items-center justify-center rounded-xl bg-slate-100 font-black text-xs border border-slate-200 text-slate-700">
+                          {r.grade || calculateLetterGrade(r.marks)}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right pr-6 py-4">
+                        <div className="flex flex-col items-end gap-1">
+                          {isPassing ? (
+                            <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-100 font-black text-[9px] rounded-md px-2 py-0.5">
+                              <CheckCircle2 size={10} className="mr-1" /> PASSED
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-rose-50 text-rose-600 border border-rose-100 font-black text-[9px] rounded-md px-2 py-0.5">
+                              <AlertCircle size={10} className="mr-1" /> FAILED
+                            </Badge>
+                          )}
+                          <Badge variant="outline" className={`font-black text-[9px] rounded-md px-2 py-0.5 ${r.status === 'DRAFT' ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-green-50 text-green-700 border-green-100'}`}>
+                            {r.status}
+                          </Badge>
+                          {r.exam?.locked && (
+                            <span className="flex items-center gap-1 text-[9px] text-slate-300 font-bold">
+                              <Lock size={10} /> Locked
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                }) : (
+                  <TableRow>
+                    <TableCell colSpan={7} className="h-48 text-center text-slate-400 italic text-sm">
+                      No results found matching your filters.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </Card>
+        </TabsContent>
+
+        {/* ════ GRADEBOOK ════════════════════════════════════════════════════════ */}
+        <TabsContent value="gradebook" className="mt-4">
+          <Card className="border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between px-8 py-5 border-b border-slate-100">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <BookOpen size={16} className="text-primary" />
+                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-900">Performance Matrix</h3>
+                </div>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                  {selectedClassId === 'all' ? 'Select a class to view the gradebook' : `Showing: ${selectedClassName}`}
+                </p>
+              </div>
+              {selectedClassId !== 'all' && reportData.length > 0 && (
+                <Button
+                  onClick={() => exportGradebookPDF(reportData, exams, selectedClassName)}
+                  className="bg-slate-900 hover:bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest h-11 px-5 gap-2"
+                >
+                  <Download size={14} /> Export PDF
+                </Button>
+              )}
+            </CardHeader>
+
+            <CardContent className="p-0">
+              {selectedClassId === 'all' ? (
+                <div className="flex flex-col items-center justify-center py-24 text-slate-400 gap-3">
+                  <LayoutGrid size={40} className="opacity-30" />
+                  <p className="text-sm font-bold italic">Select a class from the top-right dropdown to load the gradebook.</p>
+                </div>
+              ) : gradebookLoading ? (
+                <div className="flex justify-center py-24">
+                  <Loader2 size={32} className="animate-spin text-primary" />
+                </div>
+              ) : reportData.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-24 text-slate-400 gap-3">
+                  <BookOpen size={40} className="opacity-30" />
+                  <p className="text-sm font-bold italic">No result data found for this class.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-slate-900 hover:bg-slate-900 border-none">
+                        <TableHead className="text-white font-black text-[9px] uppercase tracking-wider py-4 pl-8 w-64">Student</TableHead>
+                        {exams.map(e => (
+                          <TableHead key={e.id} className="text-white font-black text-[9px] uppercase tracking-wider text-center">
+                            <div>{e?.name || '—'}</div>
+                            <div className="text-blue-400 font-bold normal-case">{e?.weight ?? 0}%</div>
+                          </TableHead>
+                        ))}
+                        <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-right pr-8">
+                          Wtd. Average
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {reportData.map(student => {
+                        const scores = exams.map((e: any) => student.marks[e.id]?.val ?? null);
+                        const valid  = scores.filter((s: any) => s !== null) as number[];
+                        const avg    = valid.length > 0
+                          ? valid.reduce((a, b) => a + b, 0) / valid.length
+                          : null;
+
+                        return (
+                          <TableRow key={student.id} className="hover:bg-slate-50/80 border-slate-100">
+                            <TableCell className="pl-8 py-4">
+                              <div className="font-bold text-slate-900">{student.name}</div>
+                              <div className="text-[9px] font-mono text-slate-400 uppercase tracking-wider">{student.userId}</div>
+                            </TableCell>
+                            {exams.map((e: any) => {
+                              const cell = student.marks[e.id];
+                              const val  = cell?.val ?? null;
+                              return (
+                                <TableCell key={e.id} className="text-center py-4">
+                                  {val !== null ? (
+                                    <>
+                                      <div className={`text-base font-black ${val < 50 ? 'text-red-500' : val >= 80 ? 'text-emerald-600' : 'text-slate-900'}`}>
+                                        {val}
+                                      </div>
+                                      <div className="text-[9px] text-slate-400 font-bold uppercase">{calculateLetterGrade(val)}</div>
+                                    </>
+                                  ) : (
+                                    <span className="text-slate-300 font-bold text-sm">—</span>
+                                  )}
+                                </TableCell>
+                              );
+                            })}
+                            <TableCell className="text-right pr-8 py-4">
+                              {avg !== null ? (
+                                <div>
+                                  <span className={`text-lg font-black ${gradeColor(avg)}`}>{avg.toFixed(1)}%</span>
+                                  <div className="text-[9px] text-slate-400 font-bold uppercase">{calculateLetterGrade(avg)}</div>
+                                </div>
+                              ) : (
+                                <span className="text-slate-300 font-bold">—</span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
-
-

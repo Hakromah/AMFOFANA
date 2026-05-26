@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import api from '@/lib/api';
 
 // PDF Libraries
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 export default function GradebookPage() {
@@ -61,56 +61,141 @@ export default function GradebookPage() {
    // --- PDF GENERATION LOGIC ---
    const downloadPDF = () => {
       if (reportData.length === 0) {
-         toast.error("No data available to download");
+         toast.error('No data available to download');
          return;
       }
 
-      const doc = new jsPDF({ orientation: 'landscape' }); // Landscape fits more exams
-      const className = classes.find(c => String(c.id) === selectedClassId)?.name || 'Class';
+      try {
+        const className = classes.find((c: any) => String(c.id) === selectedClassId)?.name || 'Class';
+        const schoolName = 'A.M. FOFANA ISLAMIC & ENGLISH HIGH SCHOOL';
+        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' }) as any;
+        const pageW = doc.internal.pageSize.getWidth();
+        const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-      // Title & Metadata
-      doc.setFontSize(20);
-      doc.text(`Grade Report: ${className}`, 14, 15);
-      doc.setFontSize(10);
-      doc.setTextColor(100);
-      doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 22);
+        // Dark header bar
+        doc.setFillColor(15, 23, 42);
+        doc.rect(0, 0, pageW, 28, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('Helvetica', 'bold');
+        doc.setFontSize(16);
+        doc.text(schoolName.toUpperCase(), 14, 11);
+        doc.setFont('Helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(156, 163, 175);
+        doc.text('Official Academic Grade Report  •  Results Management System', 14, 17);
+        doc.text(`Generated: ${date}`, 14, 22);
 
-      // Define Columns
-      const tableColumn = ["ID", "Student Name", ...exams, "Average"];
+        // Class badge (right side)
+        doc.setFillColor(37, 99, 235);
+        doc.roundedRect(pageW - 60, 6, 46, 16, 3, 3, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('Helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text(`CLASS: ${className}`, pageW - 37, 16, { align: 'center' });
 
-      // Define Rows
-      const tableRows = reportData.map(student => {
-         const scores = Object.values(student.marks) as number[];
-         const average = scores.length > 0
-            ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2) + '%'
-            : '-';
+        // Section title
+        doc.setTextColor(15, 23, 42);
+        doc.setFont('Helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.text('ACADEMIC PERFORMANCE MATRIX', 14, 38);
+        doc.setFont('Helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Total students: ${reportData.length}   |   Total assessments: ${exams.length}`, 14, 44);
 
-         return [
-            student.userId,
-            student.name,
-            ...exams.map(examName => student.marks[examName] ?? '-'),
-            average
-         ];
-      });
+        // Table header
+        const head = [['#', 'Student Name', 'Student ID', ...exams.map((e: any) => `${e}\n`), 'Avg.', 'Grade']];
 
-      // Build Table
-      autoTable(doc, {
-         startY: 30,
-         head: [tableColumn],
-         body: tableRows,
-         theme: 'striped',
-         headStyles: { fillColor: [41, 128, 185], textColor: 255 },
-         styles: { fontSize: 8, cellPadding: 2 },
-         didParseCell: (data) => {
-            // Apply red color in PDF for failing grades
-            if (data.section === 'body' && typeof data.cell.raw === 'number' && data.cell.raw < 50) {
-               data.cell.styles.textColor = [220, 38, 38]; // Red color
-            }
-         }
-      });
+        // Table body
+        const body = reportData.map((student: any, idx: number) => {
+           const scores = exams.map((e: any) => student.marks[e] ?? null);
+           const validScores = scores.filter((s: any) => s !== null) as number[];
+           const avg = validScores.length > 0
+              ? validScores.reduce((a: number, b: number) => a + b, 0) / validScores.length
+              : null;
+           const letterGrade = (score: number) => {
+              if (score >= 90) return 'AA'; if (score >= 85) return 'BA';
+              if (score >= 80) return 'BB'; if (score >= 75) return 'CB';
+              if (score >= 70) return 'CC'; if (score >= 60) return 'DC';
+              if (score >= 50) return 'DD'; return 'FF';
+           };
+           return [
+              String(idx + 1),
+              student.name || student.username || 'Unknown',
+              student.userId || 'N/A',
+              ...scores.map((s: any) => (s !== null ? String(s) : '-')),
+              avg !== null ? `${avg.toFixed(1)}%` : '-',
+              avg !== null ? letterGrade(avg) : '-',
+           ];
+        });
 
-      doc.save(`${className.replace(/\s+/g, '_')}_Grades.pdf`);
-      toast.success('PDF Downloaded');
+        autoTable(doc, {
+           startY: 48,
+           head,
+           body,
+           theme: 'grid',
+           headStyles: {
+              fillColor: [15, 23, 42] as any,
+              textColor: [255, 255, 255],
+              fontSize: 7.5,
+              fontStyle: 'bold',
+              halign: 'center',
+              valign: 'middle',
+              cellPadding: { top: 4, bottom: 4, left: 3, right: 3 },
+           },
+           bodyStyles: {
+              fontSize: 8,
+              cellPadding: { top: 3.5, bottom: 3.5, left: 3, right: 3 },
+              valign: 'middle',
+           },
+           alternateRowStyles: { fillColor: [248, 250, 252] as any },
+           columnStyles: {
+              0: { halign: 'center', cellWidth: 8 },
+              1: { cellWidth: 38, fontStyle: 'bold' },
+              2: { cellWidth: 28, fontSize: 7 },
+              [exams.length + 3]: { halign: 'center', cellWidth: 20, fontStyle: 'bold', textColor: [37, 99, 235] as any },
+              [exams.length + 4]: { halign: 'center', cellWidth: 14, fontStyle: 'bold' },
+           },
+           didParseCell: (data: any) => {
+              if (data.section === 'body') {
+                 const colIdx = data.column.index;
+                 if (colIdx >= 3 && colIdx < exams.length + 3) {
+                    const raw = parseFloat(data.cell.raw as string);
+                    if (!isNaN(raw)) {
+                       if (raw < 50) { data.cell.styles.textColor = [220, 38, 38]; data.cell.styles.fontStyle = 'bold'; }
+                       else if (raw >= 80) { data.cell.styles.textColor = [5, 150, 105]; }
+                       data.cell.styles.halign = 'center';
+                    }
+                 }
+                 if (colIdx === exams.length + 4) {
+                    const grade = data.cell.raw as string;
+                    if (grade === 'FF' || grade === 'DD') data.cell.styles.textColor = [220, 38, 38];
+                    else if (grade === 'AA' || grade === 'BA') data.cell.styles.textColor = [5, 150, 105];
+                    data.cell.styles.halign = 'center';
+                 }
+              }
+           },
+        });
+
+        // Footer
+        const finalY = doc.lastAutoTable?.finalY ?? 180;
+        const footerY = Math.max(finalY + 12, 185);
+        doc.setDrawColor(226, 232, 240);
+        doc.line(14, footerY, pageW - 14, footerY);
+        doc.setFontSize(7);
+        doc.setTextColor(156, 163, 175);
+        doc.setFont('Helvetica', 'normal');
+        doc.text(
+           `${schoolName}  |  Official Grade Report for ${className}  |  ${date}  |  Confidential`,
+           pageW / 2, footerY + 5, { align: 'center' }
+        );
+
+        doc.save(`GradeReport_${className.replace(/\s+/g, '_')}_${new Date().getFullYear()}.pdf`);
+        toast.success('Grade Report PDF exported successfully!');
+      } catch (err) {
+        console.error('PDF generation failed:', err);
+        toast.error('Export failed. Please try again.');
+      }
    };
 
    return (
