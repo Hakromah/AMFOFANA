@@ -216,3 +216,36 @@ body::-webkit-scrollbar-thumb {
 .galleryBtn::-webkit-scrollbar {
   height: 3px !important;
 }
+
+@media print {
+  /* Hide all elements that are not part of the transcript */
+  body * {
+    visibility: hidden;
+  }
+  /* Show only the printable transcript card and its children */
+  .printable-transcript,
+  .printable-transcript * {
+    visibility: visible;
+  }
+  /* Position the printable transcript at the top-left of the page */
+  .printable-transcript {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: white !important;
+    color: black !important;
+  }
+  
+  /* Ensure page backgrounds and colors are printed */
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background-color: white !important;
+  }
+}

@@ -13,6 +13,7 @@ export default function StudentLayout({
     { name: 'Exams', href: '/student/exams' },
     { name: 'Exam Results', href: '/student/results' },
     { name: 'Materials', href: '/student/materials' },
+    { name: 'Transcripts', href: '/student/transcripts' },
     { name: 'Profile', href: '/student/profile' },
   ];
 

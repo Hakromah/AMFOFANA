@@ -53,6 +53,7 @@ export default {
         const semesterActions = ['find', 'findOne', 'create', 'update', 'delete'].map(act => `api::semester.semester.${act}`);
         const termActions = ['find', 'findOne', 'create', 'update', 'delete'].map(act => `api::term.term.${act}`);
         const academicYearActions = ['find', 'findOne', 'create', 'update', 'delete'].map(act => `api::academic-year.academic-year.${act}`);
+        const transcriptActions = ['find', 'findOne', 'create', 'update', 'delete'].map(act => `api::transcript.transcript.${act}`);
 
         const allActions = [
           ...schoolAdminActions, 
@@ -62,6 +63,7 @@ export default {
           ...semesterActions,
           ...termActions,
           ...academicYearActions,
+          ...transcriptActions,
           'api::contact-message.contact-message.create',
           'api::newsletter-subscription.newsletter-subscription.create'
         ];

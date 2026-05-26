@@ -137,10 +137,10 @@ export default () => ({
 
   // ─── Results ──────────────────────────────────────────────────────
 
-  async getResultsByStudent(studentId: number) {
+   async getResultsByStudent(studentId: number) {
     const results = await strapi.entityService.findMany('api::exam-result.exam-result', {
       filters: { student: { id: studentId } },
-      populate: ['exam', 'exam.subject', 'exam.classe'],
+      populate: ['exam', 'exam.subject', 'exam.classe', 'exam.semesterRel', 'exam.termRel'],
       sort: [{ createdAt: 'desc' }],
     }) as any[];
 
@@ -149,7 +149,8 @@ export default () => ({
       examName: r.exam?.name,
       subject: r.exam?.subject?.name,
       className: r.exam?.classe?.name,
-      semester: r.exam?.semester,
+      semester: r.exam?.semesterRel?.name || r.exam?.semester || 'N/A',
+      term: r.exam?.termRel?.name || r.exam?.term || 'N/A',
       marks: r.marks,
       letterGrade: r.letterGrade,
       status: r.status,
@@ -164,7 +165,7 @@ export default () => ({
         exam: { semester },
         status: { $in: ['SUBMITTED', 'GRADED'] },
       },
-      populate: ['exam', 'exam.subject', 'exam.classe'],
+      populate: ['exam', 'exam.subject', 'exam.classe', 'exam.semesterRel', 'exam.termRel'],
     }) as any[];
 
     return results.map((r) => ({
@@ -172,7 +173,8 @@ export default () => ({
       examName: r.exam?.name,
       subject: r.exam?.subject?.name,
       className: r.exam?.classe?.name,
-      semester: r.exam?.semester,
+      semester: r.exam?.semesterRel?.name || r.exam?.semester || 'N/A',
+      term: r.exam?.termRel?.name || r.exam?.term || 'N/A',
       marks: r.marks,
       letterGrade: r.letterGrade,
       weight: r.exam?.weight,

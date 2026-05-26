@@ -68,4 +68,32 @@ export default {
     const classId = Number(ctx.params.classId);
     ctx.body = await strapi.service('api::school-student.school-student').getMaterialsByClass(user.id, classId);
   },
+
+  async previewTranscript(ctx: any) {
+    const user = ctx.state.user;
+    const { id } = ctx.params;
+    
+    // Fetch the transcript record to verify ownership
+    const transcript = await strapi.entityService.findOne('api::transcript.transcript' as any, id, {
+      populate: ['student', 'academicYear', 'class', 'semesters', 'terms']
+    }) as any;
+
+    if (!transcript) {
+      return ctx.notFound('Transcript not found');
+    }
+
+    if (transcript.student?.id !== user.id) {
+      return ctx.forbidden('You are not authorized to view this transcript');
+    }
+
+    // Call the getStudentTranscript service to load details dynamically
+    const filters = {
+      academicYearId: transcript.academicYear?.id || undefined,
+      classId: transcript.class?.id || undefined,
+      semesterIds: transcript.semesters?.map((s: any) => s.id) || [],
+      termIds: transcript.terms?.map((t: any) => t.id) || []
+    };
+
+    ctx.body = await strapi.service('api::school-admin.school-admin').getStudentTranscript(user.id, filters);
+  },
 };

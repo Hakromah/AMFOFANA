@@ -510,6 +510,46 @@ export default () => ({
     }
     const gpa = gpaCount > 0 ? (totalGPA / gpaCount).toFixed(2) : '0.00';
 
+    // Save/Update in DB dynamically to register the official transcript
+    const sortedSemesterIds = (filters.semesterIds || []).slice().sort((a,b) => a - b).join(',');
+    const sortedTermIds = (filters.termIds || []).slice().sort((a,b) => a - b).join(',');
+    const crypto = require('crypto');
+    const hashInput = `${studentId}-${filters.academicYearId || 'all'}-${filters.classId || 'all'}-${sortedSemesterIds}-${sortedTermIds}`;
+    const hash = crypto.createHash('md5').update(hashInput).digest('hex').substring(0, 8).toUpperCase();
+    const referenceNumber = `TR-${student.userId || student.id}-${hash}`;
+    const generationDate = new Date().toISOString(); // ISO datetime
+    const friendlyDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    try {
+      const existing = await strapi.entityService.findMany('api::transcript.transcript' as any, {
+        filters: { referenceNumber }
+      }) as any[];
+
+      const transcriptPayload: any = {
+        referenceNumber,
+        generationDate,
+        gpa: parseFloat(gpa),
+        averageScore: parseFloat(weightedAverageScore),
+        student: studentId,
+        academicYear: filters.academicYearId || null,
+        class: filters.classId || null,
+        semesters: filters.semesterIds || [],
+        terms: filters.termIds || []
+      };
+
+      if (existing.length > 0) {
+        await strapi.entityService.update('api::transcript.transcript' as any, existing[0].id, {
+          data: transcriptPayload as any
+        });
+      } else {
+        await strapi.entityService.create('api::transcript.transcript' as any, {
+          data: transcriptPayload as any
+        });
+      }
+    } catch (dbError) {
+      strapi.log.error('Failed to save transcript to registry database:', dbError);
+    }
+
     return {
       student: {
         id: student.id,
@@ -527,6 +567,13 @@ export default () => ({
         weightedAverageScore: parseFloat(weightedAverageScore),
         gpa: parseFloat(gpa),
         totalSubjectsCount: scoreCount
+      },
+      metadata: {
+        referenceNumber,
+        generationDate: friendlyDate,
+        academicYears: Array.from(new Set(transcriptResults.map(r => r.academicYear))),
+        semesters: Array.from(new Set(transcriptResults.map(r => r.semester))),
+        terms: Array.from(new Set(transcriptResults.map(r => r.term)))
       }
     };
   },
