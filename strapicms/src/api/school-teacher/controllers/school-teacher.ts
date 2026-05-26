@@ -165,4 +165,74 @@ export default {
     await strapi.service('api::school-teacher.school-teacher').deleteTeacherMaterial(user.id, Number(ctx.params.id));
     ctx.body = { message: 'Deleted' };
   },
+
+  async getStudentTranscriptsList(ctx: any) {
+    const user = ctx.state.user;
+    const { studentId } = ctx.params;
+    
+    if (!studentId) {
+      ctx.status = 400;
+      ctx.body = { message: 'studentId is required' };
+      return;
+    }
+
+    const parsedStudentId = Number(studentId);
+
+    // Verify teacher is authorized to manage this student
+    const classes = await strapi.entityService.findMany('api::school-class.school-class', {
+      filters: {
+        teachers: { id: user.id },
+        students: { id: parsedStudentId }
+      }
+    }) as any[];
+
+    if (classes.length === 0) {
+      return ctx.forbidden('You are not authorized to view transcripts for this student');
+    }
+
+    const list = await strapi.entityService.findMany('api::transcript.transcript' as any, {
+      filters: { student: { id: parsedStudentId } },
+      populate: ['academicYear', 'class', 'semesters', 'terms']
+    });
+    ctx.body = list;
+  },
+
+  async previewTranscript(ctx: any) {
+    const user = ctx.state.user;
+    const { id } = ctx.params;
+
+    const transcript = await strapi.entityService.findOne('api::transcript.transcript' as any, id, {
+      populate: ['student', 'academicYear', 'class', 'semesters', 'terms']
+    }) as any;
+
+    if (!transcript) {
+      return ctx.notFound('Transcript not found');
+    }
+
+    const studentId = transcript.student?.id;
+    if (!studentId) {
+      return ctx.badRequest('Transcript student record is missing');
+    }
+
+    // Verify teacher is authorized to manage this student
+    const classes = await strapi.entityService.findMany('api::school-class.school-class', {
+      filters: {
+        teachers: { id: user.id },
+        students: { id: studentId }
+      }
+    }) as any[];
+
+    if (classes.length === 0) {
+      return ctx.forbidden('You are not authorized to view this transcript');
+    }
+
+    const filters = {
+      academicYearId: transcript.academicYear?.id || undefined,
+      classId: transcript.class?.id || undefined,
+      semesterIds: transcript.semesters?.map((s: any) => s.id) || [],
+      termIds: transcript.terms?.map((t: any) => t.id) || []
+    };
+
+    ctx.body = await strapi.service('api::school-admin.school-admin').getStudentTranscript(studentId, filters);
+  },
 };

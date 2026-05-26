@@ -219,4 +219,18 @@ export default {
       termIds: parsedTermIds
     });
   },
+
+  async getStudentTranscriptsList(ctx: any) {
+    const { studentId } = ctx.params;
+    if (!studentId) {
+      ctx.status = 400;
+      ctx.body = { message: 'studentId is required' };
+      return;
+    }
+    const list = await strapi.entityService.findMany('api::transcript.transcript' as any, {
+      filters: { student: { id: Number(studentId) } },
+      populate: ['academicYear', 'class', 'semesters', 'terms']
+    });
+    ctx.body = list;
+  },
 };

@@ -4,9 +4,9 @@
 import { useEffect, useState, useMemo } from 'react';
 import {
   FileText, Search, Printer, Download,
-  RefreshCcw, Loader2, Calendar, BookOpen,
+  RefreshCcw, Loader2, BookOpen,
   Award, GraduationCap, CheckSquare, Square,
-  Building2, Phone, Mail, UserCheck
+  Building2, Phone, Mail, UserCheck, Eye, ArrowLeft, Plus
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -16,7 +16,7 @@ import 'jspdf-autotable';
 import QRCode from 'qrcode';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -43,30 +43,10 @@ export default function AdminTranscriptsPage() {
   const [transcriptData, setTranscriptData] = useState<any | null>(null);
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
 
-  useEffect(() => {
-    if (transcriptData) {
-      const qrData = {
-        name: transcriptData.student.name,
-        studentId: transcriptData.student.userId || String(transcriptData.student.id),
-        academicYear: transcriptData.metadata.academicYears.join(', '),
-        status: 'Verified by Administration',
-        referenceNumber: transcriptData.metadata.referenceNumber
-      };
-      
-      const qrString = `AMF ACADEMY OFFICIAL TRANSCRIPT\n` +
-        `Ref: ${qrData.referenceNumber}\n` +
-        `Student: ${qrData.name}\n` +
-        `Student ID: ${qrData.studentId}\n` +
-        `Academic Year: ${qrData.academicYear}\n` +
-        `Status: ${qrData.status}`;
-
-      QRCode.toDataURL(qrString, { margin: 2, scale: 4 })
-        .then((url) => setQrCodeUrl(url))
-        .catch((err) => console.error('QR code generation failed', err));
-    } else {
-      setQrCodeUrl('');
-    }
-  }, [transcriptData]);
+  // Centralized transcripts list state
+  const [issuedTranscripts, setIssuedTranscripts] = useState<any[]>([]);
+  const [loadingLedger, setLoadingLedger] = useState(false);
+  const [activeTab, setActiveTab] = useState<'ledger' | 'compile' | 'preview'>('ledger');
 
   // --- INITIAL DATA SYNC ---
   const loadFilterData = async () => {
@@ -97,8 +77,37 @@ export default function AdminTranscriptsPage() {
     loadFilterData();
   }, []);
 
+  // --- LOAD TRANSCRIPTS LEDGER ---
+  const loadIssuedTranscripts = async (studentId: string) => {
+    if (!studentId) {
+      setIssuedTranscripts([]);
+      return;
+    }
+    setLoadingLedger(true);
+    try {
+      const res = await api.get(`/admin/transcripts/student/${studentId}`);
+      setIssuedTranscripts(res.data || []);
+    } catch (err) {
+      toast.error('Failed to load issued transcripts ledger');
+      console.error(err);
+    } finally {
+      setLoadingLedger(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedStudentId) {
+      loadIssuedTranscripts(selectedStudentId);
+      setActiveTab('ledger');
+      setTranscriptData(null);
+    } else {
+      setIssuedTranscripts([]);
+      setActiveTab('ledger');
+      setTranscriptData(null);
+    }
+  }, [selectedStudentId]);
+
   // --- FILTERED ARRAYS ---
-  // Filter students by selected Class
   const classFilteredStudents = useMemo(() => {
     if (selectedClassId === 'all') return students;
     const selectedClass = classes.find(c => String(c.id) === selectedClassId);
@@ -107,7 +116,6 @@ export default function AdminTranscriptsPage() {
     return students.filter(s => studentIdsInClass.includes(s.id));
   }, [students, classes, selectedClassId]);
 
-  // Search filtered student list
   const searchedStudents = useMemo(() => {
     const query = studentSearchQuery.toLowerCase().trim();
     if (!query) return classFilteredStudents;
@@ -118,19 +126,17 @@ export default function AdminTranscriptsPage() {
     );
   }, [classFilteredStudents, studentSearchQuery]);
 
-  // Semesters filtered by academic year
   const filteredSemesters = useMemo(() => {
     if (selectedYearId === 'all') return semesters;
     return semesters.filter(s => String(s.academicYear?.id) === selectedYearId);
   }, [semesters, selectedYearId]);
 
-  // Terms filtered by selected semesters
   const filteredTerms = useMemo(() => {
     if (selectedSemesterIds.length === 0) return terms;
     return terms.filter(t => selectedSemesterIds.includes(t.semester?.id));
   }, [terms, selectedSemesterIds]);
 
-  // --- SELECT / TOGGLE HANDLERS ---
+  // --- TOGGLE HANDLERS ---
   const toggleSemester = (id: number) => {
     setSelectedSemesterIds(prev =>
       prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
@@ -151,6 +157,8 @@ export default function AdminTranscriptsPage() {
     setSelectedTermIds([]);
     setStudentSearchQuery('');
     setTranscriptData(null);
+    setIssuedTranscripts([]);
+    setActiveTab('ledger');
     toast.success('Filters reset successfully');
   };
 
@@ -171,7 +179,11 @@ export default function AdminTranscriptsPage() {
 
       const response = await api.get(`/admin/transcripts/generate?${params.toString()}`);
       setTranscriptData(response.data);
-      toast.success('Transcript calculated successfully');
+      toast.success('Transcript compiled and registered successfully');
+      
+      // Reload ledger and switch to preview
+      await loadIssuedTranscripts(selectedStudentId);
+      setActiveTab('preview');
     } catch (error) {
       toast.error('Compilation failed');
       console.error(error);
@@ -179,6 +191,57 @@ export default function AdminTranscriptsPage() {
       setGenerating(false);
     }
   };
+
+  // View existing transcript from ledger
+  const handleViewTranscript = async (t: any) => {
+    setGenerating(true);
+    try {
+      const semesterIdsParam = t.semesters?.map((s: any) => s.id).join(',');
+      const termIdsParam = t.terms?.map((tm: any) => tm.id).join(',');
+      
+      const params = new URLSearchParams();
+      params.append('studentId', selectedStudentId);
+      if (t.academicYear?.id) params.append('academicYearId', String(t.academicYear.id));
+      if (t.class?.id) params.append('classId', String(t.class.id));
+      if (semesterIdsParam) params.append('semesterIds', semesterIdsParam);
+      if (termIdsParam) params.append('termIds', termIdsParam);
+
+      const response = await api.get(`/admin/transcripts/generate?${params.toString()}`);
+      setTranscriptData(response.data);
+      setActiveTab('preview');
+    } catch (err) {
+      toast.error('Failed to render transcript details');
+      console.error(err);
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  // --- QR CODE GENERATOR ---
+  useEffect(() => {
+    if (transcriptData) {
+      const qrData = {
+        name: transcriptData.student.name,
+        studentId: transcriptData.student.userId || String(transcriptData.student.id),
+        academicYear: transcriptData.metadata.academicYears.join(', '),
+        status: 'Verified by Administration',
+        referenceNumber: transcriptData.metadata.referenceNumber
+      };
+      
+      const qrString = `AMF ACADEMY OFFICIAL TRANSCRIPT\n` +
+        `Ref: ${qrData.referenceNumber}\n` +
+        `Student: ${qrData.name}\n` +
+        `Student ID: ${qrData.studentId}\n` +
+        `Academic Year: ${qrData.academicYear}\n` +
+        `Status: ${qrData.status}`;
+
+      QRCode.toDataURL(qrString, { margin: 2, scale: 4 })
+        .then((url) => setQrCodeUrl(url))
+        .catch((err) => console.error('QR code generation failed', err));
+    } else {
+      setQrCodeUrl('');
+    }
+  }, [transcriptData]);
 
   // --- PDF EXPORT ---
   const handleDownloadPDF = () => {
@@ -364,7 +427,7 @@ export default function AdminTranscriptsPage() {
             <span className="text-[10px] font-black uppercase tracking-[0.4em]">Official Records Center</span>
           </div>
           <h1 className="text-[clamp(1.4rem,3.5vw,4rem)] font-black text-slate-900 tracking-tighter italic uppercase">
-            Academic <span className="text-primary">Transcript.</span>
+            Academic <span className="text-primary">Transcripts.</span>
           </h1>
         </div>
         <div className="flex gap-3">
@@ -461,281 +524,365 @@ export default function AdminTranscriptsPage() {
                 )}
               </div>
             </div>
-
-            {/* Semesters Multi-Select Popover */}
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Selected Semesters</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between font-bold h-12 bg-slate-50 border-slate-100 rounded-xl px-4">
-                    <span className="truncate text-xs">
-                      {selectedSemesterIds.length === 0
-                        ? 'All Semesters'
-                        : `${selectedSemesterIds.length} Semesters Selected`}
-                    </span>
-                    <BookOpen size={16} className="text-slate-400" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-64 p-3 rounded-2xl border-slate-100 shadow-2xl bg-white space-y-2">
-                  <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest p-1">Filter Semesters</p>
-                  <div className="max-h-48 overflow-y-auto space-y-1">
-                    {filteredSemesters.map(sem => {
-                      const isChecked = selectedSemesterIds.includes(sem.id);
-                      return (
-                        <button
-                          key={sem.id}
-                          onClick={() => toggleSemester(sem.id)}
-                          className="w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-50 text-left transition-colors"
-                        >
-                          {isChecked ? <CheckSquare size={16} className="text-primary" /> : <Square size={16} className="text-slate-300" />}
-                          <span>{sem.name}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* Terms Multi-Select Popover */}
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Selected Terms</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between font-bold h-12 bg-slate-50 border-slate-100 rounded-xl px-4">
-                    <span className="truncate text-xs">
-                      {selectedTermIds.length === 0
-                        ? 'All Terms'
-                        : `${selectedTermIds.length} Terms Selected`}
-                    </span>
-                    <Award size={16} className="text-slate-400" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-64 p-3 rounded-2xl border-slate-100 shadow-2xl bg-white space-y-2">
-                  <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest p-1">Filter Terms</p>
-                  <div className="max-h-48 overflow-y-auto space-y-1">
-                    {filteredTerms.map(term => {
-                      const isChecked = selectedTermIds.includes(term.id);
-                      return (
-                        <button
-                          key={term.id}
-                          onClick={() => toggleTerm(term.id)}
-                          className="w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-50 text-left transition-colors"
-                        >
-                          {isChecked ? <CheckSquare size={16} className="text-primary" /> : <Square size={16} className="text-slate-300" />}
-                          <span>{term.name} ({term.semester?.name})</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
           </div>
-
-          <Button
-            onClick={handleGenerate}
-            disabled={generating || !selectedStudentId}
-            className="w-full h-14 bg-slate-900 hover:bg-blue-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] shadow-xl shadow-slate-200 transition-all"
-          >
-            {generating ? <Loader2 className="animate-spin mr-2" size={16} /> : <FileText className="mr-2" size={16} />}
-            Generate Transcript
-          </Button>
         </section>
 
-        {/* Transcript Preview (Right 8 cols) */}
+        {/* Right Main Panel (Ledger Table vs Compile form vs Preview) */}
         <section className="lg:col-span-8 space-y-6">
-          <AnimatePresence mode="wait">
-            {transcriptData ? (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="space-y-6"
-              >
-                {/* Print/Download Toolbar */}
-                <div className="flex gap-3 justify-end print:hidden">
-                  <Button onClick={handlePrint} variant="outline" className="rounded-2xl h-14 px-6 border-slate-200 bg-white hover:bg-slate-50 font-black text-[10px] tracking-widest uppercase">
-                    <Printer size={16} className="mr-2 text-slate-600" /> Print
+          {!selectedStudentId ? (
+            <Card className="h-[450px] flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-[2.5rem] bg-white p-10 print:hidden">
+              <div className="p-5 bg-[#F8FAFC] border border-slate-100 shadow-xl rounded-3xl mb-6 text-slate-400">
+                <FileText size={40} className="animate-bounce" />
+              </div>
+              <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">No Student Selected</h3>
+              <p className="text-slate-400 text-xs font-bold uppercase tracking-wider text-center mt-2 max-w-sm">
+                Select a student from the sidebar filters to view their academic transcripts ledger.
+              </p>
+            </Card>
+          ) : (
+            <div className="space-y-6">
+              {/* Toolbar Header tabs */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-2xl border border-slate-100 print:hidden">
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => { setActiveTab('ledger'); setTranscriptData(null); }}
+                    variant={activeTab === 'ledger' ? 'default' : 'outline'}
+                    className="rounded-xl font-bold text-xs uppercase tracking-wider px-4"
+                  >
+                    Transcripts Ledger ({issuedTranscripts.length})
                   </Button>
-                  <Button onClick={handleDownloadPDF} className="bg-blue-600 hover:bg-slate-900 text-white rounded-2xl h-14 px-8 font-black uppercase text-[10px] tracking-widest shadow-xl shadow-blue-500/10">
-                    <Download size={16} className="mr-2" /> Download PDF
+                  <Button
+                    onClick={() => { setActiveTab('compile'); setTranscriptData(null); }}
+                    variant={activeTab === 'compile' ? 'default' : 'outline'}
+                    className="rounded-xl font-bold text-xs uppercase tracking-wider px-4"
+                  >
+                    <Plus size={14} className="mr-1" /> Compile New
                   </Button>
                 </div>
 
-                {/* Printable Transcript Document */}
-                <Card className="printable-transcript rounded-[2.5rem] border border-slate-100 bg-white shadow-2xl overflow-hidden print:border-none print:shadow-none print:rounded-none">
-                  {/* Premium Brand Header */}
-                  <div className="bg-slate-900 p-10 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-10 opacity-5">
-                      <Building2 size={240} />
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-black italic tracking-tighter uppercase">{transcriptData.school.name}</h2>
-                      <p className="text-[10px] text-blue-400 font-bold uppercase tracking-[0.3em] mt-1">Official Academic Registry</p>
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-bold text-slate-400 mt-4">
-                        <span className="flex items-center gap-1"><Building2 size={12} /> {transcriptData.school.address}</span>
-                        <span className="flex items-center gap-1"><Phone size={12} /> {transcriptData.school.phone}</span>
-                        <span className="flex items-center gap-1"><Mail size={12} /> {transcriptData.school.email}</span>
-                      </div>
-                    </div>
+                {activeTab === 'preview' && (
+                  <div className="flex gap-2">
+                    <Button onClick={() => { setActiveTab('ledger'); setTranscriptData(null); }} variant="outline" className="rounded-xl font-bold text-xs uppercase tracking-wider">
+                      <ArrowLeft size={14} className="mr-1" /> Back
+                    </Button>
+                    <Button onClick={handlePrint} variant="outline" className="rounded-xl font-bold text-xs uppercase tracking-wider">
+                      <Printer size={14} className="mr-1 text-slate-600" /> Print
+                    </Button>
+                    <Button onClick={handleDownloadPDF} className="bg-blue-600 hover:bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-wider">
+                      <Download size={14} className="mr-1" /> Download
+                    </Button>
                   </div>
+                )}
+              </div>
 
-                  <CardContent className="p-10 space-y-8">
-                    {/* Document Title Header */}
-                    <div className="text-center md:text-left">
-                      <h3 className="text-lg font-black text-slate-900 tracking-wider uppercase">Official Student Transcript</h3>
-                      <p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 mt-1">Cumulated Performance Ledger</p>
-                    </div>
-
-                    {/* Student Info Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-slate-50/50 p-8 rounded-3xl border border-slate-100">
-                      <div className="space-y-2">
-                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Student Profile</p>
-                        <div>
-                          <p className="text-sm font-black text-slate-800">{transcriptData.student.name}</p>
-                          <p className="text-[10px] text-blue-500 font-bold uppercase tracking-wider mt-0.5">ID: {transcriptData.student.userId || 'N/A'}</p>
-                        </div>
-                        <p className="text-xs font-semibold text-slate-500">Email: {transcriptData.student.email}</p>
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Enrolled Record</p>
-                        <div>
-                          <p className="text-xs font-bold text-slate-700">Class: {transcriptData.student.classes.join(', ') || 'N/A'}</p>
-                          <p className="text-xs font-semibold text-slate-500 mt-1">
-                            Birth Date: {transcriptData.student.birthDate ? new Date(transcriptData.student.birthDate).toLocaleDateString() : 'N/A'}
-                          </p>
-                          <p className="text-xs font-semibold text-slate-500 mt-0.5">Phone: {transcriptData.student.phoneNumber || 'N/A'}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Transcript Metadata & Scope */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-6 bg-slate-50/30 rounded-3xl border border-slate-100/80 text-xs text-slate-600">
-                      <div>
-                        <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400 mb-0.5">Reference Number</span>
-                        <span className="font-mono font-bold text-slate-800 tracking-wide select-all">{transcriptData.metadata.referenceNumber}</span>
-                      </div>
-                      <div>
-                        <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400 mb-0.5">Date of Issue</span>
-                        <span className="font-bold text-slate-800">{transcriptData.metadata.generationDate}</span>
-                      </div>
-                      <div>
-                        <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400 mb-0.5">Target Semesters</span>
-                        <span className="font-semibold text-slate-700">{transcriptData.metadata.semesters.join(', ') || 'N/A'}</span>
-                      </div>
-                      <div>
-                        <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400 mb-0.5">Target Terms</span>
-                        <span className="font-semibold text-slate-700">{transcriptData.metadata.terms.join(', ') || 'N/A'}</span>
-                      </div>
-                    </div>
-
-                    {/* Performance Table */}
-                    <div className="space-y-4">
-                      <h4 className="text-xs font-black uppercase tracking-wider text-slate-400">Academic Scoreboard</h4>
-                      <div className="rounded-2xl border overflow-hidden">
-                        <Table>
-                          <TableHeader className="bg-slate-900 text-white">
-                            <TableRow className="border-none hover:bg-slate-900">
-                              <TableHead className="text-white font-black text-[9px] uppercase tracking-wider py-4 pl-6">Subject / Class</TableHead>
-                              <TableHead className="text-white font-black text-[9px] uppercase tracking-wider">Exam / Session</TableHead>
-                              <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-center">Score</TableHead>
-                              <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-center">Grade</TableHead>
-                              <TableHead className="text-white font-black text-[9px] uppercase tracking-wider py-4 pr-6">Teacher Remarks</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {transcriptData.results.map((res: any) => (
-                              <TableRow key={res.id} className="hover:bg-slate-50/50 border-slate-100">
-                                <TableCell className="py-4 pl-6 font-bold text-slate-900">
-                                  <div>{res.subjectName}</div>
-                                  <div className="text-[10px] text-slate-500 uppercase tracking-widest mt-0.5">{res.className}</div>
-                                </TableCell>
-                                <TableCell className="font-semibold text-slate-600 text-xs">
-                                  <div className="font-bold text-slate-800">{res.examName}</div>
-                                  <div className="text-[9px] text-blue-500 font-bold uppercase tracking-widest mt-0.5">{res.semester} • {res.term}</div>
-                                </TableCell>
-                                <TableCell className="text-center font-black text-slate-900 text-sm py-4">
-                                  {res.marks}%
-                                </TableCell>
-                                <TableCell className="text-center py-4">
-                                  <Badge className="bg-slate-900 text-white font-black text-[10px] px-2 py-0.5 rounded-md border-none">
-                                    {res.letterGrade}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell className="py-4 pr-6 text-xs text-slate-500 font-semibold max-w-[200px] truncate" title={res.remarks}>
-                                  {res.remarks || <span className="text-slate-300 italic">—</span>}
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    </div>
-
-                    {/* Summary Metric Card */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-900 rounded-[2rem] p-8 text-white relative overflow-hidden">
-                      <div className="space-y-1">
-                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-400">Roster Index</p>
-                        <h4 className="text-4xl font-black italic tracking-tighter">{transcriptData.summary.totalSubjectsCount}</h4>
-                        <p className="text-[10px] font-bold opacity-60">Evaluated Fields</p>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-400">Average Performance</p>
-                        <h4 className="text-4xl font-black italic tracking-tighter">{transcriptData.summary.weightedAverageScore}%</h4>
-                        <p className="text-[10px] font-bold opacity-60">Weighted Average Score</p>
-                      </div>
-                      <div className="space-y-1 bg-blue-600 rounded-2xl p-6 shadow-lg shadow-blue-900/10">
-                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-100">Cumulative GPA</p>
-                        <h4 className="text-4xl font-black italic tracking-tighter">{transcriptData.summary.gpa.toFixed(2)}</h4>
-                        <p className="text-[10px] font-bold text-blue-100">Out of 4.00 max</p>
-                      </div>
-                    </div>
-
-                    {/* Footer Authority Signatures & QR Verification */}
-                    <div className="pt-12 grid grid-cols-1 md:grid-cols-3 gap-8 items-center text-center text-slate-400 font-semibold text-[10px] uppercase tracking-wider">
-                      <div className="space-y-2">
-                        <div className="border-b border-slate-200 h-16"></div>
-                        <p className="font-bold text-slate-500">Office of the Registrar</p>
-                      </div>
-                      
-                      <div className="flex flex-col items-center justify-center space-y-1.5 p-2 bg-slate-50 border border-slate-100 rounded-2xl print:bg-white print:border-none">
-                        {qrCodeUrl ? (
-                          <>
-                            <img src={qrCodeUrl} alt="Transcript Verification QR" className="w-20 h-20 object-contain mix-blend-multiply" />
-                            <p className="text-[8px] font-black tracking-widest text-slate-500">VERIFY AUTHENTICITY</p>
-                            <p className="text-[7px] font-mono text-slate-400 select-all">{transcriptData.metadata.referenceNumber}</p>
-                          </>
+              <AnimatePresence mode="wait">
+                {activeTab === 'ledger' && (
+                  <motion.div
+                    key="ledger"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                  >
+                    <Card className="rounded-[2rem] border border-slate-100 bg-white shadow-sm overflow-hidden">
+                      <CardContent className="p-8">
+                        <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 mb-6">Issued Transcripts Ledger</h3>
+                        
+                        {loadingLedger ? (
+                          <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-primary" size={24} /></div>
+                        ) : issuedTranscripts.length > 0 ? (
+                          <div className="rounded-2xl border overflow-hidden">
+                            <Table>
+                              <TableHeader className="bg-slate-900 text-white">
+                                <TableRow className="border-none hover:bg-slate-900">
+                                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider py-4 pl-6">Reference No.</TableHead>
+                                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider">Academic Year</TableHead>
+                                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-center">GPA</TableHead>
+                                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-center">Average</TableHead>
+                                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider">Issue Date</TableHead>
+                                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-right pr-6">Action</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {issuedTranscripts.map((t: any) => {
+                                  const pubDate = t.generationDate 
+                                    ? new Date(t.generationDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+                                    : 'N/A';
+                                  return (
+                                    <TableRow key={t.id} className="hover:bg-slate-50/50 border-slate-100">
+                                      <TableCell className="py-4 pl-6 font-mono font-bold text-xs text-slate-800">
+                                        {t.referenceNumber}
+                                      </TableCell>
+                                      <TableCell className="font-semibold text-slate-600 text-xs">
+                                        {t.academicYear?.name || t.class?.name || 'General Records'}
+                                      </TableCell>
+                                      <TableCell className="text-center font-black text-slate-900 text-sm">
+                                        {Number(t.gpa).toFixed(2)}
+                                      </TableCell>
+                                      <TableCell className="text-center font-bold text-blue-600 text-xs">
+                                        {t.averageScore}%
+                                      </TableCell>
+                                      <TableCell className="text-xs text-slate-500 font-semibold">
+                                        {pubDate}
+                                      </TableCell>
+                                      <TableCell className="text-right pr-6 py-4">
+                                        <Button
+                                          onClick={() => handleViewTranscript(t)}
+                                          className="h-10 bg-slate-900 hover:bg-blue-600 text-white rounded-xl font-bold uppercase text-[9px] tracking-wider transition-all"
+                                        >
+                                          <Eye size={12} className="mr-1.5" /> View
+                                        </Button>
+                                      </TableCell>
+                                    </TableRow>
+                                  );
+                                })}
+                              </TableBody>
+                            </Table>
+                          </div>
                         ) : (
-                          <div className="w-20 h-20 bg-slate-200 animate-pulse rounded-lg" />
+                          <div className="text-center py-20 border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/20 text-slate-400 italic text-xs font-semibold">
+                            No academic transcripts have been officially compiled and registered for this student.
+                          </div>
                         )}
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+
+                {activeTab === 'compile' && (
+                  <motion.div
+                    key="compile"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                  >
+                    <Card className="rounded-[2rem] border border-slate-100 bg-white shadow-sm p-8 space-y-6">
+                      <div className="space-y-1">
+                        <h3 className="text-xs font-black uppercase tracking-wider text-slate-400">Compile New Official Transcript</h3>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Select target semesters and terms to compile records</p>
                       </div>
-                      
-                      <div className="space-y-2">
-                        <div className="border-b border-slate-200 h-16"></div>
-                        <p className="font-bold text-slate-500">Principal / Dean Signature</p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Semesters Selection */}
+                        <div className="space-y-3">
+                          <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Target Semesters</label>
+                          <div className="max-h-60 overflow-y-auto border border-slate-100 rounded-2xl p-4 bg-slate-50/30 space-y-1">
+                            {filteredSemesters.map(sem => {
+                              const isChecked = selectedSemesterIds.includes(sem.id);
+                              return (
+                                <button
+                                  key={sem.id}
+                                  onClick={() => toggleSemester(sem.id)}
+                                  className="w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-100 text-left transition-all"
+                                >
+                                  {isChecked ? <CheckSquare size={16} className="text-primary" /> : <Square size={16} className="text-slate-300" />}
+                                  <span>{sem.name}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Terms Selection */}
+                        <div className="space-y-3">
+                          <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Target Terms</label>
+                          <div className="max-h-60 overflow-y-auto border border-slate-100 rounded-2xl p-4 bg-slate-50/30 space-y-1">
+                            {filteredTerms.map(term => {
+                              const isChecked = selectedTermIds.includes(term.id);
+                              return (
+                                <button
+                                  key={term.id}
+                                  onClick={() => toggleTerm(term.id)}
+                                  className="w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-100 text-left transition-all"
+                                >
+                                  {isChecked ? <CheckSquare size={16} className="text-primary" /> : <Square size={16} className="text-slate-300" />}
+                                  <span>{term.name} ({term.semester?.name})</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="h-[450px] flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-[2.5rem] bg-white/50 backdrop-blur-sm p-10"
-              >
-                <div className="p-5 bg-white border border-slate-100 shadow-xl rounded-3xl mb-6 text-slate-400">
-                  <FileText size={40} className="animate-bounce" />
-                </div>
-                <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">No Active Query</h3>
-                <p className="text-slate-400 text-xs font-bold uppercase tracking-wider text-center mt-2 max-w-sm">
-                  Select a student from the sidebar filter registry and click generate.
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+
+                      <Button
+                        onClick={handleGenerate}
+                        disabled={generating}
+                        className="w-full h-14 bg-slate-900 hover:bg-blue-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] shadow-xl shadow-slate-200 transition-all"
+                      >
+                        {generating ? <Loader2 className="animate-spin mr-2" size={16} /> : <FileText className="mr-2" size={16} />}
+                        Compile & Register Transcript
+                      </Button>
+                    </Card>
+                  </motion.div>
+                )}
+
+                {activeTab === 'preview' && transcriptData && (
+                  <motion.div
+                    key="preview"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="space-y-6"
+                  >
+                    {/* Printable Transcript Document */}
+                    <Card className="printable-transcript rounded-[2.5rem] border border-slate-100 bg-white shadow-2xl overflow-hidden print:border-none print:shadow-none print:rounded-none">
+                      {/* Premium Brand Header */}
+                      <div className="bg-slate-900 p-10 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-10 opacity-5">
+                          <Building2 size={240} />
+                        </div>
+                        <div>
+                          <h2 className="text-2xl font-black italic tracking-tighter uppercase">{transcriptData.school.name}</h2>
+                          <p className="text-[10px] text-blue-400 font-bold uppercase tracking-[0.3em] mt-1">Official Academic Registry</p>
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-bold text-slate-400 mt-4">
+                            <span className="flex items-center gap-1"><Building2 size={12} /> {transcriptData.school.address}</span>
+                            <span className="flex items-center gap-1"><Phone size={12} /> {transcriptData.school.phone}</span>
+                            <span className="flex items-center gap-1"><Mail size={12} /> {transcriptData.school.email}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <CardContent className="p-10 space-y-8">
+                        {/* Document Title Header */}
+                        <div className="text-center md:text-left">
+                          <h3 className="text-lg font-black text-slate-900 tracking-wider uppercase">Official Student Transcript</h3>
+                          <p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 mt-1">Cumulated Performance Ledger</p>
+                        </div>
+
+                        {/* Student Info Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-slate-50/50 p-8 rounded-3xl border border-slate-100">
+                          <div className="space-y-2">
+                            <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Student Profile</p>
+                            <div>
+                              <p className="text-sm font-black text-slate-800">{transcriptData.student.name}</p>
+                              <p className="text-[10px] text-blue-500 font-bold uppercase tracking-wider mt-0.5">ID: {transcriptData.student.userId || 'N/A'}</p>
+                            </div>
+                            <p className="text-xs font-semibold text-slate-500">Email: {transcriptData.student.email}</p>
+                          </div>
+                          <div className="space-y-2">
+                            <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Enrolled Record</p>
+                            <div>
+                              <p className="text-xs font-bold text-slate-700">Class: {transcriptData.student.classes.join(', ') || 'N/A'}</p>
+                              <p className="text-xs font-semibold text-slate-500 mt-1">
+                                Birth Date: {transcriptData.student.birthDate ? new Date(transcriptData.student.birthDate).toLocaleDateString() : 'N/A'}
+                              </p>
+                              <p className="text-xs font-semibold text-slate-500 mt-0.5">Phone: {transcriptData.student.phoneNumber || 'N/A'}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Transcript Metadata & Scope */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-6 bg-slate-50/30 rounded-3xl border border-slate-100/80 text-xs text-slate-600">
+                          <div>
+                            <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400 mb-0.5">Reference Number</span>
+                            <span className="font-mono font-bold text-slate-800 tracking-wide select-all">{transcriptData.metadata.referenceNumber}</span>
+                          </div>
+                          <div>
+                            <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400 mb-0.5">Date of Issue</span>
+                            <span className="font-bold text-slate-800">{transcriptData.metadata.generationDate}</span>
+                          </div>
+                          <div>
+                            <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400 mb-0.5">Target Semesters</span>
+                            <span className="font-semibold text-slate-700">{transcriptData.metadata.semesters.join(', ') || 'N/A'}</span>
+                          </div>
+                          <div>
+                            <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400 mb-0.5">Target Terms</span>
+                            <span className="font-semibold text-slate-700">{transcriptData.metadata.terms.join(', ') || 'N/A'}</span>
+                          </div>
+                        </div>
+
+                        {/* Performance Table */}
+                        <div className="space-y-4">
+                          <h4 className="text-xs font-black uppercase tracking-wider text-slate-400">Academic Scoreboard</h4>
+                          <div className="rounded-2xl border overflow-hidden">
+                            <Table>
+                              <TableHeader className="bg-slate-900 text-white">
+                                <TableRow className="border-none hover:bg-slate-900">
+                                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider py-4 pl-6">Subject / Class</TableHead>
+                                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider">Exam / Session</TableHead>
+                                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-center">Score</TableHead>
+                                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-center">Grade</TableHead>
+                                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider py-4 pr-6">Teacher Remarks</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {transcriptData.results.map((res: any) => (
+                                  <TableRow key={res.id} className="hover:bg-slate-50/50 border-slate-100">
+                                    <TableCell className="py-4 pl-6 font-bold text-slate-900">
+                                      <div>{res.subjectName}</div>
+                                      <div className="text-[10px] text-slate-500 uppercase tracking-widest mt-0.5">{res.className}</div>
+                                    </TableCell>
+                                    <TableCell className="font-semibold text-slate-600 text-xs">
+                                      <div className="font-bold text-slate-800">{res.examName}</div>
+                                      <div className="text-[9px] text-blue-500 font-bold uppercase tracking-widest mt-0.5">{res.semester} • {res.term}</div>
+                                    </TableCell>
+                                    <TableCell className="text-center font-black text-slate-900 text-sm py-4">
+                                      {res.marks}%
+                                    </TableCell>
+                                    <TableCell className="text-center py-4">
+                                      <Badge className="bg-slate-900 text-white font-black text-[10px] px-2 py-0.5 rounded-md border-none">
+                                        {res.letterGrade}
+                                      </Badge>
+                                    </TableCell>
+                                    <TableCell className="py-4 pr-6 text-xs text-slate-500 font-semibold max-w-[200px] truncate" title={res.remarks}>
+                                      {res.remarks || <span className="text-slate-300 italic">—</span>}
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </div>
+
+                        {/* Summary Metric Card */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-900 rounded-[2rem] p-8 text-white relative overflow-hidden">
+                          <div className="space-y-1">
+                            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-400">Roster Index</p>
+                            <h4 className="text-4xl font-black italic tracking-tighter">{transcriptData.summary.totalSubjectsCount}</h4>
+                            <p className="text-[10px] font-bold opacity-60">Evaluated Fields</p>
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-400">Average Performance</p>
+                            <h4 className="text-4xl font-black italic tracking-tighter">{transcriptData.summary.weightedAverageScore}%</h4>
+                            <p className="text-[10px] font-bold opacity-60">Weighted Average Score</p>
+                          </div>
+                          <div className="space-y-1 bg-blue-600 rounded-2xl p-6 shadow-lg shadow-blue-900/10">
+                            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-100">Cumulative GPA</p>
+                            <h4 className="text-4xl font-black italic tracking-tighter">{transcriptData.summary.gpa.toFixed(2)}</h4>
+                            <p className="text-[10px] font-bold text-blue-100">Out of 4.00 max</p>
+                          </div>
+                        </div>
+
+                        {/* Footer Authority Signatures & QR Verification */}
+                        <div className="pt-12 grid grid-cols-1 md:grid-cols-3 gap-8 items-center text-center text-slate-400 font-semibold text-[10px] uppercase tracking-wider">
+                          <div className="space-y-2">
+                            <div className="border-b border-slate-200 h-16"></div>
+                            <p className="font-bold text-slate-500">Office of the Registrar</p>
+                          </div>
+                          
+                          <div className="flex flex-col items-center justify-center space-y-1.5 p-2 bg-slate-50 border border-slate-100 rounded-2xl print:bg-white print:border-none">
+                            {qrCodeUrl ? (
+                              <>
+                                <img src={qrCodeUrl} alt="Transcript Verification QR" className="w-20 h-20 object-contain mix-blend-multiply" />
+                                <p className="text-[8px] font-black tracking-widest text-slate-500">VERIFY AUTHENTICITY</p>
+                                <p className="text-[7px] font-mono text-slate-400 select-all">{transcriptData.metadata.referenceNumber}</p>
+                              </>
+                            ) : (
+                              <div className="w-20 h-20 bg-slate-200 animate-pulse rounded-lg" />
+                            )}
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <div className="border-b border-slate-200 h-16"></div>
+                            <p className="font-bold text-slate-500">Principal / Dean Signature</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
         </section>
       </main>
     </div>

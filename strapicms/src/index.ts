@@ -26,7 +26,7 @@ export default {
           'deleteMaterial', 'getMaterialAnalytics', 'getAllTimetables', 'createTimetable', 'updateTimetable',
           'deleteTimetable', 'getExams', 'lockSemesterExams', 'filterResults',
           'getSummaryReport', 'getSemesterGPA', 'finalizeSemester', 'updateProfile',
-          'changePassword', 'generateTranscript'
+          'changePassword', 'generateTranscript', 'getStudentTranscriptsList'
         ].map(act => `api::school-admin.school-admin.${act}`);
         
         const schoolAuthActions = [
@@ -40,14 +40,15 @@ export default {
           'saveBulkResults', 'createResult', 'updateResult', 'submitResults',
           'getResults', 'filterResults', 'submitMarks', 'getMyTimetable',
           'getAllSubjects', 'updateProfile', 'changePassword',
-          'getTeacherMaterials', 'getMyClassesForMaterials', 'uploadTeacherMaterial', 'deleteTeacherMaterial'
+          'getTeacherMaterials', 'getMyClassesForMaterials', 'uploadTeacherMaterial', 'deleteTeacherMaterial',
+          'getStudentTranscriptsList', 'previewTranscript'
         ].map(act => `api::school-teacher.school-teacher.${act}`);
 
         const schoolStudentActions = [
           'getProfile', 'updateProfile', 'changePassword',
           'getMyClasses', 'getMyAttendance', 'getMyTimetable',
           'getMyExams', 'getMyResults', 'getMaterialsByClass',
-          'getSemesterTranscript', 'getDashboardStats'
+          'getSemesterTranscript', 'getDashboardStats', 'previewTranscript'
         ].map(act => `api::school-student.school-student.${act}`);
 
         const semesterActions = ['find', 'findOne', 'create', 'update', 'delete'].map(act => `api::semester.semester.${act}`);

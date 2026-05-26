@@ -50,6 +50,7 @@ export default {
     { method: 'PUT',    path: '/admin/semester/finalize',          handler: 'school-admin.finalizeSemester' },
     { method: 'PUT',    path: '/admin/semester/lock',              handler: 'school-admin.finalizeSemester' },
     { method: 'GET',    path: '/admin/transcripts/generate',       handler: 'school-admin.generateTranscript' },
+    { method: 'GET',    path: '/admin/transcripts/student/:studentId', handler: 'school-admin.getStudentTranscriptsList' },
 
     // Profile & Password
     { method: 'PUT',    path: '/admin/profile',                    handler: 'school-admin.updateProfile' },

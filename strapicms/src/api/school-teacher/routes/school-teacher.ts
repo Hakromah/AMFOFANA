@@ -37,5 +37,7 @@ export default {
     { method: 'GET',    path: '/teacher/materials/my-classes',               handler: 'school-teacher.getMyClassesForMaterials' },
     { method: 'POST',   path: '/teacher/materials/upload',                   handler: 'school-teacher.uploadTeacherMaterial' },
     { method: 'DELETE', path: '/teacher/materials/:id',                      handler: 'school-teacher.deleteTeacherMaterial' },
+    { method: 'GET',    path: '/teacher/transcripts/student/:studentId',         handler: 'school-teacher.getStudentTranscriptsList' },
+    { method: 'GET',    path: '/teacher/transcripts/:id/preview',            handler: 'school-teacher.previewTranscript' },
   ],
 };
