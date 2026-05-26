@@ -218,34 +218,80 @@ body::-webkit-scrollbar-thumb {
 }
 
 @media print {
-  /* Hide all elements that are not part of the transcript */
+  /* Hide sidebar, headers, popovers, action toolbars, and buttons */
+  aside, nav, header, button, .print\:hidden,
+  [class*="Sidebar"], [class*="Header"],
+  .max-w-7xl.mx-auto.flex, .flex.justify-between.items-center.bg-white {
+    display: none !important;
+  }
+
+  /* Exclude layout container sizes */
+  body, html, main, div.flex-1 {
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: white !important;
+  }
+
+  /* Hide everything inside the main body except the printable transcript */
   body * {
     visibility: hidden;
   }
-  /* Show only the printable transcript card and its children */
+
   .printable-transcript,
   .printable-transcript * {
     visibility: visible;
   }
-  /* Position the printable transcript at the top-left of the page */
+
+  /* Absolute position the printable transcript at the top-left of the page */
   .printable-transcript {
-    position: absolute;
-    left: 0;
-    top: 0;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 1.5rem !important; /* Reduced padding for clean layout fitting */
     border: none !important;
     box-shadow: none !important;
     background: white !important;
     color: black !important;
+    page-break-inside: avoid;
+    page-break-after: avoid;
   }
-  
+
+  /* Reduce spacing of headers, tables, and metrics card to fit on single page nicely */
+  .printable-transcript .bg-slate-900 {
+    padding: 1.5rem !important;
+  }
+  .printable-transcript .p-10 {
+    padding: 1.5rem !important;
+  }
+  .printable-transcript .space-y-8 {
+    margin-top: 1rem !important;
+    margin-bottom: 1rem !important;
+  }
+  .printable-transcript table th, 
+  .printable-transcript table td {
+    padding: 8px 12px !important;
+  }
+
   /* Ensure page backgrounds and colors are printed */
   body {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-    background-color: white !important;
+  }
+
+  /* Page break rules for tables */
+  table {
+    page-break-inside: auto;
+  }
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+  thead {
+    display: table-header-group;
   }
 }

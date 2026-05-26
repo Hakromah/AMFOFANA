@@ -15,6 +15,7 @@ export default {
     { method: 'GET', path: '/student/results',                            handler: 'school-student.getMyResults' },
     { method: 'GET', path: '/student/materials/:classId',                 handler: 'school-student.getMaterialsByClass' },
     { method: 'GET', path: '/student/academic/semester-transcript',       handler: 'school-student.getSemesterTranscript' },
+    { method: 'GET', path: '/student/transcripts',                        handler: 'school-student.getStudentTranscriptsList' },
     { method: 'GET', path: '/student/transcripts/:id/preview',            handler: 'school-student.previewTranscript' },
     { method: 'GET', path: '/student/dashboard-stats',                    handler: 'school-student.getDashboardStats' },
   ],

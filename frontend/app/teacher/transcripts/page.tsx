@@ -10,8 +10,8 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import api from '@/lib/api';
-import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import QRCode from 'qrcode';
 
 import { Button } from '@/components/ui/button';
@@ -261,7 +261,7 @@ export default function TeacherTranscriptsPage() {
       r.remarks || '—'
     ]);
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: 120,
       head: [['Subject Name', 'Class', 'Exam', 'Semester (Term)', 'Score', 'Grade', 'Remarks']],
       body: tableBody,

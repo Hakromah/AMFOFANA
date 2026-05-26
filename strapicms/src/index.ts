@@ -48,7 +48,7 @@ export default {
           'getProfile', 'updateProfile', 'changePassword',
           'getMyClasses', 'getMyAttendance', 'getMyTimetable',
           'getMyExams', 'getMyResults', 'getMaterialsByClass',
-          'getSemesterTranscript', 'getDashboardStats', 'previewTranscript'
+          'getSemesterTranscript', 'getDashboardStats', 'previewTranscript', 'getStudentTranscriptsList'
         ].map(act => `api::school-student.school-student.${act}`);
 
         const semesterActions = ['find', 'findOne', 'create', 'update', 'delete'].map(act => `api::semester.semester.${act}`);

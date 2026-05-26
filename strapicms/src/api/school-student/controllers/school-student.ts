@@ -96,4 +96,13 @@ export default {
 
     ctx.body = await strapi.service('api::school-admin.school-admin').getStudentTranscript(user.id, filters);
   },
+
+  async getStudentTranscriptsList(ctx: any) {
+    const user = ctx.state.user;
+    const list = await strapi.entityService.findMany('api::transcript.transcript' as any, {
+      filters: { student: { id: user.id } },
+      populate: ['academicYear', 'class', 'semesters', 'terms']
+    });
+    ctx.body = list;
+  },
 };
