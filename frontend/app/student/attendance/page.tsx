@@ -1,220 +1,434 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import {
-   Table,
-   TableBody,
-   TableCell,
-   TableHead,
-   TableHeader,
-   TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
-import {
-   Select,
-   SelectContent,
-   SelectItem,
-   SelectTrigger,
-   SelectValue,
-} from '@/components/ui/select';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
 import { toast } from 'sonner';
 import {
-   Calendar,
-   CheckCircle2,
-   Clock,
-   Filter,
-   Loader2,
-   Download
+  Calendar, CheckCircle2, XCircle, Clock, ShieldAlert, Loader2,
+  Download, Printer, TrendingUp, BookOpen, AlertTriangle,
 } from 'lucide-react';
 import api from '@/lib/api';
-import { Button } from '@/components/ui/button';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
+// ── Types ────────────────────────────────────────────────────────────────────
 interface AttendanceRecord {
-   id: number;
-   present: boolean;
+  id: number;
+  present: boolean;
+  status?: string; // 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED' | 'SICK'
 }
 
 interface AttendanceSession {
-   id: number;
-   date: string;
-   classe: {
-      name: string;
-   };
-   records: AttendanceRecord[];
+  id: number;
+  date: string;
+  classe: { name: string };
+  records: AttendanceRecord[];
 }
 
-export default function StudentAttendancePage() {
-   const [sessions, setSessions] = useState<AttendanceSession[]>([]);
-   const [loading, setLoading] = useState(true);
-   const [monthFilter, setMonthFilter] = useState<string>('all');
+// ── Helpers ───────────────────────────────────────────────────────────────────
+type AStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED' | 'SICK';
 
-   useEffect(() => {
-      const fetchAttendance = async () => {
-         try {
-            const response = await api.get('/student/attendance');
-            // Defense: Ensure we handle non-array responses
-            setSessions(Array.isArray(response.data) ? response.data : []);
-         } catch (error: any) {
-            console.error("Fetch error:", error);
-            toast.error('Registry Sync Failed', {
-               description: error.response?.data?.message || 'Please check your connection.'
-            });
-         } finally {
-            setLoading(false);
-         }
-      };
-      fetchAttendance();
-   }, []);
+const resolveStatus = (session: AttendanceSession): AStatus => {
+  const r = session.records?.[0];
+  if (!r) return 'ABSENT';
+  if (r.status) return r.status as AStatus;
+  return r.present ? 'PRESENT' : 'ABSENT';
+};
 
-   // --- Filter Logic ---
-   const filteredSessions = sessions.filter(session => {
-      if (monthFilter === 'all') return true;
-      const date = new Date(session.date);
-      return date.getMonth().toString() === monthFilter;
-   });
+const STATUS_DISPLAY: Record<AStatus, { label: string; icon: any; bg: string; text: string; border: string }> = {
+  PRESENT: { label: 'Present',  icon: CheckCircle2,  bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+  ABSENT:  { label: 'Absent',   icon: XCircle,       bg: 'bg-rose-50',    text: 'text-rose-700',    border: 'border-rose-200'    },
+  LATE:    { label: 'Late',     icon: Clock,         bg: 'bg-amber-50',   text: 'text-amber-700',   border: 'border-amber-200'   },
+  EXCUSED: { label: 'Excused',  icon: ShieldAlert,   bg: 'bg-blue-50',    text: 'text-blue-700',    border: 'border-blue-200'    },
+  SICK:    { label: 'Sick',     icon: ShieldAlert,   bg: 'bg-purple-50',  text: 'text-purple-700',  border: 'border-purple-200'  },
+};
 
-   // --- Stats Calculation ---
-   const total = filteredSessions.length;
-   const present = filteredSessions.filter(s => s.records?.[0]?.present).length;
-   const rate = total > 0 ? Math.round((present / total) * 100) : 0;
+const MONTHS = [
+  { value: '0', label: 'January'  }, { value: '1', label: 'February' },
+  { value: '2', label: 'March'    }, { value: '3', label: 'April'    },
+  { value: '4', label: 'May'      }, { value: '5', label: 'June'     },
+  { value: '6', label: 'July'     }, { value: '7', label: 'August'   },
+  { value: '8', label: 'September'}, { value: '9', label: 'October'  },
+  { value: '10', label: 'November' }, { value: '11', label: 'December' },
+];
 
-   if (loading) {
-      return (
-         <div className="h-[80vh] w-full flex flex-col items-center justify-center space-y-4">
-            <Loader2 className="animate-spin text-primary" size={40} />
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Decrypting Registry...</p>
-         </div>
-      );
-   }
-
-   return (
-      <div className="p-6 lg:p-10 bg-[#f8fafc] md:min-h-screen space-y-8">
-         {/* Header Section */}
-         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div>
-               <h1 className="text-[clamp(1.2rem,2.5vw+1rem,3rem)] font-black text-slate-900 tracking-tighter">
-                  Registry <span className="text-primary">Pulse</span>
-               </h1>
-               <p className="text-slate-500 font-bold text-[10px] uppercase tracking-[0.3em] mt-2">
-                  Academic Tracking • Term 2 Year 2026
-               </p>
-            </div>
-
-            <div className="flex items-center gap-3 w-full md:w-auto">
-               <Select onValueChange={setMonthFilter} defaultValue="all">
-                  <SelectTrigger className="w-full md:w-[200px] h-12 rounded-xl bg-white shadow-sm font-bold text-primary border md:hover:border-primary duration-500 transition-colors px-5">
-                     <div className="flex items-center gap-2">
-                        <Filter size={14} className="text-primary" />
-                        <SelectValue placeholder="Filter by Month" />
-                     </div>
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl border-none shadow-2xl">
-                     <SelectItem value="all" className="font-bold">All Months</SelectItem>
-                     <SelectItem value="0" className="font-bold">January</SelectItem>
-                     <SelectItem value="1" className="font-bold">February</SelectItem>
-                     <SelectItem value="2" className="font-bold">March</SelectItem>
-                     <SelectItem value="3" className="font-bold">April</SelectItem>
-                  </SelectContent>
-               </Select>
-
-               <Button className="group/download p-3 bg-white  border border-primary/10 rounded-xl text-white shadow-sm md:hover:border-primary duration-500 transition-colors">
-                  <Download size={20} className='text-primary transition-colors lg:group-hover/download:text-white duration-300' />
-               </Button>
-            </div>
-         </header>
-
-         {/* Stats Cards */}
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="md:col-span-2 border border-slate-800 md:hover:border-primary duration-500 transition-colors shadow-xl rounded-3xl bg-slate-900 text-white p-8 relative overflow-hidden">
-               <div className="relative z-10 flex flex-col h-full justify-between gap-8">
-                  <div className="flex justify-between items-start">
-                     <div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1">Attendance Rate</p>
-                        <h2 className="text-6xl font-black italic tracking-tighter">{rate}%</h2>
-                     </div>
-                     <Badge className="bg-primary/20 text-blue-400 border-none font-black px-4 py-1 uppercase text-[9px]">Live Data</Badge>
-                  </div>
-
-                  <div className="space-y-3">
-                     <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
-                        <span className="text-slate-400">Consistency Track</span>
-                        <span className={rate > 75 ? 'text-emerald-400' : 'text-rose-400'}>{present} / {total} Sessions</span>
-                     </div>
-                     <Progress value={rate} className="h-3 bg-white/5" style={{ ['--progress-foreground' as any]: '#3b82f6' }} />
-                  </div>
-               </div>
-               <CheckCircle2 className="absolute -right-12 -bottom-12 text-white/5" size={240} />
-            </Card>
-
-            <Card className="border md:hover:border-primary duration-500 shadow-sm rounded-3xl bg-white p-8 flex flex-col justify-center gap-4 border-slate-100">
-               <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white">
-                  <Clock size={24} />
-               </div>
-               <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Last Entry</p>
-                  <h4 className="text-xl font-black text-slate-900 italic">
-                     {sessions[0] ? new Date(sessions[0].date).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) : 'N/A'}
-                  </h4>
-               </div>
-               <p className="text-[10px] font-bold text-slate-400 leading-relaxed uppercase">The registry is updated by teachers at the end of every session.</p>
-            </Card>
-         </div>
-
-         {/* Registry Table */}
-         <Card className="border md:hover:border-primary duration-500 shadow-sm rounded-3xl bg-white overflow-hidden border-slate-100">
-            <Table>
-               <TableHeader className="bg-slate-50/50">
-                  <TableRow className="hover:bg-transparent border-none">
-                     <TableHead className="pl-10 py-6 font-black uppercase text-[10px] tracking-widest text-primary">Registry Date</TableHead>
-                     <TableHead className="font-black uppercase text-[10px] tracking-widest text-primary">Class Session</TableHead>
-                     <TableHead className="text-right pr-10 font-black uppercase text-[10px] tracking-widest text-primary">Status</TableHead>
-                  </TableRow>
-               </TableHeader>
-               <TableBody>
-                  {filteredSessions.length > 0 ? filteredSessions.map((session) => {
-                     const isPresent = session.records?.[0]?.present;
-                     return (
-                        <TableRow key={session.id} className="border-slate-50 hover:bg-blue-50/10 transition-all duration-300">
-                           <TableCell className="pl-10 py-6">
-                              <div className="flex items-center gap-3">
-                                 <div className="p-2 bg-primary rounded-lg text-white border border-slate-100">
-                                    <Calendar size={14} />
-                                 </div>
-                                 <span className="font-black text-slate-700 tracking-tight">
-                                    {new Date(session.date).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}
-                                 </span>
-                              </div>
-                           </TableCell>
-                           <TableCell>
-                              <div className="flex flex-col">
-                                 <span className="font-black text-slate-900 uppercase text-xs tracking-tight italic">{session.classe?.name}</span>
-                                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Academic Curriculum</span>
-                              </div>
-                           </TableCell>
-                           <TableCell className="text-right pr-10">
-                              <Badge className={`rounded-xl px-5 py-1.5 font-black uppercase text-[9px] tracking-tighter border-none shadow-sm ${isPresent ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
-                                 }`}>
-                                 {isPresent ? 'Verified Present' : 'Marked Absent'}
-                              </Badge>
-                           </TableCell>
-                        </TableRow>
-                     );
-                  }) : (
-                     <TableRow>
-                        <TableCell colSpan={3} className="h-64 text-center">
-                           <div className="flex flex-col items-center justify-center gap-2">
-                              <Calendar className="text-primary mb-2" size={40} />
-                              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">No Registry Data Found</p>
-                           </div>
-                        </TableCell>
-                     </TableRow>
-                  )}
-               </TableBody>
-            </Table>
-         </Card>
+// ── Stat card ─────────────────────────────────────────────────────────────────
+function StatCard({ label, value, icon: Icon, color, sub }: {
+  label: string; value: string | number; icon: any; color: string; sub?: string;
+}) {
+  return (
+    <div className={`flex flex-col gap-1.5 p-5 rounded-2xl border bg-white shadow-sm ${color}`}>
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</span>
+        <Icon size={16} className="text-slate-300" />
       </div>
-   );
+      <p className="text-3xl font-black text-slate-900">{value}</p>
+      {sub && <p className="text-[10px] font-bold text-slate-400">{sub}</p>}
+    </div>
+  );
+}
+
+// ── PDF generation ────────────────────────────────────────────────────────────
+const downloadAttendancePDF = (sessions: AttendanceSession[], stats: any, studentName: string) => {
+  try {
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' }) as any;
+    const pageW = doc.internal.pageSize.getWidth();
+    const date  = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    // Header
+    doc.setFillColor(15, 23, 42);
+    doc.rect(0, 0, pageW, 38, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.text('A.M. FOFANA ISLAMIC & ENGLISH HIGH SCHOOL', 14, 13);
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(156, 163, 175);
+    doc.text('Official Attendance Report  •  Student Registry', 14, 20);
+    doc.text(`Generated: ${date}`, 14, 26);
+
+    // Student badge (right)
+    doc.setFillColor(37, 99, 235);
+    doc.roundedRect(pageW - 68, 8, 54, 20, 3, 3, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.text(studentName.toUpperCase(), pageW - 41, 18, { align: 'center' });
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(156, 163, 175);
+    doc.text('Student', pageW - 41, 24, { align: 'center' });
+
+    // Section title
+    doc.setTextColor(15, 23, 42);
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.text('ATTENDANCE SUMMARY', 14, 50);
+
+    // Stats grid
+    const statsY = 55;
+    const boxW = 42;
+    const statItems = [
+      { label: 'Total Sessions', value: String(stats.total) },
+      { label: 'Present',        value: String(stats.present) },
+      { label: 'Absent',         value: String(stats.absent) },
+      { label: 'Late',           value: String(stats.late) },
+      { label: 'Attendance Rate', value: `${stats.rate}%` },
+    ];
+    statItems.forEach((item, i) => {
+      const x = 14 + i * (boxW + 2);
+      doc.setFillColor(248, 250, 252);
+      doc.rect(x, statsY, boxW, 20, 'F');
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(x, statsY, boxW, 20, 'S');
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(100, 116, 139);
+      doc.text(item.label, x + boxW / 2, statsY + 7, { align: 'center' });
+      doc.setFontSize(13);
+      doc.setTextColor(15, 23, 42);
+      doc.text(item.value, x + boxW / 2, statsY + 16, { align: 'center' });
+    });
+
+    // Detailed records table
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(15, 23, 42);
+    doc.text('DETAILED ATTENDANCE RECORDS', 14, 85);
+
+    autoTable(doc, {
+      startY: 89,
+      head: [['#', 'Date', 'Class', 'Status']],
+      body: sessions.map((s, i) => {
+        const st = resolveStatus(s);
+        return [
+          String(i + 1),
+          new Date(s.date).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }),
+          s.classe?.name || 'N/A',
+          st,
+        ];
+      }),
+      theme: 'grid',
+      headStyles: { fillColor: [15, 23, 42] as any, fontSize: 8, fontStyle: 'bold' },
+      bodyStyles: { fontSize: 8, cellPadding: 3 },
+      alternateRowStyles: { fillColor: [248, 250, 252] as any },
+      columnStyles: {
+        0: { cellWidth: 8,  halign: 'center' },
+        1: { cellWidth: 40 },
+        2: { cellWidth: 60 },
+        3: { cellWidth: 25, halign: 'center', fontStyle: 'bold' },
+      },
+      didParseCell: (data: any) => {
+        if (data.section === 'body' && data.column.index === 3) {
+          const v = data.cell.raw as string;
+          if (v === 'PRESENT') data.cell.styles.textColor = [5, 150, 105];
+          else if (v === 'ABSENT') data.cell.styles.textColor = [220, 38, 38];
+          else if (v === 'LATE') data.cell.styles.textColor = [180, 130, 0];
+          else data.cell.styles.textColor = [37, 99, 235];
+        }
+      },
+    });
+
+    // Footer
+    const finalY = doc.lastAutoTable?.finalY ?? 240;
+    doc.setDrawColor(226, 232, 240);
+    doc.line(14, finalY + 15, pageW - 14, finalY + 15);
+    doc.setFontSize(7);
+    doc.setTextColor(156, 163, 175);
+    doc.text('A.M. FOFANA ISLAMIC & ENGLISH HIGH SCHOOL  •  Official Attendance Report  •  Confidential', pageW / 2, finalY + 20, { align: 'center' });
+
+    doc.save(`Attendance_${studentName.replace(/\s+/g, '_')}_${new Date().getFullYear()}.pdf`);
+    toast.success('Attendance report downloaded!');
+  } catch (err) {
+    console.error('PDF error:', err);
+    toast.error('Failed to generate PDF. Please try again.');
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+export default function StudentAttendancePage() {
+  const [sessions, setSessions]     = useState<AttendanceSession[]>([]);
+  const [loading, setLoading]       = useState(true);
+  const [monthFilter, setMonthFilter] = useState<string>('all');
+  const [studentName, setStudentName] = useState('Student');
+
+  useEffect(() => {
+    const fetchAll = async () => {
+      try {
+        const [attRes, profileRes] = await Promise.allSettled([
+          api.get('/student/attendance'),
+          api.get('/student/profile'),
+        ]);
+        if (attRes.status === 'fulfilled') {
+          setSessions(Array.isArray(attRes.value.data) ? attRes.value.data : []);
+        } else {
+          toast.error('Failed to load attendance records.');
+        }
+        if (profileRes.status === 'fulfilled') {
+          setStudentName(profileRes.value.data?.name || profileRes.value.data?.username || 'Student');
+        }
+      } catch (err: any) {
+        toast.error('Registry sync failed.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAll();
+  }, []);
+
+  // ── Filter ──────────────────────────────────────────────────────────────────
+  const filtered = useMemo(() => {
+    if (monthFilter === 'all') return sessions;
+    return sessions.filter(s => new Date(s.date).getMonth().toString() === monthFilter);
+  }, [sessions, monthFilter]);
+
+  // ── Stats ───────────────────────────────────────────────────────────────────
+  const stats = useMemo(() => {
+    const total   = filtered.length;
+    const present = filtered.filter(s => resolveStatus(s) === 'PRESENT').length;
+    const absent  = filtered.filter(s => resolveStatus(s) === 'ABSENT').length;
+    const late    = filtered.filter(s => resolveStatus(s) === 'LATE').length;
+    const excused = filtered.filter(s => ['EXCUSED', 'SICK'].includes(resolveStatus(s))).length;
+    const rate    = total > 0 ? Math.round(((present + late) / total) * 100) : 0;
+    return { total, present, absent, late, excused, rate };
+  }, [filtered]);
+
+  const isLowAttendance = stats.total > 0 && stats.rate < 75;
+
+  // ── Loading ─────────────────────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <div className="h-[80vh] w-full flex flex-col items-center justify-center gap-4">
+        <Loader2 size={40} className="animate-spin text-primary" />
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Syncing Registry...</p>
+      </div>
+    );
+  }
+
+  // ── Print styles ────────────────────────────────────────────────────────────
+  // Applied via global CSS classes — sidebar/nav hidden via @media print in globals.css
+
+  return (
+    <div className="p-6 lg:p-10 min-h-screen space-y-6 bg-[#f8fafc] printable-attendance">
+
+      {/* ── Header ── */}
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Calendar size={14} className="text-primary" />
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Attendance</span>
+          </div>
+          <h1 className="text-[clamp(1.4rem,3vw,2.8rem)] font-black tracking-tighter text-slate-900 italic">
+            Registry <span className="text-primary">Pulse.</span>
+          </h1>
+          <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-0.5">
+            {studentName} • Academic Tracking
+          </p>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <Select value={monthFilter} onValueChange={setMonthFilter}>
+            <SelectTrigger className="w-[180px] h-11 rounded-2xl bg-white shadow-sm font-bold text-sm border-slate-100 hover:border-primary transition-colors duration-300">
+              <SelectValue placeholder="All Months" />
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl border-none shadow-2xl">
+              <SelectItem value="all" className="font-bold">All Months</SelectItem>
+              {MONTHS.map(m => <SelectItem key={m.value} value={m.value} className="font-bold">{m.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+
+          <Button
+            variant="outline"
+            className="h-11 rounded-2xl gap-2 font-bold text-sm border-slate-200 hover:border-primary transition-colors"
+            onClick={() => window.print()}
+          >
+            <Printer size={14} /> Print
+          </Button>
+
+          <Button
+            className="h-11 rounded-2xl gap-2 font-black text-[10px] uppercase tracking-widest bg-slate-900 hover:bg-primary transition-colors"
+            onClick={() => downloadAttendancePDF(filtered, stats, studentName)}
+            disabled={filtered.length === 0}
+          >
+            <Download size={14} /> Download PDF
+          </Button>
+        </div>
+      </header>
+
+      {/* ── Low Attendance Warning ── */}
+      {isLowAttendance && (
+        <div className="flex items-center gap-4 bg-rose-50 border border-rose-200 rounded-2xl px-6 py-4">
+          <div className="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center flex-shrink-0">
+            <AlertTriangle size={20} className="text-rose-600" />
+          </div>
+          <div>
+            <p className="font-black text-rose-700 text-sm">Low Attendance Warning</p>
+            <p className="text-rose-500 text-xs font-bold mt-0.5">
+              Your attendance rate is <strong>{stats.rate}%</strong> — below the required 75% threshold. Please contact your class teacher.
+            </p>
+          </div>
+          <Badge className="ml-auto bg-rose-600 text-white border-none font-black text-xs px-3 py-1 rounded-xl flex-shrink-0">
+            {stats.rate}%
+          </Badge>
+        </div>
+      )}
+
+      {/* ── Stat Cards ── */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Big attendance rate card */}
+        <Card className="col-span-2 bg-slate-900 text-white border-none shadow-xl rounded-3xl overflow-hidden relative p-0">
+          <CardContent className="p-8 relative z-10">
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Overall Attendance Rate</p>
+                <h2 className={`text-7xl font-black italic tracking-tighter mt-1 ${stats.rate >= 75 ? 'text-white' : 'text-rose-400'}`}>
+                  {stats.rate}%
+                </h2>
+              </div>
+              <Badge className="bg-primary/20 text-blue-400 border-none font-black px-4 py-1 uppercase text-[9px] mt-1">
+                {stats.rate >= 75 ? 'Good Standing' : 'Needs Attention'}
+              </Badge>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                <span className="text-slate-500">Attendance Track</span>
+                <span className={stats.rate >= 75 ? 'text-emerald-400' : 'text-rose-400'}>
+                  {stats.present + stats.late} / {stats.total} Sessions
+                </span>
+              </div>
+              <Progress value={stats.rate} className="h-2.5 bg-white/10" />
+            </div>
+          </CardContent>
+          <TrendingUp size={240} className="absolute -right-16 -bottom-16 text-white/5" />
+        </Card>
+
+        <StatCard label="Present Days"  value={stats.present}  icon={CheckCircle2} color="border-emerald-100 hover:border-emerald-300"  sub={`${stats.total > 0 ? Math.round((stats.present/stats.total)*100) : 0}% of total`} />
+        <StatCard label="Absent Days"   value={stats.absent}   icon={XCircle}      color="border-rose-100 hover:border-rose-300"         sub={`${stats.total > 0 ? Math.round((stats.absent/stats.total)*100) : 0}% of total`} />
+        <StatCard label="Late Arrivals" value={stats.late}     icon={Clock}        color="border-amber-100 hover:border-amber-300"       sub="Counted partially" />
+        <StatCard label="Excused"       value={stats.excused}  icon={ShieldAlert}  color="border-blue-100 hover:border-blue-300"         sub="Sick or excused" />
+      </div>
+
+      {/* ── Registry table ── */}
+      <Card className="border border-slate-100 rounded-3xl overflow-hidden shadow-sm bg-white">
+        <div className="flex items-center justify-between px-8 py-5 border-b border-slate-50">
+          <div>
+            <p className="text-xs font-black uppercase tracking-widest text-slate-900">Attendance History</p>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">
+              {filtered.length} sessions {monthFilter !== 'all' ? `in ${MONTHS.find(m => m.value === monthFilter)?.label}` : 'total'}
+            </p>
+          </div>
+          <BookOpen size={16} className="text-slate-200" />
+        </div>
+
+        <div className="max-h-[60vh] overflow-y-auto">
+          <Table>
+            <TableHeader className="sticky top-0 z-10 bg-white shadow-[0_1px_0_0_#f1f5f9]">
+              <TableRow className="hover:bg-transparent border-none">
+                <TableHead className="pl-8 py-4 font-black text-[9px] uppercase tracking-widest text-slate-400">Date</TableHead>
+                <TableHead className="font-black text-[9px] uppercase tracking-widest text-slate-400">Class</TableHead>
+                <TableHead className="text-right pr-8 font-black text-[9px] uppercase tracking-widest text-slate-400">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.length > 0 ? filtered.map(session => {
+                const status = resolveStatus(session);
+                const cfg    = STATUS_DISPLAY[status];
+                const Icon   = cfg.icon;
+                return (
+                  <TableRow key={session.id} className="border-slate-50 hover:bg-slate-50/50 transition-all duration-200">
+                    <TableCell className="pl-8 py-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-primary/5 flex items-center justify-center">
+                          <Calendar size={15} className="text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-black text-slate-700 text-sm">
+                            {new Date(session.date).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          </p>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                            {new Date(session.date).toLocaleDateString('en-US', { weekday: 'long' })}
+                          </p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <p className="font-black text-slate-900 text-sm uppercase tracking-tight">{session.classe?.name}</p>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Academic Session</p>
+                    </TableCell>
+                    <TableCell className="text-right pr-8">
+                      <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full border font-black text-[10px] uppercase tracking-wide ${cfg.bg} ${cfg.text} ${cfg.border}`}>
+                        <Icon size={11} />
+                        {cfg.label}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              }) : (
+                <TableRow>
+                  <TableCell colSpan={3} className="h-48 text-center">
+                    <div className="flex flex-col items-center justify-center gap-3">
+                      <Calendar size={40} className="text-slate-200" />
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">No Attendance Records Found</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </Card>
+    </div>
+  );
 }

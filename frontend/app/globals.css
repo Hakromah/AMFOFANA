@@ -295,3 +295,20 @@ body::-webkit-scrollbar-thumb {
     display: table-header-group;
   }
 }
+
+/* Attendance PDF print target */
+@media print {
+  body > *:not(.printable-attendance) {
+    display: none !important;
+  }
+  .printable-attendance {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+  }
+  .printable-attendance nav,
+  .printable-attendance header > div:last-child {
+    display: none !important;
+  }
+}
