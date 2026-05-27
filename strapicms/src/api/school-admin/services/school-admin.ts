@@ -585,7 +585,7 @@ export default () => ({
     if (classId) filters.classe = { id: classId };
     if (date)    filters.date = date;
 
-    const sessions = await strapi.entityService.findMany('api::attendance-session.attendance-session', {
+    const sessions = await (strapi.entityService.findMany as any)('api::attendance-session.attendance-session', {
       filters,
       populate: ['classe', 'subject', 'records', 'records.student'],
       sort: [{ date: 'desc' }],

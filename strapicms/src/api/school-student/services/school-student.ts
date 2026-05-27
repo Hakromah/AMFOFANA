@@ -81,7 +81,7 @@ export default () => ({
   // ─── Attendance ───────────────────────────────────────────────────
 
   async getAttendanceByStudent(studentId: number) {
-    const rawRecords = await strapi.entityService.findMany('api::attendance-record.attendance-record' as any, {
+    const rawRecords = await (strapi.entityService.findMany as any)('api::attendance-record.attendance-record', {
       filters: { student: { id: studentId } },
       populate: ['session', 'session.classe', 'session.subject'],
     }) as any[];

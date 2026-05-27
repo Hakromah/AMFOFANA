@@ -110,7 +110,7 @@ export default () => ({
   },
 
   async getAttendanceHistory(classId: number) {
-    const sessions = await strapi.entityService.findMany('api::attendance-session.attendance-session', {
+    const sessions = await (strapi.entityService.findMany as any)('api::attendance-session.attendance-session', {
       filters: { classe: { id: classId } },
       populate: ['records', 'records.student', 'subject'],
       sort: [{ date: 'desc' }],
@@ -142,13 +142,13 @@ export default () => ({
   },
 
   async getSubjectsByClass(teacherId: number, classId: number) {
-    // Fetch all exams for this class taught by this teacher to derive subjects
-    const exams = await strapi.entityService.findMany('api::school-exam.school-exam', {
+    // Try to get subjects linked to this class via exams the teacher teaches
+    const exams = await (strapi.entityService.findMany as any)('api::school-exam.school-exam', {
       filters: { teacher: { id: teacherId }, classe: { id: classId } },
       populate: ['subject'],
     }) as any[];
 
-    // Deduplicate subjects
+    // Deduplicate subjects from exams
     const subjectMap = new Map<number, any>();
     for (const exam of exams) {
       if (exam.subject?.id && !subjectMap.has(exam.subject.id)) {
@@ -156,9 +156,9 @@ export default () => ({
       }
     }
 
-    // If no exam subjects, fall back to all subjects
+    // Fallback: return all subjects if none found via exams
     if (subjectMap.size === 0) {
-      const allSubjects = await strapi.entityService.findMany('api::subject.subject') as any[];
+      const allSubjects = await (strapi.entityService.findMany as any)('api::subject.subject', {}) as any[];
       return allSubjects.map((s: any) => ({ id: s.id, name: s.name }));
     }
 
