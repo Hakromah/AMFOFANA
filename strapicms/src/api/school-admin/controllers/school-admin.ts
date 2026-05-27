@@ -233,4 +233,22 @@ export default {
     });
     ctx.body = list;
   },
+
+  // ─── Attendance (Admin read/analytics/delete) ───────────────────────
+  async getAttendanceSessions(ctx: any) {
+    const { classId, date } = ctx.query;
+    ctx.body = await strapi.service('api::school-admin.school-admin').getAttendanceSessions({
+      classId: classId ? Number(classId) : undefined,
+      date: date as string,
+    });
+  },
+
+  async getAttendanceAnalytics(ctx: any) {
+    ctx.body = await strapi.service('api::school-admin.school-admin').getAttendanceAnalytics();
+  },
+
+  async deleteAttendanceSession(ctx: any) {
+    await strapi.service('api::school-admin.school-admin').deleteAttendanceSession(Number(ctx.params.id));
+    ctx.body = { message: 'Session deleted' };
+  },
 };

@@ -92,15 +92,26 @@ export default () => ({
       sort: [{ date: 'desc' }],
     }) as any[];
 
-    return sessions.map((s) => ({
-      sessionId: s.id,
-      date: s.date,
-      records: (s.records || []).map((r: any) => ({
-        studentId: r.student?.id,
-        studentName: r.student?.username,
-        status: r.status,
-      })),
-    }));
+    return sessions.map((s) => {
+      const records = s.records || [];
+      const presentCount = records.filter((r: any) => r.status === 'PRESENT').length;
+      const lateCount    = records.filter((r: any) => r.status === 'LATE').length;
+      const totalCount   = records.length;
+      return {
+        id:           s.id,          // ← must be `id` so frontend session.id works
+        date:         s.date,
+        totalCount,
+        presentCount,
+        lateCount,
+        absentCount:  records.filter((r: any) => r.status === 'ABSENT').length,
+        excusedCount: records.filter((r: any) => r.status === 'EXCUSED' || r.status === 'SICK').length,
+        records: records.map((r: any) => ({
+          studentId:   r.student?.id,
+          studentName: r.student?.username || r.student?.name,
+          status:      r.status,
+        })),
+      };
+    });
   },
 
   // ─── Exams ────────────────────────────────────────────────────────

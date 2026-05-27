@@ -577,4 +577,92 @@ export default () => ({
       }
     };
   },
+
+  // ─── Attendance (Admin) ──────────────────────────────────────────────────
+
+  async getAttendanceSessions({ classId, date }: { classId?: number; date?: string }) {
+    const filters: any = {};
+    if (classId) filters.classe = { id: classId };
+    if (date)    filters.date = date;
+
+    const sessions = await strapi.entityService.findMany('api::attendance-session.attendance-session', {
+      filters,
+      populate: ['classe', 'records', 'records.student'],
+      sort: [{ date: 'desc' }],
+    }) as any[];
+
+    return sessions.map((s) => {
+      const records = s.records || [];
+      const presentCount = records.filter((r: any) => r.status === 'PRESENT').length;
+      const lateCount    = records.filter((r: any) => r.status === 'LATE').length;
+      return {
+        id:           s.id,
+        date:         s.date,
+        className:    s.classe?.name || 'N/A',
+        classId:      s.classe?.id,
+        totalCount:   records.length,
+        presentCount,
+        lateCount,
+        absentCount:  records.filter((r: any) => r.status === 'ABSENT').length,
+        excusedCount: records.filter((r: any) => r.status === 'EXCUSED' || r.status === 'SICK').length,
+        attendanceRate: records.length > 0
+          ? Math.round(((presentCount + lateCount) / records.length) * 100)
+          : 0,
+        records: records.map((r: any) => ({
+          studentId:   r.student?.id,
+          studentName: r.student?.username || r.student?.name,
+          userId:      r.student?.userId,
+          status:      r.status,
+        })),
+      };
+    });
+  },
+
+  async getAttendanceAnalytics() {
+    const records = await strapi.entityService.findMany('api::attendance-record.attendance-record' as any, {
+      populate: ['student', 'session', 'session.classe'],
+    }) as any[];
+
+    const totalRecords  = records.length;
+    const presentCount  = records.filter((r: any) => r.status === 'PRESENT').length;
+    const absentCount   = records.filter((r: any) => r.status === 'ABSENT').length;
+    const lateCount     = records.filter((r: any) => r.status === 'LATE').length;
+    const excusedCount  = records.filter((r: any) => r.status === 'EXCUSED' || r.status === 'SICK').length;
+    const overallRate   = totalRecords > 0 ? Math.round(((presentCount + lateCount) / totalRecords) * 100) : 0;
+
+    // Per-class breakdown
+    const classMap = new Map<string, { name: string; total: number; present: number; late: number }>();
+    for (const r of records) {
+      const clsName = r.session?.classe?.name || 'Unknown';
+      if (!classMap.has(clsName)) classMap.set(clsName, { name: clsName, total: 0, present: 0, late: 0 });
+      const entry = classMap.get(clsName)!;
+      entry.total++;
+      if (r.status === 'PRESENT') entry.present++;
+      if (r.status === 'LATE') entry.late++;
+    }
+
+    return {
+      totalRecords,
+      presentCount,
+      absentCount,
+      lateCount,
+      excusedCount,
+      overallRate,
+      byClass: Array.from(classMap.values()).map(c => ({
+        ...c,
+        rate: c.total > 0 ? Math.round(((c.present + c.late) / c.total) * 100) : 0,
+      })),
+    };
+  },
+
+  async deleteAttendanceSession(sessionId: number) {
+    // Cascade delete all records first
+    const records = await strapi.entityService.findMany('api::attendance-record.attendance-record', {
+      filters: { session: { id: sessionId } },
+    }) as any[];
+    await Promise.all(records.map((r: any) =>
+      strapi.entityService.delete('api::attendance-record.attendance-record', r.id)
+    ));
+    return strapi.entityService.delete('api::attendance-session.attendance-session', sessionId);
+  },
 });

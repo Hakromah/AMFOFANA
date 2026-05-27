@@ -13,6 +13,7 @@ export default function AdminLayout({
     { name: 'Exam Management', href: '/admin/exams' },
     { name: 'Materials Management', href: '/admin/materials' },
     { name: 'Results Management', href: '/admin/results' }, // Added
+    { name: 'Attendance', href: '/admin/attendance' },
     { name: 'Teacher Assignment', href: '/admin/assign-teacher' },
     { name: 'Student Assignment', href: '/admin/assign-student' },
     { name: 'Timetable', href: '/admin/timetable' },

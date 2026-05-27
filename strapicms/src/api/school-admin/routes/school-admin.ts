@@ -55,5 +55,10 @@ export default {
     // Profile & Password
     { method: 'PUT',    path: '/admin/profile',                    handler: 'school-admin.updateProfile' },
     { method: 'PUT',    path: '/admin/change-password',            handler: 'school-admin.changePassword' },
+
+    // Attendance (admin read-only + analytics)
+    { method: 'GET',    path: '/admin/attendance',                 handler: 'school-admin.getAttendanceSessions' },
+    { method: 'GET',    path: '/admin/attendance/analytics',       handler: 'school-admin.getAttendanceAnalytics' },
+    { method: 'DELETE', path: '/admin/attendance/:id',             handler: 'school-admin.deleteAttendanceSession' },
   ],
 };

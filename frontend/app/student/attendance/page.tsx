@@ -21,36 +21,29 @@ import api from '@/lib/api';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-// ── Types ────────────────────────────────────────────────────────────────────
+// ── Types ─────────────────────────────────────────────────────────────────────
+// Backend getAttendanceByStudent returns flat objects:
+// { id, date, className, status }
 interface AttendanceRecord {
   id: number;
-  present: boolean;
-  status?: string; // 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED' | 'SICK'
-}
-
-interface AttendanceSession {
-  id: number;
   date: string;
-  classe: { name: string };
-  records: AttendanceRecord[];
+  className: string;
+  status: string; // 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED' | 'SICK'
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
 type AStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED' | 'SICK';
 
-const resolveStatus = (session: AttendanceSession): AStatus => {
-  const r = session.records?.[0];
-  if (!r) return 'ABSENT';
-  if (r.status) return r.status as AStatus;
-  return r.present ? 'PRESENT' : 'ABSENT';
+const STATUS_DISPLAY: Record<AStatus, { label: string; icon: any; bg: string; text: string; border: string }> = {
+  PRESENT: { label: 'Present',  icon: CheckCircle2, bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+  ABSENT:  { label: 'Absent',   icon: XCircle,      bg: 'bg-rose-50',    text: 'text-rose-700',    border: 'border-rose-200'    },
+  LATE:    { label: 'Late',     icon: Clock,        bg: 'bg-amber-50',   text: 'text-amber-700',   border: 'border-amber-200'   },
+  EXCUSED: { label: 'Excused',  icon: ShieldAlert,  bg: 'bg-blue-50',    text: 'text-blue-700',    border: 'border-blue-200'    },
+  SICK:    { label: 'Sick',     icon: ShieldAlert,  bg: 'bg-purple-50',  text: 'text-purple-700',  border: 'border-purple-200'  },
 };
 
-const STATUS_DISPLAY: Record<AStatus, { label: string; icon: any; bg: string; text: string; border: string }> = {
-  PRESENT: { label: 'Present',  icon: CheckCircle2,  bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-  ABSENT:  { label: 'Absent',   icon: XCircle,       bg: 'bg-rose-50',    text: 'text-rose-700',    border: 'border-rose-200'    },
-  LATE:    { label: 'Late',     icon: Clock,         bg: 'bg-amber-50',   text: 'text-amber-700',   border: 'border-amber-200'   },
-  EXCUSED: { label: 'Excused',  icon: ShieldAlert,   bg: 'bg-blue-50',    text: 'text-blue-700',    border: 'border-blue-200'    },
-  SICK:    { label: 'Sick',     icon: ShieldAlert,   bg: 'bg-purple-50',  text: 'text-purple-700',  border: 'border-purple-200'  },
+const resolveStatus = (status: string): AStatus => {
+  if (['PRESENT', 'ABSENT', 'LATE', 'EXCUSED', 'SICK'].includes(status)) return status as AStatus;
+  return 'ABSENT';
 };
 
 const MONTHS = [
@@ -63,14 +56,14 @@ const MONTHS = [
 ];
 
 // ── Stat card ─────────────────────────────────────────────────────────────────
-function StatCard({ label, value, icon: Icon, color, sub }: {
-  label: string; value: string | number; icon: any; color: string; sub?: string;
+function StatCard({ label, value, icon: Icon, colorClass, sub }: {
+  label: string; value: string | number; icon: any; colorClass: string; sub?: string;
 }) {
   return (
-    <div className={`flex flex-col gap-1.5 p-5 rounded-2xl border bg-white shadow-sm ${color}`}>
+    <div className={`flex flex-col gap-1.5 p-5 rounded-2xl border bg-white shadow-sm transition-colors duration-300 ${colorClass}`}>
       <div className="flex items-center justify-between">
         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</span>
-        <Icon size={16} className="text-slate-300" />
+        <Icon size={15} className="text-slate-300" />
       </div>
       <p className="text-3xl font-black text-slate-900">{value}</p>
       {sub && <p className="text-[10px] font-bold text-slate-400">{sub}</p>}
@@ -79,46 +72,46 @@ function StatCard({ label, value, icon: Icon, color, sub }: {
 }
 
 // ── PDF generation ────────────────────────────────────────────────────────────
-const downloadAttendancePDF = (sessions: AttendanceSession[], stats: any, studentName: string) => {
+const downloadAttendancePDF = (records: AttendanceRecord[], stats: any, studentName: string) => {
   try {
     const doc = new jsPDF({ unit: 'mm', format: 'a4' }) as any;
     const pageW = doc.internal.pageSize.getWidth();
     const date  = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-    // Header
+    // Header bar
     doc.setFillColor(15, 23, 42);
-    doc.rect(0, 0, pageW, 38, 'F');
+    doc.rect(0, 0, pageW, 36, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFont('Helvetica', 'bold');
-    doc.setFontSize(15);
-    doc.text('A.M. FOFANA ISLAMIC & ENGLISH HIGH SCHOOL', 14, 13);
+    doc.setFontSize(14);
+    doc.text('A.M. FOFANA ISLAMIC & ENGLISH HIGH SCHOOL', 14, 12);
     doc.setFont('Helvetica', 'normal');
-    doc.setFontSize(8);
+    doc.setFontSize(7.5);
     doc.setTextColor(156, 163, 175);
-    doc.text('Official Attendance Report  •  Student Registry', 14, 20);
-    doc.text(`Generated: ${date}`, 14, 26);
+    doc.text('Official Attendance Report  •  Student Registry', 14, 19);
+    doc.text(`Generated: ${date}`, 14, 25);
 
-    // Student badge (right)
+    // Student badge (right side)
     doc.setFillColor(37, 99, 235);
-    doc.roundedRect(pageW - 68, 8, 54, 20, 3, 3, 'F');
+    doc.roundedRect(pageW - 66, 8, 52, 20, 3, 3, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFont('Helvetica', 'bold');
-    doc.setFontSize(9);
-    doc.text(studentName.toUpperCase(), pageW - 41, 18, { align: 'center' });
+    doc.setFontSize(8.5);
+    doc.text(studentName.toUpperCase(), pageW - 40, 17, { align: 'center' });
     doc.setFont('Helvetica', 'normal');
     doc.setFontSize(7);
-    doc.setTextColor(156, 163, 175);
-    doc.text('Student', pageW - 41, 24, { align: 'center' });
+    doc.setTextColor(180, 210, 255);
+    doc.text('Student', pageW - 40, 23, { align: 'center' });
 
-    // Section title
+    // Attendance Summary section
     doc.setTextColor(15, 23, 42);
     doc.setFont('Helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.text('ATTENDANCE SUMMARY', 14, 50);
+    doc.setFontSize(10);
+    doc.text('ATTENDANCE SUMMARY', 14, 48);
 
-    // Stats grid
-    const statsY = 55;
-    const boxW = 42;
+    // Stat boxes
+    const statsY = 53;
+    const bw = 37;
     const statItems = [
       { label: 'Total Sessions', value: String(stats.total) },
       { label: 'Present',        value: String(stats.present) },
@@ -127,47 +120,44 @@ const downloadAttendancePDF = (sessions: AttendanceSession[], stats: any, studen
       { label: 'Attendance Rate', value: `${stats.rate}%` },
     ];
     statItems.forEach((item, i) => {
-      const x = 14 + i * (boxW + 2);
+      const x = 14 + i * (bw + 2);
       doc.setFillColor(248, 250, 252);
-      doc.rect(x, statsY, boxW, 20, 'F');
+      doc.rect(x, statsY, bw, 20, 'F');
       doc.setDrawColor(226, 232, 240);
-      doc.rect(x, statsY, boxW, 20, 'S');
+      doc.rect(x, statsY, bw, 20, 'S');
       doc.setFont('Helvetica', 'bold');
-      doc.setFontSize(7);
+      doc.setFontSize(6.5);
       doc.setTextColor(100, 116, 139);
-      doc.text(item.label, x + boxW / 2, statsY + 7, { align: 'center' });
-      doc.setFontSize(13);
+      doc.text(item.label, x + bw / 2, statsY + 7, { align: 'center' });
+      doc.setFontSize(12);
       doc.setTextColor(15, 23, 42);
-      doc.text(item.value, x + boxW / 2, statsY + 16, { align: 'center' });
+      doc.text(item.value, x + bw / 2, statsY + 16, { align: 'center' });
     });
 
-    // Detailed records table
+    // Detail table
     doc.setFont('Helvetica', 'bold');
     doc.setFontSize(10);
     doc.setTextColor(15, 23, 42);
-    doc.text('DETAILED ATTENDANCE RECORDS', 14, 85);
+    doc.text('DETAILED ATTENDANCE RECORDS', 14, 83);
 
     autoTable(doc, {
-      startY: 89,
+      startY: 87,
       head: [['#', 'Date', 'Class', 'Status']],
-      body: sessions.map((s, i) => {
-        const st = resolveStatus(s);
-        return [
-          String(i + 1),
-          new Date(s.date).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }),
-          s.classe?.name || 'N/A',
-          st,
-        ];
-      }),
+      body: records.map((r, i) => [
+        String(i + 1),
+        r.date ? new Date(r.date).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A',
+        r.className || 'N/A',
+        resolveStatus(r.status),
+      ]),
       theme: 'grid',
       headStyles: { fillColor: [15, 23, 42] as any, fontSize: 8, fontStyle: 'bold' },
       bodyStyles: { fontSize: 8, cellPadding: 3 },
       alternateRowStyles: { fillColor: [248, 250, 252] as any },
       columnStyles: {
         0: { cellWidth: 8,  halign: 'center' },
-        1: { cellWidth: 40 },
+        1: { cellWidth: 38 },
         2: { cellWidth: 60 },
-        3: { cellWidth: 25, halign: 'center', fontStyle: 'bold' },
+        3: { cellWidth: 28, halign: 'center', fontStyle: 'bold' },
       },
       didParseCell: (data: any) => {
         if (data.section === 'body' && data.column.index === 3) {
@@ -186,40 +176,50 @@ const downloadAttendancePDF = (sessions: AttendanceSession[], stats: any, studen
     doc.line(14, finalY + 15, pageW - 14, finalY + 15);
     doc.setFontSize(7);
     doc.setTextColor(156, 163, 175);
-    doc.text('A.M. FOFANA ISLAMIC & ENGLISH HIGH SCHOOL  •  Official Attendance Report  •  Confidential', pageW / 2, finalY + 20, { align: 'center' });
+    doc.text(
+      'A.M. FOFANA ISLAMIC & ENGLISH HIGH SCHOOL  •  Official Attendance Report  •  Confidential',
+      pageW / 2, finalY + 20, { align: 'center' }
+    );
 
     doc.save(`Attendance_${studentName.replace(/\s+/g, '_')}_${new Date().getFullYear()}.pdf`);
     toast.success('Attendance report downloaded!');
   } catch (err) {
-    console.error('PDF error:', err);
-    toast.error('Failed to generate PDF. Please try again.');
+    console.error('PDF generation error:', err);
+    toast.error('Failed to generate PDF — please try again.');
   }
 };
 
 // ══════════════════════════════════════════════════════════════════════════════
 export default function StudentAttendancePage() {
-  const [sessions, setSessions]     = useState<AttendanceSession[]>([]);
-  const [loading, setLoading]       = useState(true);
+  const [records, setRecords]         = useState<AttendanceRecord[]>([]);
+  const [loading, setLoading]         = useState(true);
   const [monthFilter, setMonthFilter] = useState<string>('all');
   const [studentName, setStudentName] = useState('Student');
 
   useEffect(() => {
     const fetchAll = async () => {
       try {
+        // Fetch both attendance and profile in parallel
         const [attRes, profileRes] = await Promise.allSettled([
           api.get('/student/attendance'),
           api.get('/student/profile'),
         ]);
+
         if (attRes.status === 'fulfilled') {
-          setSessions(Array.isArray(attRes.value.data) ? attRes.value.data : []);
+          const data = attRes.value.data;
+          // Backend returns: [{ id, date, className, status }, ...]
+          setRecords(Array.isArray(data) ? data : []);
         } else {
           toast.error('Failed to load attendance records.');
         }
+
         if (profileRes.status === 'fulfilled') {
-          setStudentName(profileRes.value.data?.name || profileRes.value.data?.username || 'Student');
+          const p = profileRes.value.data;
+          setStudentName(p?.name || p?.username || 'Student');
         }
       } catch (err: any) {
-        toast.error('Registry sync failed.');
+        toast.error('Registry sync failed. Please check your connection.');
+        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -229,24 +229,26 @@ export default function StudentAttendancePage() {
 
   // ── Filter ──────────────────────────────────────────────────────────────────
   const filtered = useMemo(() => {
-    if (monthFilter === 'all') return sessions;
-    return sessions.filter(s => new Date(s.date).getMonth().toString() === monthFilter);
-  }, [sessions, monthFilter]);
+    if (monthFilter === 'all') return records;
+    return records.filter(r => {
+      if (!r.date) return false;
+      return new Date(r.date).getMonth().toString() === monthFilter;
+    });
+  }, [records, monthFilter]);
 
   // ── Stats ───────────────────────────────────────────────────────────────────
   const stats = useMemo(() => {
     const total   = filtered.length;
-    const present = filtered.filter(s => resolveStatus(s) === 'PRESENT').length;
-    const absent  = filtered.filter(s => resolveStatus(s) === 'ABSENT').length;
-    const late    = filtered.filter(s => resolveStatus(s) === 'LATE').length;
-    const excused = filtered.filter(s => ['EXCUSED', 'SICK'].includes(resolveStatus(s))).length;
+    const present = filtered.filter(r => resolveStatus(r.status) === 'PRESENT').length;
+    const absent  = filtered.filter(r => resolveStatus(r.status) === 'ABSENT').length;
+    const late    = filtered.filter(r => resolveStatus(r.status) === 'LATE').length;
+    const excused = filtered.filter(r => ['EXCUSED', 'SICK'].includes(resolveStatus(r.status))).length;
     const rate    = total > 0 ? Math.round(((present + late) / total) * 100) : 0;
     return { total, present, absent, late, excused, rate };
   }, [filtered]);
 
-  const isLowAttendance = stats.total > 0 && stats.rate < 75;
+  const isLowAttendance = stats.total > 5 && stats.rate < 75;
 
-  // ── Loading ─────────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="h-[80vh] w-full flex flex-col items-center justify-center gap-4">
@@ -256,11 +258,8 @@ export default function StudentAttendancePage() {
     );
   }
 
-  // ── Print styles ────────────────────────────────────────────────────────────
-  // Applied via global CSS classes — sidebar/nav hidden via @media print in globals.css
-
   return (
-    <div className="p-6 lg:p-10 min-h-screen space-y-6 bg-[#f8fafc] printable-attendance">
+    <div className="p-6 lg:p-10 min-h-screen space-y-6 bg-[#f8fafc]">
 
       {/* ── Header ── */}
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -280,12 +279,14 @@ export default function StudentAttendancePage() {
         {/* Actions */}
         <div className="flex items-center gap-3 flex-wrap">
           <Select value={monthFilter} onValueChange={setMonthFilter}>
-            <SelectTrigger className="w-[180px] h-11 rounded-2xl bg-white shadow-sm font-bold text-sm border-slate-100 hover:border-primary transition-colors duration-300">
+            <SelectTrigger className="w-[170px] h-11 rounded-2xl bg-white shadow-sm font-bold text-sm border-slate-100 hover:border-primary transition-colors duration-300">
               <SelectValue placeholder="All Months" />
             </SelectTrigger>
             <SelectContent className="rounded-2xl border-none shadow-2xl">
               <SelectItem value="all" className="font-bold">All Months</SelectItem>
-              {MONTHS.map(m => <SelectItem key={m.value} value={m.value} className="font-bold">{m.label}</SelectItem>)}
+              {MONTHS.map(m => (
+                <SelectItem key={m.value} value={m.value} className="font-bold">{m.label}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
@@ -327,10 +328,10 @@ export default function StudentAttendancePage() {
 
       {/* ── Stat Cards ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {/* Big attendance rate card */}
+        {/* Big dark rate card — spans 2 cols */}
         <Card className="col-span-2 bg-slate-900 text-white border-none shadow-xl rounded-3xl overflow-hidden relative p-0">
           <CardContent className="p-8 relative z-10">
-            <div className="flex justify-between items-start mb-6">
+            <div className="flex justify-between items-start mb-5">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Overall Attendance Rate</p>
                 <h2 className={`text-7xl font-black italic tracking-tighter mt-1 ${stats.rate >= 75 ? 'text-white' : 'text-rose-400'}`}>
@@ -351,22 +352,47 @@ export default function StudentAttendancePage() {
               <Progress value={stats.rate} className="h-2.5 bg-white/10" />
             </div>
           </CardContent>
-          <TrendingUp size={240} className="absolute -right-16 -bottom-16 text-white/5" />
+          <TrendingUp size={200} className="absolute -right-14 -bottom-12 text-white/5" />
         </Card>
 
-        <StatCard label="Present Days"  value={stats.present}  icon={CheckCircle2} color="border-emerald-100 hover:border-emerald-300"  sub={`${stats.total > 0 ? Math.round((stats.present/stats.total)*100) : 0}% of total`} />
-        <StatCard label="Absent Days"   value={stats.absent}   icon={XCircle}      color="border-rose-100 hover:border-rose-300"         sub={`${stats.total > 0 ? Math.round((stats.absent/stats.total)*100) : 0}% of total`} />
-        <StatCard label="Late Arrivals" value={stats.late}     icon={Clock}        color="border-amber-100 hover:border-amber-300"       sub="Counted partially" />
-        <StatCard label="Excused"       value={stats.excused}  icon={ShieldAlert}  color="border-blue-100 hover:border-blue-300"         sub="Sick or excused" />
+        <StatCard
+          label="Present Days"
+          value={stats.present}
+          icon={CheckCircle2}
+          colorClass="border-emerald-100 hover:border-emerald-300"
+          sub={stats.total > 0 ? `${Math.round((stats.present / stats.total) * 100)}% of sessions` : '—'}
+        />
+        <StatCard
+          label="Absent Days"
+          value={stats.absent}
+          icon={XCircle}
+          colorClass="border-rose-100 hover:border-rose-300"
+          sub={stats.total > 0 ? `${Math.round((stats.absent / stats.total) * 100)}% of sessions` : '—'}
+        />
+        <StatCard
+          label="Late Arrivals"
+          value={stats.late}
+          icon={Clock}
+          colorClass="border-amber-100 hover:border-amber-300"
+          sub="Counted partially"
+        />
+        <StatCard
+          label="Excused / Sick"
+          value={stats.excused}
+          icon={ShieldAlert}
+          colorClass="border-blue-100 hover:border-blue-300"
+          sub="With valid reason"
+        />
       </div>
 
-      {/* ── Registry table ── */}
+      {/* ── Attendance History Table ── */}
       <Card className="border border-slate-100 rounded-3xl overflow-hidden shadow-sm bg-white">
         <div className="flex items-center justify-between px-8 py-5 border-b border-slate-50">
           <div>
             <p className="text-xs font-black uppercase tracking-widest text-slate-900">Attendance History</p>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">
-              {filtered.length} sessions {monthFilter !== 'all' ? `in ${MONTHS.find(m => m.value === monthFilter)?.label}` : 'total'}
+              {filtered.length} session{filtered.length !== 1 ? 's' : ''}
+              {monthFilter !== 'all' ? ` in ${MONTHS.find(m => m.value === monthFilter)?.label}` : ' total'}
             </p>
           </div>
           <BookOpen size={16} className="text-slate-200" />
@@ -382,29 +408,33 @@ export default function StudentAttendancePage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.length > 0 ? filtered.map(session => {
-                const status = resolveStatus(session);
+              {filtered.length > 0 ? filtered.map(record => {
+                const status = resolveStatus(record.status);
                 const cfg    = STATUS_DISPLAY[status];
                 const Icon   = cfg.icon;
                 return (
-                  <TableRow key={session.id} className="border-slate-50 hover:bg-slate-50/50 transition-all duration-200">
+                  <TableRow key={record.id} className="border-slate-50 hover:bg-slate-50/60 transition-all duration-200">
                     <TableCell className="pl-8 py-5">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-primary/5 flex items-center justify-center">
-                          <Calendar size={15} className="text-primary" />
+                        <div className="w-9 h-9 rounded-xl bg-primary/5 flex items-center justify-center flex-shrink-0">
+                          <Calendar size={14} className="text-primary" />
                         </div>
                         <div>
                           <p className="font-black text-slate-700 text-sm">
-                            {new Date(session.date).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}
+                            {record.date
+                              ? new Date(record.date).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })
+                              : 'N/A'}
                           </p>
                           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                            {new Date(session.date).toLocaleDateString('en-US', { weekday: 'long' })}
+                            {record.date ? new Date(record.date).toLocaleDateString('en-US', { weekday: 'long' }) : ''}
                           </p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <p className="font-black text-slate-900 text-sm uppercase tracking-tight">{session.classe?.name}</p>
+                      <p className="font-black text-slate-900 text-sm">
+                        {record.className || 'N/A'}
+                      </p>
                       <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Academic Session</p>
                     </TableCell>
                     <TableCell className="text-right pr-8">
@@ -420,7 +450,9 @@ export default function StudentAttendancePage() {
                   <TableCell colSpan={3} className="h-48 text-center">
                     <div className="flex flex-col items-center justify-center gap-3">
                       <Calendar size={40} className="text-slate-200" />
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">No Attendance Records Found</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        {monthFilter !== 'all' ? 'No records for this month.' : 'No attendance records found.'}
+                      </p>
                     </div>
                   </TableCell>
                 </TableRow>
