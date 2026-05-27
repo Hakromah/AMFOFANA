@@ -57,8 +57,9 @@ export default {
     { method: 'PUT',    path: '/admin/change-password',            handler: 'school-admin.changePassword' },
 
     // Attendance (admin read-only + analytics)
-    { method: 'GET',    path: '/admin/attendance',                 handler: 'school-admin.getAttendanceSessions' },
-    { method: 'GET',    path: '/admin/attendance/analytics',       handler: 'school-admin.getAttendanceAnalytics' },
-    { method: 'DELETE', path: '/admin/attendance/:id',             handler: 'school-admin.deleteAttendanceSession' },
+    // auth:false + manual ADMIN check so these work without Strapi panel permission grants
+    { method: 'GET',    path: '/admin/attendance',           handler: 'school-admin.getAttendanceSessions',   config: { auth: false } },
+    { method: 'GET',    path: '/admin/attendance/analytics', handler: 'school-admin.getAttendanceAnalytics',  config: { auth: false } },
+    { method: 'DELETE', path: '/admin/attendance/:id',       handler: 'school-admin.deleteAttendanceSession', config: { auth: false } },
   ],
 };

@@ -587,7 +587,7 @@ export default () => ({
 
     const sessions = await strapi.entityService.findMany('api::attendance-session.attendance-session', {
       filters,
-      populate: ['classe', 'records', 'records.student'],
+      populate: ['classe', 'subject', 'records', 'records.student'],
       sort: [{ date: 'desc' }],
     }) as any[];
 
@@ -598,6 +598,8 @@ export default () => ({
       return {
         id:           s.id,
         date:         s.date,
+        sessionTime:  s.sessionTime || null,
+        subjectName:  s.subject?.name || null,
         className:    s.classe?.name || 'N/A',
         classId:      s.classe?.id,
         totalCount:   records.length,

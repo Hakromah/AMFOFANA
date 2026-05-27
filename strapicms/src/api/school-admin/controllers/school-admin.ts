@@ -234,21 +234,77 @@ export default {
     ctx.body = list;
   },
 
-  // ─── Attendance (Admin read/analytics/delete) ───────────────────────
+  // ─── Attendance (Admin read/analytics/delete) ─────────────────────────────
+  // These routes use auth:false so they must manually verify the JWT + schoolRole
+
   async getAttendanceSessions(ctx: any) {
+    const user = await _verifyAdmin(ctx);
+    if (!user) return;
     const { classId, date } = ctx.query;
-    ctx.body = await strapi.service('api::school-admin.school-admin').getAttendanceSessions({
-      classId: classId ? Number(classId) : undefined,
-      date: date as string,
-    });
+    try {
+      ctx.body = await strapi.service('api::school-admin.school-admin').getAttendanceSessions({
+        classId: classId ? Number(classId) : undefined,
+        date: date as string,
+      });
+    } catch (err: any) {
+      ctx.status = 500;
+      ctx.body = { error: err.message };
+    }
   },
 
   async getAttendanceAnalytics(ctx: any) {
-    ctx.body = await strapi.service('api::school-admin.school-admin').getAttendanceAnalytics();
+    const user = await _verifyAdmin(ctx);
+    if (!user) return;
+    try {
+      ctx.body = await strapi.service('api::school-admin.school-admin').getAttendanceAnalytics();
+    } catch (err: any) {
+      ctx.status = 500;
+      ctx.body = { error: err.message };
+    }
   },
 
   async deleteAttendanceSession(ctx: any) {
-    await strapi.service('api::school-admin.school-admin').deleteAttendanceSession(Number(ctx.params.id));
-    ctx.body = { message: 'Session deleted' };
+    const user = await _verifyAdmin(ctx);
+    if (!user) return;
+    try {
+      await strapi.service('api::school-admin.school-admin').deleteAttendanceSession(Number(ctx.params.id));
+      ctx.body = { message: 'Session deleted' };
+    } catch (err: any) {
+      ctx.status = 500;
+      ctx.body = { error: err.message };
+    }
   },
 };
+
+// ─── Helper: verify admin from JWT (for auth:false routes) ────────────────
+async function _verifyAdmin(ctx: any): Promise<any | null> {
+  try {
+    const authHeader = ctx.request.header?.authorization || '';
+    const token = authHeader.replace('Bearer ', '').trim();
+    if (!token) {
+      ctx.status = 401;
+      ctx.body = { error: 'Unauthorized: no token provided' };
+      return null;
+    }
+    const jwtService = strapi.plugin('users-permissions').service('jwt');
+    const decoded = await jwtService.verify(token);
+    if (!decoded?.id) {
+      ctx.status = 401;
+      ctx.body = { error: 'Unauthorized: invalid token' };
+      return null;
+    }
+    const user = await strapi.entityService.findOne(
+      'plugin::users-permissions.user', decoded.id
+    ) as any;
+    if (!user || user.schoolRole !== 'ADMIN') {
+      ctx.status = 403;
+      ctx.body = { error: 'Forbidden: ADMIN role required' };
+      return null;
+    }
+    return user;
+  } catch (err: any) {
+    ctx.status = 401;
+    ctx.body = { error: 'Unauthorized: ' + err.message };
+    return null;
+  }
+}

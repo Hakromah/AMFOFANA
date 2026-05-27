@@ -43,6 +43,14 @@ export default {
     );
   },
 
+  async getSubjectsByClass(ctx: any) {
+    const user = ctx.state.user;
+    ctx.body = await strapi.service('api::school-teacher.school-teacher').getSubjectsByClass(
+      user.id,
+      Number(ctx.params.classId)
+    );
+  },
+
   async createExam(ctx: any) {
     const user = ctx.state.user;
     ctx.body = await strapi.service('api::school-teacher.school-teacher').createExam(user.id, ctx.request.body);

@@ -15,7 +15,7 @@ import {
 import { toast } from 'sonner';
 import {
   Calendar, CheckCircle2, XCircle, Clock, Users, Loader2,
-  ClipboardList, BarChart2, Trash2, ShieldAlert, TrendingUp, RefreshCw,
+  ClipboardList, BarChart2, Trash2, ShieldAlert, TrendingUp, RefreshCw, BookOpen,
 } from 'lucide-react';
 import api from '@/lib/api';
 
@@ -23,6 +23,8 @@ import api from '@/lib/api';
 interface AttendanceSession {
   id: number;
   date: string;
+  sessionTime: string | null;
+  subjectName: string | null;
   className: string;
   classId: number;
   totalCount: number;
@@ -303,7 +305,20 @@ export default function AdminAttendancePage() {
                           <p className="font-black text-slate-900 text-sm">
                             {new Date(session.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
                           </p>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{session.className}</p>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{session.className}</span>
+                            {session.subjectName && (
+                              <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 flex items-center gap-1">
+                                <BookOpen size={8} /> {session.subjectName}
+                              </span>
+                            )}
+                            {session.sessionTime && (
+                              <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 flex items-center gap-1">
+                                <Clock size={8} />
+                                {new Date(`2000-01-01T${session.sessionTime}`).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
 

@@ -27,8 +27,10 @@ import autoTable from 'jspdf-autotable';
 interface AttendanceRecord {
   id: number;
   date: string;
+  sessionTime: string | null;
   className: string;
-  status: string; // 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED' | 'SICK'
+  subjectName: string | null;
+  status: string;
 }
 
 type AStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED' | 'SICK';
@@ -142,11 +144,13 @@ const downloadAttendancePDF = (records: AttendanceRecord[], stats: any, studentN
 
     autoTable(doc, {
       startY: 87,
-      head: [['#', 'Date', 'Class', 'Status']],
+      head: [['#', 'Date', 'Time', 'Class', 'Subject', 'Status']],
       body: records.map((r, i) => [
         String(i + 1),
         r.date ? new Date(r.date).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A',
+        r.sessionTime ? new Date(`2000-01-01T${r.sessionTime}`).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '—',
         r.className || 'N/A',
+        r.subjectName || '—',
         resolveStatus(r.status),
       ]),
       theme: 'grid',
@@ -155,12 +159,14 @@ const downloadAttendancePDF = (records: AttendanceRecord[], stats: any, studentN
       alternateRowStyles: { fillColor: [248, 250, 252] as any },
       columnStyles: {
         0: { cellWidth: 8,  halign: 'center' },
-        1: { cellWidth: 38 },
-        2: { cellWidth: 60 },
-        3: { cellWidth: 28, halign: 'center', fontStyle: 'bold' },
+        1: { cellWidth: 33 },
+        2: { cellWidth: 18 },
+        3: { cellWidth: 40 },
+        4: { cellWidth: 40 },
+        5: { cellWidth: 28, halign: 'center', fontStyle: 'bold' },
       },
       didParseCell: (data: any) => {
-        if (data.section === 'body' && data.column.index === 3) {
+        if (data.section === 'body' && data.column.index === 5) {
           const v = data.cell.raw as string;
           if (v === 'PRESENT') data.cell.styles.textColor = [5, 150, 105];
           else if (v === 'ABSENT') data.cell.styles.textColor = [220, 38, 38];
@@ -402,7 +408,8 @@ export default function StudentAttendancePage() {
           <Table>
             <TableHeader className="sticky top-0 z-10 bg-white shadow-[0_1px_0_0_#f1f5f9]">
               <TableRow className="hover:bg-transparent border-none">
-                <TableHead className="pl-8 py-4 font-black text-[9px] uppercase tracking-widest text-slate-400">Date</TableHead>
+                <TableHead className="pl-8 py-4 font-black text-[9px] uppercase tracking-widest text-slate-400">Date / Time</TableHead>
+                <TableHead className="font-black text-[9px] uppercase tracking-widest text-slate-400">Subject</TableHead>
                 <TableHead className="font-black text-[9px] uppercase tracking-widest text-slate-400">Class</TableHead>
                 <TableHead className="text-right pr-8 font-black text-[9px] uppercase tracking-widest text-slate-400">Status</TableHead>
               </TableRow>
@@ -426,16 +433,22 @@ export default function StudentAttendancePage() {
                               : 'N/A'}
                           </p>
                           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                            {record.date ? new Date(record.date).toLocaleDateString('en-US', { weekday: 'long' }) : ''}
+                            {record.sessionTime
+                              ? new Date(`2000-01-01T${record.sessionTime}`).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+                              : record.date ? new Date(record.date).toLocaleDateString('en-US', { weekday: 'long' }) : ''}
                           </p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <p className="font-black text-slate-900 text-sm">
-                        {record.className || 'N/A'}
-                      </p>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Academic Session</p>
+                      {record.subjectName ? (
+                        <p className="font-black text-primary text-sm">{record.subjectName}</p>
+                      ) : (
+                        <p className="text-slate-300 italic text-sm font-bold">—</p>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <p className="font-black text-slate-900 text-sm">{record.className || 'N/A'}</p>
                     </TableCell>
                     <TableCell className="text-right pr-8">
                       <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full border font-black text-[10px] uppercase tracking-wide ${cfg.bg} ${cfg.text} ${cfg.border}`}>
@@ -447,7 +460,7 @@ export default function StudentAttendancePage() {
                 );
               }) : (
                 <TableRow>
-                  <TableCell colSpan={3} className="h-48 text-center">
+                  <TableCell colSpan={4} className="h-48 text-center">
                     <div className="flex flex-col items-center justify-center gap-3">
                       <Calendar size={40} className="text-slate-200" />
                       <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">

@@ -83,10 +83,10 @@ export default () => ({
   async getAttendanceByStudent(studentId: number) {
     const rawRecords = await strapi.entityService.findMany('api::attendance-record.attendance-record' as any, {
       filters: { student: { id: studentId } },
-      populate: ['session', 'session.classe'],
+      populate: ['session', 'session.classe', 'session.subject'],
     }) as any[];
 
-    // Strapi v5 often rejects deep relation string sorting under SQLite. Sorting in memory instead:
+    // Sort in memory (avoids SQLite deep-relation sort issues)
     const records = rawRecords.sort((a, b) => {
       const dateA = a.session?.date ? new Date(a.session.date).getTime() : 0;
       const dateB = b.session?.date ? new Date(b.session.date).getTime() : 0;
@@ -94,10 +94,12 @@ export default () => ({
     });
 
     return records.map((r) => ({
-      id: r.id,
-      date: r.session?.date,
-      className: r.session?.classe?.name,
-      status: r.status,
+      id:          r.id,
+      date:        r.session?.date,
+      sessionTime: r.session?.sessionTime || null,
+      className:   r.session?.classe?.name || null,
+      subjectName: r.session?.subject?.name || null,
+      status:      r.status,
     }));
   },
 

@@ -11,6 +11,7 @@ export default {
     { method: 'POST', path: '/teacher/attendance',                           handler: 'school-teacher.submitAttendance' },
     { method: 'PUT',  path: '/teacher/attendance/:attendanceId',             handler: 'school-teacher.updateAttendance' },
     { method: 'GET',  path: '/teacher/classes/:classId/attendance-history',  handler: 'school-teacher.getAttendanceHistory' },
+    { method: 'GET',  path: '/teacher/classes/:classId/subjects',            handler: 'school-teacher.getSubjectsByClass' },
 
     { method: 'POST',   path: '/teacher/exams',                              handler: 'school-teacher.createExam' },
     { method: 'GET',    path: '/teacher/exams',                              handler: 'school-teacher.getMyExams' },

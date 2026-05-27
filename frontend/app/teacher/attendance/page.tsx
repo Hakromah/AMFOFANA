@@ -17,11 +17,11 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import {
   Calendar, Users, ClipboardCheck, Loader2, Save, History,
-  PlusCircle, Search, CheckCheck, X, Clock, UserCheck, ShieldCheck,
+  PlusCircle, Search, CheckCheck, X, Clock, UserCheck,
+  ShieldCheck, BookOpen,
 } from 'lucide-react';
 
 // ── Types ────────────────────────────────────────────────────────────────────
-// Only statuses the DB schema supports: PRESENT | ABSENT | LATE | EXCUSED | SICK
 type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED' | 'SICK';
 
 interface Student {
@@ -31,15 +31,22 @@ interface Student {
   userId: string;
 }
 
+interface Subject {
+  id: number;
+  name: string;
+}
+
 interface AttendanceRecord {
   studentId: number;
   status: AttendanceStatus;
 }
 
-// History session shape returned by the fixed backend
 interface HistorySession {
   id: number;
   date: string;
+  sessionTime: string | null;
+  subjectName: string | null;
+  subjectId: number | null;
   totalCount: number;
   presentCount: number;
   lateCount: number;
@@ -56,7 +63,6 @@ const STATUS_CONFIG: Record<AttendanceStatus, { label: string; bg: string; text:
   SICK:    { label: 'Sick',     bg: 'bg-purple-50 border-purple-200',   text: 'text-purple-700',  dot: 'bg-purple-500' },
 };
 
-// Order for single-click cycling
 const STATUS_CYCLE: AttendanceStatus[] = ['PRESENT', 'ABSENT', 'LATE', 'EXCUSED', 'SICK'];
 
 function StatusButton({ status, onChange }: { status: AttendanceStatus; onChange: (s: AttendanceStatus) => void }) {
@@ -65,7 +71,7 @@ function StatusButton({ status, onChange }: { status: AttendanceStatus; onChange
   return (
     <button
       onClick={next}
-      className={`flex items-center gap-2 px-4 py-1.5 rounded-full border font-black text-[10px] uppercase tracking-widest transition-all duration-200 hover:shadow-sm ${cfg.bg} ${cfg.text}`}
+      className={`flex items-center gap-2 px-4 py-1.5 rounded-full border font-black text-[10px] uppercase tracking-widest transition-all duration-200 hover:shadow-sm active:scale-95 ${cfg.bg} ${cfg.text}`}
     >
       <span className={`w-2 h-2 rounded-full ${cfg.dot}`} />
       {cfg.label}
@@ -75,7 +81,7 @@ function StatusButton({ status, onChange }: { status: AttendanceStatus; onChange
 
 function StatPill({ label, value, color }: { label: string; value: number; color: string }) {
   return (
-    <div className="flex flex-col items-center gap-0.5 min-w-[65px]">
+    <div className="flex flex-col items-center gap-0.5 min-w-[60px]">
       <span className={`text-2xl font-black ${color}`}>{value}</span>
       <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">{label}</span>
     </div>
@@ -86,7 +92,10 @@ function StatPill({ label, value, color }: { label: string; value: number; color
 export default function TeacherAttendancePage() {
   const [classes, setClasses]                   = useState<any[]>([]);
   const [students, setStudents]                 = useState<Student[]>([]);
+  const [subjects, setSubjects]                 = useState<Subject[]>([]);
   const [selectedClass, setSelectedClass]       = useState<string>('');
+  const [selectedSubject, setSelectedSubject]   = useState<string>('');
+  const [sessionTime, setSessionTime]           = useState<string>('');
   const [attendance, setAttendance]             = useState<AttendanceRecord[]>([]);
   const [view, setView]                         = useState<'mark' | 'history'>('mark');
   const [history, setHistory]                   = useState<HistorySession[]>([]);
@@ -97,14 +106,12 @@ export default function TeacherAttendancePage() {
   const [submitting, setSubmitting]             = useState(false);
   const [loadingStudents, setLoadingStudents]   = useState(false);
 
-  // ── Load classes ────────────────────────────────────────────────────────────
   useEffect(() => {
     api.get('/teacher/classes')
       .then(r => setClasses(r.data))
       .catch(() => toast.error('Failed to load classes'));
   }, []);
 
-  // ── Filtered students by search ─────────────────────────────────────────────
   const filteredStudents = useMemo(
     () => students.filter(s => {
       const q = search.toLowerCase();
@@ -114,27 +121,31 @@ export default function TeacherAttendancePage() {
     [students, search]
   );
 
-  // ── Live analytics ──────────────────────────────────────────────────────────
   const presentCount  = attendance.filter(a => a.status === 'PRESENT').length;
   const absentCount   = attendance.filter(a => a.status === 'ABSENT').length;
   const lateCount     = attendance.filter(a => a.status === 'LATE').length;
   const excusedCount  = attendance.filter(a => a.status === 'EXCUSED' || a.status === 'SICK').length;
   const attendanceRate = students.length > 0
-    ? Math.round(((presentCount + lateCount) / students.length) * 100)
-    : 0;
+    ? Math.round(((presentCount + lateCount) / students.length) * 100) : 0;
 
-  // ── Fetch helpers ───────────────────────────────────────────────────────────
-  const fetchStudents = async (classId: string, keepAttendance = false) => {
+  const fetchStudents = async (classId: string) => {
     setLoadingStudents(true);
     try {
       const r = await api.get(`/teacher/classes/${classId}/students`);
       setStudents(r.data);
-      if (!keepAttendance) {
-        // Default everyone to PRESENT for a fresh session
-        setAttendance(r.data.map((s: Student) => ({ studentId: s.id, status: 'PRESENT' as AttendanceStatus })));
-      }
+      setAttendance(r.data.map((s: Student) => ({ studentId: s.id, status: 'PRESENT' as AttendanceStatus })));
     } catch { toast.error('Failed to fetch students'); }
     finally { setLoadingStudents(false); }
+  };
+
+  const fetchSubjects = async (classId: string) => {
+    try {
+      const r = await api.get(`/teacher/classes/${classId}/subjects`);
+      setSubjects(Array.isArray(r.data) ? r.data : []);
+    } catch {
+      // fallback silently — subject selection is optional
+      setSubjects([]);
+    }
   };
 
   const fetchHistory = async (classId: string) => {
@@ -144,38 +155,41 @@ export default function TeacherAttendancePage() {
     } catch { toast.error('Failed to load attendance history'); }
   };
 
-  // ── Class selection ─────────────────────────────────────────────────────────
   const handleClassChange = (classId: string) => {
     setSelectedClass(classId);
+    setSelectedSubject('');
+    setSessionTime('');
     setIsEditing(false);
     setCurrentSessionId(null);
     setSearch('');
     if (view === 'mark') {
       fetchStudents(classId);
+      fetchSubjects(classId);
     } else {
       fetchHistory(classId);
     }
   };
 
-  // ── Status helpers ──────────────────────────────────────────────────────────
   const setStatus = (studentId: number, status: AttendanceStatus) =>
     setAttendance(prev => prev.map(a => a.studentId === studentId ? { ...a, status } : a));
 
   const markAll = (status: AttendanceStatus) =>
     setAttendance(prev => prev.map(a => ({ ...a, status })));
 
-  // ── Submit / Update ─────────────────────────────────────────────────────────
   const handleSubmit = async () => {
     if (!selectedClass) return toast.error('Please select a class first.');
     if (students.length === 0) return toast.error('No students loaded for this class.');
+
     setSubmitting(true);
     const tid = toast.loading(isEditing ? 'Updating session...' : 'Saving attendance...');
 
-    const payload = {
+    const payload: any = {
       classId: parseInt(selectedClass),
       date: sessionDate,
       records: attendance.map(a => ({ studentId: a.studentId, status: a.status })),
     };
+    if (sessionTime)    payload.sessionTime = sessionTime;
+    if (selectedSubject) payload.subjectId  = parseInt(selectedSubject);
 
     try {
       if (isEditing && currentSessionId) {
@@ -188,44 +202,40 @@ export default function TeacherAttendancePage() {
       } else {
         await api.post('/teacher/attendance', payload);
         toast.success('Attendance saved ✓', { id: tid });
-        // Reset to clean new-session state
         setAttendance(students.map(s => ({ studentId: s.id, status: 'PRESENT' as AttendanceStatus })));
         setSessionDate(new Date().toISOString().split('T')[0]);
+        setSessionTime('');
+        setSelectedSubject('');
       }
     } catch (error: any) {
-      const msg = error?.response?.data?.error?.message || 'Sync failed — check connection';
-      toast.error(msg, { id: tid });
-      console.error('Attendance submit error:', error);
+      const msg = error?.response?.data?.error?.message
+        || error?.response?.data?.error
+        || 'Sync failed — check connection';
+      toast.error(String(msg), { id: tid });
+      console.error('Attendance submit error:', error?.response?.data || error);
     } finally {
       setSubmitting(false);
     }
   };
 
-  // ── Edit session ────────────────────────────────────────────────────────────
   const handleEditSession = async (session: HistorySession) => {
     const tid = toast.loading('Loading session for editing...');
     try {
-      // session.id is now guaranteed by the fixed backend
       setIsEditing(true);
       setCurrentSessionId(session.id);
       setSessionDate(session.date?.split('T')[0] || new Date().toISOString().split('T')[0]);
+      setSessionTime(session.sessionTime || '');
+      setSelectedSubject(session.subjectId ? String(session.subjectId) : '');
 
-      // Re-fetch current students for this class
       const r = await api.get(`/teacher/classes/${selectedClass}/students`);
-      const fetchedStudents: Student[] = r.data;
-      setStudents(fetchedStudents);
+      const fetched: Student[] = r.data;
+      setStudents(fetched);
 
-      // Restore statuses from the session record — unknown students default to ABSENT
       const statusMap = new Map<number, AttendanceStatus>();
       for (const rec of session.records) {
         if (rec.studentId) statusMap.set(rec.studentId, rec.status as AttendanceStatus);
       }
-      setAttendance(
-        fetchedStudents.map(s => ({
-          studentId: s.id,
-          status: statusMap.get(s.id) ?? 'ABSENT',
-        }))
-      );
+      setAttendance(fetched.map(s => ({ studentId: s.id, status: statusMap.get(s.id) ?? 'ABSENT' })));
 
       setView('mark');
       toast.success('Session loaded — make your changes', { id: tid });
@@ -233,6 +243,14 @@ export default function TeacherAttendancePage() {
       toast.error('Failed to load session details', { id: tid });
       console.error(err);
     }
+  };
+
+  const cancelEdit = () => {
+    setIsEditing(false);
+    setCurrentSessionId(null);
+    setSessionTime('');
+    setSelectedSubject('');
+    setView('history');
   };
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -257,7 +275,7 @@ export default function TeacherAttendancePage() {
 
         {/* Class selector */}
         <Select value={selectedClass} onValueChange={handleClassChange}>
-          <SelectTrigger className="w-full md:w-[260px] h-12 rounded-2xl bg-white shadow-sm font-black text-[10px] uppercase tracking-widest border-slate-100 hover:border-primary transition-colors duration-300">
+          <SelectTrigger className="w-full md:w-[240px] h-12 rounded-2xl bg-white shadow-sm font-black text-[10px] uppercase tracking-widest border-slate-100 hover:border-primary transition-colors duration-300">
             <SelectValue placeholder="Select Class" />
           </SelectTrigger>
           <SelectContent className="rounded-2xl border-none shadow-2xl">
@@ -268,14 +286,15 @@ export default function TeacherAttendancePage() {
         </Select>
       </div>
 
-      {/* ── View toggle ── */}
+      {/* ── Tab buttons ── */}
       {selectedClass && (
         <div className="flex gap-3 flex-wrap">
           <Button
             onClick={() => {
-              if (view !== 'mark') {
+              if (view !== 'mark' && !isEditing) {
                 setView('mark');
-                if (!isEditing) fetchStudents(selectedClass);
+                fetchStudents(selectedClass);
+                fetchSubjects(selectedClass);
               }
             }}
             className={`rounded-2xl font-black text-[10px] uppercase tracking-widest px-6 h-10 gap-2 transition-all ${
@@ -284,13 +303,10 @@ export default function TeacherAttendancePage() {
                 : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-400'
             }`}
           >
-            <PlusCircle size={13} /> {isEditing ? 'Editing Session' : 'New Session'}
+            <PlusCircle size={13} /> {isEditing ? '✎ Editing Session' : 'New Session'}
           </Button>
           <Button
-            onClick={() => {
-              setView('history');
-              fetchHistory(selectedClass);
-            }}
+            onClick={() => { setView('history'); fetchHistory(selectedClass); }}
             className={`rounded-2xl font-black text-[10px] uppercase tracking-widest px-6 h-10 gap-2 transition-all ${
               view === 'history'
                 ? 'bg-primary text-white shadow-md'
@@ -304,7 +320,6 @@ export default function TeacherAttendancePage() {
 
       {/* ═══════════════════════════════════════════════════════════════════════ */}
       {!selectedClass ? (
-        /* EMPTY STATE */
         <div className="h-[500px] flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-white hover:border-primary/40 transition-colors duration-500">
           <div className="p-8 bg-slate-50 rounded-3xl mb-6">
             <Users size={64} className="text-slate-200" />
@@ -316,9 +331,8 @@ export default function TeacherAttendancePage() {
         </div>
 
       ) : view === 'mark' ? (
-        /* ═══ MARK SESSION VIEW ════════════════════════════════════════════ */
         <div className="space-y-5">
-          {/* Live analytics bar */}
+          {/* ── Live analytics bar ── */}
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm px-6 py-4">
             <div className="flex flex-wrap items-center justify-between gap-6">
               <div className="flex flex-wrap gap-6">
@@ -340,20 +354,70 @@ export default function TeacherAttendancePage() {
             </div>
           </div>
 
-          {/* Session controls: date + search + bulk actions */}
-          <div className="flex flex-col md:flex-row gap-3 items-start md:items-center flex-wrap">
-            {/* Date picker */}
-            <div className="flex items-center gap-2 bg-white rounded-xl border border-slate-100 px-4 h-11 shadow-sm">
-              <Calendar size={14} className="text-primary" />
-              <input
-                type="date"
-                value={sessionDate}
-                onChange={e => setSessionDate(e.target.value)}
-                className="text-sm font-bold text-slate-700 bg-transparent outline-none"
-              />
-            </div>
+          {/* ── Session metadata row: Date | Subject | Time ── */}
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm px-6 py-5 space-y-4">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Session Details</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-            {/* Search */}
+              {/* Date */}
+              <div className="space-y-1.5">
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+                  <Calendar size={10} /> Date
+                </label>
+                <div className="flex items-center gap-2 bg-slate-50 rounded-xl border border-slate-100 px-4 h-11">
+                  <input
+                    type="date"
+                    value={sessionDate}
+                    onChange={e => setSessionDate(e.target.value)}
+                    className="w-full text-sm font-bold text-slate-700 bg-transparent outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Subject */}
+              <div className="space-y-1.5">
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+                  <BookOpen size={10} /> Subject
+                </label>
+                <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                  <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-slate-100 font-bold text-sm hover:border-primary transition-colors">
+                    <SelectValue placeholder="Select subject (optional)" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-2xl border-none shadow-2xl">
+                    <SelectItem value="none" className="font-bold text-slate-400 italic">No subject</SelectItem>
+                    {subjects.map(s => (
+                      <SelectItem key={s.id} value={String(s.id)} className="font-bold">{s.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Session Time */}
+              <div className="space-y-1.5">
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+                  <Clock size={10} /> Session Time
+                </label>
+                <div className="flex items-center gap-2 bg-slate-50 rounded-xl border border-slate-100 px-4 h-11 hover:border-primary transition-colors">
+                  <Clock size={14} className="text-slate-400 flex-shrink-0" />
+                  <input
+                    type="time"
+                    value={sessionTime}
+                    onChange={e => setSessionTime(e.target.value)}
+                    className="w-full text-sm font-bold text-slate-700 bg-transparent outline-none"
+                    placeholder="e.g. 08:30"
+                  />
+                </div>
+                {sessionTime && (
+                  <p className="text-[9px] font-bold text-primary pl-1">
+                    {new Date(`2000-01-01T${sessionTime}`).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* ── Search + bulk actions ── */}
+          <div className="flex flex-col md:flex-row gap-3 items-start md:items-center flex-wrap">
             <div className="relative flex-1 max-w-xs">
               <Search size={14} className="absolute left-3 top-3.5 text-slate-400" />
               <Input
@@ -363,8 +427,6 @@ export default function TeacherAttendancePage() {
                 onChange={e => setSearch(e.target.value)}
               />
             </div>
-
-            {/* Bulk mark buttons */}
             <div className="flex gap-2 flex-wrap ml-auto">
               <Button size="sm" variant="outline"
                 className="rounded-xl gap-1.5 font-bold text-[11px] border-slate-200 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700"
@@ -384,13 +446,13 @@ export default function TeacherAttendancePage() {
             </div>
           </div>
 
-          {/* Student registry table */}
+          {/* ── Student registry table ── */}
           <Card className="border border-slate-100 rounded-3xl overflow-hidden shadow-sm">
             <CardHeader className="border-b border-slate-50 px-8 py-4 flex flex-row items-center justify-between bg-white">
               <div>
                 <p className="text-xs font-black uppercase tracking-widest text-slate-900">Class Registry</p>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">
-                  {loadingStudents ? 'Loading students...' : `${students.length} students enrolled`}
+                  {loadingStudents ? 'Loading...' : `${students.length} students enrolled`}
                 </p>
               </div>
               <Badge className={`font-black px-4 py-1 rounded-full uppercase text-[9px] border-none ${isEditing ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-primary'}`}>
@@ -406,7 +468,7 @@ export default function TeacherAttendancePage() {
                 <Table>
                   <TableHeader className="sticky top-0 z-10 bg-slate-50/95 backdrop-blur-sm">
                     <TableRow className="hover:bg-transparent border-none">
-                      <TableHead className="pl-8 py-4 font-black text-[9px] uppercase tracking-widest text-slate-400 w-[130px]">Student ID</TableHead>
+                      <TableHead className="pl-8 py-4 font-black text-[9px] uppercase tracking-widest text-slate-400 w-[140px]">Student ID</TableHead>
                       <TableHead className="font-black text-[9px] uppercase tracking-widest text-slate-400">Full Name</TableHead>
                       <TableHead className="text-right pr-8 font-black text-[9px] uppercase tracking-widest text-slate-400">
                         Status <span className="normal-case font-normal text-slate-300">(click to change)</span>
@@ -455,21 +517,29 @@ export default function TeacherAttendancePage() {
             </CardContent>
           </Card>
 
-          {/* Footer action bar */}
+          {/* ── Footer action bar ── */}
           <div className="flex items-center justify-between bg-white rounded-2xl border border-slate-100 shadow-sm px-8 py-4">
-            <div className="flex items-center gap-2 text-slate-500">
-              <UserCheck size={16} />
-              <span className="text-sm font-bold">{presentCount} of {students.length} present</span>
+            <div className="flex items-center gap-3 text-slate-500 flex-wrap">
+              <div className="flex items-center gap-1.5">
+                <UserCheck size={15} />
+                <span className="text-sm font-bold">{presentCount} of {students.length} present</span>
+              </div>
+              {selectedSubject && selectedSubject !== 'none' && (
+                <Badge className="bg-blue-50 text-primary border-none font-bold text-[10px] px-3">
+                  {subjects.find(s => String(s.id) === selectedSubject)?.name}
+                </Badge>
+              )}
+              {sessionTime && (
+                <Badge className="bg-slate-50 text-slate-600 border-none font-bold text-[10px] px-3">
+                  {new Date(`2000-01-01T${sessionTime}`).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                </Badge>
+              )}
             </div>
             <div className="flex gap-3">
               {isEditing && (
                 <Button variant="ghost"
                   className="rounded-xl font-bold text-slate-400 text-xs hover:text-rose-500"
-                  onClick={() => {
-                    setIsEditing(false);
-                    setCurrentSessionId(null);
-                    setView('history');
-                  }}>
+                  onClick={cancelEdit}>
                   Cancel
                 </Button>
               )}
@@ -486,17 +556,18 @@ export default function TeacherAttendancePage() {
         </div>
 
       ) : (
-        /* ═══ HISTORY VIEW ═════════════════════════════════════════════════ */
+        /* ═══ HISTORY VIEW ════════════════════════════════════════════════ */
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="font-black text-slate-900 uppercase tracking-widest text-[11px]">
               {history.length} Session{history.length !== 1 ? 's' : ''} Recorded
             </h2>
           </div>
+
           {history.length === 0 ? (
             <div className="h-64 flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-white">
               <ShieldCheck size={36} className="text-slate-200 mb-3" />
-              <p className="text-slate-400 font-black text-xs uppercase tracking-widest">No sessions recorded yet for this class.</p>
+              <p className="text-slate-400 font-black text-xs uppercase tracking-widest">No sessions recorded yet.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -505,9 +576,13 @@ export default function TeacherAttendancePage() {
                   ? Math.round(((session.presentCount + session.lateCount) / session.totalCount) * 100)
                   : 0;
                 const isGood = rate >= 75;
+                const timeDisplay = session.sessionTime
+                  ? new Date(`2000-01-01T${session.sessionTime}`).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+                  : null;
+
                 return (
-                  <Card key={session.id} className="border border-slate-100 hover:border-primary/40 duration-500 transition-all shadow-sm rounded-3xl bg-white p-6 group hover:shadow-md">
-                    <div className="flex justify-between items-start mb-5">
+                  <Card key={session.id} className="border border-slate-100 hover:border-primary/40 duration-300 transition-all shadow-sm rounded-3xl bg-white p-6 group hover:shadow-md">
+                    <div className="flex justify-between items-start mb-4">
                       <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center group-hover:bg-blue-50 transition-colors">
                         <Calendar size={20} className="text-slate-400 group-hover:text-primary transition-colors" />
                       </div>
@@ -519,11 +594,25 @@ export default function TeacherAttendancePage() {
                       </div>
                     </div>
 
-                    <h4 className="text-lg font-black text-slate-900 tracking-tight mb-2">
+                    <h4 className="text-base font-black text-slate-900 tracking-tight">
                       {new Date(session.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                     </h4>
 
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 mb-4">
+                    {/* Subject + Time badges */}
+                    <div className="flex flex-wrap gap-2 mt-2 mb-3">
+                      {session.subjectName && (
+                        <span className="text-[9px] font-black px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 flex items-center gap-1">
+                          <BookOpen size={9} /> {session.subjectName}
+                        </span>
+                      )}
+                      {timeDisplay && (
+                        <span className="text-[9px] font-black px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 flex items-center gap-1">
+                          <Clock size={9} /> {timeDisplay}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap gap-3 mb-3">
                       <span className="text-[10px] font-black text-slate-500 flex items-center gap-1">
                         <span className="w-2 h-2 rounded-full bg-emerald-400" />{session.presentCount} Present
                       </span>
@@ -542,7 +631,7 @@ export default function TeacherAttendancePage() {
                       )}
                     </div>
 
-                    <Progress value={rate} className="h-1.5 mb-5 bg-slate-100" />
+                    <Progress value={rate} className="h-1.5 mb-4 bg-slate-100" />
 
                     <Button
                       className="w-full h-10 rounded-xl bg-slate-900 text-white font-black text-[10px] uppercase tracking-widest hover:bg-primary transition-all"

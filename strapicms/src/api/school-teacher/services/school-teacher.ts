@@ -43,16 +43,24 @@ export default () => ({
 
   // ─── Attendance ───────────────────────────────────────────────────
 
-  async submitAttendance(dto: { classId: number; date: string; records: Array<{ studentId: number; status: string }> }) {
-    // Create the attendance session
+  async submitAttendance(dto: {
+    classId: number;
+    date: string;
+    sessionTime?: string;
+    subjectId?: number;
+    records: Array<{ studentId: number; status: string }>;
+  }) {
+    const sessionData: any = {
+      date: dto.date,
+      classe: dto.classId,
+    };
+    if (dto.sessionTime) sessionData.sessionTime = dto.sessionTime;
+    if (dto.subjectId)   sessionData.subject = dto.subjectId;
+
     const session = await strapi.entityService.create('api::attendance-session.attendance-session', {
-      data: {
-        date: dto.date,
-        classe: dto.classId,
-      },
+      data: sessionData,
     }) as any;
 
-    // Create individual records
     await Promise.all(dto.records.map((r) =>
       strapi.entityService.create('api::attendance-record.attendance-record' as any, {
         data: {
@@ -64,8 +72,24 @@ export default () => ({
     ));
   },
 
-  async updateAttendance(sessionId: number, dto: { records: Array<{ studentId: number; status: string }> }) {
-    // Delete old records and recreate
+  async updateAttendance(sessionId: number, dto: {
+    date?: string;
+    sessionTime?: string;
+    subjectId?: number;
+    records: Array<{ studentId: number; status: string }>;
+  }) {
+    // Update session metadata if provided
+    const sessionUpdate: any = {};
+    if (dto.date)        sessionUpdate.date = dto.date;
+    if (dto.sessionTime) sessionUpdate.sessionTime = dto.sessionTime;
+    if (dto.subjectId)   sessionUpdate.subject = dto.subjectId;
+    if (Object.keys(sessionUpdate).length > 0) {
+      await strapi.entityService.update('api::attendance-session.attendance-session', sessionId, {
+        data: sessionUpdate,
+      });
+    }
+
+    // Delete old records and recreate with new statuses
     const oldRecords = await strapi.entityService.findMany('api::attendance-record.attendance-record', {
       filters: { session: { id: sessionId } },
     }) as any[];
@@ -88,18 +112,21 @@ export default () => ({
   async getAttendanceHistory(classId: number) {
     const sessions = await strapi.entityService.findMany('api::attendance-session.attendance-session', {
       filters: { classe: { id: classId } },
-      populate: ['records', 'records.student'],
+      populate: ['records', 'records.student', 'subject'],
       sort: [{ date: 'desc' }],
     }) as any[];
 
     return sessions.map((s) => {
-      const records = s.records || [];
+      const records     = s.records || [];
       const presentCount = records.filter((r: any) => r.status === 'PRESENT').length;
       const lateCount    = records.filter((r: any) => r.status === 'LATE').length;
       const totalCount   = records.length;
       return {
-        id:           s.id,          // ← must be `id` so frontend session.id works
+        id:           s.id,
         date:         s.date,
+        sessionTime:  s.sessionTime || null,
+        subjectName:  s.subject?.name || null,
+        subjectId:    s.subject?.id || null,
         totalCount,
         presentCount,
         lateCount,
@@ -112,6 +139,30 @@ export default () => ({
         })),
       };
     });
+  },
+
+  async getSubjectsByClass(teacherId: number, classId: number) {
+    // Fetch all exams for this class taught by this teacher to derive subjects
+    const exams = await strapi.entityService.findMany('api::school-exam.school-exam', {
+      filters: { teacher: { id: teacherId }, classe: { id: classId } },
+      populate: ['subject'],
+    }) as any[];
+
+    // Deduplicate subjects
+    const subjectMap = new Map<number, any>();
+    for (const exam of exams) {
+      if (exam.subject?.id && !subjectMap.has(exam.subject.id)) {
+        subjectMap.set(exam.subject.id, { id: exam.subject.id, name: exam.subject.name });
+      }
+    }
+
+    // If no exam subjects, fall back to all subjects
+    if (subjectMap.size === 0) {
+      const allSubjects = await strapi.entityService.findMany('api::subject.subject') as any[];
+      return allSubjects.map((s: any) => ({ id: s.id, name: s.name }));
+    }
+
+    return Array.from(subjectMap.values());
   },
 
   // ─── Exams ────────────────────────────────────────────────────────
