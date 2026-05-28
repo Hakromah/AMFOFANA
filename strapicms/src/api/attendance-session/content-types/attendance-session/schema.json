@@ -18,6 +18,9 @@
     "sessionTime": {
       "type": "string"
     },
+    "notes": {
+      "type": "string"
+    },
     "classe": {
       "type": "relation",
       "relation": "manyToOne",

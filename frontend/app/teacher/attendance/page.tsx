@@ -18,7 +18,7 @@ import { Progress } from '@/components/ui/progress';
 import {
   Calendar, Users, ClipboardCheck, Loader2, Save, History,
   PlusCircle, Search, CheckCheck, X, Clock, UserCheck,
-  ShieldCheck, BookOpen,
+  ShieldCheck, BookOpen, FileEdit,
 } from 'lucide-react';
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -34,6 +34,7 @@ interface Student {
 interface Subject {
   id: number;
   name: string;
+  code?: string | null;
 }
 
 interface AttendanceRecord {
@@ -47,6 +48,7 @@ interface HistorySession {
   sessionTime: string | null;
   subjectName: string | null;
   subjectId: number | null;
+  notes: string | null;
   totalCount: number;
   presentCount: number;
   lateCount: number;
@@ -94,7 +96,8 @@ export default function TeacherAttendancePage() {
   const [students, setStudents]                 = useState<Student[]>([]);
   const [subjects, setSubjects]                 = useState<Subject[]>([]);
   const [selectedClass, setSelectedClass]       = useState<string>('');
-  const [selectedSubject, setSelectedSubject]   = useState<string>('');
+  const [selectedSubject, setSelectedSubject]   = useState<string>('');  // 'none' | 'other' | '<id>'
+  const [otherNote, setOtherNote]               = useState<string>('');  // custom text when "other"
   const [sessionTime, setSessionTime]           = useState<string>('');
   const [attendance, setAttendance]             = useState<AttendanceRecord[]>([]);
   const [view, setView]                         = useState<'mark' | 'history'>('mark');
@@ -105,13 +108,18 @@ export default function TeacherAttendancePage() {
   const [currentSessionId, setCurrentSessionId] = useState<number | null>(null);
   const [submitting, setSubmitting]             = useState(false);
   const [loadingStudents, setLoadingStudents]   = useState(false);
+  const [loadingSubjects, setLoadingSubjects]   = useState(false);
 
+  const isOtherSelected = selectedSubject === 'other';
+
+  // ── Load classes on mount ───────────────────────────────────────────────────
   useEffect(() => {
     api.get('/teacher/classes')
       .then(r => setClasses(r.data))
       .catch(() => toast.error('Failed to load classes'));
   }, []);
 
+  // ── Filtered students ───────────────────────────────────────────────────────
   const filteredStudents = useMemo(
     () => students.filter(s => {
       const q = search.toLowerCase();
@@ -121,6 +129,7 @@ export default function TeacherAttendancePage() {
     [students, search]
   );
 
+  // ── Live analytics ──────────────────────────────────────────────────────────
   const presentCount  = attendance.filter(a => a.status === 'PRESENT').length;
   const absentCount   = attendance.filter(a => a.status === 'ABSENT').length;
   const lateCount     = attendance.filter(a => a.status === 'LATE').length;
@@ -128,6 +137,7 @@ export default function TeacherAttendancePage() {
   const attendanceRate = students.length > 0
     ? Math.round(((presentCount + lateCount) / students.length) * 100) : 0;
 
+  // ── Fetch helpers ───────────────────────────────────────────────────────────
   const fetchStudents = async (classId: string) => {
     setLoadingStudents(true);
     try {
@@ -139,12 +149,22 @@ export default function TeacherAttendancePage() {
   };
 
   const fetchSubjects = async (classId: string) => {
+    setLoadingSubjects(true);
     try {
+      // Use the class-specific endpoint (now returns all subjects sorted alphabetically)
       const r = await api.get(`/teacher/classes/${classId}/subjects`);
       setSubjects(Array.isArray(r.data) ? r.data : []);
     } catch {
-      // fallback silently — subject selection is optional
-      setSubjects([]);
+      // Fallback: try the general teacher subjects endpoint
+      try {
+        const r2 = await api.get('/teacher/subjects');
+        setSubjects(Array.isArray(r2.data) ? r2.data : []);
+      } catch {
+        setSubjects([]);
+        toast.error('Could not load subjects — you can still use "Other"');
+      }
+    } finally {
+      setLoadingSubjects(false);
     }
   };
 
@@ -155,9 +175,11 @@ export default function TeacherAttendancePage() {
     } catch { toast.error('Failed to load attendance history'); }
   };
 
+  // ── Class selection ─────────────────────────────────────────────────────────
   const handleClassChange = (classId: string) => {
     setSelectedClass(classId);
     setSelectedSubject('');
+    setOtherNote('');
     setSessionTime('');
     setIsEditing(false);
     setCurrentSessionId(null);
@@ -170,15 +192,18 @@ export default function TeacherAttendancePage() {
     }
   };
 
+  // ── Status helpers ──────────────────────────────────────────────────────────
   const setStatus = (studentId: number, status: AttendanceStatus) =>
     setAttendance(prev => prev.map(a => a.studentId === studentId ? { ...a, status } : a));
 
   const markAll = (status: AttendanceStatus) =>
     setAttendance(prev => prev.map(a => ({ ...a, status })));
 
+  // ── Submit / Update ─────────────────────────────────────────────────────────
   const handleSubmit = async () => {
     if (!selectedClass) return toast.error('Please select a class first.');
     if (students.length === 0) return toast.error('No students loaded for this class.');
+    if (isOtherSelected && !otherNote.trim()) return toast.error('Please enter the event name for "Other".');
 
     setSubmitting(true);
     const tid = toast.loading(isEditing ? 'Updating session...' : 'Saving attendance...');
@@ -188,8 +213,14 @@ export default function TeacherAttendancePage() {
       date: sessionDate,
       records: attendance.map(a => ({ studentId: a.studentId, status: a.status })),
     };
-    if (sessionTime)    payload.sessionTime = sessionTime;
-    if (selectedSubject) payload.subjectId  = parseInt(selectedSubject);
+    if (sessionTime) payload.sessionTime = sessionTime;
+    // Subject: regular relation OR "other" custom note
+    if (selectedSubject && selectedSubject !== 'none' && !isOtherSelected) {
+      payload.subjectId = parseInt(selectedSubject);
+    }
+    if (isOtherSelected && otherNote.trim()) {
+      payload.notes = otherNote.trim();
+    }
 
     try {
       if (isEditing && currentSessionId) {
@@ -202,10 +233,12 @@ export default function TeacherAttendancePage() {
       } else {
         await api.post('/teacher/attendance', payload);
         toast.success('Attendance saved ✓', { id: tid });
+        // Reset session form
         setAttendance(students.map(s => ({ studentId: s.id, status: 'PRESENT' as AttendanceStatus })));
         setSessionDate(new Date().toISOString().split('T')[0]);
         setSessionTime('');
         setSelectedSubject('');
+        setOtherNote('');
       }
     } catch (error: any) {
       const msg = error?.response?.data?.error?.message
@@ -218,6 +251,7 @@ export default function TeacherAttendancePage() {
     }
   };
 
+  // ── Edit session ────────────────────────────────────────────────────────────
   const handleEditSession = async (session: HistorySession) => {
     const tid = toast.loading('Loading session for editing...');
     try {
@@ -225,7 +259,18 @@ export default function TeacherAttendancePage() {
       setCurrentSessionId(session.id);
       setSessionDate(session.date?.split('T')[0] || new Date().toISOString().split('T')[0]);
       setSessionTime(session.sessionTime || '');
-      setSelectedSubject(session.subjectId ? String(session.subjectId) : '');
+
+      // Restore subject / other
+      if (session.notes) {
+        setSelectedSubject('other');
+        setOtherNote(session.notes);
+      } else if (session.subjectId) {
+        setSelectedSubject(String(session.subjectId));
+        setOtherNote('');
+      } else {
+        setSelectedSubject('none');
+        setOtherNote('');
+      }
 
       const r = await api.get(`/teacher/classes/${selectedClass}/students`);
       const fetched: Student[] = r.data;
@@ -250,8 +295,14 @@ export default function TeacherAttendancePage() {
     setCurrentSessionId(null);
     setSessionTime('');
     setSelectedSubject('');
+    setOtherNote('');
     setView('history');
   };
+
+  // ── Subject display label ───────────────────────────────────────────────────
+  const subjectLabel = isOtherSelected
+    ? (otherNote || 'Other Event')
+    : (subjects.find(s => String(s.id) === selectedSubject)?.name || null);
 
   // ══════════════════════════════════════════════════════════════════════════
   return (
@@ -272,8 +323,6 @@ export default function TeacherAttendancePage() {
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
           </p>
         </div>
-
-        {/* Class selector */}
         <Select value={selectedClass} onValueChange={handleClassChange}>
           <SelectTrigger className="w-full md:w-[240px] h-12 rounded-2xl bg-white shadow-sm font-black text-[10px] uppercase tracking-widest border-slate-100 hover:border-primary transition-colors duration-300">
             <SelectValue placeholder="Select Class" />
@@ -286,7 +335,7 @@ export default function TeacherAttendancePage() {
         </Select>
       </div>
 
-      {/* ── Tab buttons ── */}
+      {/* ── View tabs ── */}
       {selectedClass && (
         <div className="flex gap-3 flex-wrap">
           <Button
@@ -298,9 +347,7 @@ export default function TeacherAttendancePage() {
               }
             }}
             className={`rounded-2xl font-black text-[10px] uppercase tracking-widest px-6 h-10 gap-2 transition-all ${
-              view === 'mark'
-                ? 'bg-slate-900 text-white shadow-md'
-                : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-400'
+              view === 'mark' ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-400'
             }`}
           >
             <PlusCircle size={13} /> {isEditing ? '✎ Editing Session' : 'New Session'}
@@ -308,9 +355,7 @@ export default function TeacherAttendancePage() {
           <Button
             onClick={() => { setView('history'); fetchHistory(selectedClass); }}
             className={`rounded-2xl font-black text-[10px] uppercase tracking-widest px-6 h-10 gap-2 transition-all ${
-              view === 'history'
-                ? 'bg-primary text-white shadow-md'
-                : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-400'
+              view === 'history' ? 'bg-primary text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-400'
             }`}
           >
             <History size={13} /> View History
@@ -318,7 +363,7 @@ export default function TeacherAttendancePage() {
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════════ */}
+      {/* ═══ EMPTY STATE ═══════════════════════════════════════════════════════ */}
       {!selectedClass ? (
         <div className="h-[500px] flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-white hover:border-primary/40 transition-colors duration-500">
           <div className="p-8 bg-slate-50 rounded-3xl mb-6">
@@ -331,8 +376,10 @@ export default function TeacherAttendancePage() {
         </div>
 
       ) : view === 'mark' ? (
+        /* ═══ MARK SESSION VIEW ════════════════════════════════════════════ */
         <div className="space-y-5">
-          {/* ── Live analytics bar ── */}
+
+          {/* Live analytics bar */}
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm px-6 py-4">
             <div className="flex flex-wrap items-center justify-between gap-6">
               <div className="flex flex-wrap gap-6">
@@ -354,9 +401,10 @@ export default function TeacherAttendancePage() {
             </div>
           </div>
 
-          {/* ── Session metadata row: Date | Subject | Time ── */}
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm px-6 py-5 space-y-4">
+          {/* Session Details Panel */}
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm px-6 py-5 space-y-5">
             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Session Details</p>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
               {/* Date */}
@@ -378,16 +426,28 @@ export default function TeacherAttendancePage() {
               <div className="space-y-1.5">
                 <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
                   <BookOpen size={10} /> Subject
+                  {loadingSubjects && <Loader2 size={10} className="animate-spin text-primary" />}
                 </label>
-                <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                <Select value={selectedSubject} onValueChange={v => { setSelectedSubject(v); setOtherNote(''); }}>
                   <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-slate-100 font-bold text-sm hover:border-primary transition-colors">
-                    <SelectValue placeholder="Select subject (optional)" />
+                    <SelectValue placeholder={loadingSubjects ? 'Loading subjects...' : 'Select subject'} />
                   </SelectTrigger>
-                  <SelectContent className="rounded-2xl border-none shadow-2xl">
-                    <SelectItem value="none" className="font-bold text-slate-400 italic">No subject</SelectItem>
+                  <SelectContent className="rounded-2xl border-none shadow-2xl max-h-64 overflow-y-auto">
+                    <SelectItem value="none" className="font-bold text-slate-400 italic">
+                      No subject
+                    </SelectItem>
                     {subjects.map(s => (
-                      <SelectItem key={s.id} value={String(s.id)} className="font-bold">{s.name}</SelectItem>
+                      <SelectItem key={s.id} value={String(s.id)} className="font-bold">
+                        {s.name}{s.code ? ` (${s.code})` : ''}
+                      </SelectItem>
                     ))}
+                    {/* Divider + Other option */}
+                    <div className="border-t border-slate-100 my-1" />
+                    <SelectItem value="other" className="font-black text-primary flex items-center gap-2">
+                      <span className="flex items-center gap-2">
+                        <FileEdit size={12} className="text-primary" /> Other / Custom Event
+                      </span>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -404,7 +464,6 @@ export default function TeacherAttendancePage() {
                     value={sessionTime}
                     onChange={e => setSessionTime(e.target.value)}
                     className="w-full text-sm font-bold text-slate-700 bg-transparent outline-none"
-                    placeholder="e.g. 08:30"
                   />
                 </div>
                 {sessionTime && (
@@ -414,9 +473,45 @@ export default function TeacherAttendancePage() {
                 )}
               </div>
             </div>
+
+            {/* "Other" custom event input — shows when "other" is selected */}
+            {isOtherSelected && (
+              <div className="space-y-1.5 animate-in slide-in-from-top-2 duration-200">
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+                  <FileEdit size={10} /> Describe the Event / Missed Activity
+                </label>
+                <div className="flex items-start gap-3">
+                  <div className="flex-1 relative">
+                    <Input
+                      placeholder="e.g. Sports Day, School Ceremony, Field Trip, National Holiday..."
+                      value={otherNote}
+                      onChange={e => setOtherNote(e.target.value)}
+                      className="h-11 rounded-xl bg-amber-50 border-amber-200 font-bold text-sm placeholder:text-amber-300 focus:border-primary"
+                      autoFocus
+                    />
+                    {otherNote && (
+                      <button
+                        onClick={() => setOtherNote('')}
+                        className="absolute right-3 top-3 text-slate-300 hover:text-slate-500"
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+                  </div>
+                  {otherNote && (
+                    <Badge className="bg-amber-50 text-amber-700 border border-amber-200 font-black text-[10px] px-3 py-1 h-11 flex items-center rounded-xl">
+                      Custom Event
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-[9px] font-bold text-amber-500 pl-1">
+                  This will be recorded as the session reason — visible to students and admin.
+                </p>
+              </div>
+            )}
           </div>
 
-          {/* ── Search + bulk actions ── */}
+          {/* Search + bulk actions */}
           <div className="flex flex-col md:flex-row gap-3 items-start md:items-center flex-wrap">
             <div className="relative flex-1 max-w-xs">
               <Search size={14} className="absolute left-3 top-3.5 text-slate-400" />
@@ -446,7 +541,7 @@ export default function TeacherAttendancePage() {
             </div>
           </div>
 
-          {/* ── Student registry table ── */}
+          {/* Student Registry Table */}
           <Card className="border border-slate-100 rounded-3xl overflow-hidden shadow-sm">
             <CardHeader className="border-b border-slate-50 px-8 py-4 flex flex-row items-center justify-between bg-white">
               <div>
@@ -517,21 +612,21 @@ export default function TeacherAttendancePage() {
             </CardContent>
           </Card>
 
-          {/* ── Footer action bar ── */}
+          {/* Footer action bar */}
           <div className="flex items-center justify-between bg-white rounded-2xl border border-slate-100 shadow-sm px-8 py-4">
             <div className="flex items-center gap-3 text-slate-500 flex-wrap">
               <div className="flex items-center gap-1.5">
                 <UserCheck size={15} />
                 <span className="text-sm font-bold">{presentCount} of {students.length} present</span>
               </div>
-              {selectedSubject && selectedSubject !== 'none' && (
-                <Badge className="bg-blue-50 text-primary border-none font-bold text-[10px] px-3">
-                  {subjects.find(s => String(s.id) === selectedSubject)?.name}
+              {subjectLabel && (
+                <Badge className={`border-none font-bold text-[10px] px-3 ${isOtherSelected ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-primary'}`}>
+                  {isOtherSelected ? '📝 ' : '📚 '}{subjectLabel}
                 </Badge>
               )}
               {sessionTime && (
                 <Badge className="bg-slate-50 text-slate-600 border-none font-bold text-[10px] px-3">
-                  {new Date(`2000-01-01T${sessionTime}`).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                  🕐 {new Date(`2000-01-01T${sessionTime}`).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                 </Badge>
               )}
             </div>
@@ -573,12 +668,12 @@ export default function TeacherAttendancePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {history.map((session, idx) => {
                 const rate = session.totalCount > 0
-                  ? Math.round(((session.presentCount + session.lateCount) / session.totalCount) * 100)
-                  : 0;
-                const isGood = rate >= 75;
+                  ? Math.round(((session.presentCount + session.lateCount) / session.totalCount) * 100) : 0;
                 const timeDisplay = session.sessionTime
                   ? new Date(`2000-01-01T${session.sessionTime}`).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
                   : null;
+                const eventLabel = session.notes || session.subjectName;
+                const isOtherEvent = !!session.notes;
 
                 return (
                   <Card key={session.id} className="border border-slate-100 hover:border-primary/40 duration-300 transition-all shadow-sm rounded-3xl bg-white p-6 group hover:shadow-md">
@@ -587,7 +682,7 @@ export default function TeacherAttendancePage() {
                         <Calendar size={20} className="text-slate-400 group-hover:text-primary transition-colors" />
                       </div>
                       <div className="text-right">
-                        <span className={`text-xs font-black px-3 py-1 rounded-full ${isGood ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-600'}`}>
+                        <span className={`text-xs font-black px-3 py-1 rounded-full ${rate >= 75 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-600'}`}>
                           {rate}%
                         </span>
                         <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mt-1">Session #{idx + 1}</p>
@@ -598,11 +693,12 @@ export default function TeacherAttendancePage() {
                       {new Date(session.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                     </h4>
 
-                    {/* Subject + Time badges */}
+                    {/* Subject / Event + Time */}
                     <div className="flex flex-wrap gap-2 mt-2 mb-3">
-                      {session.subjectName && (
-                        <span className="text-[9px] font-black px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 flex items-center gap-1">
-                          <BookOpen size={9} /> {session.subjectName}
+                      {eventLabel && (
+                        <span className={`text-[9px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 ${isOtherEvent ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-blue-700'}`}>
+                          {isOtherEvent ? <FileEdit size={9} /> : <BookOpen size={9} />}
+                          {eventLabel}
                         </span>
                       )}
                       {timeDisplay && (

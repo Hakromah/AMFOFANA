@@ -15,7 +15,7 @@ import {
 import { toast } from 'sonner';
 import {
   Calendar, CheckCircle2, XCircle, Clock, Users, Loader2,
-  ClipboardList, BarChart2, Trash2, ShieldAlert, TrendingUp, RefreshCw, BookOpen,
+  ClipboardList, BarChart2, Trash2, ShieldAlert, TrendingUp, RefreshCw, BookOpen, FileEdit,
 } from 'lucide-react';
 import api from '@/lib/api';
 
@@ -25,6 +25,7 @@ interface AttendanceSession {
   date: string;
   sessionTime: string | null;
   subjectName: string | null;
+  notes: string | null;
   className: string;
   classId: number;
   totalCount: number;
@@ -307,11 +308,15 @@ export default function AdminAttendancePage() {
                           </p>
                           <div className="flex flex-wrap gap-2 mt-1">
                             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{session.className}</span>
-                            {session.subjectName && (
+                            {session.notes ? (
+                              <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 flex items-center gap-1">
+                                <FileEdit size={8} /> {session.notes}
+                              </span>
+                            ) : session.subjectName ? (
                               <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 flex items-center gap-1">
                                 <BookOpen size={8} /> {session.subjectName}
                               </span>
-                            )}
+                            ) : null}
                             {session.sessionTime && (
                               <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 flex items-center gap-1">
                                 <Clock size={8} />

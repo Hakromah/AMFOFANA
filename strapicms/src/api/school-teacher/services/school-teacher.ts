@@ -48,6 +48,7 @@ export default () => ({
     date: string;
     sessionTime?: string;
     subjectId?: number;
+    notes?: string;
     records: Array<{ studentId: number; status: string }>;
   }) {
     const sessionData: any = {
@@ -56,6 +57,7 @@ export default () => ({
     };
     if (dto.sessionTime) sessionData.sessionTime = dto.sessionTime;
     if (dto.subjectId)   sessionData.subject = dto.subjectId;
+    if (dto.notes)       sessionData.notes = dto.notes;
 
     const session = await strapi.entityService.create('api::attendance-session.attendance-session', {
       data: sessionData,
@@ -76,6 +78,7 @@ export default () => ({
     date?: string;
     sessionTime?: string;
     subjectId?: number;
+    notes?: string;
     records: Array<{ studentId: number; status: string }>;
   }) {
     // Update session metadata if provided
@@ -83,6 +86,8 @@ export default () => ({
     if (dto.date)        sessionUpdate.date = dto.date;
     if (dto.sessionTime) sessionUpdate.sessionTime = dto.sessionTime;
     if (dto.subjectId)   sessionUpdate.subject = dto.subjectId;
+    // Always update notes (could be clearing it)
+    sessionUpdate.notes = dto.notes || null;
     if (Object.keys(sessionUpdate).length > 0) {
       await strapi.entityService.update('api::attendance-session.attendance-session', sessionId, {
         data: sessionUpdate,
@@ -127,6 +132,7 @@ export default () => ({
         sessionTime:  s.sessionTime || null,
         subjectName:  s.subject?.name || null,
         subjectId:    s.subject?.id || null,
+        notes:        s.notes || null,
         totalCount,
         presentCount,
         lateCount,
@@ -141,28 +147,13 @@ export default () => ({
     });
   },
 
-  async getSubjectsByClass(teacherId: number, classId: number) {
-    // Try to get subjects linked to this class via exams the teacher teaches
-    const exams = await (strapi.entityService.findMany as any)('api::school-exam.school-exam', {
-      filters: { teacher: { id: teacherId }, classe: { id: classId } },
-      populate: ['subject'],
+  async getSubjectsByClass(_teacherId: number, _classId: number) {
+    // Return all subjects — simple and always works regardless of exam assignments.
+    // The frontend labels these as the teacher's subjects since subjects are school-wide.
+    const allSubjects = await (strapi.entityService.findMany as any)('api::subject.subject', {
+      sort: [{ name: 'asc' }],
     }) as any[];
-
-    // Deduplicate subjects from exams
-    const subjectMap = new Map<number, any>();
-    for (const exam of exams) {
-      if (exam.subject?.id && !subjectMap.has(exam.subject.id)) {
-        subjectMap.set(exam.subject.id, { id: exam.subject.id, name: exam.subject.name });
-      }
-    }
-
-    // Fallback: return all subjects if none found via exams
-    if (subjectMap.size === 0) {
-      const allSubjects = await (strapi.entityService.findMany as any)('api::subject.subject', {}) as any[];
-      return allSubjects.map((s: any) => ({ id: s.id, name: s.name }));
-    }
-
-    return Array.from(subjectMap.values());
+    return allSubjects.map((s: any) => ({ id: s.id, name: s.name, code: s.code || null }));
   },
 
   // ─── Exams ────────────────────────────────────────────────────────

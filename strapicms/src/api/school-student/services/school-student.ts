@@ -99,6 +99,7 @@ export default () => ({
       sessionTime: r.session?.sessionTime || null,
       className:   r.session?.classe?.name || null,
       subjectName: r.session?.subject?.name || null,
+      notes:       r.session?.notes || null,
       status:      r.status,
     }));
   },

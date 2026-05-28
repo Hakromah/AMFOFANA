@@ -30,6 +30,7 @@ interface AttendanceRecord {
   sessionTime: string | null;
   className: string;
   subjectName: string | null;
+  notes: string | null;
   status: string;
 }
 
@@ -441,7 +442,12 @@ export default function StudentAttendancePage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      {record.subjectName ? (
+                      {record.notes ? (
+                        <div>
+                          <p className="font-black text-amber-600 text-sm">{record.notes}</p>
+                          <p className="text-[9px] font-bold text-amber-400 uppercase tracking-widest">Custom Event</p>
+                        </div>
+                      ) : record.subjectName ? (
                         <p className="font-black text-primary text-sm">{record.subjectName}</p>
                       ) : (
                         <p className="text-slate-300 italic text-sm font-bold">—</p>

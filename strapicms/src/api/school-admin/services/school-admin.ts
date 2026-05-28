@@ -600,6 +600,7 @@ export default () => ({
         date:         s.date,
         sessionTime:  s.sessionTime || null,
         subjectName:  s.subject?.name || null,
+        notes:        s.notes || null,
         className:    s.classe?.name || 'N/A',
         classId:      s.classe?.id,
         totalCount:   records.length,
