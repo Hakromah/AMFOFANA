@@ -665,7 +665,11 @@ export default function TeacherAttendancePage() {
               <p className="text-slate-400 font-black text-xs uppercase tracking-widest">No sessions recorded yet.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div
+            className="overflow-y-auto pr-1"
+            style={{ maxHeight: '488px' }}
+          >
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
               {history.map((session, idx) => {
                 const rate = session.totalCount > 0
                   ? Math.round(((session.presentCount + session.lateCount) / session.totalCount) * 100) : 0;
@@ -676,72 +680,76 @@ export default function TeacherAttendancePage() {
                 const isOtherEvent = !!session.notes;
 
                 return (
-                  <Card key={session.id} className="border border-slate-100 hover:border-primary/40 duration-300 transition-all shadow-sm rounded-3xl bg-white p-6 group hover:shadow-md">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center group-hover:bg-blue-50 transition-colors">
-                        <Calendar size={20} className="text-slate-400 group-hover:text-primary transition-colors" />
+                  <Card key={session.id} className="border border-slate-100 hover:border-primary/40 duration-200 transition-all shadow-sm rounded-2xl bg-white p-3 group hover:shadow-md">
+                    {/* Top row: icon + rate */}
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="w-8 h-8 bg-slate-50 rounded-xl flex items-center justify-center group-hover:bg-blue-50 transition-colors flex-shrink-0">
+                        <Calendar size={15} className="text-slate-400 group-hover:text-primary transition-colors" />
                       </div>
                       <div className="text-right">
-                        <span className={`text-xs font-black px-3 py-1 rounded-full ${rate >= 75 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-600'}`}>
+                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${rate >= 75 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-600'}`}>
                           {rate}%
                         </span>
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mt-1">Session #{idx + 1}</p>
+                        <p className="text-[8px] font-black text-slate-300 uppercase tracking-wider mt-0.5">#{idx + 1}</p>
                       </div>
                     </div>
 
-                    <h4 className="text-base font-black text-slate-900 tracking-tight">
-                      {new Date(session.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    {/* Date */}
+                    <h4 className="text-[11px] font-black text-slate-900 tracking-tight leading-tight mb-1">
+                      {new Date(session.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </h4>
 
-                    {/* Subject / Event + Time */}
-                    <div className="flex flex-wrap gap-2 mt-2 mb-3">
+                    {/* Subject / Event + Time badges */}
+                    <div className="flex flex-wrap gap-1 mb-2">
                       {eventLabel && (
-                        <span className={`text-[9px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 ${isOtherEvent ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-blue-700'}`}>
-                          {isOtherEvent ? <FileEdit size={9} /> : <BookOpen size={9} />}
-                          {eventLabel}
+                        <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full flex items-center gap-0.5 max-w-full ${isOtherEvent ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-blue-700'}`}>
+                          {isOtherEvent ? <FileEdit size={7} /> : <BookOpen size={7} />}
+                          <span className="truncate max-w-[80px]">{eventLabel}</span>
                         </span>
                       )}
                       {timeDisplay && (
-                        <span className="text-[9px] font-black px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 flex items-center gap-1">
-                          <Clock size={9} /> {timeDisplay}
+                        <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 flex items-center gap-0.5">
+                          <Clock size={7} /> {timeDisplay}
                         </span>
                       )}
                     </div>
 
-                    <div className="flex flex-wrap gap-3 mb-3">
-                      <span className="text-[10px] font-black text-slate-500 flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400" />{session.presentCount} Present
+                    {/* Stats row — abbreviated */}
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      <span className="text-[8px] font-black text-slate-500 flex items-center gap-0.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />{session.presentCount}P
                       </span>
-                      <span className="text-[10px] font-black text-slate-500 flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-rose-400" />{session.absentCount} Absent
+                      <span className="text-[8px] font-black text-slate-500 flex items-center gap-0.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />{session.absentCount}A
                       </span>
                       {session.lateCount > 0 && (
-                        <span className="text-[10px] font-black text-slate-500 flex items-center gap-1">
-                          <span className="w-2 h-2 rounded-full bg-amber-400" />{session.lateCount} Late
+                        <span className="text-[8px] font-black text-slate-500 flex items-center gap-0.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />{session.lateCount}L
                         </span>
                       )}
                       {session.excusedCount > 0 && (
-                        <span className="text-[10px] font-black text-slate-500 flex items-center gap-1">
-                          <span className="w-2 h-2 rounded-full bg-blue-400" />{session.excusedCount} Excused
+                        <span className="text-[8px] font-black text-slate-500 flex items-center gap-0.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />{session.excusedCount}E
                         </span>
                       )}
                     </div>
 
-                    <Progress value={rate} className="h-1.5 mb-4 bg-slate-100" />
+                    <Progress value={rate} className="h-1 mb-2 bg-slate-100" />
 
                     <Button
-                      className="w-full h-10 rounded-xl bg-slate-900 text-white font-black text-[10px] uppercase tracking-widest hover:bg-primary transition-all"
+                      className="w-full h-7 rounded-lg bg-slate-900 text-white font-black text-[8px] uppercase tracking-widest hover:bg-primary transition-all"
                       onClick={() => handleEditSession(session)}
                     >
-                      Modify Session
+                      Modify
                     </Button>
                   </Card>
                 );
               })}
             </div>
-          )}
-        </div>
-      )}
-    </div>
+          </div>
+        )}
+      </div>
+    )}
+  </div>
   );
 }

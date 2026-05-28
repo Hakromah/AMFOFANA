@@ -15,7 +15,7 @@ import {
 import { toast } from 'sonner';
 import {
   Calendar, CheckCircle2, XCircle, Clock, Users, Loader2,
-  ClipboardList, BarChart2, Trash2, ShieldAlert, TrendingUp, RefreshCw, BookOpen, FileEdit,
+  ClipboardList, BarChart2, Trash2, ShieldAlert, TrendingUp, RefreshCw, BookOpen, FileEdit, X,
 } from 'lucide-react';
 import api from '@/lib/api';
 
@@ -74,6 +74,7 @@ export default function AdminAttendancePage() {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [classes, setClasses]     = useState<any[]>([]);
   const [classFilter, setClassFilter] = useState<string>('all');
+  const [dateFilter, setDateFilter]   = useState<string>('');   // ISO date string YYYY-MM-DD
   const [loading, setLoading]     = useState(true);
   const [tab, setTab]             = useState<'sessions' | 'analytics'>('analytics');
   const [expandedId, setExpandedId] = useState<number | null>(null);
@@ -100,11 +101,14 @@ export default function AdminAttendancePage() {
 
   useEffect(() => { fetchData(); }, []);
 
-  // ── Filter sessions by class ─────────────────────────────────────────────────
+  // ── Filter sessions by class + date ─────────────────────────────────────────
   const filtered = useMemo(() => {
-    if (classFilter === 'all') return sessions;
-    return sessions.filter(s => String(s.classId) === classFilter);
-  }, [sessions, classFilter]);
+    return sessions.filter(s => {
+      const matchClass = classFilter === 'all' || String(s.classId) === classFilter;
+      const matchDate  = !dateFilter || s.date === dateFilter;
+      return matchClass && matchDate;
+    });
+  }, [sessions, classFilter, dateFilter]);
 
   // ── Delete session ───────────────────────────────────────────────────────────
   const handleDelete = async (id: number) => {
@@ -263,10 +267,11 @@ export default function AdminAttendancePage() {
       {/* ═══ SESSIONS TAB ════════════════════════════════════════════════════ */}
       {tab === 'sessions' && (
         <div className="space-y-5">
-          {/* Class filter */}
-          <div className="flex items-center gap-3">
+          {/* Filters row: Class + Date + result count */}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Class filter */}
             <Select value={classFilter} onValueChange={setClassFilter}>
-              <SelectTrigger className="w-[220px] h-11 rounded-2xl bg-white border-slate-100 font-bold shadow-sm hover:border-primary transition-colors">
+              <SelectTrigger className="w-[200px] h-11 rounded-2xl bg-white border-slate-100 font-bold shadow-sm hover:border-primary transition-colors">
                 <SelectValue placeholder="Filter by Class" />
               </SelectTrigger>
               <SelectContent className="rounded-2xl border-none shadow-2xl">
@@ -276,19 +281,58 @@ export default function AdminAttendancePage() {
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+
+            {/* Date filter */}
+            <div className="flex items-center gap-2 bg-white border border-slate-100 rounded-2xl px-4 h-11 shadow-sm hover:border-primary transition-colors">
+              <Calendar size={14} className="text-slate-400 flex-shrink-0" />
+              <input
+                type="date"
+                value={dateFilter}
+                onChange={e => setDateFilter(e.target.value)}
+                className="text-sm font-bold text-slate-700 bg-transparent outline-none w-[140px]"
+                placeholder="Filter by date"
+              />
+              {dateFilter && (
+                <button
+                  onClick={() => setDateFilter('')}
+                  className="text-slate-300 hover:text-rose-400 transition-colors ml-1"
+                  title="Clear date filter"
+                >
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+
+            {/* Clear all */}
+            {(classFilter !== 'all' || dateFilter) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-11 rounded-2xl font-bold text-[11px] text-slate-400 hover:text-rose-500 hover:bg-rose-50 px-4"
+                onClick={() => { setClassFilter('all'); setDateFilter(''); }}
+              >
+                <X size={12} className="mr-1" /> Clear Filters
+              </Button>
+            )}
+
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-auto">
               {filtered.length} session{filtered.length !== 1 ? 's' : ''} found
             </p>
           </div>
 
-          {/* Sessions list */}
+          {/* Sessions scrollable list — shows ~5 rows, rest scrollable */}
           {filtered.length === 0 ? (
             <div className="h-64 flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-white">
               <Users size={40} className="text-slate-200 mb-3" />
-              <p className="text-slate-400 font-black text-xs uppercase tracking-widest">No sessions found.</p>
+              <p className="text-slate-400 font-black text-xs uppercase tracking-widest">
+                {dateFilter || classFilter !== 'all' ? 'No sessions match your filters.' : 'No sessions found.'}
+              </p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div
+              className="space-y-2 overflow-y-auto pr-1"
+              style={{ maxHeight: '420px' }}
+            >
               {filtered.map(session => {
                 const isExpanded = expandedId === session.id;
                 return (
