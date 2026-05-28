@@ -196,18 +196,15 @@ export default function TeacherResultsPage() {
   const fetchResultsList = useCallback(async () => {
     const params = new URLSearchParams();
     if (selectedClassId !== 'all') params.append('classId', selectedClassId);
-
-    // This sends the string from the input to the 'studentId' param in Java
-    if (filterStudentId.trim()) params.append('studentId', filterStudentId.trim());
-
+    // Do NOT send studentId to backend — we filter client-side to support userId string search
     try {
       const response = await api.get(`/teacher/results/filter?${params.toString()}`);
       setResults(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       setResults([]);
-      console.log(error)
+      console.log(error);
     }
-}, [selectedClassId, filterStudentId]);
+  }, [selectedClassId]);
 
   const fetchGradebookData = useCallback(async () => {
     if (selectedClassId === 'all') return;
@@ -274,10 +271,19 @@ export default function TeacherResultsPage() {
     const timer = setTimeout(() => {
       fetchResultsList();
       if (selectedClassId !== 'all') fetchGradebookData();
-    }, 300); // 300ms Debounce for search
+    }, 300);
     return () => clearTimeout(timer);
-  }, [selectedClassId, filterStudentId, fetchResultsList, fetchGradebookData]);
+  }, [selectedClassId, fetchResultsList, fetchGradebookData]); // filterStudentId removed — filtered client-side
 
+  // ── Client-side filter: match userId string OR student name ─────────────────
+  const displayedResults = filterStudentId.trim()
+    ? results.filter(r => {
+        const q = filterStudentId.trim().toLowerCase();
+        const idMatch   = (r?.student?.userId || '').toLowerCase().includes(q);
+        const nameMatch = (r?.student?.username || r?.student?.name || '').toLowerCase().includes(q);
+        return idMatch || nameMatch;
+      })
+    : results;
   const handleSubmitResults = async () => {
     const draftResultIds = results.filter(r => r.status === 'DRAFT' && r?.exam && !r.exam.locked).map(r => r.id);
     if (draftResultIds.length === 0) {
@@ -421,56 +427,70 @@ export default function TeacherResultsPage() {
             />
           </div>
           <div className="rounded-md border shadow-sm">
-            <Table>
-              <TableHeader className="bg-slate-50">
-                <TableRow>
-                  <TableHead>Class</TableHead>
-                  <TableHead>Student</TableHead>
-                  <TableHead>Assessment (Term)</TableHead>
-                  <TableHead className="text-center">Weight</TableHead>
-                  <TableHead className="text-center">Score</TableHead>
-                  <TableHead className="text-center">Grade</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {results.length > 0 ? results.map((r) => (
-                  <TableRow key={r.id}>
-                    <TableCell className="font-medium">{r.exam?.classe?.name ?? '—'}</TableCell>
-                    <TableCell>
-                      <div className="font-semibold">{r.student?.username || r.student?.name || 'Unknown Student'}</div>
-                      <div className="text-[10px] text-muted-foreground uppercase">{r?.student?.userId || 'N/A'}</div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-medium">{r?.exam?.name || 'N/A'}</div>
-                      <div className="text-[10px] font-bold uppercase text-blue-700">
-                        <span className="bg-blue-100">{r?.exam?.term || 'N/A'}</span>
-                        </div>
-                    </TableCell>
-                    <TableCell className="text-center font-bold text-slate-500">{r.exam?.weight ?? 0}%</TableCell>
-                    <TableCell className="text-center font-bold text-base">{r.marks}</TableCell>
-                    <TableCell className="text-center">
-                      <span className="bg-slate-100 px-2 py-1 rounded text-xs font-black">{calculateLetterGrade(r.marks)}</span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col gap-1">
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black text-center w-fit ${r.status === 'DRAFT' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
-                          {r.status}
-                        </span>
-                        {r?.exam?.locked && <span className="flex items-center gap-1 text-[9px] font-bold text-slate-400"><Lock className="w-2.5 h-2.5" /> LOCKED</span>}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {r?.exam?.locked ? <BadgeCheck className="w-5 h-5 ml-auto text-slate-300" /> :
-                        <Button variant="ghost" size="sm" onClick={() => { setEditingResult(r); setIsDialogOpen(true) }}>Edit</Button>}
-                    </TableCell>
+            {/* Sticky header + 10-row scrollable body */}
+            <div className="overflow-y-auto" style={{ maxHeight: '520px' }}>
+              <Table>
+                <TableHeader className="bg-slate-50 sticky top-0 z-10">
+                  <TableRow>
+                    <TableHead>Class</TableHead>
+                    <TableHead>Student</TableHead>
+                    <TableHead>Assessment (Term)</TableHead>
+                    <TableHead className="text-center">Weight</TableHead>
+                    <TableHead className="text-center">Score</TableHead>
+                    <TableHead className="text-center">Grade</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                )) : (
-                  <TableRow><TableCell colSpan={8} className="text-center py-10 text-muted-foreground italic">No results found.</TableCell></TableRow>
+                </TableHeader>
+                <TableBody>
+                  {displayedResults.length > 0 ? displayedResults.map((r) => (
+                    <TableRow key={r.id}>
+                      <TableCell className="font-medium">{r.exam?.classe?.name ?? '—'}</TableCell>
+                      <TableCell>
+                        <div className="font-semibold">{r.student?.username || r.student?.name || 'Unknown Student'}</div>
+                        <div className="text-[10px] text-muted-foreground uppercase">{r?.student?.userId || 'N/A'}</div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-medium">{r?.exam?.name || 'N/A'}</div>
+                        <div className="text-[10px] font-bold uppercase text-blue-700">
+                          <span className="bg-blue-100">{r?.exam?.term || 'N/A'}</span>
+                          </div>
+                      </TableCell>
+                      <TableCell className="text-center font-bold text-slate-500">{r.exam?.weight ?? 0}%</TableCell>
+                      <TableCell className="text-center font-bold text-base">{r.marks}</TableCell>
+                      <TableCell className="text-center">
+                        <span className="bg-slate-100 px-2 py-1 rounded text-xs font-black">{calculateLetterGrade(r.marks)}</span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-black text-center w-fit ${r.status === 'DRAFT' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
+                            {r.status}
+                          </span>
+                          {r?.exam?.locked && <span className="flex items-center gap-1 text-[9px] font-bold text-slate-400"><Lock className="w-2.5 h-2.5" /> LOCKED</span>}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {r?.exam?.locked ? <BadgeCheck className="w-5 h-5 ml-auto text-slate-300" /> :
+                          <Button variant="ghost" size="sm" onClick={() => { setEditingResult(r); setIsDialogOpen(true) }}>Edit</Button>}
+                      </TableCell>
+                    </TableRow>
+                  )) : (
+                    <TableRow><TableCell colSpan={8} className="text-center py-10 text-muted-foreground italic">
+                      {filterStudentId.trim() ? `No results match "${filterStudentId}".` : 'No results found.'}
+                    </TableCell></TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+            {/* Row count footer */}
+            {displayedResults.length > 0 && (
+              <div className="border-t px-4 py-2 bg-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest flex justify-between">
+                <span>Showing {displayedResults.length} result{displayedResults.length !== 1 ? 's' : ''}{filterStudentId.trim() ? ` matching "${filterStudentId}"` : ''}</span>
+                {filterStudentId.trim() && results.length !== displayedResults.length && (
+                  <span>{results.length - displayedResults.length} hidden by filter</span>
                 )}
-              </TableBody>
-            </Table>
+              </div>
+            )}
           </div>
         </TabsContent>
 
