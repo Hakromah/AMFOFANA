@@ -69,6 +69,9 @@ export default function UserManagement() {
    const [isImportOpen, setIsImportOpen] = useState(false);
    const [importing, setImporting] = useState(false);
    const [selectedUser, setSelectedUser] = useState<any>(null);
+   const [emailDuplicate, setEmailDuplicate] = useState<any | null>(null);  // existing user with same email
+   const [checkingEmail, setCheckingEmail] = useState(false);
+   const [isSubmitting, setIsSubmitting] = useState(false);
 
    // Inspector States
    const [selectedStudentId, setSelectedStudentId] = useState<string>('');
@@ -120,13 +123,33 @@ export default function UserManagement() {
 
    // --- HANDLERS ---
    const handleCreateSubmit = async (values: z.infer<typeof userFormSchema>) => {
+      if (emailDuplicate) {
+         toast.error(`Cannot create user: Email "${values.email}" is already registered.`);
+         return;
+      }
+      setIsSubmitting(true);
       try {
          await api.post('/admin/users', values);
          toast.success('Identity generated and stored in ledger');
          setIsCreateOpen(false);
          form.reset();
+         setEmailDuplicate(null);
          fetchUsers();
-      } catch (error) { toast.error('Generation failed'); console.log(error) }
+      } catch (error: any) {
+         const msg = error?.response?.data?.error?.message
+            || error?.response?.data?.message
+            || 'Generation failed — check the email address';
+         toast.error(msg);
+      } finally {
+         setIsSubmitting(false);
+      }
+   };
+
+   // Live email duplicate check — runs against the already-fetched users list (no extra API call)
+   const checkEmailDuplicate = (email: string) => {
+      if (!email || !email.includes('@')) { setEmailDuplicate(null); return; }
+      const match = users.find(u => u.email?.toLowerCase() === email.trim().toLowerCase());
+      setEmailDuplicate(match || null);
    };
 
    // 1. Logic for parsing and cleaning
@@ -509,7 +532,7 @@ export default function UserManagement() {
          {/* 5. DIALOGS (Integrated User Registration Forms) */}
 
          {/* Create Identity */}
-         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+         <Dialog open={isCreateOpen} onOpenChange={(open) => { setIsCreateOpen(open); if (!open) { setEmailDuplicate(null); form.reset(); } }}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl p-0 border-none shadow-2xl">
                <DialogHeader className="p-6 bg-blue-600 text-white">
                   <DialogTitle className="text-xl font-black tracking-tighter uppercase">Initialize New Identity</DialogTitle>
@@ -521,9 +544,40 @@ export default function UserManagement() {
                            <FormField control={form.control} name="name" render={({ field }) => (
                               <FormItem><FormLabel className="text-[10px] font-black uppercase text-slate-400">Legal Name</FormLabel><FormControl><Input placeholder="Full Name" className="rounded-xl bg-slate-50 border-none h-11 px-4" {...field} /></FormControl><FormMessage /></FormItem>
                            )} />
-                           <FormField control={form.control} name="email" render={({ field }) => (
-                              <FormItem><FormLabel className="text-[10px] font-black uppercase text-slate-400">Institutional Email</FormLabel><FormControl><Input placeholder="email@amf.edu" className="rounded-xl bg-slate-50 border-none h-11 px-4" {...field} /></FormControl><FormMessage /></FormItem>
-                           )} />
+                            <FormField control={form.control} name="email" render={({ field }) => (
+                               <FormItem>
+                                 <FormLabel className="text-[10px] font-black uppercase text-slate-400">Institutional Email</FormLabel>
+                                 <FormControl>
+                                   <div className="relative">
+                                     <Input
+                                       placeholder="email@amf.edu"
+                                       className={`rounded-xl bg-slate-50 border h-11 px-4 transition-colors ${
+                                         emailDuplicate ? 'border-rose-400 bg-rose-50 focus-visible:ring-rose-300' : 'border-transparent'
+                                       }`}
+                                       {...field}
+                                       onChange={(e) => {
+                                         field.onChange(e);
+                                         checkEmailDuplicate(e.target.value);
+                                       }}
+                                     />
+                                     {emailDuplicate && (
+                                       <AlertCircle size={15} className="absolute right-3 top-3.5 text-rose-500" />
+                                     )}
+                                   </div>
+                                 </FormControl>
+                                 <FormMessage />
+                                 {emailDuplicate && (
+                                   <div className="flex items-start gap-2 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2 mt-1">
+                                     <AlertCircle size={14} className="text-rose-500 shrink-0 mt-0.5" />
+                                     <p className="text-[11px] font-bold text-rose-700 leading-snug">
+                                       This email is already registered to{' '}
+                                       <span className="font-black">{emailDuplicate.name}</span>{' '}
+                                       <span className="bg-rose-100 text-rose-600 px-1.5 py-0.5 rounded font-black text-[9px] uppercase">{emailDuplicate.role}</span>
+                                     </p>
+                                   </div>
+                                 )}
+                               </FormItem>
+                            )} />
                         </div>
                         <div className="grid grid-cols-2 gap-6 border-t pt-6">
                            <FormField control={form.control} name="password" render={({ field }) => (
@@ -565,7 +619,17 @@ export default function UserManagement() {
                         <FormField control={form.control} name="address" render={({ field }) => (
                            <FormItem><FormLabel className="text-[10px] font-black uppercase text-slate-400">Address</FormLabel><FormControl><Input placeholder="Full Residential Address" className="rounded-xl bg-slate-50 border-none h-11 px-4" {...field} /></FormControl></FormItem>
                         )} />
-                        <Button type="submit" className="w-full h-12 rounded-xl bg-slate-900 hover:bg-black font-black tracking-[0.3em] text-[10px] uppercase shadow-lg transition-all active:scale-[0.98] mt-4">Authorize Storage</Button>
+                         <Button
+                            type="submit"
+                            disabled={isSubmitting || !!emailDuplicate}
+                            className="w-full h-12 rounded-xl bg-slate-900 hover:bg-black font-black tracking-[0.3em] text-[10px] uppercase shadow-lg transition-all active:scale-[0.98] mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {isSubmitting ? (
+                              <><Loader2 size={16} className="animate-spin mr-2" /> Verifying... </>
+                            ) : emailDuplicate ? (
+                              <><AlertCircle size={16} className="mr-2" /> Duplicate Email </>
+                            ) : 'Authorize Storage'}
+                          </Button>
                      </form>
                   </Form>
                </div>

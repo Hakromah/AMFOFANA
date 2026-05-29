@@ -21,7 +21,22 @@ export default () => ({
 
   async createUser(data: any) {
     const userId = data.userId || generateUserId();
-    
+
+    // ── Email uniqueness guard ──────────────────────────────────────────────
+    if (data.email) {
+      const existing = await strapi.entityService.findMany('plugin::users-permissions.user' as any, {
+        filters: { email: data.email.trim().toLowerCase() } as any,
+      }) as any[];
+      if (existing.length > 0) {
+        const err: any = new Error(
+          `Email "${data.email}" is already registered. Each user must have a unique email address.`
+        );
+        err.status = 400;
+        err.name   = 'DuplicateEmailError';
+        throw err;
+      }
+    }
+
     const defaultRoles = await strapi.entityService.findMany('plugin::users-permissions.role' as any, {
       filters: { type: 'authenticated' },
     }) as any[];
@@ -36,25 +51,19 @@ export default () => ({
     delete cleanData.role;
 
     // Provide plain-text password; Strapi's users-permissions beforeCreate hook hashes it automatically!
-
-    try {
-      return await strapi.entityService.create('plugin::users-permissions.user' as any, {
-        data: {
-          ...cleanData,
-          username,
-          schoolRole,
-          userId,
-          password: data.password, // Strapi native hooks take over here!
-          provider: 'local', // Mandatory for Strapi v5 local auth!
-          role: defaultRoles[0]?.id, // The ID for 'Authenticated' in Strapi Core
-          confirmed: true,
-        },
-      });
-    } catch (e: any) {
-      const fs = require('fs');
-      fs.writeFileSync('C:/Users/pc/AMFOFANA-UPDATES/AMFOFANA/strapicms/error.log', e.stack + '\n\n' + JSON.stringify(e.details));
-      throw e;
-    }
+    return await strapi.entityService.create('plugin::users-permissions.user' as any, {
+      data: {
+        ...cleanData,
+        email: data.email.trim().toLowerCase(),  // normalise to lowercase
+        username,
+        schoolRole,
+        userId,
+        password: data.password,
+        provider: 'local',
+        role: defaultRoles[0]?.id,
+        confirmed: true,
+      },
+    });
   },
 
   async bulkCreateUsers(users: any[]) {

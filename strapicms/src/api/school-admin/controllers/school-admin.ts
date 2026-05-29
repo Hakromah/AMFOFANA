@@ -11,7 +11,16 @@ export default {
   },
 
   async createUser(ctx: any) {
-    ctx.body = await strapi.service('api::school-admin.school-admin').createUser(ctx.request.body);
+    try {
+      ctx.body = await strapi.service('api::school-admin.school-admin').createUser(ctx.request.body);
+    } catch (err: any) {
+      if (err.name === 'DuplicateEmailError' || err.status === 400) {
+        ctx.status = 400;
+        ctx.body = { error: { message: err.message } };
+      } else {
+        throw err; // Re-throw unexpected errors
+      }
+    }
   },
 
   async bulkCreateUsers(ctx: any) {
