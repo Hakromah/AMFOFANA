@@ -46,3 +46,42 @@ Required edits:
 4- Nav items only about us have a dropdown menu on hover, the others don't have, I don't know if only about us should have a dropdown menu on hover.
 5- On Mobile/Tablet, the Footer sections should display as a grid with 2 or 3 columns. ```
 
+=======================================================================
+```
+## PULL THE DATA FROM GITHUB TO HETZNER
+cd /var/www/AMFOFANA
+git pull origin main
+
+## Navigate into the backend CMS folder
+cd /var/www/AMFOFANA/strapicms
+
+## 1. Install any newly added package dependencies
+npm install
+
+## 2. Clear out old cached production build outputs
+rm -rf dist build
+
+## 3. Compile a clean, static production admin panel bundle
+NODE_ENV=production npm run build
+
+## 4. Safely reload your backend PM2 process container without downtime
+pm2 restart amfofana-backend
+
+## Navigate into the frontend Next.js UI folder
+cd /var/www/AMFOFANA/frontend
+
+## 1. Install fresh frontend dependencies
+npm install
+
+## 2. Delete the stale Next.js compilation cache folder
+rm -rf .next
+
+## 3. Recompile the production static web pages and assets
+npm run build
+
+## 4. Reload your frontend PM2 server pool instance
+pm2 restart amfofana-frontend
+pm2 list
+```
+
+
