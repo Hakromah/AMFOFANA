@@ -537,7 +537,7 @@ export default function AdminResultsPage() {
                     <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
                     <Tooltip
                       contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.12)' }}
-                      formatter={(value: any, name: string) => [value, name === 'studentScore' ? 'Score' : 'Class Avg']}
+                      formatter={(value: any, name?: string) => [value, name === 'studentScore' ? 'Score' : 'Class Avg']}
                     />
                     <Legend formatter={(value) => value === 'studentScore' ? 'Score' : 'Class Avg'} />
                     <Line name="studentScore" type="monotone" dataKey="studentScore" stroke="#2563eb" strokeWidth={3} dot={{ r: 5, fill: '#2563eb' }} />
