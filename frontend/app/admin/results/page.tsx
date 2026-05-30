@@ -16,11 +16,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import {
   Search, GraduationCap, Loader2, Lock, CheckCircle2, AlertCircle,
-  LayoutGrid, ListFilter, Download, UserCircle, BookOpen, RefreshCcw,
+  LayoutGrid, ListFilter, Download, UserCircle, BookOpen, RefreshCcw, TrendingUp, X,
 } from 'lucide-react';
 import api from '@/lib/api';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import {
+  CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
+} from 'recharts';
 
 // ── Grade helpers ─────────────────────────────────────────────────────────────
 const calculateLetterGrade = (marks: number | string): string => {
@@ -299,6 +302,24 @@ export default function AdminResultsPage() {
     return () => clearTimeout(t);
   }, [fetchResults, fetchGradebook]);
 
+  // ── Selected student for chart popup ────────────────────────────────────────
+  const [selectedStudentForChart, setSelectedStudentForChart] = useState<any | null>(null);
+
+  const getChartData = (student: any) =>
+    exams.map((exam: any) => {
+      const allScores = reportData
+        .map((s: any) => s.marks[exam.id]?.val)
+        .filter((v: any) => v != null) as number[];
+      const avg = allScores.length > 0
+        ? allScores.reduce((a: number, b: number) => a + b, 0) / allScores.length
+        : 0;
+      return {
+        name: exam.name,
+        studentScore: student.marks[exam.id]?.val || 0,
+        classAverage: parseFloat(avg.toFixed(1)),
+      };
+    });
+
   // ── RENDER ───────────────────────────────────────────────────────────────────
   return (
     <div className="p-[clamp(1rem,2vw+1rem,2rem)] space-y-[clamp(1rem,1.5vw+0.5rem,2rem)] max-w-7xl mx-auto">
@@ -389,96 +410,145 @@ export default function AdminResultsPage() {
             </CardContent>
           </Card>
 
-          {/* Results table */}
+          {/* Results table — 5 rows scrollable */}
           <Card className="border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-slate-900 hover:bg-slate-900 border-none">
-                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider py-4 pl-6">Student</TableHead>
-                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider">Class</TableHead>
-                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider">Assessment</TableHead>
-                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-center">Weight</TableHead>
-                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-center">Score</TableHead>
-                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-center">Grade</TableHead>
-                  <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-right pr-6">Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="h-64 text-center">
-                      <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
-                    </TableCell>
+            <div className="overflow-y-auto" style={{ maxHeight: '340px' }}>
+              <Table>
+                <TableHeader className="sticky top-0 z-10">
+                  <TableRow className="bg-slate-900 hover:bg-slate-900 border-none">
+                    <TableHead className="text-white font-black text-[9px] uppercase tracking-wider py-4 pl-6">Student</TableHead>
+                    <TableHead className="text-white font-black text-[9px] uppercase tracking-wider">Class</TableHead>
+                    <TableHead className="text-white font-black text-[9px] uppercase tracking-wider">Assessment</TableHead>
+                    <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-center">Weight</TableHead>
+                    <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-center">Score</TableHead>
+                    <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-center">Grade</TableHead>
+                    <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-right pr-6">Status</TableHead>
                   </TableRow>
-                ) : filteredResults.length > 0 ? filteredResults.map(r => {
-                  const isPassing = r.marks >= 50;
-                  return (
-                    <TableRow key={r.id} className="hover:bg-slate-50/70 border-slate-100">
-                      <TableCell className="pl-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center">
-                            <UserCircle size={20} className="text-slate-400" />
-                          </div>
-                          <div>
-                            <div className="font-bold text-slate-800 text-sm">{r.student?.username || r.student?.name || 'Unknown'}</div>
-                            <div className="text-[9px] font-mono text-slate-400 uppercase tracking-wider">{r.student?.userId}</div>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-bold text-slate-600 text-sm">{r.exam?.classe?.name ?? '—'}</TableCell>
-                      <TableCell>
-                        <div className="font-bold text-slate-800 text-sm">{r.exam?.name}</div>
-                        <div className="flex gap-1.5 mt-0.5">
-                          <span className="text-[9px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-black uppercase">{r.exam?.term}</span>
-                          <span className="text-[9px] text-slate-400 font-bold uppercase">{r.exam?.semester}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center font-bold text-slate-500">{r.exam?.weight}%</TableCell>
-                      <TableCell className="text-center">
-                        <span className={`text-lg font-black ${gradeColor(r.marks)}`}>{r.marks}%</span>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <div className="w-10 h-10 mx-auto flex items-center justify-center rounded-xl bg-slate-100 font-black text-xs border border-slate-200 text-slate-700">
-                          {r.grade || calculateLetterGrade(r.marks)}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right pr-6 py-4">
-                        <div className="flex flex-col items-end gap-1">
-                          {isPassing ? (
-                            <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-100 font-black text-[9px] rounded-md px-2 py-0.5">
-                              <CheckCircle2 size={10} className="mr-1" /> PASSED
-                            </Badge>
-                          ) : (
-                            <Badge className="bg-rose-50 text-rose-600 border border-rose-100 font-black text-[9px] rounded-md px-2 py-0.5">
-                              <AlertCircle size={10} className="mr-1" /> FAILED
-                            </Badge>
-                          )}
-                          <Badge variant="outline" className={`font-black text-[9px] rounded-md px-2 py-0.5 ${r.status === 'DRAFT' ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-green-50 text-green-700 border-green-100'}`}>
-                            {r.status}
-                          </Badge>
-                          {r.exam?.locked && (
-                            <span className="flex items-center gap-1 text-[9px] text-slate-300 font-bold">
-                              <Lock size={10} /> Locked
-                            </span>
-                          )}
-                        </div>
+                </TableHeader>
+                <TableBody>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="h-64 text-center">
+                        <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
                       </TableCell>
                     </TableRow>
-                  );
-                }) : (
-                  <TableRow>
-                    <TableCell colSpan={7} className="h-48 text-center text-slate-400 italic text-sm">
-                      No results found matching your filters.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                  ) : filteredResults.length > 0 ? filteredResults.map(r => {
+                    const isPassing = r.marks >= 50;
+                    return (
+                      <TableRow key={r.id} className="hover:bg-slate-50/70 border-slate-100">
+                        <TableCell className="pl-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center">
+                              <UserCircle size={20} className="text-slate-400" />
+                            </div>
+                            <div>
+                              <div className="font-bold text-slate-800 text-sm">{r.student?.username || r.student?.name || 'Unknown'}</div>
+                              <div className="text-[9px] font-mono text-slate-400 uppercase tracking-wider">{r.student?.userId}</div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-bold text-slate-600 text-sm">{r.exam?.classe?.name ?? '—'}</TableCell>
+                        <TableCell>
+                          <div className="font-bold text-slate-800 text-sm">{r.exam?.name}</div>
+                          <div className="flex gap-1.5 mt-0.5">
+                            <span className="text-[9px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-black uppercase">{r.exam?.term}</span>
+                            <span className="text-[9px] text-slate-400 font-bold uppercase">{r.exam?.semester}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center font-bold text-slate-500">{r.exam?.weight}%</TableCell>
+                        <TableCell className="text-center">
+                          <span className={`text-lg font-black ${gradeColor(r.marks)}`}>{r.marks}</span>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <div className="w-10 h-10 mx-auto flex items-center justify-center rounded-xl bg-slate-100 font-black text-xs border border-slate-200 text-slate-700">
+                            {r.grade || calculateLetterGrade(r.marks)}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right pr-6 py-4">
+                          <div className="flex flex-col items-end gap-1">
+                            {isPassing ? (
+                              <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-100 font-black text-[9px] rounded-md px-2 py-0.5">
+                                <CheckCircle2 size={10} className="mr-1" /> PASSED
+                              </Badge>
+                            ) : (
+                              <Badge className="bg-rose-50 text-rose-600 border border-rose-100 font-black text-[9px] rounded-md px-2 py-0.5">
+                                <AlertCircle size={10} className="mr-1" /> FAILED
+                              </Badge>
+                            )}
+                            <Badge variant="outline" className={`font-black text-[9px] rounded-md px-2 py-0.5 ${
+                              r.status === 'DRAFT' ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-green-50 text-green-700 border-green-100'
+                            }`}>
+                              {r.status}
+                            </Badge>
+                            {r.exam?.locked && (
+                              <span className="flex items-center gap-1 text-[9px] text-slate-300 font-bold">
+                                <Lock size={10} /> Locked
+                              </span>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  }) : (
+                    <TableRow>
+                      <TableCell colSpan={7} className="h-48 text-center text-slate-400 italic text-sm">
+                        No results found matching your filters.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+            {filteredResults.length > 0 && (
+              <div className="border-t px-6 py-2 bg-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                {filteredResults.length} record{filteredResults.length !== 1 ? 's' : ''} found
+              </div>
+            )}
           </Card>
         </TabsContent>
 
         {/* ════ GRADEBOOK ════════════════════════════════════════════════════════ */}
-        <TabsContent value="gradebook" className="mt-4">
+        <TabsContent value="gradebook" className="mt-4 space-y-4">
+
+          {/* ── Student chart popup ── */}
+          {selectedStudentForChart && (
+            <Card className="border border-primary bg-primary/5 hover:border-blue-700 duration-300 transition-colors shadow-sm">
+              <CardHeader className="flex flex-row items-center flex-wrap justify-between pb-2 px-6 pt-5">
+                <div className="flex items-center gap-3">
+                  <TrendingUp className="w-5 h-5 text-primary" />
+                  <span className="font-black text-slate-900 text-sm uppercase tracking-wide">
+                    Analysis: {selectedStudentForChart?.name || 'N/A'}
+                  </span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedStudentForChart(null)}
+                  className="rounded-xl hover:bg-rose-50 hover:text-rose-500"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </CardHeader>
+              <CardContent className="h-[280px] px-6 pb-5">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={getChartData(selectedStudentForChart)}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="name" tick={{ fontSize: 11, fontWeight: 700 }} />
+                    <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
+                    <Tooltip
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.12)' }}
+                      formatter={(value: any, name: string) => [value, name === 'studentScore' ? 'Score' : 'Class Avg']}
+                    />
+                    <Legend formatter={(value) => value === 'studentScore' ? 'Score' : 'Class Avg'} />
+                    <Line name="studentScore" type="monotone" dataKey="studentScore" stroke="#2563eb" strokeWidth={3} dot={{ r: 5, fill: '#2563eb' }} />
+                    <Line name="classAverage" type="monotone" dataKey="classAverage" stroke="#94a3b8" strokeDasharray="5 5" strokeWidth={2} dot={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* ── Gradebook matrix ── */}
           <Card className="border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between px-8 py-5 border-b border-slate-100">
               <div className="space-y-0.5">
@@ -487,7 +557,9 @@ export default function AdminResultsPage() {
                   <h3 className="text-sm font-black uppercase tracking-wider text-slate-900">Performance Matrix</h3>
                 </div>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                  {selectedClassId === 'all' ? 'Select a class to view the gradebook' : `Showing: ${selectedClassName}`}
+                  {selectedClassId === 'all'
+                    ? 'Select a class to view the gradebook'
+                    : `Showing: ${selectedClassName} — Click a student row to view their chart`}
                 </p>
               </div>
               {selectedClassId !== 'all' && reportData.length > 0 && (
@@ -517,68 +589,91 @@ export default function AdminResultsPage() {
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-slate-900 hover:bg-slate-900 border-none">
-                        <TableHead className="text-white font-black text-[9px] uppercase tracking-wider py-4 pl-8 w-64">Student</TableHead>
-                        {exams.map(e => (
-                          <TableHead key={e.id} className="text-white font-black text-[9px] uppercase tracking-wider text-center">
-                            <div>{e?.name || '—'}</div>
-                            <div className="text-blue-400 font-bold normal-case">{e?.weight ?? 0}%</div>
+                  {/* Scrollable 5-row gradebook */}
+                  <div className="overflow-y-auto" style={{ maxHeight: '340px' }}>
+                    <Table>
+                      <TableHeader className="sticky top-0 z-10">
+                        <TableRow className="bg-slate-900 hover:bg-slate-900 border-none">
+                          <TableHead className="text-white font-black text-[9px] uppercase tracking-wider py-4 pl-8 w-64">Student</TableHead>
+                          {exams.map(e => (
+                            <TableHead key={e.id} className="text-white font-black text-[9px] uppercase tracking-wider text-center">
+                              <div>{e?.name || '—'}</div>
+                              <div className="text-blue-400 font-bold normal-case">{e?.weight ?? 0}%</div>
+                            </TableHead>
+                          ))}
+                          <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-right pr-8">
+                            Wtd. Average
                           </TableHead>
-                        ))}
-                        <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-right pr-8">
-                          Wtd. Average
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {reportData.map(student => {
-                        const scores = exams.map((e: any) => student.marks[e.id]?.val ?? null);
-                        const valid  = scores.filter((s: any) => s !== null) as number[];
-                        const avg    = valid.length > 0
-                          ? valid.reduce((a, b) => a + b, 0) / valid.length
-                          : null;
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {reportData.map(student => {
+                          const scores = exams.map((e: any) => student.marks[e.id]?.val ?? null);
+                          const valid  = scores.filter((s: any) => s !== null) as number[];
+                          const avg    = valid.length > 0
+                            ? valid.reduce((a, b) => a + b, 0) / valid.length
+                            : null;
+                          const isSelected = selectedStudentForChart?.id === student.id;
 
-                        return (
-                          <TableRow key={student.id} className="hover:bg-slate-50/80 border-slate-100">
-                            <TableCell className="pl-8 py-4">
-                              <div className="font-bold text-slate-900">{student.name}</div>
-                              <div className="text-[9px] font-mono text-slate-400 uppercase tracking-wider">{student.userId}</div>
-                            </TableCell>
-                            {exams.map((e: any) => {
-                              const cell = student.marks[e.id];
-                              const val  = cell?.val ?? null;
-                              return (
-                                <TableCell key={e.id} className="text-center py-4">
-                                  {val !== null ? (
-                                    <>
-                                      <div className={`text-base font-black ${val < 50 ? 'text-red-500' : val >= 80 ? 'text-emerald-600' : 'text-slate-900'}`}>
-                                        {val}
-                                      </div>
-                                      <div className="text-[9px] text-slate-400 font-bold uppercase">{calculateLetterGrade(val)}</div>
-                                    </>
-                                  ) : (
-                                    <span className="text-slate-300 font-bold text-sm">—</span>
-                                  )}
-                                </TableCell>
-                              );
-                            })}
-                            <TableCell className="text-right pr-8 py-4">
-                              {avg !== null ? (
-                                <div>
-                                  <span className={`text-lg font-black ${gradeColor(avg)}`}>{avg.toFixed(1)}%</span>
-                                  <div className="text-[9px] text-slate-400 font-bold uppercase">{calculateLetterGrade(avg)}</div>
+                          return (
+                            <TableRow
+                              key={student.id}
+                              className={`border-slate-100 cursor-pointer transition-colors ${
+                                isSelected
+                                  ? 'bg-blue-50 hover:bg-blue-100'
+                                  : 'hover:bg-slate-50/80'
+                              }`}
+                              onClick={() => setSelectedStudentForChart(isSelected ? null : student)}
+                              title="Click to view performance chart"
+                            >
+                              <TableCell className="pl-8 py-4">
+                                <div className="flex items-center gap-2">
+                                  {isSelected && <TrendingUp size={13} className="text-primary shrink-0" />}
+                                  <div>
+                                    <div className={`font-bold text-sm ${isSelected ? 'text-primary' : 'text-slate-900'}`}>
+                                      {student.name}
+                                    </div>
+                                    <div className="text-[9px] font-mono text-slate-400 uppercase tracking-wider">{student.userId}</div>
+                                  </div>
                                 </div>
-                              ) : (
-                                <span className="text-slate-300 font-bold">—</span>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
+                              </TableCell>
+                              {exams.map((e: any) => {
+                                const cell = student.marks[e.id];
+                                const val  = cell?.val ?? null;
+                                return (
+                                  <TableCell key={e.id} className="text-center py-4">
+                                    {val !== null ? (
+                                      <>
+                                        <div className={`text-base font-black ${
+                                          val < 50 ? 'text-red-500' : val >= 80 ? 'text-emerald-600' : 'text-slate-900'
+                                        }`}>{val}</div>
+                                        <div className="text-[9px] text-slate-400 font-bold uppercase">{calculateLetterGrade(val)}</div>
+                                      </>
+                                    ) : (
+                                      <span className="text-slate-300 font-bold text-sm">—</span>
+                                    )}
+                                  </TableCell>
+                                );
+                              })}
+                              <TableCell className="text-right pr-8 py-4">
+                                {avg !== null ? (
+                                  <div>
+                                    <span className={`text-lg font-black ${gradeColor(avg)}`}>{avg.toFixed(1)}%</span>
+                                    <div className="text-[9px] text-slate-400 font-bold uppercase">{calculateLetterGrade(avg)}</div>
+                                  </div>
+                                ) : (
+                                  <span className="text-slate-300 font-bold">—</span>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+                  <div className="border-t px-8 py-2 bg-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    {reportData.length} student{reportData.length !== 1 ? 's' : ''} — click any row to view performance chart
+                  </div>
                 </div>
               )}
             </CardContent>
