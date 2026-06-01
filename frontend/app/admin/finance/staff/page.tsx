@@ -76,8 +76,8 @@ export default function StaffFinance() {
       const [userRes, allUsersRes, recordRes, paymentRes] = await Promise.all([
         api.get('/auth/me'),
         api.get('/admin/users'), // fetches all roles
-        api.get('/salary-records?populate[staff]=*&populate[submittedBy]=*&populate[approvedBy]=*'),
-        api.get('/salary-payments?populate[salaryRecord]=*&populate[staff]=*')
+        api.get('/salary-records?populate[staff]=true&populate[submittedBy]=true&populate[approvedBy]=true'),
+        api.get('/salary-payments?populate[salaryRecord]=true&populate[staff]=true')
       ]);
 
       setRole(userRes.data.role.replace('ROLE_', ''));
@@ -351,7 +351,7 @@ export default function StaffFinance() {
   const downloadPayslip = async (paymentId: number) => {
     const tid = toast.loading('Compiling payslip data...');
     try {
-      const pmRes = await api.get(`/salary-payments/${paymentId}?populate=*`);
+      const pmRes = await api.get(`/salary-payments/${paymentId}?populate[salaryRecord]=true&populate[staff]=true`);
       const paymentData = pmRes.data?.data?.attributes || pmRes.data?.data || pmRes.data;
 
       const rcRes = await api.get(`/receipts?filters[salaryPayment][id]=${paymentId}`);

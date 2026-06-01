@@ -85,8 +85,8 @@ export default function StudentFinance() {
         api.get('/auth/me'),
         api.get('/admin/users?role=STUDENT'),
         api.get('/admin/classes'),
-        api.get('/student-invoices?populate[student]=*&populate[submittedBy]=*&populate[approvedBy]=*'),
-        api.get('/student-payments?populate[invoice]=*&populate[student]=*')
+        api.get('/student-invoices?populate[student]=true&populate[submittedBy]=true&populate[approvedBy]=true'),
+        api.get('/student-payments?populate[invoice]=true&populate[student]=true')
       ]);
 
       setRole(userRes.data.role.replace('ROLE_', ''));
@@ -368,7 +368,7 @@ export default function StudentFinance() {
   const downloadReceipt = async (paymentId: number) => {
     const tid = toast.loading('Compiling receipt data...');
     try {
-      const pmRes = await api.get(`/student-payments/${paymentId}?populate=*`);
+      const pmRes = await api.get(`/student-payments/${paymentId}?populate[invoice]=true&populate[student]=true`);
       const paymentData = pmRes.data?.data?.attributes || pmRes.data?.data || pmRes.data;
       
       const rcRes = await api.get(`/receipts?filters[studentPayment][id]=${paymentId}`);
