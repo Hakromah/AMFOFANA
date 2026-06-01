@@ -45,6 +45,8 @@ const getIcon = (name: string) => {
    if (n.includes('attendance')) return <UserCheck className="w-4 h-4" />;
    if (n.includes('student') || n.includes('class')) return <Users className="w-4 h-4" />;
    if (n.includes('transcripts')) return <FileText className="w-4 h-4" />;
+   if (n.includes('staff')) return <UsersRound className="w-4 h-4" />;
+   if (n.includes('utility')) return <Landmark className="w-4 h-4" />;
    return <Settings className="w-4 h-4" />;
 };
 
@@ -115,6 +117,13 @@ export default function Sidebar({ menuItems }: SidebarProps) {
       { name: 'Staff Finance', href: '/admin/finance/staff' },
       { name: 'Reports', href: '/admin/finance/reports' },
       { name: 'Utilities', href: '/admin/finance/utilities' }
+   ] : userData?.role === 'ADMIN' ? [
+      ...menuItems,
+      { name: 'Finance Dashboard', href: '/admin/finance' },
+      { name: 'Student Finance', href: '/admin/finance/students' },
+      { name: 'Staff Finance', href: '/admin/finance/staff' },
+      { name: 'Financial Reports', href: '/admin/finance/reports' },
+      { name: 'Finance Utilities', href: '/admin/finance/utilities' }
    ] : menuItems;
 
    const renderContent = () => (

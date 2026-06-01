@@ -10,7 +10,8 @@ import {
    Search, UserPlus, MoreVertical, UserCog, Trash2, ShieldCheck,
    User, Mail, Fingerprint, Calendar as CalendarIcon, MapPin,
    Phone, Globe, Info, Loader2, Edit, FileUp, Download,
-   AlertCircle, Home, LayoutDashboard, PieChart, Activity
+   AlertCircle, Home, LayoutDashboard, PieChart, Activity,
+   Bus, Briefcase, Landmark
 } from 'lucide-react';
 import {
    DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -40,7 +41,7 @@ const userFormSchema = z.object({
    name: z.string().min(1, 'Name is required'),
    email: z.string().email('Invalid email'),
    password: z.string().min(6, 'Min 6 characters'),
-   role: z.enum(['STUDENT', 'TEACHER', 'ADMIN']),
+   role: z.enum(['STUDENT', 'TEACHER', 'ADMIN', 'ACCOUNTANT', 'ACCOUNTLEAD', 'DRIVER', 'WORKER']),
    birthDate: z.string().optional(),
    birthCountry: z.string().optional(),
    birthCity: z.string().optional(),
@@ -90,15 +91,17 @@ export default function UserManagement() {
    });
 
    // --- DATA CALCULATIONS (The "Command Center" Logic) ---
-   const statsData = useMemo(() => {
-      const counts = { STUDENT: 0, TEACHER: 0, ADMIN: 0 };
-      users.forEach(u => { if (counts[u.role as keyof typeof counts] !== undefined) counts[u.role as keyof typeof counts]++; });
-      return [
-         { name: 'Students', value: counts.STUDENT, color: '#10b981' },
-         { name: 'Teachers', value: counts.TEACHER, color: '#3b82f6' },
-         { name: 'Admins', value: counts.ADMIN, color: '#f59e0b' },
-      ];
-   }, [users]);
+    const statsData = useMemo(() => {
+       const counts = { STUDENT: 0, TEACHER: 0, ADMIN: 0, ACCOUNTANT: 0, ACCOUNTLEAD: 0, DRIVER: 0, WORKER: 0 };
+       users.forEach(u => { if (counts[u.role as keyof typeof counts] !== undefined) counts[u.role as keyof typeof counts]++; });
+       return [
+          { name: 'Students', value: counts.STUDENT, color: '#10b981' },
+          { name: 'Teachers', value: counts.TEACHER, color: '#3b82f6' },
+          { name: 'Admins', value: counts.ADMIN, color: '#f59e0b' },
+          { name: 'Accountants', value: counts.ACCOUNTANT + counts.ACCOUNTLEAD, color: '#8b5cf6' },
+          { name: 'Drivers/Workers', value: counts.DRIVER + counts.WORKER, color: '#6366f1' }
+       ];
+    }, [users]);
 
    const fetchUsers = async () => {
       setLoading(true);
@@ -294,7 +297,11 @@ export default function UserManagement() {
       const styles: any = {
          ADMIN: "bg-amber-500 hover:bg-amber-600",
          TEACHER: "bg-blue-600 hover:bg-blue-700",
-         STUDENT: "bg-emerald-500 hover:bg-emerald-600"
+         STUDENT: "bg-emerald-500 hover:bg-emerald-600",
+         ACCOUNTANT: "bg-purple-600 hover:bg-purple-700",
+         ACCOUNTLEAD: "bg-violet-600 hover:bg-violet-700",
+         DRIVER: "bg-indigo-600 hover:bg-indigo-700",
+         WORKER: "bg-slate-700 hover:bg-slate-800"
       };
 
       return (
@@ -302,6 +309,9 @@ export default function UserManagement() {
             {role === 'ADMIN' && <ShieldCheck size={10} />}
             {role === 'TEACHER' && <UserCog size={10} />}
             {role === 'STUDENT' && <User size={10} />}
+            {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && <Landmark size={10} />}
+            {role === 'DRIVER' && <Bus size={10} />}
+            {role === 'WORKER' && <Briefcase size={10} />}
             {role}
          </Badge>
       );
@@ -441,7 +451,7 @@ export default function UserManagement() {
                      <Input placeholder="Search registry by name, email, or fingerprint ID..." className="pl-12 h-12 bg-slate-50 border-none rounded-xl focus-visible:ring-2 focus-visible:ring-blue-600 font-medium" value={search} onChange={(e) => setSearch(e.target.value)} />
                   </div>
                   <div className="flex p-1 bg-slate-100 rounded-2xl gap-1">
-                     {['ALL', 'ADMIN', 'TEACHER', 'STUDENT'].map((role) => (
+                     {['ALL', 'ADMIN', 'TEACHER', 'STUDENT', 'ACCOUNTANT', 'ACCOUNTLEAD', 'DRIVER', 'WORKER'].map((role) => (
                         <Button key={role} variant="ghost" size="sm" onClick={() => setRoleFilter(role)} className={`rounded-xl h-10 px-5 font-black uppercase text-[10px] tracking-widest transition-all ${roleFilter === role ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}>{role}</Button>
                      ))}
                   </div>
@@ -587,7 +597,15 @@ export default function UserManagement() {
                               <FormItem><FormLabel className="text-[10px] font-black uppercase text-slate-400">Permission Tier</FormLabel>
                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl><SelectTrigger className="rounded-xl bg-slate-50 border-none h-11"><SelectValue placeholder="Role" /></SelectTrigger></FormControl>
-                                    <SelectContent className="rounded-xl shadow-xl"><SelectItem value="STUDENT">Student</SelectItem><SelectItem value="TEACHER">Teacher</SelectItem><SelectItem value="ADMIN">Admin</SelectItem></SelectContent>
+                                    <SelectContent className="rounded-xl shadow-xl">
+                                       <SelectItem value="STUDENT">Student</SelectItem>
+                                       <SelectItem value="TEACHER">Teacher</SelectItem>
+                                       <SelectItem value="ADMIN">Admin</SelectItem>
+                                       <SelectItem value="ACCOUNTANT">Accountant</SelectItem>
+                                       <SelectItem value="ACCOUNTLEAD">Account Lead</SelectItem>
+                                       <SelectItem value="DRIVER">Driver</SelectItem>
+                                       <SelectItem value="WORKER">Worker</SelectItem>
+                                    </SelectContent>
                                  </Select>
                               </FormItem>
                            )} />
