@@ -240,7 +240,11 @@ export default () => ({
   async approveInvoice(id: number, userId: number) {
     const invoice = await (strapi.entityService.findOne as any)('api::student-invoice.student-invoice' as any, id) as any;
     if (!invoice) throw new Error('Invoice not found');
-    if (invoice.status !== 'SUBMITTED') throw new Error('Only submitted invoices can be approved');
+    // ACCOUNTLEAD can approve from DRAFT or SUBMITTED status directly
+    const approvableStatuses = ['DRAFT', 'SUBMITTED', 'REJECTED'];
+    if (!approvableStatuses.includes(invoice.status)) {
+      throw new Error(`Cannot approve an invoice with status ${invoice.status}`);
+    }
 
     const updated = await (strapi.entityService.update as any)('api::student-invoice.student-invoice' as any, id, {
       data: {
@@ -266,7 +270,11 @@ export default () => ({
   async rejectInvoice(id: number, reason: string, userId: number) {
     const invoice = await (strapi.entityService.findOne as any)('api::student-invoice.student-invoice' as any, id) as any;
     if (!invoice) throw new Error('Invoice not found');
-    if (invoice.status !== 'SUBMITTED') throw new Error('Only submitted invoices can be rejected');
+    // ACCOUNTLEAD can reject from DRAFT or SUBMITTED
+    const rejectableStatuses = ['DRAFT', 'SUBMITTED', 'APPROVED'];
+    if (!rejectableStatuses.includes(invoice.status)) {
+      throw new Error(`Cannot reject an invoice with status ${invoice.status}`);
+    }
 
     const updated = await (strapi.entityService.update as any)('api::student-invoice.student-invoice' as any, id, {
       data: {
@@ -329,7 +337,11 @@ export default () => ({
       populate: ['invoice', 'student']
     }) as any;
     if (!payment) throw new Error('Payment record not found');
-    if (payment.status !== 'SUBMITTED') throw new Error('Only submitted payments can be approved');
+    // ACCOUNTLEAD can approve from DRAFT or SUBMITTED
+    const approvableStatuses = ['DRAFT', 'SUBMITTED', 'REJECTED'];
+    if (!approvableStatuses.includes(payment.status)) {
+      throw new Error(`Cannot approve a payment with status ${payment.status}`);
+    }
 
     // 1. Approve the payment
     const approvedPayment = await (strapi.entityService.update as any)('api::student-payment.student-payment' as any, id, {
@@ -397,7 +409,11 @@ export default () => ({
   async rejectPayment(id: number, reason: string, userId: number) {
     const payment = await (strapi.entityService.findOne as any)('api::student-payment.student-payment' as any, id) as any;
     if (!payment) throw new Error('Payment not found');
-    if (payment.status !== 'SUBMITTED') throw new Error('Only submitted payments can be rejected');
+    // ACCOUNTLEAD can reject from DRAFT, SUBMITTED, or APPROVED
+    const rejectableStatuses = ['DRAFT', 'SUBMITTED', 'APPROVED'];
+    if (!rejectableStatuses.includes(payment.status)) {
+      throw new Error(`Cannot reject a payment with status ${payment.status}`);
+    }
 
     const updated = await (strapi.entityService.update as any)('api::student-payment.student-payment' as any, id, {
       data: {
@@ -501,7 +517,11 @@ export default () => ({
   async approveSalaryRecord(id: number, userId: number) {
     const record = await (strapi.entityService.findOne as any)('api::salary-record.salary-record' as any, id) as any;
     if (!record) throw new Error('Salary record not found');
-    if (record.status !== 'SUBMITTED') throw new Error('Only submitted salary records can be approved');
+    // ACCOUNTLEAD can approve from DRAFT or SUBMITTED
+    const approvableStatuses = ['DRAFT', 'SUBMITTED', 'REJECTED'];
+    if (!approvableStatuses.includes(record.status)) {
+      throw new Error(`Cannot approve a salary record with status ${record.status}`);
+    }
 
     const updated = await (strapi.entityService.update as any)('api::salary-record.salary-record' as any, id, {
       data: {
@@ -527,7 +547,11 @@ export default () => ({
   async rejectSalaryRecord(id: number, reason: string, userId: number) {
     const record = await (strapi.entityService.findOne as any)('api::salary-record.salary-record' as any, id) as any;
     if (!record) throw new Error('Salary record not found');
-    if (record.status !== 'SUBMITTED') throw new Error('Only submitted salary records can be rejected');
+    // ACCOUNTLEAD can reject from DRAFT, SUBMITTED, or APPROVED
+    const rejectableStatuses = ['DRAFT', 'SUBMITTED', 'APPROVED'];
+    if (!rejectableStatuses.includes(record.status)) {
+      throw new Error(`Cannot reject a salary record with status ${record.status}`);
+    }
 
     const updated = await (strapi.entityService.update as any)('api::salary-record.salary-record' as any, id, {
       data: {
@@ -589,7 +613,11 @@ export default () => ({
       populate: ['salaryRecord', 'staff']
     }) as any;
     if (!payment) throw new Error('Salary payment not found');
-    if (payment.status !== 'SUBMITTED') throw new Error('Only submitted disbursements can be approved');
+    // ACCOUNTLEAD can approve from DRAFT or SUBMITTED
+    const approvableStatuses = ['DRAFT', 'SUBMITTED', 'REJECTED'];
+    if (!approvableStatuses.includes(payment.status)) {
+      throw new Error(`Cannot approve a salary payment with status ${payment.status}`);
+    }
 
     // 1. Approve
     const approvedPayment = await (strapi.entityService.update as any)('api::salary-payment.salary-payment' as any, id, {
@@ -652,7 +680,11 @@ export default () => ({
   async rejectSalaryPayment(id: number, reason: string, userId: number) {
     const payment = await (strapi.entityService.findOne as any)('api::salary-payment.salary-payment' as any, id) as any;
     if (!payment) throw new Error('Salary payment not found');
-    if (payment.status !== 'SUBMITTED') throw new Error('Only submitted disbursements can be rejected');
+    // ACCOUNTLEAD can reject from DRAFT, SUBMITTED, or APPROVED
+    const rejectableStatuses = ['DRAFT', 'SUBMITTED', 'APPROVED'];
+    if (!rejectableStatuses.includes(payment.status)) {
+      throw new Error(`Cannot reject a salary payment with status ${payment.status}`);
+    }
 
     const updated = await (strapi.entityService.update as any)('api::salary-payment.salary-payment' as any, id, {
       data: {

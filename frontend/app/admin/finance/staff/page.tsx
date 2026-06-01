@@ -73,25 +73,26 @@ export default function StaffFinance() {
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      const [userRes, allUsersRes, recordRes, paymentRes] = await Promise.all([
+      const [userRes, allUsersRes, financeRes] = await Promise.all([
         api.get('/auth/me'),
-        api.get('/admin/users'), // fetches all roles
-        api.get('/salary-records?populate[staff][fields][0]=id&populate[staff][fields][1]=username&populate[staff][fields][2]=email&populate[staff][fields][3]=schoolRole&populate[submittedBy][fields][0]=id&populate[submittedBy][fields][1]=username&populate[approvedBy][fields][0]=id&populate[approvedBy][fields][1]=username'),
-        api.get('/salary-payments?populate[salaryRecord][populate][staff][fields][0]=id&populate[salaryRecord][populate][staff][fields][1]=username&populate[salaryRecord][populate][staff][fields][2]=email&populate[salaryRecord][populate][staff][fields][3]=schoolRole&populate[staff][fields][0]=id&populate[staff][fields][1]=username&populate[staff][fields][2]=email&populate[staff][fields][3]=schoolRole')
+        api.get('/admin/users'),
+        api.get('/school-finance/data/staff')  // Custom flat endpoint
       ]);
 
-      setRole(userRes.data.role.replace('ROLE_', ''));
-      
-      // Filter drivers, workers, teachers, accountants
-      const staffRoles = ['DRIVER', 'WORKER', 'TEACHER', 'ACCOUNTANT', 'ACCOUNTLEAD'];
-      const filteredStaff = allUsersRes.data.filter((u: any) => staffRoles.includes(u.schoolRole)).map((u: any) => ({
-        ...u,
-        name: u.username || u.name
-      }));
-      setStaff(filteredStaff);
+      const rawRole: string = userRes.data.schoolRole || userRes.data.role || 'ACCOUNTANT';
+      setRole(rawRole.replace('ROLE_', ''));
 
-      setSalaryRecords(recordRes.data?.data || recordRes.data || []);
-      setSalaryPayments(paymentRes.data?.data || paymentRes.data || []);
+      // Filter staff roles
+      const staffRoles = ['DRIVER', 'WORKER', 'TEACHER', 'ACCOUNTANT', 'ACCOUNTLEAD'];
+      setStaff(
+        (allUsersRes.data as any[]).filter((u: any) => staffRoles.includes(u.schoolRole)).map((u: any) => ({
+          ...u,
+          name: u.username || u.name
+        }))
+      );
+
+      setSalaryRecords(financeRes.data?.salaryRecords || []);
+      setSalaryPayments(financeRes.data?.salaryPayments || []);
     } catch (e: any) {
       toast.error('Failed to sync staff payroll ledger');
       console.error(e);
@@ -163,18 +164,17 @@ export default function StaffFinance() {
     }
   };
 
-  // Trigger record edit modal
+  // Trigger record edit modal — uses flat fields from new endpoint
   const startEditRecord = (rec: any) => {
-    const actual = rec.attributes || rec;
-    const staffObj = getStaffData(actual.staff);
     setEditingRecord(rec);
-    setSelectedStaffId(String(staffObj?.id || ''));
-    setSalaryMonth(actual.month);
-    setSalaryYear(Number(actual.year));
-    setBaseSalary(Number(actual.baseSalary));
-    setAllowances(Number(actual.allowances));
-    setDeductions(Number(actual.deductions));
-    setSalaryNotes(actual.notes || '');
+    // Use the flat staffId field returned by the backend endpoint
+    setSelectedStaffId(String(rec.staffId || ''));
+    setSalaryMonth(rec.month);
+    setSalaryYear(Number(rec.year));
+    setBaseSalary(Number(rec.baseSalary));
+    setAllowances(Number(rec.allowances));
+    setDeductions(Number(rec.deductions));
+    setSalaryNotes(rec.notes || '');
     setIsSalaryOpen(true);
   };
 
@@ -222,27 +222,28 @@ export default function StaffFinance() {
     }
 
     const rec = salaryRecords.find(r => String(r.id) === selectedRecordIdForPayout);
-    const record = rec?.attributes || rec;
-    const staffObj = getStaffData(record?.staff);
+    // rec is now a flat object with staffId directly
+    const staffId = rec?.staffId || null;
 
-    const payload = {
-      salaryRecord: Number(selectedRecordIdForPayout),
-      staff: staffObj?.id,
-      amount: Number(payoutAmount),
-      paymentMethod: payoutMethod,
-      notes: payoutNotes
-    };
 
     const tid = toast.loading(editingPayout ? 'Saving changes...' : 'Logging disbursement...');
     try {
       if (editingPayout) {
         const docId = editingPayout.documentId || editingPayout.id;
-        await api.put(`/salary-payments/${docId}`, { data: payload });
+        await api.put(`/salary-payments/${docId}`, {
+          data: {
+            salaryRecord: Number(selectedRecordIdForPayout),
+            staff: staffId,
+            amount: Number(payoutAmount),
+            paymentMethod: payoutMethod,
+            notes: payoutNotes
+          }
+        });
         toast.success('Payout entry updated successfully', { id: tid });
       } else {
         await api.post('/school-finance/salary-payments', {
           salaryRecordId: Number(selectedRecordIdForPayout),
-          staffId: staffObj?.id,
+          staffId: staffId,
           amount: Number(payoutAmount),
           paymentMethod: payoutMethod,
           notes: payoutNotes
@@ -262,15 +263,13 @@ export default function StaffFinance() {
     }
   };
 
-  // Trigger payout edit modal
+  // Trigger payout edit modal — uses flat fields
   const startEditPayout = (pay: any) => {
-    const actual = pay.attributes || pay;
-    const recordObj = getRecordData(actual.salaryRecord);
     setEditingPayout(pay);
-    setSelectedRecordIdForPayout(String(recordObj?.id || ''));
-    setPayoutAmount(actual.amount);
-    setPayoutMethod(actual.paymentMethod);
-    setPayoutNotes(actual.notes || '');
+    setSelectedRecordIdForPayout(String(pay.salaryRecordId || ''));
+    setPayoutAmount(pay.amount);
+    setPayoutMethod(pay.paymentMethod);
+    setPayoutNotes(pay.notes || '');
     setIsPayoutOpen(true);
   };
 
@@ -375,32 +374,45 @@ export default function StaffFinance() {
     }
   };
 
-  // Compile Payslip / Receipt PDF
-  const downloadPayslip = async (paymentDocId: string) => {
+  // Compile Payslip / Receipt PDF — uses flat data from our state
+  const downloadPayslip = async (paymentDocId: string, paymentId: number) => {
     const tid = toast.loading('Compiling payslip data...');
     try {
-      const pmRes = await api.get(`/salary-payments/${paymentDocId}?populate[salaryRecord][populate][staff][fields][0]=id&populate[salaryRecord][populate][staff][fields][1]=username&populate[salaryRecord][populate][staff][fields][2]=email&populate[salaryRecord][populate][staff][fields][3]=schoolRole&populate[staff][fields][0]=id&populate[staff][fields][1]=username&populate[staff][fields][2]=email&populate[staff][fields][3]=schoolRole`);
-      const paymentData = pmRes.data?.data?.attributes || pmRes.data?.data || pmRes.data;
-      const paymentId = pmRes.data?.data?.id || pmRes.data?.id;
+      // Fetch fresh data for PDF
+      const pmRes = await api.get(
+        `/salary-payments/${paymentDocId}?populate[staff][fields][0]=username&populate[staff][fields][1]=email&populate[staff][fields][2]=schoolRole&populate[salaryRecord][fields][0]=recordNumber&populate[salaryRecord][fields][1]=baseSalary&populate[salaryRecord][fields][2]=allowances&populate[salaryRecord][fields][3]=deductions`
+      );
+      const rawData = pmRes.data?.data || pmRes.data;
+      const paymentData = rawData?.attributes || rawData;
+      const numericId = rawData?.id || paymentId;
 
-      const rcRes = await api.get(`/receipts?filters[salaryPayment][id]=${paymentId}`);
-      const receiptData = rcRes.data?.[0] || {};
+      const rcRes = await api.get(`/receipts?filters[salaryPayment][id]=${numericId}`);
+      const receiptArr = rcRes.data?.data || rcRes.data || [];
+      const receiptData = (Array.isArray(receiptArr) ? receiptArr[0] : receiptArr)?.attributes
+        || (Array.isArray(receiptArr) ? receiptArr[0] : receiptArr)
+        || {};
 
-      const staffObj = getStaffData(paymentData.staff);
-      const salaryRecordObj = getRecordData(paymentData.salaryRecord);
+      // Use flat pay from state as fallback
+      const flatPay = salaryPayments.find(p => p.id === paymentId) || salaryPayments.find((p: any) => p.documentId === paymentDocId);
+      const staffName = paymentData?.staff?.username || flatPay?.staffName || 'Employee';
+      const staffRole = paymentData?.staff?.schoolRole || flatPay?.staffRole || 'Staff';
+      const staffEmail = paymentData?.staff?.email || flatPay?.staffEmail || 'N/A';
+      const salRec = paymentData?.salaryRecord;
+      const base = Number(salRec?.baseSalary || flatPay?.salaryRecordNetSalary || 0);
+      const allow = Number(salRec?.allowances || 0);
+      const ded = Number(salRec?.deductions || 0);
 
       const doc = new jsPDF();
-      
       doc.setDrawColor(37, 99, 235);
       doc.setLineWidth(1.5);
       doc.rect(5, 5, 200, 287);
 
       doc.setFillColor(15, 23, 42);
       doc.rect(5, 5, 200, 45, 'F');
-      
+
       doc.setTextColor(255, 255, 255);
       doc.setFont('Helvetica', 'bold');
-      doc.setFontSize(28);
+      doc.setFontSize(22);
       doc.text('AMFOFANA ACADEMY', 15, 23);
       doc.setFontSize(9);
       doc.setFont('Helvetica', 'normal');
@@ -414,46 +426,39 @@ export default function StaffFinance() {
       doc.setFontSize(10);
       doc.setFont('Helvetica', 'normal');
 
-      doc.text(`Transaction Reference: ${paymentData.paymentNumber || 'N/A'}`, 15, 80);
-      doc.text(`Payslip Number: ${receiptData.receiptNumber || 'REC-TEMP'}`, 15, 87);
-      doc.text(`Disbursement Date: ${new Date(paymentData.paymentDate).toLocaleDateString()}`, 15, 94);
+      doc.text(`Transaction Reference: ${paymentData?.paymentNumber || flatPay?.paymentNumber || 'N/A'}`, 15, 80);
+      doc.text(`Payslip Number: ${receiptData?.receiptNumber || 'REC-TEMP'}`, 15, 87);
+      doc.text(`Disbursement Date: ${new Date(paymentData?.paymentDate || new Date()).toLocaleDateString()}`, 15, 94);
 
       doc.setFont('Helvetica', 'bold');
       doc.text('Employee Profile:', 120, 80);
       doc.setFont('Helvetica', 'normal');
-      doc.text(`Name: ${staffObj?.username || staffObj?.name || 'Staff'}`, 120, 87);
-      doc.text(`Role: ${staffObj?.schoolRole || 'Staff'}`, 120, 94);
-      doc.text(`Email: ${staffObj?.email || 'N/A'}`, 120, 101);
-
-      const base = Number(salaryRecordObj?.baseSalary || 0);
-      const allow = Number(salaryRecordObj?.allowances || 0);
-      const ded = Number(salaryRecordObj?.deductions || 0);
-
-      const rows = [
-        ['Base Salary', `${base.toLocaleString()} GNF`],
-        ['Allowances', `+ ${allow.toLocaleString()} GNF`],
-        ['Deductions', `- ${ded.toLocaleString()} GNF`],
-        ['Net Payout Disbursed', `${Number(paymentData.amount).toLocaleString()} GNF`]
-      ];
+      doc.text(`Name: ${staffName}`, 120, 87);
+      doc.text(`Role: ${staffRole}`, 120, 94);
+      doc.text(`Email: ${staffEmail}`, 120, 101);
 
       autoTable(doc, {
         startY: 115,
         head: [['Payroll Breakdown Component', 'Ledger Amount']],
-        body: rows,
+        body: [
+          ['Base Salary', `${base.toLocaleString()} GNF`],
+          ['Allowances', `+ ${allow.toLocaleString()} GNF`],
+          ['Deductions', `- ${ded.toLocaleString()} GNF`],
+          ['Net Payout Disbursed', `${Number(paymentData?.amount || flatPay?.amount || 0).toLocaleString()} GNF`]
+        ],
         theme: 'striped',
         headStyles: { fillColor: [15, 23, 42] }
       });
 
       const finalY = (doc as any).lastAutoTable?.finalY || 160;
-
-      const qrDataUrl = await QRCode.toDataURL(receiptData.qrCode || 'https://verify.amfofana.edu');
+      const qrDataUrl = await QRCode.toDataURL(receiptData?.qrCode || 'https://verify.amfofana.edu');
       doc.addImage(qrDataUrl, 'PNG', 140, finalY + 15, 45, 45);
       doc.setFontSize(8);
       doc.setTextColor(148, 163, 184);
       doc.text('Scan to verify digital payroll signature', 142, finalY + 63);
 
-      doc.save(`Payslip-${paymentData.paymentNumber || 'GEN'}.pdf`);
-      toast.success('PDF compiled safely', { id: tid });
+      doc.save(`Payslip-${paymentData?.paymentNumber || flatPay?.paymentNumber || 'GEN'}.pdf`);
+      toast.success('PDF compiled successfully', { id: tid });
     } catch (e: any) {
       toast.error('Payslip generation failed', { id: tid });
       console.error(e);
@@ -526,18 +531,16 @@ export default function StaffFinance() {
             </TableHeader>
             <TableBody>
               {salaryRecords.map((rec: any) => {
-                const actual = rec.attributes || rec;
-                const staffObj = getStaffData(actual.staff);
-                const staffName = staffObj?.username || staffObj?.name || 'N/A';
-                const staffRole = staffObj?.schoolRole || 'N/A';
-
-                const isDraftOrRejected = actual.status === 'DRAFT' || actual.status === 'REJECTED';
+                // Data is now flat from the backend endpoint
+                const staffName = rec.staffName || 'Unknown';
+                const staffRole = rec.staffRole || 'N/A';
+                const isDraftOrRejected = rec.status === 'DRAFT' || rec.status === 'REJECTED';
 
                 return (
                   <TableRow key={rec.id} className="hover:bg-slate-50/50 duration-200">
                     {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && (
                       <TableCell className="w-12">
-                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || (role === 'ACCOUNTLEAD' && (isDraftOrRejected || actual.status === 'SUBMITTED'))) && (
+                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || (role === 'ACCOUNTLEAD' && rec.status !== 'PAID')) && (
                           <input
                             type="checkbox"
                             checked={selectedRecordIds.includes(rec.id)}
@@ -554,7 +557,7 @@ export default function StaffFinance() {
                       </TableCell>
                     )}
 
-                    <TableCell className="font-bold text-slate-900">{actual.recordNumber}</TableCell>
+                    <TableCell className="font-bold text-slate-900">{rec.recordNumber}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <UserCircle2 className="w-5 h-5 text-slate-400" />
@@ -562,25 +565,25 @@ export default function StaffFinance() {
                       </div>
                     </TableCell>
                     <TableCell><Badge variant="secondary" className="font-bold text-[10px] uppercase tracking-wider">{staffRole}</Badge></TableCell>
-                    <TableCell className="font-medium text-slate-600">{actual.month} {actual.year}</TableCell>
-                    <TableCell className="font-black text-slate-900">{Number(actual.baseSalary).toLocaleString()} GNF</TableCell>
-                    <TableCell className="font-black text-blue-600">{Number(actual.netSalary).toLocaleString()} GNF</TableCell>
+                    <TableCell className="font-medium text-slate-600">{rec.month} {rec.year}</TableCell>
+                    <TableCell className="font-black text-slate-900">{Number(rec.baseSalary || 0).toLocaleString()} GNF</TableCell>
+                    <TableCell className="font-black text-blue-600">{Number(rec.netSalary || 0).toLocaleString()} GNF</TableCell>
                     <TableCell>
                       <Badge className={
-                        actual.status === 'PAID' ? 'bg-emerald-500 hover:bg-emerald-600' :
-                        actual.status === 'PARTIALLY_PAID' ? 'bg-amber-500 hover:bg-amber-600' :
-                        actual.status === 'APPROVED' ? 'bg-blue-600 hover:bg-blue-700' :
-                        actual.status === 'REJECTED' ? 'bg-rose-500 hover:bg-rose-600' :
-                        actual.status === 'DRAFT' ? 'bg-slate-300 text-slate-800 hover:bg-slate-400' :
+                        rec.status === 'PAID' ? 'bg-emerald-500 hover:bg-emerald-600' :
+                        rec.status === 'PARTIALLY_PAID' ? 'bg-amber-500 hover:bg-amber-600' :
+                        rec.status === 'APPROVED' ? 'bg-blue-600 hover:bg-blue-700' :
+                        rec.status === 'REJECTED' ? 'bg-rose-500 hover:bg-rose-600' :
+                        rec.status === 'DRAFT' ? 'bg-slate-300 text-slate-800 hover:bg-slate-400' :
                         'bg-slate-500 hover:bg-slate-600'
                       }>
-                        {actual.status}
+                        {rec.status}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         {((role === 'ACCOUNTANT' && isDraftOrRejected) || 
-                          (role === 'ACCOUNTLEAD' && (isDraftOrRejected || actual.status === 'SUBMITTED' || actual.status === 'APPROVED'))) && (
+                          (role === 'ACCOUNTLEAD' && (isDraftOrRejected || rec.status === 'SUBMITTED' || rec.status === 'APPROVED'))) && (
                           <>
                             <Button 
                               onClick={() => startEditRecord(rec)}
@@ -603,7 +606,7 @@ export default function StaffFinance() {
                           </>
                         )}
 
-                        {role === 'ACCOUNTLEAD' && actual.status === 'SUBMITTED' && (
+                        {role === 'ACCOUNTLEAD' && (rec.status === 'SUBMITTED' || rec.status === 'DRAFT') && (
                           <>
                             <Button 
                               onClick={() => handleApprove(rec.id, 'RECORD')}
@@ -655,25 +658,22 @@ export default function StaffFinance() {
               </TableHeader>
               <TableBody>
                 {salaryPayments.filter((p: any) => {
-                  const actual = p.attributes || p;
-                  return actual.status === 'SUBMITTED' || actual.status === 'REJECTED';
+                  return p.status === 'SUBMITTED' || p.status === 'REJECTED';
                 }).map((p: any) => {
-                  const actual = p.attributes || p;
-                  const staffObj = getStaffData(actual.staff);
-                  const staffName = staffObj?.username || staffObj?.name || 'Staff';
+                  const staffName = p.staffName || 'Staff';
                   return (
                     <TableRow key={p.id}>
-                      <TableCell className="font-bold">{actual.paymentNumber}</TableCell>
+                      <TableCell className="font-bold">{p.paymentNumber}</TableCell>
                       <TableCell>{staffName}</TableCell>
-                      <TableCell>{actual.paymentMethod}</TableCell>
-                      <TableCell className="font-black">{Number(actual.amount).toLocaleString()} GNF</TableCell>
+                      <TableCell>{p.paymentMethod}</TableCell>
+                      <TableCell className="font-black">{Number(p.amount || 0).toLocaleString()} GNF</TableCell>
                       <TableCell>
-                        <Badge className={actual.status === 'REJECTED' ? 'bg-rose-500' : 'bg-amber-500'}>
-                          {actual.status}
+                        <Badge className={p.status === 'REJECTED' ? 'bg-rose-500' : 'bg-amber-500'}>
+                          {p.status}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right space-x-2">
-                        {actual.status === 'SUBMITTED' ? (
+                        {p.status === 'SUBMITTED' ? (
                           <>
                             <Button 
                               onClick={() => handleApprove(p.id, 'DISBURSE')}
@@ -741,17 +741,14 @@ export default function StaffFinance() {
             </TableHeader>
             <TableBody>
               {salaryPayments.map((p: any) => {
-                const actual = p.attributes || p;
-                const staffObj = getStaffData(actual.staff);
-                const staffName = staffObj?.username || staffObj?.name || 'N/A';
-
-                const isDraftOrRejected = actual.status === 'DRAFT' || actual.status === 'REJECTED';
+                const staffName = p.staffName || 'N/A';
+                const isDraftOrRejected = p.status === 'DRAFT' || p.status === 'REJECTED';
 
                 return (
                   <TableRow key={p.id}>
                     {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && (
                       <TableCell className="w-12">
-                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || (role === 'ACCOUNTLEAD' && (isDraftOrRejected || actual.status === 'SUBMITTED'))) && (
+                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || (role === 'ACCOUNTLEAD' && (isDraftOrRejected || p.status === 'SUBMITTED'))) && (
                           <input
                             type="checkbox"
                             checked={selectedPayoutIds.includes(p.id)}
@@ -768,24 +765,24 @@ export default function StaffFinance() {
                       </TableCell>
                     )}
 
-                    <TableCell className="font-bold">{actual.paymentNumber}</TableCell>
+                    <TableCell className="font-bold">{p.paymentNumber}</TableCell>
                     <TableCell>{staffName}</TableCell>
-                    <TableCell>{actual.paymentMethod}</TableCell>
-                    <TableCell className="font-black">{Number(actual.amount).toLocaleString()} GNF</TableCell>
+                    <TableCell>{p.paymentMethod}</TableCell>
+                    <TableCell className="font-black">{Number(p.amount || 0).toLocaleString()} GNF</TableCell>
                     <TableCell>
                       <Badge className={
-                        actual.status === 'APPROVED' ? 'bg-emerald-500' :
-                        actual.status === 'REJECTED' ? 'bg-rose-500' :
-                        actual.status === 'DRAFT' ? 'bg-slate-300 text-slate-800' :
+                        p.status === 'APPROVED' ? 'bg-emerald-500' :
+                        p.status === 'REJECTED' ? 'bg-rose-500' :
+                        p.status === 'DRAFT' ? 'bg-slate-300 text-slate-800' :
                         'bg-amber-500'
                       }>
-                        {actual.status}
+                        {p.status}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         {((role === 'ACCOUNTANT' && isDraftOrRejected) || 
-                          (role === 'ACCOUNTLEAD' && (isDraftOrRejected || actual.status === 'SUBMITTED' || actual.status === 'APPROVED'))) && (
+                          (role === 'ACCOUNTLEAD' && (isDraftOrRejected || p.status === 'SUBMITTED' || p.status === 'APPROVED'))) && (
                           <>
                             <Button 
                               onClick={() => startEditPayout(p)}
@@ -808,9 +805,9 @@ export default function StaffFinance() {
                           </>
                         )}
 
-                        {actual.status === 'APPROVED' && (
+                        {p.status === 'APPROVED' && (
                           <Button 
-                            onClick={() => downloadPayslip(p.documentId || p.id)}
+                            onClick={() => downloadPayslip(p.documentId || String(p.id), p.id)}
                             size="sm" 
                             variant="outline"
                             className="rounded-lg gap-2 text-xs"
@@ -839,7 +836,8 @@ export default function StaffFinance() {
           <div className="space-y-4 py-4">
             <div className="space-y-1">
               <label className="text-xs font-black uppercase text-slate-400">Select Employee</label>
-              <Select value={selectedStaffId} onValueChange={setSelectedStaffId} disabled={!!editingRecord}>
+              {/* Dropdown NOT disabled when editing so user can correct the staff member */}
+              <Select value={selectedStaffId} onValueChange={setSelectedStaffId}>
                 <SelectTrigger className="h-11 rounded-xl bg-slate-50">
                   <SelectValue placeholder="Search employee..." />
                 </SelectTrigger>
@@ -957,17 +955,14 @@ export default function StaffFinance() {
                 </SelectTrigger>
                 <SelectContent className="max-h-[250px] overflow-y-auto">
                   {salaryRecords.filter(r => {
-                    const actual = r.attributes || r;
                     if (editingPayout) return true;
-                    return actual.status === 'APPROVED' || actual.status === 'PARTIALLY_PAID';
+                    return r.status === 'APPROVED' || r.status === 'PARTIALLY_PAID';
                   }).map((rec: any) => {
-                    const actual = rec.attributes || rec;
-                    const staffObj = getStaffData(actual.staff);
-                    const staffName = staffObj?.username || staffObj?.name || 'Staff';
-                    const staffRole = staffObj?.schoolRole ? ` (${staffObj.schoolRole})` : '';
+                    const staffName = rec.staffName || 'Staff';
+                    const staffRoleLabel = rec.staffRole ? ` (${rec.staffRole})` : '';
                     return (
                       <SelectItem key={rec.id} value={String(rec.id)}>
-                        {actual.recordNumber} - {staffName}{staffRole} ({Number(actual.netSalary).toLocaleString()} GNF due)
+                        {rec.recordNumber} - {staffName}{staffRoleLabel} ({Number(rec.netSalary || 0).toLocaleString()} GNF due)
                       </SelectItem>
                     );
                   })}

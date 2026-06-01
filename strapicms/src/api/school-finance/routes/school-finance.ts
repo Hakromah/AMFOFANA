@@ -4,6 +4,19 @@
 
 export default {
   routes: [
+    // ─── Flat Finance Data Endpoints ──────────────────────────────────────────
+    {
+      method: 'GET',
+      path: '/school-finance/data/students',
+      handler: 'school-finance.getStudentFinanceData',
+      config: { middlewares: [] }
+    },
+    {
+      method: 'GET',
+      path: '/school-finance/data/staff',
+      handler: 'school-finance.getStaffFinanceData',
+      config: { middlewares: [] }
+    },
     {
       method: 'GET',
       path: '/school-finance/stats',

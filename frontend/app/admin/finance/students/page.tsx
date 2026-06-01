@@ -3,8 +3,8 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Search, Plus, Check, X, FileText, Download, Printer, Edit, Trash2,
-  DollarSign, Landmark, Filter, CheckCircle2, ShieldAlert, CreditCard, ChevronRight, UserCircle2, Clock
+  Search, Plus, Check, X, FileText, Download, Edit, Trash2,
+  DollarSign, Filter, CheckCircle2, Clock, UserCircle2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,17 +18,69 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import QRCode from 'qrcode';
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+interface FlatInvoice {
+  id: number;
+  documentId: string;
+  invoiceNumber: string;
+  month: string;
+  year: number;
+  status: string;
+  subtotal: number;
+  totalPaid: number;
+  remainingBalance: number;
+  notes: string;
+  items: any[];
+  dueDate: string;
+  rejectionReason?: string;
+  // Flat student fields embedded by backend
+  studentId: number | null;
+  studentDocumentId: string | null;
+  studentName: string | null;
+  studentUserId: string | null;
+  studentEmail: string | null;
+}
+
+interface FlatPayment {
+  id: number;
+  documentId: string;
+  paymentNumber: string;
+  amount: number;
+  paymentDate: string;
+  paymentMethod: string;
+  paymentCategory: string;
+  status: string;
+  notes: string;
+  rejectionReason?: string;
+  // Flat invoice fields
+  invoiceId: number | null;
+  invoiceDocumentId: string | null;
+  invoiceNumber: string | null;
+  invoiceRemainingBalance: number;
+  // Flat student fields
+  studentId: number | null;
+  studentName: string | null;
+  studentUserId: string | null;
+  studentEmail: string | null;
+}
+
+interface StudentUser {
+  id: number;
+  username: string;
+  userId: string;
+  email: string;
+}
+
 export default function StudentFinance() {
   const [role, setRole] = useState<string>('ACCOUNTANT');
-  const [students, setStudents] = useState<any[]>([]);
-  const [invoices, setInvoices] = useState<any[]>([]);
-  const [payments, setPayments] = useState<any[]>([]);
+  const [students, setStudents] = useState<StudentUser[]>([]);
+  const [invoices, setInvoices] = useState<FlatInvoice[]>([]);
+  const [payments, setPayments] = useState<FlatPayment[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Search & Filter
   const [search, setSearch] = useState('');
-  const [classFilter, setClassFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
   // Multi-Select Checkboxes
@@ -44,61 +96,50 @@ export default function StudentFinance() {
   const [rejectionReason, setRejectionReason] = useState('');
 
   // Invoice Form State (Create & Edit)
-  const [editingInvoice, setEditingInvoice] = useState<any>(null);
+  const [editingInvoice, setEditingInvoice] = useState<FlatInvoice | null>(null);
   const [selectedStudentId, setSelectedStudentId] = useState<string>('');
   const [invoiceMonth, setInvoiceMonth] = useState<string>('June');
-  const [invoiceYear, setInvoiceYear] = useState<number>(2026);
+  const [invoiceYear, setInvoiceYear] = useState<number>(new Date().getFullYear());
   const [invoiceNotes, setInvoiceNotes] = useState<string>('');
   const [chargeItems, setChargeItems] = useState<any[]>([
     { description: 'Tuition Fee', amount: 500000, category: 'TUITION' }
   ]);
 
   // Payment Form State (Receive & Edit)
-  const [editingPayment, setEditingPayment] = useState<any>(null);
+  const [editingPayment, setEditingPayment] = useState<FlatPayment | null>(null);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string>('');
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<string>('MOBILE_MONEY');
   const [paymentCategory, setPaymentCategory] = useState<string>('TUITION');
   const [paymentNotes, setPaymentNotes] = useState<string>('');
 
-  // Safe Relational Unwrapping Helpers
-  const getStudentData = (studentField: any) => {
-    if (!studentField) return null;
-    if (studentField.data) {
-      return studentField.data.attributes || studentField.data;
-    }
-    return studentField.attributes || studentField;
-  };
-
-  const getInvoiceData = (invoiceField: any) => {
-    if (!invoiceField) return null;
-    if (invoiceField.data) {
-      return invoiceField.data.attributes || invoiceField.data;
-    }
-    return invoiceField.attributes || invoiceField;
-  };
-
+  // ─── Data Fetching ─────────────────────────────────────────────────────────
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      const [userRes, studentRes, classRes, invoiceRes, paymentRes] = await Promise.all([
+      const [userRes, studentRes, classRes, financeRes] = await Promise.all([
         api.get('/auth/me'),
         api.get('/admin/users?role=STUDENT'),
         api.get('/admin/classes'),
-        api.get('/student-invoices?populate[student][fields][0]=id&populate[student][fields][1]=username&populate[student][fields][2]=email&populate[student][fields][3]=userId&populate[submittedBy][fields][0]=id&populate[submittedBy][fields][1]=username&populate[approvedBy][fields][0]=id&populate[approvedBy][fields][1]=username'),
-        api.get('/student-payments?populate[invoice][populate][student][fields][0]=id&populate[invoice][populate][student][fields][1]=username&populate[invoice][populate][student][fields][2]=email&populate[invoice][populate][student][fields][3]=userId&populate[student][fields][0]=id&populate[student][fields][1]=username&populate[student][fields][2]=email&populate[student][fields][3]=userId')
+        api.get('/school-finance/data/students')  // Custom flat endpoint — no populate issues
       ]);
 
-      setRole(userRes.data.role.replace('ROLE_', ''));
-      setStudents(studentRes.data.map((s: any) => ({
-        ...s,
-        name: s.username || s.name
-      })));
-      setClasses(classRes.data);
-      setInvoices(invoiceRes.data?.data || invoiceRes.data || []);
-      setPayments(paymentRes.data?.data || paymentRes.data || []);
+      const rawRole: string = userRes.data.schoolRole || userRes.data.role || 'ACCOUNTANT';
+      setRole(rawRole.replace('ROLE_', ''));
+
+      setStudents(
+        (studentRes.data as any[]).map((s: any) => ({
+          id: s.id,
+          username: s.username || s.name || '',
+          userId: s.userId || '',
+          email: s.email || ''
+        }))
+      );
+      setClasses(classRes.data || []);
+      setInvoices(financeRes.data?.invoices || []);
+      setPayments(financeRes.data?.payments || []);
     } catch (e: any) {
-      toast.error('Failed to sync database finance ledger');
+      toast.error('Failed to sync finance ledger');
       console.error(e);
     } finally {
       setLoading(false);
@@ -109,23 +150,17 @@ export default function StudentFinance() {
     fetchAllData();
   }, []);
 
-  // Filtered lists
+  // ─── Filtered Lists ────────────────────────────────────────────────────────
   const filteredInvoices = useMemo(() => {
-    return invoices.filter((inv: any) => {
-      const actualInv = inv.attributes || inv;
-      const studentObj = getStudentData(actualInv.student);
-      const studentName = studentObj?.username || studentObj?.name || '';
-      const invoiceNum = actualInv.invoiceNumber || '';
-      const matchesSearch = studentName.toLowerCase().includes(search.toLowerCase()) || invoiceNum.toLowerCase().includes(search.toLowerCase());
-
-      const matchesClass = classFilter === 'ALL' || studentObj?.enrolledClasses?.some((c: any) => String(c.id) === classFilter);
-      const matchesStatus = statusFilter === 'ALL' || actualInv.status === statusFilter;
-
-      return matchesSearch && matchesClass && matchesStatus;
+    return invoices.filter((inv) => {
+      const nameMatch = (inv.studentName || '').toLowerCase().includes(search.toLowerCase());
+      const numMatch = inv.invoiceNumber.toLowerCase().includes(search.toLowerCase());
+      const statusMatch = statusFilter === 'ALL' || inv.status === statusFilter;
+      return (nameMatch || numMatch) && statusMatch;
     });
-  }, [invoices, search, classFilter, statusFilter]);
+  }, [invoices, search, statusFilter]);
 
-  // Invoice creation / edit submit
+  // ─── Invoice CRUD ──────────────────────────────────────────────────────────
   const handleCreateOrEditInvoice = async () => {
     if (!selectedStudentId) {
       toast.error('Please select a student');
@@ -137,25 +172,23 @@ export default function StudentFinance() {
       return;
     }
 
-    const payload = {
-      student: Number(selectedStudentId),
-      month: invoiceMonth,
-      year: Number(invoiceYear),
-      notes: invoiceNotes,
-      items: chargeItems,
-      subtotal,
-      remainingBalance: subtotal - Number(editingInvoice?.attributes?.totalPaid || editingInvoice?.totalPaid || 0)
-    };
-
     const tid = toast.loading(editingInvoice ? 'Saving changes...' : 'Generating invoice...');
     try {
       if (editingInvoice) {
-        // Standard REST PUT in Strapi v5 requires the documentId
         const docId = editingInvoice.documentId || editingInvoice.id;
-        await api.put(`/student-invoices/${docId}`, { data: payload });
-        toast.success('Invoicing updated successfully', { id: tid });
+        await api.put(`/student-invoices/${docId}`, {
+          data: {
+            student: Number(selectedStudentId),
+            month: invoiceMonth,
+            year: Number(invoiceYear),
+            notes: invoiceNotes,
+            items: chargeItems,
+            subtotal,
+            remainingBalance: subtotal - Number(editingInvoice.totalPaid || 0)
+          }
+        });
+        toast.success('Invoice updated successfully', { id: tid });
       } else {
-        // Create new Draft Invoice
         await api.post('/school-finance/invoices', {
           studentId: Number(selectedStudentId),
           month: invoiceMonth,
@@ -175,39 +208,35 @@ export default function StudentFinance() {
       setSelectedInvoiceIds([]);
       fetchAllData();
     } catch (e: any) {
-      toast.error(e.response?.data?.error?.message || 'Invoice operations failed', { id: tid });
+      toast.error(e.response?.data?.error?.message || 'Invoice operation failed', { id: tid });
     }
   };
 
-  // Trigger invoice edit modal
-  const startEditInvoice = (inv: any) => {
-    const actual = inv.attributes || inv;
-    const studentObj = getStudentData(actual.student);
+  const startEditInvoice = (inv: FlatInvoice) => {
     setEditingInvoice(inv);
-    setSelectedStudentId(String(studentObj?.id || ''));
-    setInvoiceMonth(actual.month);
-    setInvoiceYear(Number(actual.year));
-    setInvoiceNotes(actual.notes || '');
-    setChargeItems(actual.items || [{ description: 'Tuition Fee', amount: 500000, category: 'TUITION' }]);
+    // Pre-populate student dropdown with the student's numeric ID
+    setSelectedStudentId(String(inv.studentId || ''));
+    setInvoiceMonth(inv.month);
+    setInvoiceYear(Number(inv.year));
+    setInvoiceNotes(inv.notes || '');
+    setChargeItems(inv.items?.length ? inv.items : [{ description: 'Tuition Fee', amount: 500000, category: 'TUITION' }]);
     setIsInvoiceOpen(true);
   };
 
-  // Delete invoice handler
-  const handleDeleteInvoice = async (inv: any) => {
+  const handleDeleteInvoice = async (inv: FlatInvoice) => {
     if (!confirm('Are you sure you want to delete this invoice?')) return;
     const tid = toast.loading('Deleting invoice...');
     const docId = inv.documentId || inv.id;
     try {
       await api.delete(`/student-invoices/${docId}`);
-      toast.success('Invoice deleted successfully', { id: tid });
+      toast.success('Invoice deleted', { id: tid });
       setSelectedInvoiceIds(selectedInvoiceIds.filter(x => x !== inv.id));
-      fetchAllData();
+      setInvoices(prev => prev.filter(i => i.id !== inv.id));
     } catch (e) {
       toast.error('Failed to delete invoice', { id: tid });
     }
   };
 
-  // Submit selected invoices (Bulk submit)
   const handleSubmitSelectedInvoices = async () => {
     const tid = toast.loading(`Submitting ${selectedInvoiceIds.length} invoices...`);
     try {
@@ -216,7 +245,7 @@ export default function StudentFinance() {
         const docId = inv?.documentId || id;
         return api.put(`/student-invoices/${docId}`, { data: { status: 'SUBMITTED' } });
       }));
-      toast.success('Invoices submitted successfully to Account Lead', { id: tid });
+      toast.success('Invoices submitted to Account Lead', { id: tid });
       setSelectedInvoiceIds([]);
       fetchAllData();
     } catch (e) {
@@ -224,7 +253,7 @@ export default function StudentFinance() {
     }
   };
 
-  // Payment receipt / edit submission
+  // ─── Payment CRUD ──────────────────────────────────────────────────────────
   const handleCreateOrEditPayment = async () => {
     if (!selectedInvoiceId) {
       toast.error('Please select an invoice');
@@ -236,34 +265,32 @@ export default function StudentFinance() {
     }
 
     const inv = invoices.find(i => String(i.id) === selectedInvoiceId);
-    const invoice = inv?.attributes || inv;
-    const studentObj = getStudentData(invoice?.student);
 
-    const payload = {
-      invoice: Number(selectedInvoiceId),
-      student: studentObj?.id,
-      amount: Number(paymentAmount),
-      paymentMethod,
-      paymentCategory,
-      notes: paymentNotes
-    };
-
-    const tid = toast.loading(editingPayment ? 'Saving changes...' : 'Logging payment collection...');
+    const tid = toast.loading(editingPayment ? 'Saving changes...' : 'Logging payment...');
     try {
       if (editingPayment) {
         const docId = editingPayment.documentId || editingPayment.id;
-        await api.put(`/student-payments/${docId}`, { data: payload });
-        toast.success('Payment log updated successfully', { id: tid });
+        await api.put(`/student-payments/${docId}`, {
+          data: {
+            invoice: Number(selectedInvoiceId),
+            student: inv?.studentId,
+            amount: Number(paymentAmount),
+            paymentMethod,
+            paymentCategory,
+            notes: paymentNotes
+          }
+        });
+        toast.success('Payment log updated', { id: tid });
       } else {
         await api.post('/school-finance/payments', {
           invoiceId: Number(selectedInvoiceId),
-          studentId: studentObj?.id,
+          studentId: inv?.studentId,
           amount: Number(paymentAmount),
           paymentMethod,
           paymentCategory,
           notes: paymentNotes
         });
-        toast.success('Payment logged successfully in DRAFT state', { id: tid });
+        toast.success('Payment logged as DRAFT', { id: tid });
       }
 
       setIsPaymentOpen(false);
@@ -278,35 +305,30 @@ export default function StudentFinance() {
     }
   };
 
-  // Trigger payment edit modal
-  const startEditPayment = (pay: any) => {
-    const actual = pay.attributes || pay;
-    const invoiceObj = getInvoiceData(actual.invoice);
+  const startEditPayment = (pay: FlatPayment) => {
     setEditingPayment(pay);
-    setSelectedInvoiceId(String(invoiceObj?.id || ''));
-    setPaymentAmount(actual.amount);
-    setPaymentMethod(actual.paymentMethod);
-    setPaymentCategory(actual.paymentCategory);
-    setPaymentNotes(actual.notes || '');
+    setSelectedInvoiceId(String(pay.invoiceId || ''));
+    setPaymentAmount(pay.amount);
+    setPaymentMethod(pay.paymentMethod);
+    setPaymentCategory(pay.paymentCategory);
+    setPaymentNotes(pay.notes || '');
     setIsPaymentOpen(true);
   };
 
-  // Delete payment handler
-  const handleDeletePayment = async (pay: any) => {
+  const handleDeletePayment = async (pay: FlatPayment) => {
     if (!confirm('Are you sure you want to delete this payment log?')) return;
-    const tid = toast.loading('Deleting payment collection log...');
+    const tid = toast.loading('Deleting payment...');
     const docId = pay.documentId || pay.id;
     try {
       await api.delete(`/student-payments/${docId}`);
-      toast.success('Payment log deleted successfully', { id: tid });
+      toast.success('Payment log deleted', { id: tid });
       setSelectedPaymentIds(selectedPaymentIds.filter(x => x !== pay.id));
-      fetchAllData();
+      setPayments(prev => prev.filter(p => p.id !== pay.id));
     } catch (e) {
       toast.error('Failed to delete payment log', { id: tid });
     }
   };
 
-  // Submit selected payments (Bulk submit)
   const handleSubmitSelectedPayments = async () => {
     const tid = toast.loading(`Submitting ${selectedPaymentIds.length} payments...`);
     try {
@@ -315,7 +337,7 @@ export default function StudentFinance() {
         const docId = pay?.documentId || id;
         return api.put(`/student-payments/${docId}`, { data: { status: 'SUBMITTED' } });
       }));
-      toast.success('Payments submitted successfully for approval', { id: tid });
+      toast.success('Payments submitted for approval', { id: tid });
       setSelectedPaymentIds([]);
       fetchAllData();
     } catch (e) {
@@ -323,18 +345,18 @@ export default function StudentFinance() {
     }
   };
 
-  // Record Approval Workflow
+  // ─── Approval Workflow ─────────────────────────────────────────────────────
   const handleApprove = async (id: number, type: 'INVOICE' | 'PAYMENT') => {
     const endpoint = type === 'INVOICE'
       ? `/school-finance/invoices/${id}/approve`
       : `/school-finance/payments/${id}/approve`;
-
+    const tid = toast.loading(`Approving ${type.toLowerCase()}...`);
     try {
       await api.put(endpoint);
-      toast.success(`${type} record approved successfully`);
+      toast.success(`${type} approved successfully`, { id: tid });
       fetchAllData();
     } catch (e: any) {
-      toast.error('Approval failed');
+      toast.error(e.response?.data?.error?.message || 'Approval failed', { id: tid });
     }
   };
 
@@ -346,68 +368,83 @@ export default function StudentFinance() {
   };
 
   const handleRejectSubmit = async () => {
-    if (!rejectionReason) {
+    if (!rejectionReason.trim()) {
       toast.error('Please provide a reason');
       return;
     }
     const endpoint = rejectType === 'INVOICE'
       ? `/school-finance/invoices/${selectedRecordId}/reject`
       : `/school-finance/payments/${selectedRecordId}/reject`;
-
+    const tid = toast.loading('Submitting rejection...');
     try {
       await api.put(endpoint, { reason: rejectionReason });
-      toast.success(`${rejectType} rejected successfully`);
+      toast.success(`${rejectType} rejected`, { id: tid });
       setIsRejectOpen(false);
       fetchAllData();
     } catch (e: any) {
-      toast.error('Rejection submission failed');
+      toast.error(e.response?.data?.error?.message || 'Rejection failed', { id: tid });
     }
   };
 
   const handleBulkApproveInvoices = async () => {
+    if (selectedInvoiceIds.length === 0) return;
     const tid = toast.loading(`Approving ${selectedInvoiceIds.length} invoices...`);
     try {
-      await Promise.all(selectedInvoiceIds.map(id => {
-        return api.put(`/school-finance/invoices/${id}/approve`);
-      }));
+      await Promise.all(selectedInvoiceIds.map(id =>
+        api.put(`/school-finance/invoices/${id}/approve`)
+      ));
       toast.success('Invoices approved successfully', { id: tid });
       setSelectedInvoiceIds([]);
       fetchAllData();
-    } catch (e) {
-      toast.error('Failed to approve selected invoices', { id: tid });
+    } catch (e: any) {
+      toast.error(e.response?.data?.error?.message || 'Failed to approve selected invoices', { id: tid });
     }
   };
 
   const handleBulkApprovePayments = async () => {
+    if (selectedPaymentIds.length === 0) return;
     const tid = toast.loading(`Approving ${selectedPaymentIds.length} payments...`);
     try {
-      await Promise.all(selectedPaymentIds.map(id => {
-        return api.put(`/school-finance/payments/${id}/approve`);
-      }));
+      await Promise.all(selectedPaymentIds.map(id =>
+        api.put(`/school-finance/payments/${id}/approve`)
+      ));
       toast.success('Payments approved successfully', { id: tid });
       setSelectedPaymentIds([]);
       fetchAllData();
-    } catch (e) {
-      toast.error('Failed to approve selected payments', { id: tid });
+    } catch (e: any) {
+      toast.error(e.response?.data?.error?.message || 'Failed to approve selected payments', { id: tid });
     }
   };
 
-  // Professional PDF printable receipt generator
-  const downloadReceipt = async (paymentDocId: string) => {
-    const tid = toast.loading('Compiling receipt data...');
+  // ─── PDF Downloads ─────────────────────────────────────────────────────────
+  const downloadReceipt = async (paymentDocId: string, paymentId: number) => {
+    const tid = toast.loading('Compiling receipt...');
     try {
-      const pmRes = await api.get(`/student-payments/${paymentDocId}?populate[invoice][populate][student][fields][0]=id&populate[invoice][populate][student][fields][1]=username&populate[invoice][populate][student][fields][2]=email&populate[invoice][populate][student][fields][3]=userId&populate[student][fields][0]=id&populate[student][fields][1]=username&populate[student][fields][2]=email&populate[student][fields][3]=userId`);
-      const paymentData = pmRes.data?.data?.attributes || pmRes.data?.data || pmRes.data;
-      const paymentId = pmRes.data?.data?.id || pmRes.data?.id;
+      // Fetch payment with full nested populate using the documentId
+      const pmRes = await api.get(
+        `/student-payments/${paymentDocId}?populate[invoice][fields][0]=invoiceNumber&populate[invoice][fields][1]=remainingBalance&populate[student][fields][0]=username&populate[student][fields][1]=email&populate[student][fields][2]=userId`
+      );
+      const rawData = pmRes.data?.data || pmRes.data;
+      const paymentData = rawData?.attributes || rawData;
+      // Get the numeric id from the response for receipt lookup
+      const numericId = rawData?.id || paymentId;
 
-      const rcRes = await api.get(`/receipts?filters[studentPayment][id]=${paymentId}`);
-      const receiptData = rcRes.data?.[0] || {};
+      // Fetch receipt record
+      const rcRes = await api.get(`/receipts?filters[studentPayment][id]=${numericId}&populate=*`);
+      const receiptArr = rcRes.data?.data || rcRes.data || [];
+      const receiptData = (Array.isArray(receiptArr) ? receiptArr[0] : receiptArr)?.attributes
+        || (Array.isArray(receiptArr) ? receiptArr[0] : receiptArr)
+        || {};
 
-      const studentObj = getStudentData(paymentData.student);
-      const invoiceObj = getInvoiceData(paymentData.invoice);
+      // Resolve student & invoice from the flat payment we already have
+      const pay = payments.find(p => p.id === paymentId) || payments.find(p => p.documentId === paymentDocId);
+      const studentName = pay?.studentName || paymentData?.student?.username || 'Student';
+      const studentUserId = pay?.studentUserId || paymentData?.student?.userId || 'N/A';
+      const studentEmail = pay?.studentEmail || paymentData?.student?.email || 'N/A';
+      const invoiceNumber = pay?.invoiceNumber || paymentData?.invoice?.invoiceNumber || 'N/A';
+      const remainingBalance = pay?.invoiceRemainingBalance ?? paymentData?.invoice?.remainingBalance ?? 0;
 
       const doc = new jsPDF();
-
       doc.setDrawColor(59, 130, 246);
       doc.setLineWidth(1.5);
       doc.rect(5, 5, 200, 287);
@@ -417,7 +454,7 @@ export default function StudentFinance() {
 
       doc.setTextColor(255, 255, 255);
       doc.setFont('Helvetica', 'bold');
-      doc.setFontSize(28);
+      doc.setFontSize(22);
       doc.text('AMFOFANA ACADEMY', 15, 23);
       doc.setFontSize(9);
       doc.setFont('Helvetica', 'normal');
@@ -431,28 +468,26 @@ export default function StudentFinance() {
       doc.setFontSize(10);
       doc.setFont('Helvetica', 'normal');
 
-      doc.text(`Receipt Number: ${receiptData.receiptNumber || 'REC-TEMP'}`, 15, 80);
-      doc.text(`Invoice Ref: ${invoiceObj?.invoiceNumber || 'N/A'}`, 15, 87);
-      doc.text(`Payment Date: ${new Date(paymentData.paymentDate).toLocaleDateString()}`, 15, 94);
+      doc.text(`Receipt Number: ${receiptData?.receiptNumber || 'REC-TEMP'}`, 15, 80);
+      doc.text(`Invoice Ref: ${invoiceNumber}`, 15, 87);
+      doc.text(`Payment Date: ${new Date(paymentData?.paymentDate || new Date()).toLocaleDateString()}`, 15, 94);
 
       doc.setFont('Helvetica', 'bold');
       doc.text('Billed Student Profile:', 120, 80);
       doc.setFont('Helvetica', 'normal');
-      doc.text(`Name: ${studentObj?.username || studentObj?.name || 'Student'}`, 120, 87);
-      doc.text(`ID: ${studentObj?.userId || 'N/A'}`, 120, 94);
-      doc.text(`Email: ${studentObj?.email || 'N/A'}`, 120, 101);
-
-      const tableRows = [[
-        paymentData.paymentCategory || 'Fee',
-        paymentData.paymentMethod || 'Cash',
-        paymentData.notes || 'payout received',
-        `${Number(paymentData.amount).toLocaleString()} GNF`
-      ]];
+      doc.text(`Name: ${studentName}`, 120, 87);
+      doc.text(`ID: ${studentUserId}`, 120, 94);
+      doc.text(`Email: ${studentEmail}`, 120, 101);
 
       autoTable(doc, {
         startY: 115,
         head: [['Category', 'Method', 'Description', 'Amount Paid']],
-        body: tableRows,
+        body: [[
+          paymentData?.paymentCategory || pay?.paymentCategory || 'Fee',
+          paymentData?.paymentMethod || pay?.paymentMethod || 'Cash',
+          paymentData?.notes || pay?.notes || 'Payment received',
+          `${Number(paymentData?.amount || pay?.amount || 0).toLocaleString()} GNF`
+        ]],
         theme: 'grid',
         headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255] },
         styles: { fontSize: 10 }
@@ -462,25 +497,24 @@ export default function StudentFinance() {
       doc.setFont('Helvetica', 'bold');
       doc.text('Ledger Status:', 15, finalY + 20);
       doc.setFont('Helvetica', 'normal');
-      doc.text(`Total Amount Collected: ${Number(paymentData.amount).toLocaleString()} GNF`, 15, finalY + 28);
-      doc.text(`Remaining Invoice Balance: ${Number(invoiceObj?.remainingBalance || 0).toLocaleString()} GNF`, 15, finalY + 35);
+      doc.text(`Total Amount Collected: ${Number(paymentData?.amount || pay?.amount || 0).toLocaleString()} GNF`, 15, finalY + 28);
+      doc.text(`Remaining Invoice Balance: ${Number(remainingBalance).toLocaleString()} GNF`, 15, finalY + 35);
 
-      const qrDataUrl = await QRCode.toDataURL(receiptData.qrCode || 'https://verify.amfofana.edu');
+      const qrDataUrl = await QRCode.toDataURL(receiptData?.qrCode || 'https://verify.amfofana.edu');
       doc.addImage(qrDataUrl, 'PNG', 140, finalY + 15, 45, 45);
       doc.setFontSize(8);
       doc.setTextColor(148, 163, 184);
       doc.text('Scan for official digital verification', 142, finalY + 63);
 
-      doc.save(`Receipt-${paymentData.paymentNumber || 'GEN'}.pdf`);
-      toast.success('PDF compiled safely', { id: tid });
+      doc.save(`Receipt-${pay?.paymentNumber || 'GEN'}.pdf`);
+      toast.success('PDF compiled successfully', { id: tid });
     } catch (e: any) {
-      toast.error('PDF generation failed', { id: tid });
-      console.error(e);
+      console.error('Receipt error:', e);
+      toast.error('Receipt PDF generation failed', { id: tid });
     }
   };
 
-  // Compile detailed statement
-  const downloadStatement = async (studentId: number) => {
+  const downloadStatement = async (studentId: number | null) => {
     if (!studentId) {
       toast.error('Ledger export failed: Student ID was invalid');
       return;
@@ -491,48 +525,80 @@ export default function StudentFinance() {
       const data = res.data;
 
       const doc = new jsPDF();
-
       doc.setFillColor(15, 23, 42);
       doc.rect(5, 5, 200, 40, 'F');
       doc.setTextColor(255, 255, 255);
-      doc.setFontSize(22);
-      doc.text('AMFOFANA ACADEMY STATEMENT OF ACCOUNT', 15, 22);
+      doc.setFontSize(16);
+      doc.text('AMFOFANA ACADEMY — STATEMENT OF ACCOUNT', 15, 22);
       doc.setFontSize(10);
-      doc.text(`Billed Student: ${data.studentProfile.name} | ID: ${data.studentProfile.userId}`, 15, 32);
+      doc.text(`Student: ${data.studentProfile?.name || 'N/A'} | ID: ${data.studentProfile?.userId || 'N/A'}`, 15, 32);
 
       doc.setTextColor(15, 23, 42);
       doc.setFontSize(14);
       doc.text('Ledger Summary Metrics', 15, 60);
       doc.setFontSize(10);
-      doc.text(`Total Invoiced: ${data.totalInvoiced.toLocaleString()} GNF`, 15, 70);
-      doc.text(`Total Paid: ${data.totalPaid.toLocaleString()} GNF`, 15, 77);
-      doc.text(`Outstanding Balance: ${data.outstandingBalance.toLocaleString()} GNF`, 15, 84);
+      doc.text(`Total Invoiced: ${Number(data.totalInvoiced || 0).toLocaleString()} GNF`, 15, 70);
+      doc.text(`Total Paid: ${Number(data.totalPaid || 0).toLocaleString()} GNF`, 15, 77);
+      doc.text(`Outstanding Balance: ${Number(data.outstandingBalance || 0).toLocaleString()} GNF`, 15, 84);
 
       doc.setFontSize(14);
       doc.text('Invoice Ledger History', 15, 100);
-      const invRows = data.invoices.map((i: any) => [
+      const invRows = (data.invoices || []).map((i: any) => [
         i.invoiceNumber,
         `${i.month} ${i.year}`,
         i.status,
-        `${Number(i.subtotal).toLocaleString()} GNF`,
-        `${Number(i.remainingBalance).toLocaleString()} GNF`
+        `${Number(i.subtotal || 0).toLocaleString()} GNF`,
+        `${Number(i.remainingBalance || 0).toLocaleString()} GNF`
       ]);
 
       autoTable(doc, {
         startY: 105,
-        head: [['Invoice #', 'Billing Period', 'Status', 'Billed Subtotal', 'Remaining Balance']],
+        head: [['Invoice #', 'Billing Period', 'Status', 'Billed', 'Balance']],
         body: invRows,
         theme: 'grid',
         headStyles: { fillColor: [15, 23, 42] }
       });
 
-      doc.save(`Statement-${data.studentProfile.userId}.pdf`);
+      doc.save(`Statement-${data.studentProfile?.userId || studentId}.pdf`);
       toast.success('Statement generated successfully', { id: tid });
     } catch (e: any) {
       toast.error('Ledger export failed', { id: tid });
+      console.error(e);
     }
   };
 
+  // ─── Render Helpers ────────────────────────────────────────────────────────
+  const statusBadgeClass = (status: string) => {
+    if (status === 'PAID') return 'bg-emerald-500 hover:bg-emerald-600';
+    if (status === 'PARTIALLY_PAID') return 'bg-amber-500 hover:bg-amber-600';
+    if (status === 'APPROVED') return 'bg-blue-600 hover:bg-blue-700';
+    if (status === 'REJECTED') return 'bg-rose-500 hover:bg-rose-600';
+    if (status === 'DRAFT') return 'bg-slate-300 text-slate-800 hover:bg-slate-400';
+    return 'bg-slate-500 hover:bg-slate-600';
+  };
+
+  // Accountant: edit/delete DRAFT or REJECTED
+  // AccountLead: edit/delete anything (DRAFT, REJECTED, SUBMITTED, APPROVED)
+  const canEditDelete = (status: string) => {
+    if (role === 'ACCOUNTANT') return status === 'DRAFT' || status === 'REJECTED';
+    if (role === 'ACCOUNTLEAD') return true; // full access
+    return false;
+  };
+
+  // Checkbox eligibility
+  const canCheckInvoice = (inv: FlatInvoice) => {
+    if (role === 'ACCOUNTANT') return inv.status === 'DRAFT' || inv.status === 'REJECTED';
+    if (role === 'ACCOUNTLEAD') return inv.status !== 'PAID'; // can select any non-paid
+    return false;
+  };
+
+  const canCheckPayment = (pay: FlatPayment) => {
+    if (role === 'ACCOUNTANT') return pay.status === 'DRAFT' || pay.status === 'REJECTED';
+    if (role === 'ACCOUNTLEAD') return pay.status !== 'APPROVED'; // can select non-approved
+    return false;
+  };
+
+  // ─── JSX ───────────────────────────────────────────────────────────────────
   return (
     <div className="p-8 space-y-8 bg-slate-50/50 min-h-screen">
       {/* Header */}
@@ -546,7 +612,7 @@ export default function StudentFinance() {
           {role === 'ACCOUNTANT' && selectedInvoiceIds.length > 0 && (
             <Button
               onClick={handleSubmitSelectedInvoices}
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs px-5 duration-300"
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs px-5"
             >
               Submit Selected ({selectedInvoiceIds.length})
             </Button>
@@ -555,22 +621,22 @@ export default function StudentFinance() {
           {role === 'ACCOUNTLEAD' && selectedInvoiceIds.length > 0 && (
             <Button
               onClick={handleBulkApproveInvoices}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs px-5 duration-300"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs px-5"
             >
               Approve Selected ({selectedInvoiceIds.length})
             </Button>
           )}
 
           <Button
-            onClick={() => { setEditingInvoice(null); setIsInvoiceOpen(true); }}
-            className="flex items-center gap-2 px-5 bg-slate-900 text-white rounded-xl font-bold uppercase tracking-wider text-xs duration-300"
+            onClick={() => { setEditingInvoice(null); setSelectedStudentId(''); setIsInvoiceOpen(true); }}
+            className="flex items-center gap-2 px-5 bg-slate-900 text-white rounded-xl font-bold uppercase tracking-wider text-xs"
           >
             <Plus className="w-4 h-4" /> Create Invoice
           </Button>
 
           <Button
-            onClick={() => { setEditingPayment(null); setIsPaymentOpen(true); }}
-            className="flex items-center gap-2 px-5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs duration-300"
+            onClick={() => { setEditingPayment(null); setSelectedInvoiceId(''); setIsPaymentOpen(true); }}
+            className="flex items-center gap-2 px-5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs"
           >
             <DollarSign className="w-4 h-4" /> Receive Payment
           </Button>
@@ -579,7 +645,7 @@ export default function StudentFinance() {
 
       {/* Filters */}
       <Card className="border-0 shadow-lg shadow-slate-100 bg-white rounded-3xl p-6">
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-3">
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
@@ -589,18 +655,6 @@ export default function StudentFinance() {
               className="pl-10 h-11 rounded-xl bg-slate-50 border-slate-100"
             />
           </div>
-
-          <Select value={classFilter} onValueChange={setClassFilter}>
-            <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-slate-100">
-              <SelectValue placeholder="All Classes" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">All Classes</SelectItem>
-              {classes.map((cls: any) => (
-                <SelectItem key={cls.id} value={String(cls.id)}>{cls.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
 
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-slate-100">
@@ -623,7 +677,7 @@ export default function StudentFinance() {
         </div>
       </Card>
 
-      {/* Main Ledger Table */}
+      {/* ─── Invoice Ledger Table ───────────────────────────────────────────── */}
       <Card className="border-0 shadow-xl shadow-slate-100/50 bg-white rounded-3xl overflow-hidden">
         <CardHeader className="px-6 py-5 border-b border-slate-50">
           <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500">Student Billing Ledger Sheets</CardTitle>
@@ -644,137 +698,140 @@ export default function StudentFinance() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredInvoices.map((inv: any) => {
-                const actualInv = inv.attributes || inv;
-                const studentObj = getStudentData(actualInv.student);
-                const studentName = studentObj?.username || studentObj?.name || 'N/A';
-                const studentUserId = studentObj?.userId || 'N/A';
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center py-10 text-slate-400">Loading ledger data...</TableCell>
+                </TableRow>
+              ) : filteredInvoices.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center py-10 text-slate-400 font-bold uppercase text-[10px]">No invoices found</TableCell>
+                </TableRow>
+              ) : filteredInvoices.map((inv) => (
+                <TableRow key={inv.id} className="hover:bg-slate-50/50 duration-200">
+                  {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && (
+                    <TableCell className="w-12">
+                      {canCheckInvoice(inv) && (
+                        <input
+                          type="checkbox"
+                          checked={selectedInvoiceIds.includes(inv.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedInvoiceIds([...selectedInvoiceIds, inv.id]);
+                            } else {
+                              setSelectedInvoiceIds(selectedInvoiceIds.filter(id => id !== inv.id));
+                            }
+                          }}
+                          className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                        />
+                      )}
+                    </TableCell>
+                  )}
 
-                const isDraftOrRejected = actualInv.status === 'DRAFT' || actualInv.status === 'REJECTED';
-
-                return (
-                  <TableRow key={inv.id} className="hover:bg-slate-50/50 duration-200">
-                    {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && (
-                      <TableCell className="w-12">
-                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || (role === 'ACCOUNTLEAD' && (isDraftOrRejected || actualInv.status === 'SUBMITTED'))) && (
-                          <input
-                            type="checkbox"
-                            checked={selectedInvoiceIds.includes(inv.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedInvoiceIds([...selectedInvoiceIds, inv.id]);
-                              } else {
-                                setSelectedInvoiceIds(selectedInvoiceIds.filter(id => id !== inv.id));
-                              }
-                            }}
-                            className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                          />
-                        )}
-                      </TableCell>
-                    )}
-
-                    <TableCell className="font-bold tracking-tight text-slate-900">{actualInv.invoiceNumber}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <UserCircle2 className="w-5 h-5 text-slate-400" />
-                        <div>
-                          <p className="font-semibold text-slate-800">{studentName}</p>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{studentUserId}</p>
-                        </div>
+                  <TableCell className="font-bold tracking-tight text-slate-900">{inv.invoiceNumber}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <UserCircle2 className="w-5 h-5 text-slate-400" />
+                      <div>
+                        <p className="font-semibold text-slate-800">{inv.studentName || <span className="text-slate-400 italic text-xs">Unknown</span>}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{inv.studentUserId || '—'}</p>
                       </div>
-                    </TableCell>
-                    <TableCell className="font-medium text-slate-600">{actualInv.month} {actualInv.year}</TableCell>
-                    <TableCell className="font-black text-slate-900">{Number(actualInv.subtotal).toLocaleString()} GNF</TableCell>
-                    <TableCell className="font-semibold text-emerald-600">{Number(actualInv.totalPaid || 0).toLocaleString()} GNF</TableCell>
-                    <TableCell className="font-semibold text-rose-600">{Number(actualInv.remainingBalance).toLocaleString()} GNF</TableCell>
-                    <TableCell>
-                      <Badge className={
-                        actualInv.status === 'PAID' ? 'bg-emerald-500 hover:bg-emerald-600' :
-                        actualInv.status === 'PARTIALLY_PAID' ? 'bg-amber-500 hover:bg-amber-600' :
-                        actualInv.status === 'APPROVED' ? 'bg-blue-600 hover:bg-blue-700' :
-                        actualInv.status === 'REJECTED' ? 'bg-rose-500 hover:bg-rose-600' :
-                        actualInv.status === 'DRAFT' ? 'bg-slate-300 text-slate-800 hover:bg-slate-400' :
-                        'bg-slate-500 hover:bg-slate-600'
-                      }>
-                        {actualInv.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        {/* Edit/Delete for Accountant & AccountLead based on role privilege */}
-                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || 
-                          (role === 'ACCOUNTLEAD' && (isDraftOrRejected || actualInv.status === 'SUBMITTED' || actualInv.status === 'APPROVED'))) && (
-                          <>
-                            <Button 
-                              onClick={() => startEditInvoice(inv)}
-                              size="icon" 
-                              variant="ghost"
-                              className="rounded-xl border border-amber-100 bg-amber-50/50 hover:bg-amber-100 text-amber-700 h-8 w-8"
-                              title="Edit Invoice"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button 
-                              onClick={() => handleDeleteInvoice(inv)}
-                              size="icon" 
-                              variant="ghost"
-                              className="rounded-xl border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 h-8 w-8"
-                              title="Delete Invoice"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </>
-                        )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-medium text-slate-600">{inv.month} {inv.year}</TableCell>
+                  <TableCell className="font-black text-slate-900">{Number(inv.subtotal || 0).toLocaleString()} GNF</TableCell>
+                  <TableCell className="font-semibold text-emerald-600">{Number(inv.totalPaid || 0).toLocaleString()} GNF</TableCell>
+                  <TableCell className="font-semibold text-rose-600">{Number(inv.remainingBalance || 0).toLocaleString()} GNF</TableCell>
+                  <TableCell>
+                    <Badge className={statusBadgeClass(inv.status)}>{inv.status}</Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-1.5">
+                      {/* Edit & Delete — based on role privilege */}
+                      {canEditDelete(inv.status) && (
+                        <>
+                          <Button
+                            onClick={() => startEditInvoice(inv)}
+                            size="icon"
+                            variant="ghost"
+                            className="rounded-xl border border-amber-100 bg-amber-50/50 hover:bg-amber-100 text-amber-700 h-8 w-8"
+                            title="Edit Invoice"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            onClick={() => handleDeleteInvoice(inv)}
+                            size="icon"
+                            variant="ghost"
+                            className="rounded-xl border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 h-8 w-8"
+                            title="Delete Invoice"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </>
+                      )}
 
-                        {role === 'ACCOUNTLEAD' && actualInv.status === 'SUBMITTED' && (
-                          <>
-                            <Button
-                              onClick={() => handleApprove(inv.id, 'INVOICE')}
-                              size="icon"
-                              className="bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-xl"
-                              title="Approve"
-                            >
-                              <Check className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              onClick={() => handleOpenReject(inv.id, 'INVOICE')}
-                              size="icon"
-                              className="bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-xl"
-                              title="Reject"
-                            >
-                              <X className="w-4 h-4" />
-                            </Button>
-                          </>
-                        )}
+                      {/* AccountLead: Approve/Reject buttons for SUBMITTED items */}
+                      {role === 'ACCOUNTLEAD' && (inv.status === 'SUBMITTED' || inv.status === 'DRAFT') && (
+                        <>
+                          <Button
+                            onClick={() => handleApprove(inv.id, 'INVOICE')}
+                            size="icon"
+                            className="bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-xl h-8 w-8"
+                            title="Approve"
+                          >
+                            <Check className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            onClick={() => handleOpenReject(inv.id, 'INVOICE')}
+                            size="icon"
+                            className="bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-xl h-8 w-8"
+                            title="Reject"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </>
+                      )}
 
-                        {role === 'ACCOUNTLEAD' && actualInv.status === 'REJECTED' && (
-                          <span className="text-[10px] text-rose-500 font-extrabold uppercase bg-rose-50 px-2.5 py-1 rounded-xl">
-                            Rejected - Awaiting revision
-                          </span>
-                        )}
-
+                      {/* Accountant: Submit single invoice */}
+                      {role === 'ACCOUNTANT' && (inv.status === 'DRAFT' || inv.status === 'REJECTED') && (
                         <Button
-                          onClick={() => downloadStatement(studentObj?.id || actualInv.student?.id)}
-                          size="icon"
-                          variant="ghost"
-                          className="rounded-xl border hover:bg-slate-50"
-                          title="Download Statement"
+                          onClick={() => {
+                            const docId = inv.documentId || inv.id;
+                            const tid = toast.loading('Submitting invoice...');
+                            api.put(`/student-invoices/${docId}`, { data: { status: 'SUBMITTED' } })
+                              .then(() => { toast.success('Invoice submitted', { id: tid }); fetchAllData(); })
+                              .catch(() => toast.error('Submit failed', { id: tid }));
+                          }}
+                          size="sm"
+                          className="bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl text-xs font-bold px-3 h-8"
+                          title="Submit to AccountLead"
                         >
-                          <FileText className="w-4 h-4 text-slate-600" />
+                          Submit
                         </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+                      )}
+
+                      {/* Download Statement */}
+                      <Button
+                        onClick={() => downloadStatement(inv.studentId)}
+                        size="icon"
+                        variant="ghost"
+                        className="rounded-xl border hover:bg-slate-50"
+                        title="Download Statement"
+                      >
+                        <FileText className="w-4 h-4 text-slate-600" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
 
-      {/* Student Payments Awaiting Approval / Rejected Logs */}
+      {/* ─── Payments Pending Review (AccountLead view) ──────────────────────── */}
       {role === 'ACCOUNTLEAD' && (
-        <Card className="border-0 shadow-xl shadow-slate-100/50 bg-white rounded-3xl overflow-hidden mt-8">
+        <Card className="border-0 shadow-xl shadow-slate-100/50 bg-white rounded-3xl overflow-hidden">
           <CardHeader className="px-6 py-5 border-b border-slate-50">
             <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500 flex items-center gap-2">
               <Clock className="w-4 h-4 text-amber-500" /> Payment Collections Pending Review / Revision
@@ -794,66 +851,60 @@ export default function StudentFinance() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {payments.filter((p: any) => {
-                  const actual = p.attributes || p;
-                  return actual.status === 'SUBMITTED' || actual.status === 'REJECTED';
-                }).map((p: any) => {
-                  const actualPay = p.attributes || p;
-                  const studentObj = getStudentData(actualPay.student);
-                  const studentName = studentObj?.username || studentObj?.name || 'Student';
-                  return (
-                    <TableRow key={p.id}>
-                      <TableCell className="font-bold">{actualPay.paymentNumber}</TableCell>
-                      <TableCell>{studentName}</TableCell>
-                      <TableCell>{actualPay.paymentMethod}</TableCell>
-                      <TableCell><Badge variant="secondary">{actualPay.paymentCategory}</Badge></TableCell>
-                      <TableCell className="font-black">{Number(actualPay.amount).toLocaleString()} GNF</TableCell>
-                      <TableCell>
-                        <Badge className={actualPay.status === 'REJECTED' ? 'bg-rose-500' : 'bg-amber-500'}>
-                          {actualPay.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right space-x-2">
-                        {actualPay.status === 'SUBMITTED' ? (
-                          <>
-                            <Button
-                              onClick={() => handleApprove(p.id, 'PAYMENT')}
-                              size="sm"
-                              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs"
-                            >
-                              Approve
-                            </Button>
-                            <Button
-                              onClick={() => handleOpenReject(p.id, 'PAYMENT')}
-                              size="sm"
-                              className="bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs"
-                            >
-                              Reject
-                            </Button>
-                          </>
-                        ) : (
-                          <span className="text-[10px] text-rose-500 font-extrabold uppercase bg-rose-50 px-2.5 py-1 rounded-xl">Waiting Accountant Revision</span>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-                {payments.filter((p: any) => {
-                  const actual = p.attributes || p;
-                  return actual.status === 'SUBMITTED' || actual.status === 'REJECTED';
-                }).length === 0 && (
+                {payments.filter(p => p.status === 'SUBMITTED' || p.status === 'REJECTED').length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center p-6 text-slate-400 font-bold uppercase text-[10px]">No pending reviewer collections found</TableCell>
                   </TableRow>
-                )}
+                ) : payments.filter(p => p.status === 'SUBMITTED' || p.status === 'REJECTED').map((p) => (
+                  <TableRow key={p.id}>
+                    <TableCell className="font-bold">{p.paymentNumber}</TableCell>
+                    <TableCell>
+                      <div>
+                        <p className="font-semibold">{p.studentName || <span className="text-slate-400 italic text-xs">Unknown</span>}</p>
+                        <p className="text-[10px] text-slate-400">{p.studentUserId || '—'}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell>{p.paymentMethod}</TableCell>
+                    <TableCell><Badge variant="secondary">{p.paymentCategory}</Badge></TableCell>
+                    <TableCell className="font-black">{Number(p.amount).toLocaleString()} GNF</TableCell>
+                    <TableCell>
+                      <Badge className={p.status === 'REJECTED' ? 'bg-rose-500' : 'bg-amber-500'}>{p.status}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right space-x-2">
+                      {p.status === 'SUBMITTED' && (
+                        <>
+                          <Button
+                            onClick={() => handleApprove(p.id, 'PAYMENT')}
+                            size="sm"
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs"
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            onClick={() => handleOpenReject(p.id, 'PAYMENT')}
+                            size="sm"
+                            className="bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs"
+                          >
+                            Reject
+                          </Button>
+                        </>
+                      )}
+                      {p.status === 'REJECTED' && (
+                        <span className="text-[10px] text-rose-500 font-extrabold uppercase bg-rose-50 px-2.5 py-1 rounded-xl">
+                          Waiting Revision
+                        </span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </CardContent>
         </Card>
       )}
 
-      {/* Historical Payments / Receipts / Draft & Rejected Collections for Accountants */}
-      <Card className="border-0 shadow-xl shadow-slate-100/50 bg-white rounded-3xl overflow-hidden mt-8">
+      {/* ─── Payments & Receipts Ledger ──────────────────────────────────────── */}
+      <Card className="border-0 shadow-xl shadow-slate-100/50 bg-white rounded-3xl overflow-hidden">
         <CardHeader className="px-6 py-5 border-b border-slate-50 flex items-center justify-between">
           <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500">Payments & Receipts Ledger</CardTitle>
           <div className="flex gap-2">
@@ -890,97 +941,132 @@ export default function StudentFinance() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {payments.map((p: any) => {
-                const actualPay = p.attributes || p;
-                const studentObj = getStudentData(actualPay.student);
-                const studentName = studentObj?.username || studentObj?.name || 'N/A';
-
-                const isDraftOrRejected = actualPay.status === 'DRAFT' || actualPay.status === 'REJECTED';
-
-                return (
-                  <TableRow key={p.id}>
-                    {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && (
-                      <TableCell className="w-12">
-                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || (role === 'ACCOUNTLEAD' && (isDraftOrRejected || actualPay.status === 'SUBMITTED'))) && (
-                          <input
-                            type="checkbox"
-                            checked={selectedPaymentIds.includes(p.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedPaymentIds([...selectedPaymentIds, p.id]);
-                              } else {
-                                setSelectedPaymentIds(selectedPaymentIds.filter(id => id !== p.id));
-                              }
-                            }}
-                            className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
-                          />
-                        )}
-                      </TableCell>
-                    )}
-
-                    <TableCell className="font-bold">{actualPay.paymentNumber}</TableCell>
-                    <TableCell>{studentName}</TableCell>
-                    <TableCell>{actualPay.paymentMethod}</TableCell>
-                    <TableCell><Badge variant="secondary">{actualPay.paymentCategory}</Badge></TableCell>
-                    <TableCell className="font-black">{Number(actualPay.amount).toLocaleString()} GNF</TableCell>
-                    <TableCell>
-                      <Badge className={
-                        actualPay.status === 'APPROVED' ? 'bg-emerald-500' :
-                        actualPay.status === 'REJECTED' ? 'bg-rose-500' :
-                        actualPay.status === 'DRAFT' ? 'bg-slate-300 text-slate-800' :
-                        'bg-amber-500'
-                      }>
-                        {actualPay.status}
-                      </Badge>
+              {payments.map((p) => (
+                <TableRow key={p.id}>
+                  {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && (
+                    <TableCell className="w-12">
+                      {canCheckPayment(p) && (
+                        <input
+                          type="checkbox"
+                          checked={selectedPaymentIds.includes(p.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedPaymentIds([...selectedPaymentIds, p.id]);
+                            } else {
+                              setSelectedPaymentIds(selectedPaymentIds.filter(id => id !== p.id));
+                            }
+                          }}
+                          className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                        />
+                      )}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || 
-                          (role === 'ACCOUNTLEAD' && (isDraftOrRejected || actualPay.status === 'SUBMITTED' || actualPay.status === 'APPROVED'))) && (
-                          <>
-                            <Button 
-                              onClick={() => startEditPayment(p)}
-                              size="icon" 
-                              variant="ghost"
-                              className="rounded-xl border border-amber-100 bg-amber-50/50 hover:bg-amber-100 text-amber-700 h-8 w-8"
-                              title="Edit Log"
-                            >
-                              <Edit className="w-3.5 h-3.5" />
-                            </Button>
-                            <Button 
-                              onClick={() => handleDeletePayment(p)}
-                              size="icon" 
-                              variant="ghost"
-                              className="rounded-xl border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 h-8 w-8"
-                              title="Delete Log"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
-                          </>
-                        )}
+                  )}
 
-                        {actualPay.status === 'APPROVED' && (
-                          <Button 
-                            onClick={() => downloadReceipt(p.documentId || p.id)}
-                            size="sm" 
-                            variant="outline"
-                            className="rounded-lg gap-2 text-xs"
+                  <TableCell className="font-bold">{p.paymentNumber}</TableCell>
+                  <TableCell>
+                    <div>
+                      <p className="font-semibold">{p.studentName || <span className="text-slate-400 italic text-xs">Unknown</span>}</p>
+                      <p className="text-[10px] text-slate-400">{p.studentUserId || '—'}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell>{p.paymentMethod}</TableCell>
+                  <TableCell><Badge variant="secondary">{p.paymentCategory}</Badge></TableCell>
+                  <TableCell className="font-black">{Number(p.amount).toLocaleString()} GNF</TableCell>
+                  <TableCell>
+                    <Badge className={
+                      p.status === 'APPROVED' ? 'bg-emerald-500' :
+                      p.status === 'REJECTED' ? 'bg-rose-500' :
+                      p.status === 'DRAFT' ? 'bg-slate-300 text-slate-800' :
+                      'bg-amber-500'
+                    }>
+                      {p.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-1.5">
+                      {canEditDelete(p.status) && (
+                        <>
+                          <Button
+                            onClick={() => startEditPayment(p)}
+                            size="icon"
+                            variant="ghost"
+                            className="rounded-xl border border-amber-100 bg-amber-50/50 hover:bg-amber-100 text-amber-700 h-8 w-8"
+                            title="Edit Log"
                           >
-                            <Download className="w-3.5 h-3.5" /> PDF
+                            <Edit className="w-3.5 h-3.5" />
                           </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+                          <Button
+                            onClick={() => handleDeletePayment(p)}
+                            size="icon"
+                            variant="ghost"
+                            className="rounded-xl border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 h-8 w-8"
+                            title="Delete Log"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </>
+                      )}
+
+                      {/* AccountLead can approve/reject DRAFT payments directly */}
+                      {role === 'ACCOUNTLEAD' && (p.status === 'DRAFT' || p.status === 'SUBMITTED') && (
+                        <>
+                          <Button
+                            onClick={() => handleApprove(p.id, 'PAYMENT')}
+                            size="icon"
+                            className="bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-xl h-8 w-8"
+                            title="Approve"
+                          >
+                            <Check className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            onClick={() => handleOpenReject(p.id, 'PAYMENT')}
+                            size="icon"
+                            className="bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-xl h-8 w-8"
+                            title="Reject"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </>
+                      )}
+
+                      {/* Accountant: Submit single payment */}
+                      {role === 'ACCOUNTANT' && (p.status === 'DRAFT' || p.status === 'REJECTED') && (
+                        <Button
+                          onClick={() => {
+                            const docId = p.documentId || p.id;
+                            const tid = toast.loading('Submitting payment...');
+                            api.put(`/student-payments/${docId}`, { data: { status: 'SUBMITTED' } })
+                              .then(() => { toast.success('Payment submitted', { id: tid }); fetchAllData(); })
+                              .catch(() => toast.error('Submit failed', { id: tid }));
+                          }}
+                          size="sm"
+                          className="bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl text-xs font-bold px-3 h-8"
+                        >
+                          Submit
+                        </Button>
+                      )}
+
+                      {p.status === 'APPROVED' && (
+                        <Button
+                          onClick={() => downloadReceipt(p.documentId || String(p.id), p.id)}
+                          size="sm"
+                          variant="outline"
+                          className="rounded-lg gap-2 text-xs"
+                        >
+                          <Download className="w-3.5 h-3.5" /> PDF
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
 
-      {/* Create / Edit Invoice Dialog */}
-      <Dialog open={isInvoiceOpen} onOpenChange={(open) => { setIsInvoiceOpen(open); if (!open) setEditingInvoice(null); }}>
+      {/* ─── Create / Edit Invoice Dialog ────────────────────────────────────── */}
+      <Dialog open={isInvoiceOpen} onOpenChange={(open) => { setIsInvoiceOpen(open); if (!open) { setEditingInvoice(null); setSelectedStudentId(''); } }}>
         <DialogContent className="max-w-md bg-white rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-lg font-black uppercase tracking-wide">
@@ -990,13 +1076,16 @@ export default function StudentFinance() {
           <div className="space-y-4 py-4">
             <div className="space-y-1">
               <label className="text-xs font-black uppercase text-slate-400">Select Student</label>
-              <Select value={selectedStudentId} onValueChange={setSelectedStudentId} disabled={!!editingInvoice}>
+              {/* NOTE: dropdown is NOT disabled when editing — user can change student */}
+              <Select value={selectedStudentId} onValueChange={setSelectedStudentId}>
                 <SelectTrigger className="h-11 rounded-xl bg-slate-50">
                   <SelectValue placeholder="Search student name..." />
                 </SelectTrigger>
                 <SelectContent className="max-h-[250px] overflow-y-auto">
-                  {students.map((s: any) => (
-                    <SelectItem key={s.id} value={String(s.id)}>{s.name} ({s.userId})</SelectItem>
+                  {students.map((s) => (
+                    <SelectItem key={s.id} value={String(s.id)}>
+                      {s.username} {s.userId ? `(${s.userId})` : ''}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -1028,7 +1117,6 @@ export default function StudentFinance() {
               </div>
             </div>
 
-            {/* Charge breakdown items */}
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <label className="text-xs font-black uppercase text-slate-400">Fee Breakdown Items</label>
@@ -1088,7 +1176,7 @@ export default function StudentFinance() {
           <DialogFooter>
             <Button
               onClick={handleCreateOrEditInvoice}
-              className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold uppercase tracking-wider text-xs duration-300"
+              className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold uppercase tracking-wider text-xs"
             >
               {editingInvoice ? 'Save Invoice Changes' : 'Generate Billing Invoice'}
             </Button>
@@ -1096,8 +1184,8 @@ export default function StudentFinance() {
         </DialogContent>
       </Dialog>
 
-      {/* Receive / Edit Payment Dialog */}
-      <Dialog open={isPaymentOpen} onOpenChange={(open) => { setIsPaymentOpen(open); if (!open) setEditingPayment(null); }}>
+      {/* ─── Receive / Edit Payment Dialog ───────────────────────────────────── */}
+      <Dialog open={isPaymentOpen} onOpenChange={(open) => { setIsPaymentOpen(open); if (!open) { setEditingPayment(null); setSelectedInvoiceId(''); } }}>
         <DialogContent className="max-w-md bg-white rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-lg font-black uppercase tracking-wide">
@@ -1107,29 +1195,27 @@ export default function StudentFinance() {
           <div className="space-y-4 py-4">
             <div className="space-y-1">
               <label className="text-xs font-black uppercase text-slate-400">Select Billing Invoice</label>
-              <Select value={selectedInvoiceId} onValueChange={(val) => {
-                setSelectedInvoiceId(val);
-                const inv = invoices.find(i => String(i.id) === val);
-                const actualInv = inv?.attributes || inv;
-                setPaymentAmount(actualInv?.remainingBalance || 0);
-              }} disabled={!!editingPayment}>
+              <Select
+                value={selectedInvoiceId}
+                onValueChange={(val) => {
+                  setSelectedInvoiceId(val);
+                  const inv = invoices.find(i => String(i.id) === val);
+                  setPaymentAmount(inv?.remainingBalance || 0);
+                }}
+              >
                 <SelectTrigger className="h-11 rounded-xl bg-slate-50">
                   <SelectValue placeholder="Select invoice ref..." />
                 </SelectTrigger>
                 <SelectContent className="max-h-[250px] overflow-y-auto">
                   {invoices.filter(i => {
-                    const actual = i.attributes || i;
-                    // Allow draft/rejected invoices if editing, otherwise only allow approved/partially_paid ones
                     if (editingPayment) return true;
-                    return actual.status === 'APPROVED' || actual.status === 'PARTIALLY_PAID';
-                  }).map((inv: any) => {
-                    const actualInv = inv.attributes || inv;
-                    const studentObj = getStudentData(actualInv.student);
-                    const studentName = studentObj?.username || studentObj?.name || 'Student';
-                    const studentUserId = studentObj?.userId ? ` (${studentObj.userId})` : '';
+                    return i.status === 'APPROVED' || i.status === 'PARTIALLY_PAID';
+                  }).map((inv) => {
+                    const studentName = inv.studentName || 'Student';
+                    const studentUID = inv.studentUserId ? ` (${inv.studentUserId})` : '';
                     return (
                       <SelectItem key={inv.id} value={String(inv.id)}>
-                        {actualInv.invoiceNumber} - {studentName}{studentUserId} ({Number(actualInv.remainingBalance).toLocaleString()} GNF due)
+                        {inv.invoiceNumber} — {studentName}{studentUID} ({Number(inv.remainingBalance).toLocaleString()} GNF due)
                       </SelectItem>
                     );
                   })}
@@ -1193,15 +1279,15 @@ export default function StudentFinance() {
           <DialogFooter>
             <Button
               onClick={handleCreateOrEditPayment}
-              className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs duration-300"
+              className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs"
             >
-              {editingPayment ? 'Save Payment changes' : 'Submit Payment Receipt Log'}
+              {editingPayment ? 'Save Payment Changes' : 'Submit Payment Receipt Log'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Reject Record Dialog */}
+      {/* ─── Reject Record Dialog ─────────────────────────────────────────────── */}
       <Dialog open={isRejectOpen} onOpenChange={setIsRejectOpen}>
         <DialogContent className="max-w-sm bg-white rounded-3xl">
           <DialogHeader>
@@ -1221,7 +1307,7 @@ export default function StudentFinance() {
           <DialogFooter>
             <Button
               onClick={handleRejectSubmit}
-              className="w-full h-11 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs duration-300"
+              className="w-full h-11 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs"
             >
               Confirm Rejection
             </Button>
