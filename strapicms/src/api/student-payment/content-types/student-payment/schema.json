@@ -57,11 +57,12 @@
     "status": {
       "type": "enumeration",
       "enum": [
+        "DRAFT",
         "SUBMITTED",
         "APPROVED",
         "REJECTED"
       ],
-      "default": "SUBMITTED"
+      "default": "DRAFT"
     },
     "notes": {
       "type": "text"

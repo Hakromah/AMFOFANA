@@ -212,7 +212,7 @@ export default () => ({
         month: dto.month,
         year: dto.year,
         dueDate: dto.dueDate,
-        status: 'SUBMITTED',
+        status: 'DRAFT',
         notes: dto.notes,
         items: dto.items,
         subtotal,
@@ -304,7 +304,7 @@ export default () => ({
         paymentDate: dto.paymentDate || new Date().toISOString(),
         paymentMethod: dto.paymentMethod,
         paymentCategory: dto.paymentCategory,
-        status: 'SUBMITTED',
+        status: 'DRAFT',
         notes: dto.notes,
         receivedBy: userId
       },
@@ -478,7 +478,7 @@ export default () => ({
         allowances,
         deductions,
         netSalary,
-        status: 'SUBMITTED',
+        status: 'DRAFT',
         notes: dto.notes,
         submittedBy: userId
       },
@@ -564,7 +564,7 @@ export default () => ({
         amount: Number(dto.amount),
         paymentDate: dto.paymentDate || new Date().toISOString(),
         paymentMethod: dto.paymentMethod,
-        status: 'SUBMITTED',
+        status: 'DRAFT',
         notes: dto.notes,
         paidBy: userId
       },

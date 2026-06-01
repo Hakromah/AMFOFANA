@@ -47,13 +47,14 @@
     "status": {
       "type": "enumeration",
       "enum": [
+        "DRAFT",
         "SUBMITTED",
         "APPROVED",
         "REJECTED",
         "PAID",
         "PARTIALLY_PAID"
       ],
-      "default": "SUBMITTED"
+      "default": "DRAFT"
     },
     "notes": {
       "type": "text"
