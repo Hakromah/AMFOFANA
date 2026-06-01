@@ -63,19 +63,29 @@ export default function LoginPage() {
          });
 
          setTimeout(() => {
-            switch (role) {
-               case 'ADMIN':
-                  router.push('/admin');
-                  break;
-               case 'TEACHER':
-                  router.push('/teacher');
-                  break;
-               case 'STUDENT':
-                  router.push('/student');
-                  break;
-               default:
-                  router.push('/');
-            }
+             switch (role) {
+                case 'ADMIN':
+                   router.push('/admin');
+                   break;
+                case 'ACCOUNTANT':
+                case 'ACCOUNTLEAD':
+                   router.push('/admin/finance');
+                   break;
+                case 'TEACHER':
+                   router.push('/teacher');
+                   break;
+                case 'STUDENT':
+                   router.push('/student');
+                   break;
+                case 'DRIVER':
+                   router.push('/driver');
+                   break;
+                case 'WORKER':
+                   router.push('/worker');
+                   break;
+                default:
+                   router.push('/');
+             }
          }, 1000);
 
       } catch (error: any) {

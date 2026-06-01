@@ -104,6 +104,19 @@ export default function Sidebar({ menuItems }: SidebarProps) {
       }
    };
 
+   const finalMenuItems = userData?.role === 'ACCOUNTANT' ? [
+      { name: 'Finance Dashboard', href: '/admin/finance' },
+      { name: 'Student Finance', href: '/admin/finance/students' },
+      { name: 'Staff Finance', href: '/admin/finance/staff' },
+      { name: 'Reports', href: '/admin/finance/reports' }
+   ] : userData?.role === 'ACCOUNTLEAD' ? [
+      { name: 'Finance Dashboard', href: '/admin/finance' },
+      { name: 'Student Finance', href: '/admin/finance/students' },
+      { name: 'Staff Finance', href: '/admin/finance/staff' },
+      { name: 'Reports', href: '/admin/finance/reports' },
+      { name: 'Utilities', href: '/admin/finance/utilities' }
+   ] : menuItems;
+
    const renderContent = () => (
       <div className="flex flex-col h-full bg-white">
          {/* Branding Section */}
@@ -137,7 +150,7 @@ export default function Sidebar({ menuItems }: SidebarProps) {
 
                   {/* Navigation */}
                   <nav className="flex flex-col gap-1">
-                     {menuItems.map((item) => {
+                     {finalMenuItems.map((item) => {
                         const isActive = pathname === item.href;
 
                         return (

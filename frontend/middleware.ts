@@ -24,10 +24,17 @@ export function middleware(request: NextRequest) {
     switch (userRole) {
       case 'ADMIN':
         return NextResponse.redirect(new URL('/admin', request.url));
+      case 'ACCOUNTANT':
+      case 'ACCOUNTLEAD':
+        return NextResponse.redirect(new URL('/admin/finance', request.url));
       case 'TEACHER':
         return NextResponse.redirect(new URL('/teacher', request.url));
       case 'STUDENT':
         return NextResponse.redirect(new URL('/student', request.url));
+      case 'DRIVER':
+        return NextResponse.redirect(new URL('/driver', request.url));
+      case 'WORKER':
+        return NextResponse.redirect(new URL('/worker', request.url));
       default:
         // Fallback to homepage if role is not defined
         return NextResponse.redirect(new URL('/', request.url));
@@ -35,13 +42,37 @@ export function middleware(request: NextRequest) {
   }
 
   // Role-based route protection for dashboard access
-  if (pathname.startsWith('/admin') && userRole !== 'ADMIN') {
-    return NextResponse.redirect(new URL('/', request.url));
+  if (pathname.startsWith('/admin')) {
+    if (userRole !== 'ADMIN' && userRole !== 'ACCOUNTANT' && userRole !== 'ACCOUNTLEAD') {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+    // Safeguard administrative pages from Accountant/Lead roles
+    const adminOnlyPaths = [
+      '/admin/users',
+      '/admin/classes',
+      '/admin/subjects',
+      '/admin/exams',
+      '/admin/materials',
+      '/admin/assign-teacher',
+      '/admin/assign-student',
+      '/admin/timetable',
+      '/admin/settings'
+    ];
+    if (userRole !== 'ADMIN' && adminOnlyPaths.some(p => pathname.startsWith(p))) {
+      return NextResponse.redirect(new URL('/admin/finance', request.url));
+    }
   }
+
   if (pathname.startsWith('/teacher') && userRole !== 'TEACHER') {
     return NextResponse.redirect(new URL('/', request.url));
   }
   if (pathname.startsWith('/student') && userRole !== 'STUDENT') {
+    return NextResponse.redirect(new URL('/', request.url));
+  }
+  if (pathname.startsWith('/driver') && userRole !== 'DRIVER') {
+    return NextResponse.redirect(new URL('/', request.url));
+  }
+  if (pathname.startsWith('/worker') && userRole !== 'WORKER') {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
@@ -55,5 +86,8 @@ export const config = {
     '/admin/:path*',
     '/teacher/:path*',
     '/student/:path*',
+    '/driver/:path*',
+    '/worker/:path*',
   ],
 };
+

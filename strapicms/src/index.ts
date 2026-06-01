@@ -51,20 +51,48 @@ export default {
           'getSemesterTranscript', 'getDashboardStats', 'previewTranscript', 'getStudentTranscriptsList'
         ].map(act => `api::school-student.school-student.${act}`);
 
+        const schoolFinanceActions = [
+          'getStats', 'recalculateSystem', 'getAuditLogs', 'createInvoice',
+          'approveInvoice', 'rejectInvoice', 'createPayment', 'approvePayment',
+          'rejectPayment', 'getStudentStatement', 'createSalaryRecord', 'approveSalaryRecord',
+          'rejectSalaryRecord', 'createSalaryPayment', 'approveSalaryPayment', 'rejectSalaryPayment'
+        ].map(act => `api::school-finance.school-finance.${act}`);
+
         const semesterActions = ['find', 'findOne', 'create', 'update', 'delete'].map(act => `api::semester.semester.${act}`);
         const termActions = ['find', 'findOne', 'create', 'update', 'delete'].map(act => `api::term.term.${act}`);
         const academicYearActions = ['find', 'findOne', 'create', 'update', 'delete'].map(act => `api::academic-year.academic-year.${act}`);
         const transcriptActions = ['find', 'findOne', 'create', 'update', 'delete'].map(act => `api::transcript.transcript.${act}`);
+
+        // Accounting Collections
+        const studentInvoiceActions = ['find', 'findOne', 'create', 'update', 'delete'].map(act => `api::student-invoice.student-invoice.${act}`);
+        const studentPaymentActions = ['find', 'findOne', 'create', 'update', 'delete'].map(act => `api::student-payment.student-payment.${act}`);
+        const salaryRecordActions = ['find', 'findOne', 'create', 'update', 'delete'].map(act => `api::salary-record.salary-record.${act}`);
+        const salaryPaymentActions = ['find', 'findOne', 'create', 'update', 'delete'].map(act => `api::salary-payment.salary-payment.${act}`);
+        const financialStatementActions = ['find', 'findOne', 'create', 'update', 'delete'].map(act => `api::financial-statement.financial-statement.${act}`);
+        const receiptActions = ['find', 'findOne', 'create', 'update', 'delete'].map(act => `api::receipt.receipt.${act}`);
+        const accountingLogActions = ['find', 'findOne', 'create', 'update', 'delete'].map(act => `api::accounting-log.accounting-log.${act}`);
+        const paymentCategoryActions = ['find', 'findOne', 'create', 'update', 'delete'].map(act => `api::payment-category.payment-category.${act}`);
+        const financialReportActions = ['find', 'findOne', 'create', 'update', 'delete'].map(act => `api::financial-report.financial-report.${act}`);
 
         const allActions = [
           ...schoolAdminActions, 
           ...schoolAuthActions, 
           ...schoolTeacherActions, 
           ...schoolStudentActions,
+          ...schoolFinanceActions,
           ...semesterActions,
           ...termActions,
           ...academicYearActions,
           ...transcriptActions,
+          ...studentInvoiceActions,
+          ...studentPaymentActions,
+          ...salaryRecordActions,
+          ...salaryPaymentActions,
+          ...financialStatementActions,
+          ...receiptActions,
+          ...accountingLogActions,
+          ...paymentCategoryActions,
+          ...financialReportActions,
           'api::contact-message.contact-message.create',
           'api::newsletter-subscription.newsletter-subscription.create'
         ];

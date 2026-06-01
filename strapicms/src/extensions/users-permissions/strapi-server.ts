@@ -27,7 +27,7 @@ export default (plugin: any) => {
     address: { type: 'text' },
     gender: { type: 'enumeration', enum: ['Male', 'Female', 'Other'] },
     phoneNumber: { type: 'string' },
-    schoolRole: { type: 'enumeration', enum: ['ADMIN', 'TEACHER', 'STUDENT'] },
+    schoolRole: { type: 'enumeration', enum: ['ADMIN', 'TEACHER', 'STUDENT', 'ACCOUNTANT', 'ACCOUNTLEAD', 'DRIVER', 'WORKER'] },
     teachingClasses: {
       type: 'relation',
       relation: 'manyToMany',
