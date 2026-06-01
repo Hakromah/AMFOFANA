@@ -134,8 +134,15 @@ export default function StaffFinance() {
     const tid = toast.loading(editingRecord ? 'Saving changes...' : 'Generating record...');
     try {
       if (editingRecord) {
-        const docId = editingRecord.documentId || editingRecord.id;
-        await api.put(`/salary-records/${docId}`, { data: payload });
+        await api.put(`/school-finance/salaries/${editingRecord.id}/update`, {
+          staffId: Number(selectedStaffId),
+          month: salaryMonth,
+          year: Number(salaryYear),
+          baseSalary: Number(baseSalary),
+          allowances: Number(allowances),
+          deductions: Number(deductions),
+          notes: salaryNotes
+        });
         toast.success('Payroll statement updated successfully', { id: tid });
       } else {
         await api.post('/school-finance/salaries', {
@@ -182,9 +189,8 @@ export default function StaffFinance() {
   const handleDeleteRecord = async (rec: any) => {
     if (!confirm('Are you sure you want to delete this salary record?')) return;
     const tid = toast.loading('Deleting salary record...');
-    const docId = rec.documentId || rec.id;
     try {
-      await api.delete(`/salary-records/${docId}`);
+      await api.delete(`/school-finance/salaries/${rec.id}`);
       toast.success('Salary record deleted successfully', { id: tid });
       setSelectedRecordIds(selectedRecordIds.filter(x => x !== rec.id));
       fetchAllData();
@@ -198,9 +204,7 @@ export default function StaffFinance() {
     const tid = toast.loading(`Submitting ${selectedRecordIds.length} salary records...`);
     try {
       await Promise.all(selectedRecordIds.map(id => {
-        const r = salaryRecords.find(x => x.id === id);
-        const docId = r?.documentId || id;
-        return api.put(`/salary-records/${docId}`, { data: { status: 'SUBMITTED' } });
+        return api.put(`/school-finance/salaries/${id}/update`, { status: 'SUBMITTED' });
       }));
       toast.success('Salary records submitted successfully for review', { id: tid });
       setSelectedRecordIds([]);
@@ -229,15 +233,12 @@ export default function StaffFinance() {
     const tid = toast.loading(editingPayout ? 'Saving changes...' : 'Logging disbursement...');
     try {
       if (editingPayout) {
-        const docId = editingPayout.documentId || editingPayout.id;
-        await api.put(`/salary-payments/${docId}`, {
-          data: {
-            salaryRecord: Number(selectedRecordIdForPayout),
-            staff: staffId,
-            amount: Number(payoutAmount),
-            paymentMethod: payoutMethod,
-            notes: payoutNotes
-          }
+        await api.put(`/school-finance/salary-payments/${editingPayout.id}/update`, {
+          salaryRecordId: Number(selectedRecordIdForPayout),
+          staffId: staffId,
+          amount: Number(payoutAmount),
+          paymentMethod: payoutMethod,
+          notes: payoutNotes
         });
         toast.success('Payout entry updated successfully', { id: tid });
       } else {
@@ -277,9 +278,8 @@ export default function StaffFinance() {
   const handleDeletePayout = async (pay: any) => {
     if (!confirm('Are you sure you want to delete this disbursement log?')) return;
     const tid = toast.loading('Deleting disbursement log...');
-    const docId = pay.documentId || pay.id;
     try {
-      await api.delete(`/salary-payments/${docId}`);
+      await api.delete(`/school-finance/salary-payments/${pay.id}`);
       toast.success('Disbursement log deleted successfully', { id: tid });
       setSelectedPayoutIds(selectedPayoutIds.filter(x => x !== pay.id));
       fetchAllData();
@@ -293,9 +293,7 @@ export default function StaffFinance() {
     const tid = toast.loading(`Submitting ${selectedPayoutIds.length} payouts...`);
     try {
       await Promise.all(selectedPayoutIds.map(id => {
-        const p = salaryPayments.find(x => x.id === id);
-        const docId = p?.documentId || id;
-        return api.put(`/salary-payments/${docId}`, { data: { status: 'SUBMITTED' } });
+        return api.put(`/school-finance/salary-payments/${id}/update`, { status: 'SUBMITTED' });
       }));
       toast.success('Disbursements submitted successfully for approval', { id: tid });
       setSelectedPayoutIds([]);
@@ -561,7 +559,10 @@ export default function StaffFinance() {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <UserCircle2 className="w-5 h-5 text-slate-400" />
-                        <span className="font-semibold text-slate-800">{staffName}</span>
+                        <div>
+                          <p className="font-semibold text-slate-800">{staffName}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{rec.staffUserId || '—'}</p>
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell><Badge variant="secondary" className="font-bold text-[10px] uppercase tracking-wider">{staffRole}</Badge></TableCell>
@@ -664,7 +665,12 @@ export default function StaffFinance() {
                   return (
                     <TableRow key={p.id}>
                       <TableCell className="font-bold">{p.paymentNumber}</TableCell>
-                      <TableCell>{staffName}</TableCell>
+                      <TableCell>
+                        <div>
+                          <p className="font-semibold">{staffName}</p>
+                          <p className="text-[10px] text-slate-400">{p.staffUserId || '—'}</p>
+                        </div>
+                      </TableCell>
                       <TableCell>{p.paymentMethod}</TableCell>
                       <TableCell className="font-black">{Number(p.amount || 0).toLocaleString()} GNF</TableCell>
                       <TableCell>
@@ -766,7 +772,12 @@ export default function StaffFinance() {
                     )}
 
                     <TableCell className="font-bold">{p.paymentNumber}</TableCell>
-                    <TableCell>{staffName}</TableCell>
+                    <TableCell>
+                      <div>
+                        <p className="font-semibold">{staffName}</p>
+                        <p className="text-[10px] text-slate-400">{p.staffUserId || '—'}</p>
+                      </div>
+                    </TableCell>
                     <TableCell>{p.paymentMethod}</TableCell>
                     <TableCell className="font-black">{Number(p.amount || 0).toLocaleString()} GNF</TableCell>
                     <TableCell>

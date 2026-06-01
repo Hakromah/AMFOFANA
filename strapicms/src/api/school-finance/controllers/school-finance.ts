@@ -111,7 +111,8 @@ export default {
       staffDocumentId: rec.staff?.documentId || null,
       staffName: rec.staff?.username || rec.staff?.name || null,
       staffRole: rec.staff?.schoolRole || null,
-      staffEmail: rec.staff?.email || null
+      staffEmail: rec.staff?.email || null,
+      staffUserId: rec.staff?.userId || null
     }));
 
     const flatPayments = salaryPayments.map((pay: any) => ({
@@ -134,7 +135,8 @@ export default {
       staffDocumentId: pay.staff?.documentId || null,
       staffName: pay.staff?.username || pay.staff?.name || null,
       staffRole: pay.staff?.schoolRole || null,
-      staffEmail: pay.staff?.email || null
+      staffEmail: pay.staff?.email || null,
+      staffUserId: pay.staff?.userId || null
     }));
 
     ctx.body = { salaryRecords: flatRecords, salaryPayments: flatPayments };
@@ -288,5 +290,115 @@ export default {
     const { reason } = ctx.request.body;
     const payment = await strapi.service('api::school-finance.school-finance').rejectSalaryPayment(Number(ctx.params.id), reason, user.id);
     ctx.body = payment;
+  },
+
+  // ─── Update & Delete endpoints (bypass Strapi v5 REST relation validation) ──
+  async updateInvoice(ctx: any) {
+    const user = ctx.state.user;
+    if (!user || (user.schoolRole !== 'ACCOUNTANT' && user.schoolRole !== 'ACCOUNTLEAD' && user.schoolRole !== 'ADMIN')) {
+      return ctx.forbidden('Access denied');
+    }
+    const id = Number(ctx.params.id);
+    const body = ctx.request.body;
+    const updateData: any = {};
+    if (body.studentId) updateData.student = Number(body.studentId);
+    if (body.month) updateData.month = body.month;
+    if (body.year !== undefined) updateData.year = Number(body.year);
+    if (body.notes !== undefined) updateData.notes = body.notes;
+    if (body.items) {
+      updateData.items = body.items;
+      updateData.subtotal = body.items.reduce((sum: number, item: any) => sum + Number(item.amount || 0), 0);
+    }
+    if (body.subtotal !== undefined) updateData.subtotal = Number(body.subtotal);
+    if (body.remainingBalance !== undefined) updateData.remainingBalance = Number(body.remainingBalance);
+    if (body.status) updateData.status = body.status;
+    ctx.body = await (strapi.entityService.update as any)('api::student-invoice.student-invoice', id, { data: updateData, populate: ['student'] });
+  },
+
+  async deleteInvoice(ctx: any) {
+    const user = ctx.state.user;
+    if (!user || (user.schoolRole !== 'ACCOUNTANT' && user.schoolRole !== 'ACCOUNTLEAD' && user.schoolRole !== 'ADMIN')) {
+      return ctx.forbidden('Access denied');
+    }
+    ctx.body = await (strapi.entityService.delete as any)('api::student-invoice.student-invoice', Number(ctx.params.id));
+  },
+
+  async updatePayment(ctx: any) {
+    const user = ctx.state.user;
+    if (!user || (user.schoolRole !== 'ACCOUNTANT' && user.schoolRole !== 'ACCOUNTLEAD' && user.schoolRole !== 'ADMIN')) {
+      return ctx.forbidden('Access denied');
+    }
+    const id = Number(ctx.params.id);
+    const body = ctx.request.body;
+    const updateData: any = {};
+    if (body.invoiceId) updateData.invoice = Number(body.invoiceId);
+    if (body.studentId) updateData.student = Number(body.studentId);
+    if (body.amount !== undefined) updateData.amount = Number(body.amount);
+    if (body.paymentMethod) updateData.paymentMethod = body.paymentMethod;
+    if (body.paymentCategory) updateData.paymentCategory = body.paymentCategory;
+    if (body.notes !== undefined) updateData.notes = body.notes;
+    if (body.status) updateData.status = body.status;
+    ctx.body = await (strapi.entityService.update as any)('api::student-payment.student-payment', id, { data: updateData, populate: ['student', 'invoice'] });
+  },
+
+  async deletePayment(ctx: any) {
+    const user = ctx.state.user;
+    if (!user || (user.schoolRole !== 'ACCOUNTANT' && user.schoolRole !== 'ACCOUNTLEAD' && user.schoolRole !== 'ADMIN')) {
+      return ctx.forbidden('Access denied');
+    }
+    ctx.body = await (strapi.entityService.delete as any)('api::student-payment.student-payment', Number(ctx.params.id));
+  },
+
+  async updateSalaryRecord(ctx: any) {
+    const user = ctx.state.user;
+    if (!user || (user.schoolRole !== 'ACCOUNTANT' && user.schoolRole !== 'ACCOUNTLEAD' && user.schoolRole !== 'ADMIN')) {
+      return ctx.forbidden('Access denied');
+    }
+    const id = Number(ctx.params.id);
+    const body = ctx.request.body;
+    const updateData: any = {};
+    if (body.staffId) updateData.staff = Number(body.staffId);
+    if (body.month) updateData.month = body.month;
+    if (body.year !== undefined) updateData.year = Number(body.year);
+    if (body.baseSalary !== undefined) updateData.baseSalary = Number(body.baseSalary);
+    if (body.allowances !== undefined) updateData.allowances = Number(body.allowances);
+    if (body.deductions !== undefined) updateData.deductions = Number(body.deductions);
+    if (body.notes !== undefined) updateData.notes = body.notes;
+    if (body.status) updateData.status = body.status;
+    updateData.netSalary = Number(body.baseSalary || 0) + Number(body.allowances || 0) - Number(body.deductions || 0);
+    ctx.body = await (strapi.entityService.update as any)('api::salary-record.salary-record', id, { data: updateData, populate: ['staff'] });
+  },
+
+  async deleteSalaryRecord(ctx: any) {
+    const user = ctx.state.user;
+    if (!user || (user.schoolRole !== 'ACCOUNTANT' && user.schoolRole !== 'ACCOUNTLEAD' && user.schoolRole !== 'ADMIN')) {
+      return ctx.forbidden('Access denied');
+    }
+    ctx.body = await (strapi.entityService.delete as any)('api::salary-record.salary-record', Number(ctx.params.id));
+  },
+
+  async updateSalaryPayment(ctx: any) {
+    const user = ctx.state.user;
+    if (!user || (user.schoolRole !== 'ACCOUNTANT' && user.schoolRole !== 'ACCOUNTLEAD' && user.schoolRole !== 'ADMIN')) {
+      return ctx.forbidden('Access denied');
+    }
+    const id = Number(ctx.params.id);
+    const body = ctx.request.body;
+    const updateData: any = {};
+    if (body.salaryRecordId) updateData.salaryRecord = Number(body.salaryRecordId);
+    if (body.staffId) updateData.staff = Number(body.staffId);
+    if (body.amount !== undefined) updateData.amount = Number(body.amount);
+    if (body.paymentMethod) updateData.paymentMethod = body.paymentMethod;
+    if (body.notes !== undefined) updateData.notes = body.notes;
+    if (body.status) updateData.status = body.status;
+    ctx.body = await (strapi.entityService.update as any)('api::salary-payment.salary-payment', id, { data: updateData, populate: ['staff', 'salaryRecord'] });
+  },
+
+  async deleteSalaryPayment(ctx: any) {
+    const user = ctx.state.user;
+    if (!user || (user.schoolRole !== 'ACCOUNTANT' && user.schoolRole !== 'ACCOUNTLEAD' && user.schoolRole !== 'ADMIN')) {
+      return ctx.forbidden('Access denied');
+    }
+    ctx.body = await (strapi.entityService.delete as any)('api::salary-payment.salary-payment', Number(ctx.params.id));
   }
 };

@@ -112,6 +112,55 @@ export default {
       path: '/school-finance/salary-payments/:id/reject',
       handler: 'school-finance.rejectSalaryPayment',
       config: { middlewares: [] }
+    },
+    // ─── Update & Delete endpoints ─────────────────────────────────────────
+    {
+      method: 'PUT',
+      path: '/school-finance/invoices/:id/update',
+      handler: 'school-finance.updateInvoice',
+      config: { middlewares: [] }
+    },
+    {
+      method: 'DELETE',
+      path: '/school-finance/invoices/:id',
+      handler: 'school-finance.deleteInvoice',
+      config: { middlewares: [] }
+    },
+    {
+      method: 'PUT',
+      path: '/school-finance/payments/:id/update',
+      handler: 'school-finance.updatePayment',
+      config: { middlewares: [] }
+    },
+    {
+      method: 'DELETE',
+      path: '/school-finance/payments/:id',
+      handler: 'school-finance.deletePayment',
+      config: { middlewares: [] }
+    },
+    {
+      method: 'PUT',
+      path: '/school-finance/salaries/:id/update',
+      handler: 'school-finance.updateSalaryRecord',
+      config: { middlewares: [] }
+    },
+    {
+      method: 'DELETE',
+      path: '/school-finance/salaries/:id',
+      handler: 'school-finance.deleteSalaryRecord',
+      config: { middlewares: [] }
+    },
+    {
+      method: 'PUT',
+      path: '/school-finance/salary-payments/:id/update',
+      handler: 'school-finance.updateSalaryPayment',
+      config: { middlewares: [] }
+    },
+    {
+      method: 'DELETE',
+      path: '/school-finance/salary-payments/:id',
+      handler: 'school-finance.deleteSalaryPayment',
+      config: { middlewares: [] }
     }
   ]
 };

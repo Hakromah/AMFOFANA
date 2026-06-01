@@ -175,17 +175,12 @@ export default function StudentFinance() {
     const tid = toast.loading(editingInvoice ? 'Saving changes...' : 'Generating invoice...');
     try {
       if (editingInvoice) {
-        const docId = editingInvoice.documentId || editingInvoice.id;
-        await api.put(`/student-invoices/${docId}`, {
-          data: {
-            student: Number(selectedStudentId),
-            month: invoiceMonth,
-            year: Number(invoiceYear),
-            notes: invoiceNotes,
-            items: chargeItems,
-            subtotal,
-            remainingBalance: subtotal - Number(editingInvoice.totalPaid || 0)
-          }
+        await api.put(`/school-finance/invoices/${editingInvoice.id}/update`, {
+          studentId: Number(selectedStudentId),
+          month: invoiceMonth,
+          year: Number(invoiceYear),
+          notes: invoiceNotes,
+          items: chargeItems,
         });
         toast.success('Invoice updated successfully', { id: tid });
       } else {
@@ -226,9 +221,8 @@ export default function StudentFinance() {
   const handleDeleteInvoice = async (inv: FlatInvoice) => {
     if (!confirm('Are you sure you want to delete this invoice?')) return;
     const tid = toast.loading('Deleting invoice...');
-    const docId = inv.documentId || inv.id;
     try {
-      await api.delete(`/student-invoices/${docId}`);
+      await api.delete(`/school-finance/invoices/${inv.id}`);
       toast.success('Invoice deleted', { id: tid });
       setSelectedInvoiceIds(selectedInvoiceIds.filter(x => x !== inv.id));
       setInvoices(prev => prev.filter(i => i.id !== inv.id));
@@ -241,9 +235,7 @@ export default function StudentFinance() {
     const tid = toast.loading(`Submitting ${selectedInvoiceIds.length} invoices...`);
     try {
       await Promise.all(selectedInvoiceIds.map(id => {
-        const inv = invoices.find(i => i.id === id);
-        const docId = inv?.documentId || id;
-        return api.put(`/student-invoices/${docId}`, { data: { status: 'SUBMITTED' } });
+        return api.put(`/school-finance/invoices/${id}/update`, { status: 'SUBMITTED' });
       }));
       toast.success('Invoices submitted to Account Lead', { id: tid });
       setSelectedInvoiceIds([]);
@@ -269,16 +261,13 @@ export default function StudentFinance() {
     const tid = toast.loading(editingPayment ? 'Saving changes...' : 'Logging payment...');
     try {
       if (editingPayment) {
-        const docId = editingPayment.documentId || editingPayment.id;
-        await api.put(`/student-payments/${docId}`, {
-          data: {
-            invoice: Number(selectedInvoiceId),
-            student: inv?.studentId,
-            amount: Number(paymentAmount),
-            paymentMethod,
-            paymentCategory,
-            notes: paymentNotes
-          }
+        await api.put(`/school-finance/payments/${editingPayment.id}/update`, {
+          invoiceId: Number(selectedInvoiceId),
+          studentId: inv?.studentId,
+          amount: Number(paymentAmount),
+          paymentMethod,
+          paymentCategory,
+          notes: paymentNotes
         });
         toast.success('Payment log updated', { id: tid });
       } else {
@@ -318,9 +307,8 @@ export default function StudentFinance() {
   const handleDeletePayment = async (pay: FlatPayment) => {
     if (!confirm('Are you sure you want to delete this payment log?')) return;
     const tid = toast.loading('Deleting payment...');
-    const docId = pay.documentId || pay.id;
     try {
-      await api.delete(`/student-payments/${docId}`);
+      await api.delete(`/school-finance/payments/${pay.id}`);
       toast.success('Payment log deleted', { id: tid });
       setSelectedPaymentIds(selectedPaymentIds.filter(x => x !== pay.id));
       setPayments(prev => prev.filter(p => p.id !== pay.id));
@@ -333,9 +321,7 @@ export default function StudentFinance() {
     const tid = toast.loading(`Submitting ${selectedPaymentIds.length} payments...`);
     try {
       await Promise.all(selectedPaymentIds.map(id => {
-        const pay = payments.find(p => p.id === id);
-        const docId = pay?.documentId || id;
-        return api.put(`/student-payments/${docId}`, { data: { status: 'SUBMITTED' } });
+        return api.put(`/school-finance/payments/${id}/update`, { status: 'SUBMITTED' });
       }));
       toast.success('Payments submitted for approval', { id: tid });
       setSelectedPaymentIds([]);
@@ -796,9 +782,8 @@ export default function StudentFinance() {
                       {role === 'ACCOUNTANT' && (inv.status === 'DRAFT' || inv.status === 'REJECTED') && (
                         <Button
                           onClick={() => {
-                            const docId = inv.documentId || inv.id;
                             const tid = toast.loading('Submitting invoice...');
-                            api.put(`/student-invoices/${docId}`, { data: { status: 'SUBMITTED' } })
+                            api.put(`/school-finance/invoices/${inv.id}/update`, { status: 'SUBMITTED' })
                               .then(() => { toast.success('Invoice submitted', { id: tid }); fetchAllData(); })
                               .catch(() => toast.error('Submit failed', { id: tid }));
                           }}
@@ -1033,9 +1018,8 @@ export default function StudentFinance() {
                       {role === 'ACCOUNTANT' && (p.status === 'DRAFT' || p.status === 'REJECTED') && (
                         <Button
                           onClick={() => {
-                            const docId = p.documentId || p.id;
                             const tid = toast.loading('Submitting payment...');
-                            api.put(`/student-payments/${docId}`, { data: { status: 'SUBMITTED' } })
+                            api.put(`/school-finance/payments/${p.id}/update`, { status: 'SUBMITTED' })
                               .then(() => { toast.success('Payment submitted', { id: tid }); fetchAllData(); })
                               .catch(() => toast.error('Submit failed', { id: tid }));
                           }}

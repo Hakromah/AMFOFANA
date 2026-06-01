@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis,
-  Tooltip, ResponsiveContainer, CartesianGrid, Legend
+  Tooltip, ResponsiveContainer, CartesianGrid, Legend, Cell
 } from 'recharts';
 import api from '@/lib/api';
 import { toast } from 'sonner';
@@ -173,7 +173,7 @@ export default function FinanceDashboard() {
                       { name: 'Transport', value: stats?.transportationRevenue || 0, fill: '#10b981' },
                       { name: 'Salary Expenses', value: stats?.salaryExpenses || 0, fill: '#f43f5e' }
                     ] : []).map((entry, index) => (
-                      <Line key={`cell-${index}`} fill={entry.fill} />
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
                     ))}
                   </Bar>
                 </BarChart>
