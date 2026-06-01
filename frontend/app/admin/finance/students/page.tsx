@@ -85,8 +85,8 @@ export default function StudentFinance() {
         api.get('/auth/me'),
         api.get('/admin/users?role=STUDENT'),
         api.get('/admin/classes'),
-        api.get('/student-invoices?populate[student]=true&populate[submittedBy]=true&populate[approvedBy]=true'),
-        api.get('/student-payments?populate[invoice]=true&populate[student]=true')
+        api.get('/student-invoices?populate[student][fields][0]=id&populate[student][fields][1]=username&populate[student][fields][2]=email&populate[student][fields][3]=userId&populate[submittedBy][fields][0]=id&populate[submittedBy][fields][1]=username&populate[approvedBy][fields][0]=id&populate[approvedBy][fields][1]=username'),
+        api.get('/student-payments?populate[invoice][populate][student][fields][0]=id&populate[invoice][populate][student][fields][1]=username&populate[invoice][populate][student][fields][2]=email&populate[invoice][populate][student][fields][3]=userId&populate[student][fields][0]=id&populate[student][fields][1]=username&populate[student][fields][2]=email&populate[student][fields][3]=userId')
       ]);
 
       setRole(userRes.data.role.replace('ROLE_', ''));
@@ -117,7 +117,7 @@ export default function StudentFinance() {
       const studentName = studentObj?.username || studentObj?.name || '';
       const invoiceNum = actualInv.invoiceNumber || '';
       const matchesSearch = studentName.toLowerCase().includes(search.toLowerCase()) || invoiceNum.toLowerCase().includes(search.toLowerCase());
-      
+
       const matchesClass = classFilter === 'ALL' || studentObj?.enrolledClasses?.some((c: any) => String(c.id) === classFilter);
       const matchesStatus = statusFilter === 'ALL' || actualInv.status === statusFilter;
 
@@ -325,8 +325,8 @@ export default function StudentFinance() {
 
   // Record Approval Workflow
   const handleApprove = async (id: number, type: 'INVOICE' | 'PAYMENT') => {
-    const endpoint = type === 'INVOICE' 
-      ? `/school-finance/invoices/${id}/approve` 
+    const endpoint = type === 'INVOICE'
+      ? `/school-finance/invoices/${id}/approve`
       : `/school-finance/payments/${id}/approve`;
 
     try {
@@ -364,13 +364,42 @@ export default function StudentFinance() {
     }
   };
 
+  const handleBulkApproveInvoices = async () => {
+    const tid = toast.loading(`Approving ${selectedInvoiceIds.length} invoices...`);
+    try {
+      await Promise.all(selectedInvoiceIds.map(id => {
+        return api.put(`/school-finance/invoices/${id}/approve`);
+      }));
+      toast.success('Invoices approved successfully', { id: tid });
+      setSelectedInvoiceIds([]);
+      fetchAllData();
+    } catch (e) {
+      toast.error('Failed to approve selected invoices', { id: tid });
+    }
+  };
+
+  const handleBulkApprovePayments = async () => {
+    const tid = toast.loading(`Approving ${selectedPaymentIds.length} payments...`);
+    try {
+      await Promise.all(selectedPaymentIds.map(id => {
+        return api.put(`/school-finance/payments/${id}/approve`);
+      }));
+      toast.success('Payments approved successfully', { id: tid });
+      setSelectedPaymentIds([]);
+      fetchAllData();
+    } catch (e) {
+      toast.error('Failed to approve selected payments', { id: tid });
+    }
+  };
+
   // Professional PDF printable receipt generator
-  const downloadReceipt = async (paymentId: number) => {
+  const downloadReceipt = async (paymentDocId: string) => {
     const tid = toast.loading('Compiling receipt data...');
     try {
-      const pmRes = await api.get(`/student-payments/${paymentId}?populate[invoice]=true&populate[student]=true`);
+      const pmRes = await api.get(`/student-payments/${paymentDocId}?populate[invoice][populate][student][fields][0]=id&populate[invoice][populate][student][fields][1]=username&populate[invoice][populate][student][fields][2]=email&populate[invoice][populate][student][fields][3]=userId&populate[student][fields][0]=id&populate[student][fields][1]=username&populate[student][fields][2]=email&populate[student][fields][3]=userId`);
       const paymentData = pmRes.data?.data?.attributes || pmRes.data?.data || pmRes.data;
-      
+      const paymentId = pmRes.data?.data?.id || pmRes.data?.id;
+
       const rcRes = await api.get(`/receipts?filters[studentPayment][id]=${paymentId}`);
       const receiptData = rcRes.data?.[0] || {};
 
@@ -378,14 +407,14 @@ export default function StudentFinance() {
       const invoiceObj = getInvoiceData(paymentData.invoice);
 
       const doc = new jsPDF();
-      
+
       doc.setDrawColor(59, 130, 246);
       doc.setLineWidth(1.5);
       doc.rect(5, 5, 200, 287);
 
       doc.setFillColor(15, 23, 42);
       doc.rect(5, 5, 200, 45, 'F');
-      
+
       doc.setTextColor(255, 255, 255);
       doc.setFont('Helvetica', 'bold');
       doc.setFontSize(28);
@@ -462,7 +491,7 @@ export default function StudentFinance() {
       const data = res.data;
 
       const doc = new jsPDF();
-      
+
       doc.setFillColor(15, 23, 42);
       doc.rect(5, 5, 200, 40, 'F');
       doc.setTextColor(255, 255, 255);
@@ -512,7 +541,7 @@ export default function StudentFinance() {
           <h1 className="text-3xl font-black tracking-tight text-slate-900 italic uppercase">Student Finance Ledger</h1>
           <p className="text-sm text-slate-500 font-medium">Manage student invoicing billing categories and approval workflows</p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           {role === 'ACCOUNTANT' && selectedInvoiceIds.length > 0 && (
             <Button
@@ -523,14 +552,23 @@ export default function StudentFinance() {
             </Button>
           )}
 
-          <Button 
+          {role === 'ACCOUNTLEAD' && selectedInvoiceIds.length > 0 && (
+            <Button
+              onClick={handleBulkApproveInvoices}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs px-5 duration-300"
+            >
+              Approve Selected ({selectedInvoiceIds.length})
+            </Button>
+          )}
+
+          <Button
             onClick={() => { setEditingInvoice(null); setIsInvoiceOpen(true); }}
             className="flex items-center gap-2 px-5 bg-slate-900 text-white rounded-xl font-bold uppercase tracking-wider text-xs duration-300"
           >
             <Plus className="w-4 h-4" /> Create Invoice
           </Button>
 
-          <Button 
+          <Button
             onClick={() => { setEditingPayment(null); setIsPaymentOpen(true); }}
             className="flex items-center gap-2 px-5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs duration-300"
           >
@@ -544,8 +582,8 @@ export default function StudentFinance() {
         <div className="grid gap-4 md:grid-cols-4">
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input 
-              placeholder="Search Student name or Invoice..." 
+            <Input
+              placeholder="Search Student name or Invoice..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10 h-11 rounded-xl bg-slate-50 border-slate-100"
@@ -594,7 +632,7 @@ export default function StudentFinance() {
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
-                {role === 'ACCOUNTANT' && <TableHead className="w-12"></TableHead>}
+                {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && <TableHead className="w-12"></TableHead>}
                 <TableHead className="font-bold text-slate-700">Invoice Number</TableHead>
                 <TableHead className="font-bold text-slate-700">Student</TableHead>
                 <TableHead className="font-bold text-slate-700">Billing Period</TableHead>
@@ -616,9 +654,9 @@ export default function StudentFinance() {
 
                 return (
                   <TableRow key={inv.id} className="hover:bg-slate-50/50 duration-200">
-                    {role === 'ACCOUNTANT' && (
+                    {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && (
                       <TableCell className="w-12">
-                        {isDraftOrRejected && (
+                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || (role === 'ACCOUNTLEAD' && (isDraftOrRejected || actualInv.status === 'SUBMITTED'))) && (
                           <input
                             type="checkbox"
                             checked={selectedInvoiceIds.includes(inv.id)}
@@ -634,7 +672,7 @@ export default function StudentFinance() {
                         )}
                       </TableCell>
                     )}
-                    
+
                     <TableCell className="font-bold tracking-tight text-slate-900">{actualInv.invoiceNumber}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -663,8 +701,9 @@ export default function StudentFinance() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1.5">
-                        {/* Edit/Delete for Accountant when DRAFT/REJECTED */}
-                        {role === 'ACCOUNTANT' && isDraftOrRejected && (
+                        {/* Edit/Delete for Accountant & AccountLead based on role privilege */}
+                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || 
+                          (role === 'ACCOUNTLEAD' && (isDraftOrRejected || actualInv.status === 'SUBMITTED' || actualInv.status === 'APPROVED'))) && (
                           <>
                             <Button 
                               onClick={() => startEditInvoice(inv)}
@@ -689,17 +728,17 @@ export default function StudentFinance() {
 
                         {role === 'ACCOUNTLEAD' && actualInv.status === 'SUBMITTED' && (
                           <>
-                            <Button 
+                            <Button
                               onClick={() => handleApprove(inv.id, 'INVOICE')}
-                              size="icon" 
+                              size="icon"
                               className="bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-xl"
                               title="Approve"
                             >
                               <Check className="w-4 h-4" />
                             </Button>
-                            <Button 
+                            <Button
                               onClick={() => handleOpenReject(inv.id, 'INVOICE')}
-                              size="icon" 
+                              size="icon"
                               className="bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-xl"
                               title="Reject"
                             >
@@ -714,10 +753,10 @@ export default function StudentFinance() {
                           </span>
                         )}
 
-                        <Button 
+                        <Button
                           onClick={() => downloadStatement(studentObj?.id || actualInv.student?.id)}
                           size="icon"
-                          variant="ghost" 
+                          variant="ghost"
                           className="rounded-xl border hover:bg-slate-50"
                           title="Download Statement"
                         >
@@ -777,16 +816,16 @@ export default function StudentFinance() {
                       <TableCell className="text-right space-x-2">
                         {actualPay.status === 'SUBMITTED' ? (
                           <>
-                            <Button 
+                            <Button
                               onClick={() => handleApprove(p.id, 'PAYMENT')}
-                              size="sm" 
+                              size="sm"
                               className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs"
                             >
                               Approve
                             </Button>
-                            <Button 
+                            <Button
                               onClick={() => handleOpenReject(p.id, 'PAYMENT')}
-                              size="sm" 
+                              size="sm"
                               className="bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs"
                             >
                               Reject
@@ -817,20 +856,30 @@ export default function StudentFinance() {
       <Card className="border-0 shadow-xl shadow-slate-100/50 bg-white rounded-3xl overflow-hidden mt-8">
         <CardHeader className="px-6 py-5 border-b border-slate-50 flex items-center justify-between">
           <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500">Payments & Receipts Ledger</CardTitle>
-          {role === 'ACCOUNTANT' && selectedPaymentIds.length > 0 && (
-            <Button
-              onClick={handleSubmitSelectedPayments}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-[10px] h-8 px-4"
-            >
-              Submit Selected ({selectedPaymentIds.length})
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {role === 'ACCOUNTANT' && selectedPaymentIds.length > 0 && (
+              <Button
+                onClick={handleSubmitSelectedPayments}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-[10px] h-8 px-4"
+              >
+                Submit Selected ({selectedPaymentIds.length})
+              </Button>
+            )}
+            {role === 'ACCOUNTLEAD' && selectedPaymentIds.length > 0 && (
+              <Button
+                onClick={handleBulkApprovePayments}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-[10px] h-8 px-4"
+              >
+                Approve Selected ({selectedPaymentIds.length})
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                {role === 'ACCOUNTANT' && <TableHead className="w-12"></TableHead>}
+                {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && <TableHead className="w-12"></TableHead>}
                 <TableHead>Payment Reference</TableHead>
                 <TableHead>Student</TableHead>
                 <TableHead>Method</TableHead>
@@ -850,9 +899,9 @@ export default function StudentFinance() {
 
                 return (
                   <TableRow key={p.id}>
-                    {role === 'ACCOUNTANT' && (
+                    {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && (
                       <TableCell className="w-12">
-                        {isDraftOrRejected && (
+                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || (role === 'ACCOUNTLEAD' && (isDraftOrRejected || actualPay.status === 'SUBMITTED'))) && (
                           <input
                             type="checkbox"
                             checked={selectedPaymentIds.includes(p.id)}
@@ -886,7 +935,8 @@ export default function StudentFinance() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1.5">
-                        {role === 'ACCOUNTANT' && isDraftOrRejected && (
+                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || 
+                          (role === 'ACCOUNTLEAD' && (isDraftOrRejected || actualPay.status === 'SUBMITTED' || actualPay.status === 'APPROVED'))) && (
                           <>
                             <Button 
                               onClick={() => startEditPayment(p)}
@@ -911,7 +961,7 @@ export default function StudentFinance() {
 
                         {actualPay.status === 'APPROVED' && (
                           <Button 
-                            onClick={() => downloadReceipt(p.id)}
+                            onClick={() => downloadReceipt(p.documentId || p.id)}
                             size="sm" 
                             variant="outline"
                             className="rounded-lg gap-2 text-xs"
@@ -969,9 +1019,9 @@ export default function StudentFinance() {
 
               <div className="space-y-1">
                 <label className="text-xs font-black uppercase text-slate-400">Billing Year</label>
-                <Input 
-                  type="number" 
-                  value={invoiceYear} 
+                <Input
+                  type="number"
+                  value={invoiceYear}
                   onChange={(e) => setInvoiceYear(Number(e.target.value))}
                   className="h-11 rounded-xl bg-slate-50"
                 />
@@ -982,19 +1032,19 @@ export default function StudentFinance() {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <label className="text-xs font-black uppercase text-slate-400">Fee Breakdown Items</label>
-                <Button 
+                <Button
                   onClick={() => setChargeItems([...chargeItems, { description: '', amount: 0, category: 'OTHER' }])}
                   className="h-7 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-black uppercase tracking-wider"
                 >
                   Add Custom Item
                 </Button>
               </div>
-              
+
               <div className="space-y-3 max-h-[150px] overflow-y-auto pr-1">
                 {chargeItems.map((item, idx) => (
                   <div key={idx} className="grid grid-cols-12 gap-2 items-center">
-                    <Input 
-                      placeholder="e.g. Tuition Fee" 
+                    <Input
+                      placeholder="e.g. Tuition Fee"
                       value={item.description}
                       onChange={(e) => {
                         const next = [...chargeItems];
@@ -1003,9 +1053,9 @@ export default function StudentFinance() {
                       }}
                       className="col-span-6 h-9 rounded-lg bg-slate-50 text-xs"
                     />
-                    <Input 
-                      type="number" 
-                      placeholder="Amount" 
+                    <Input
+                      type="number"
+                      placeholder="Amount"
                       value={item.amount || ''}
                       onChange={(e) => {
                         const next = [...chargeItems];
@@ -1014,7 +1064,7 @@ export default function StudentFinance() {
                       }}
                       className="col-span-4 h-9 rounded-lg bg-slate-50 text-xs"
                     />
-                    <Button 
+                    <Button
                       onClick={() => setChargeItems(chargeItems.filter((_, i) => i !== idx))}
                       className="col-span-2 h-9 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg"
                     >
@@ -1027,8 +1077,8 @@ export default function StudentFinance() {
 
             <div className="space-y-1">
               <label className="text-xs font-black uppercase text-slate-400">Additional Ledger Notes</label>
-              <Input 
-                value={invoiceNotes} 
+              <Input
+                value={invoiceNotes}
                 onChange={(e) => setInvoiceNotes(e.target.value)}
                 placeholder="Terms, bank guidelines, custom notes..."
                 className="h-11 rounded-xl bg-slate-50"
@@ -1036,7 +1086,7 @@ export default function StudentFinance() {
             </div>
           </div>
           <DialogFooter>
-            <Button 
+            <Button
               onClick={handleCreateOrEditInvoice}
               className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold uppercase tracking-wider text-xs duration-300"
             >
@@ -1089,9 +1139,9 @@ export default function StudentFinance() {
 
             <div className="space-y-1">
               <label className="text-xs font-black uppercase text-slate-400">Disbursed Amount (GNF)</label>
-              <Input 
-                type="number" 
-                value={paymentAmount || ''} 
+              <Input
+                type="number"
+                value={paymentAmount || ''}
                 onChange={(e) => setPaymentAmount(Number(e.target.value))}
                 className="h-11 rounded-xl bg-slate-50 font-black text-lg"
               />
@@ -1132,8 +1182,8 @@ export default function StudentFinance() {
 
             <div className="space-y-1">
               <label className="text-xs font-black uppercase text-slate-400">Collection Notes</label>
-              <Input 
-                value={paymentNotes} 
+              <Input
+                value={paymentNotes}
                 onChange={(e) => setPaymentNotes(e.target.value)}
                 placeholder="Txn ID, references, details..."
                 className="h-11 rounded-xl bg-slate-50"
@@ -1141,7 +1191,7 @@ export default function StudentFinance() {
             </div>
           </div>
           <DialogFooter>
-            <Button 
+            <Button
               onClick={handleCreateOrEditPayment}
               className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs duration-300"
             >
@@ -1160,8 +1210,8 @@ export default function StudentFinance() {
           <div className="space-y-4 py-3">
             <div className="space-y-1">
               <label className="text-xs font-black uppercase text-slate-400">Provide Rejection Reason</label>
-              <Input 
-                value={rejectionReason} 
+              <Input
+                value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
                 placeholder="Specify reason for audit..."
                 className="h-11 rounded-xl bg-slate-50"
@@ -1169,7 +1219,7 @@ export default function StudentFinance() {
             </div>
           </div>
           <DialogFooter>
-            <Button 
+            <Button
               onClick={handleRejectSubmit}
               className="w-full h-11 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs duration-300"
             >

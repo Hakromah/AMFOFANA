@@ -76,8 +76,8 @@ export default function StaffFinance() {
       const [userRes, allUsersRes, recordRes, paymentRes] = await Promise.all([
         api.get('/auth/me'),
         api.get('/admin/users'), // fetches all roles
-        api.get('/salary-records?populate[staff]=true&populate[submittedBy]=true&populate[approvedBy]=true'),
-        api.get('/salary-payments?populate[salaryRecord]=true&populate[staff]=true')
+        api.get('/salary-records?populate[staff][fields][0]=id&populate[staff][fields][1]=username&populate[staff][fields][2]=email&populate[staff][fields][3]=schoolRole&populate[submittedBy][fields][0]=id&populate[submittedBy][fields][1]=username&populate[approvedBy][fields][0]=id&populate[approvedBy][fields][1]=username'),
+        api.get('/salary-payments?populate[salaryRecord][populate][staff][fields][0]=id&populate[salaryRecord][populate][staff][fields][1]=username&populate[salaryRecord][populate][staff][fields][2]=email&populate[salaryRecord][populate][staff][fields][3]=schoolRole&populate[staff][fields][0]=id&populate[staff][fields][1]=username&populate[staff][fields][2]=email&populate[staff][fields][3]=schoolRole')
       ]);
 
       setRole(userRes.data.role.replace('ROLE_', ''));
@@ -347,12 +347,41 @@ export default function StaffFinance() {
     }
   };
 
+  const handleBulkApproveRecords = async () => {
+    const tid = toast.loading(`Approving ${selectedRecordIds.length} salary records...`);
+    try {
+      await Promise.all(selectedRecordIds.map(id => {
+        return api.put(`/school-finance/salaries/${id}/approve`);
+      }));
+      toast.success('Salary records approved successfully', { id: tid });
+      setSelectedRecordIds([]);
+      fetchAllData();
+    } catch (e) {
+      toast.error('Failed to approve selected records', { id: tid });
+    }
+  };
+
+  const handleBulkApprovePayouts = async () => {
+    const tid = toast.loading(`Approving ${selectedPayoutIds.length} payouts...`);
+    try {
+      await Promise.all(selectedPayoutIds.map(id => {
+        return api.put(`/school-finance/salary-payments/${id}/approve`);
+      }));
+      toast.success('Payouts approved successfully', { id: tid });
+      setSelectedPayoutIds([]);
+      fetchAllData();
+    } catch (e) {
+      toast.error('Failed to approve selected payouts', { id: tid });
+    }
+  };
+
   // Compile Payslip / Receipt PDF
-  const downloadPayslip = async (paymentId: number) => {
+  const downloadPayslip = async (paymentDocId: string) => {
     const tid = toast.loading('Compiling payslip data...');
     try {
-      const pmRes = await api.get(`/salary-payments/${paymentId}?populate[salaryRecord]=true&populate[staff]=true`);
+      const pmRes = await api.get(`/salary-payments/${paymentDocId}?populate[salaryRecord][populate][staff][fields][0]=id&populate[salaryRecord][populate][staff][fields][1]=username&populate[salaryRecord][populate][staff][fields][2]=email&populate[salaryRecord][populate][staff][fields][3]=schoolRole&populate[staff][fields][0]=id&populate[staff][fields][1]=username&populate[staff][fields][2]=email&populate[staff][fields][3]=schoolRole`);
       const paymentData = pmRes.data?.data?.attributes || pmRes.data?.data || pmRes.data;
+      const paymentId = pmRes.data?.data?.id || pmRes.data?.id;
 
       const rcRes = await api.get(`/receipts?filters[salaryPayment][id]=${paymentId}`);
       const receiptData = rcRes.data?.[0] || {};
@@ -450,6 +479,15 @@ export default function StaffFinance() {
             </Button>
           )}
 
+          {role === 'ACCOUNTLEAD' && selectedRecordIds.length > 0 && (
+            <Button
+              onClick={handleBulkApproveRecords}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs px-5 duration-300"
+            >
+              Approve Selected ({selectedRecordIds.length})
+            </Button>
+          )}
+
           <Button 
             onClick={() => { setEditingRecord(null); setIsSalaryOpen(true); }}
             className="flex items-center gap-2 px-5 bg-slate-900 text-white rounded-xl font-bold uppercase tracking-wider text-xs duration-300"
@@ -475,7 +513,7 @@ export default function StaffFinance() {
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
-                {role === 'ACCOUNTANT' && <TableHead className="w-12"></TableHead>}
+                {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && <TableHead className="w-12"></TableHead>}
                 <TableHead className="font-bold text-slate-700">Record ID</TableHead>
                 <TableHead className="font-bold text-slate-700">Employee Name</TableHead>
                 <TableHead className="font-bold text-slate-700">Role</TableHead>
@@ -497,9 +535,9 @@ export default function StaffFinance() {
 
                 return (
                   <TableRow key={rec.id} className="hover:bg-slate-50/50 duration-200">
-                    {role === 'ACCOUNTANT' && (
+                    {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && (
                       <TableCell className="w-12">
-                        {isDraftOrRejected && (
+                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || (role === 'ACCOUNTLEAD' && (isDraftOrRejected || actual.status === 'SUBMITTED'))) && (
                           <input
                             type="checkbox"
                             checked={selectedRecordIds.includes(rec.id)}
@@ -541,7 +579,8 @@ export default function StaffFinance() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1.5">
-                        {role === 'ACCOUNTANT' && isDraftOrRejected && (
+                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || 
+                          (role === 'ACCOUNTLEAD' && (isDraftOrRejected || actual.status === 'SUBMITTED' || actual.status === 'APPROVED'))) && (
                           <>
                             <Button 
                               onClick={() => startEditRecord(rec)}
@@ -583,10 +622,6 @@ export default function StaffFinance() {
                               <X className="w-3.5 h-3.5" />
                             </Button>
                           </>
-                        )}
-
-                        {role === 'ACCOUNTLEAD' && actual.status === 'REJECTED' && (
-                          <span className="text-[10px] text-rose-500 font-extrabold uppercase bg-rose-50 px-2.5 py-1 rounded-xl">Rejected - Waiting Revision</span>
                         )}
                       </div>
                     </TableCell>
@@ -662,14 +697,6 @@ export default function StaffFinance() {
                     </TableRow>
                   );
                 })}
-                {salaryPayments.filter((p: any) => {
-                  const actual = p.attributes || p;
-                  return actual.status === 'SUBMITTED' || actual.status === 'REJECTED';
-                }).length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center p-6 text-slate-400 font-bold uppercase text-[10px]">No pending review payout logs found</TableCell>
-                  </TableRow>
-                )}
               </TableBody>
             </Table>
           </CardContent>
@@ -680,20 +707,30 @@ export default function StaffFinance() {
       <Card className="border-0 shadow-xl shadow-slate-100/50 bg-white rounded-3xl overflow-hidden mt-8">
         <CardHeader className="px-6 py-5 border-b border-slate-50 flex items-center justify-between">
           <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500">Approved Payslips & Payout Ledger</CardTitle>
-          {role === 'ACCOUNTANT' && selectedPayoutIds.length > 0 && (
-            <Button
-              onClick={handleSubmitSelectedPayouts}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-[10px] h-8 px-4"
-            >
-              Submit Selected ({selectedPayoutIds.length})
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && selectedPayoutIds.length > 0 && (
+              <Button
+                onClick={handleSubmitSelectedPayouts}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-[10px] h-8 px-4"
+              >
+                Submit Selected ({selectedPayoutIds.length})
+              </Button>
+            )}
+            {role === 'ACCOUNTLEAD' && selectedPayoutIds.length > 0 && (
+              <Button
+                onClick={handleBulkApprovePayouts}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-[10px] h-8 px-4"
+              >
+                Approve Selected ({selectedPayoutIds.length})
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                {role === 'ACCOUNTANT' && <TableHead className="w-12"></TableHead>}
+                {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && <TableHead className="w-12"></TableHead>}
                 <TableHead>Payout Reference</TableHead>
                 <TableHead>Employee</TableHead>
                 <TableHead>Method</TableHead>
@@ -712,9 +749,9 @@ export default function StaffFinance() {
 
                 return (
                   <TableRow key={p.id}>
-                    {role === 'ACCOUNTANT' && (
+                    {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && (
                       <TableCell className="w-12">
-                        {isDraftOrRejected && (
+                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || (role === 'ACCOUNTLEAD' && (isDraftOrRejected || actual.status === 'SUBMITTED'))) && (
                           <input
                             type="checkbox"
                             checked={selectedPayoutIds.includes(p.id)}
@@ -747,7 +784,8 @@ export default function StaffFinance() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1.5">
-                        {role === 'ACCOUNTANT' && isDraftOrRejected && (
+                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || 
+                          (role === 'ACCOUNTLEAD' && (isDraftOrRejected || actual.status === 'SUBMITTED' || actual.status === 'APPROVED'))) && (
                           <>
                             <Button 
                               onClick={() => startEditPayout(p)}
@@ -772,7 +810,7 @@ export default function StaffFinance() {
 
                         {actual.status === 'APPROVED' && (
                           <Button 
-                            onClick={() => downloadPayslip(p.id)}
+                            onClick={() => downloadPayslip(p.documentId || p.id)}
                             size="sm" 
                             variant="outline"
                             className="rounded-lg gap-2 text-xs"
