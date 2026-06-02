@@ -406,29 +406,36 @@ export default function StudentFinance() {
   const downloadReceipt = async (paymentDocId: string, paymentId: number) => {
     const tid = toast.loading('Compiling receipt...');
     try {
-      // Fetch payment with full nested populate using the documentId
-      const pmRes = await api.get(
-        `/student-payments/${paymentDocId}?populate[invoice][fields][0]=invoiceNumber&populate[invoice][fields][1]=remainingBalance&populate[student][fields][0]=username&populate[student][fields][1]=email&populate[student][fields][2]=userId`
-      );
-      const rawData = pmRes.data?.data || pmRes.data;
-      const paymentData = rawData?.attributes || rawData;
-      // Get the numeric id from the response for receipt lookup
-      const numericId = rawData?.id || paymentId;
-
-      // Fetch receipt record
-      const rcRes = await api.get(`/receipts?filters[studentPayment][id]=${numericId}&populate=*`);
-      const receiptArr = rcRes.data?.data || rcRes.data || [];
-      const receiptData = (Array.isArray(receiptArr) ? receiptArr[0] : receiptArr)?.attributes
-        || (Array.isArray(receiptArr) ? receiptArr[0] : receiptArr)
-        || {};
-
-      // Resolve student & invoice from the flat payment we already have
+      // Use flat payment from state — avoids Strapi v5 populate REST failures
       const pay = payments.find(p => p.id === paymentId) || payments.find(p => p.documentId === paymentDocId);
-      const studentName = pay?.studentName || paymentData?.student?.username || 'Student';
-      const studentUserId = pay?.studentUserId || paymentData?.student?.userId || 'N/A';
-      const studentEmail = pay?.studentEmail || paymentData?.student?.email || 'N/A';
-      const invoiceNumber = pay?.invoiceNumber || paymentData?.invoice?.invoiceNumber || 'N/A';
-      const remainingBalance = pay?.invoiceRemainingBalance ?? paymentData?.invoice?.remainingBalance ?? 0;
+      if (!pay) {
+        toast.error('Payment record not found', { id: tid });
+        return;
+      }
+
+      const studentName = pay.studentName || 'Student';
+      const studentUserId = pay.studentUserId || 'N/A';
+      const studentEmail = pay.studentEmail || 'N/A';
+      const invoiceNumber = pay.invoiceNumber || 'N/A';
+      const remainingBalance = pay.invoiceRemainingBalance ?? 0;
+
+      // Try to fetch receipt number — gracefully fall back if not found
+      let receiptNumber = `REC-TEMP-${paymentId}`;
+      let qrContent = `AMFOFANA ACADEMY\nInvoice: ${invoiceNumber}\nStudent: ${studentName}\nID: ${studentUserId}\nAmount: ${Number(pay.amount).toLocaleString()} GNF`;
+      try {
+        const rcRes = await api.get(`/receipts?filters[studentPayment][id][$eq]=${paymentId}&fields[0]=receiptNumber&fields[1]=qrCode`);
+        const receiptArr = rcRes.data?.data || rcRes.data || [];
+        const receiptRaw = Array.isArray(receiptArr) ? receiptArr[0] : receiptArr;
+        const receiptAttrs = receiptRaw?.attributes || receiptRaw || {};
+        if (receiptAttrs.receiptNumber) {
+          receiptNumber = receiptAttrs.receiptNumber;
+        }
+        if (receiptAttrs.qrCode) {
+          qrContent = receiptAttrs.qrCode;
+        }
+      } catch (_) {
+        // receipt lookup failed — use fallback values
+      }
 
       const doc = new jsPDF();
       doc.setDrawColor(59, 130, 246);
@@ -454,9 +461,9 @@ export default function StudentFinance() {
       doc.setFontSize(10);
       doc.setFont('Helvetica', 'normal');
 
-      doc.text(`Receipt Number: ${receiptData?.receiptNumber || 'REC-TEMP'}`, 15, 80);
+      doc.text(`Receipt Number: ${receiptNumber}`, 15, 80);
       doc.text(`Invoice Ref: ${invoiceNumber}`, 15, 87);
-      doc.text(`Payment Date: ${new Date(paymentData?.paymentDate || new Date()).toLocaleDateString()}`, 15, 94);
+      doc.text(`Payment Date: ${new Date(pay.paymentDate || new Date()).toLocaleDateString()}`, 15, 94);
 
       doc.setFont('Helvetica', 'bold');
       doc.text('Billed Student Profile:', 120, 80);
@@ -469,10 +476,10 @@ export default function StudentFinance() {
         startY: 115,
         head: [['Category', 'Method', 'Description', 'Amount Paid']],
         body: [[
-          paymentData?.paymentCategory || pay?.paymentCategory || 'Fee',
-          paymentData?.paymentMethod || pay?.paymentMethod || 'Cash',
-          paymentData?.notes || pay?.notes || 'Payment received',
-          `${Number(paymentData?.amount || pay?.amount || 0).toLocaleString()} GNF`
+          pay.paymentCategory || 'Fee',
+          pay.paymentMethod || 'Cash',
+          pay.notes || 'Payment received',
+          `${Number(pay.amount || 0).toLocaleString()} GNF`
         ]],
         theme: 'grid',
         headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255] },
@@ -483,16 +490,17 @@ export default function StudentFinance() {
       doc.setFont('Helvetica', 'bold');
       doc.text('Ledger Status:', 15, finalY + 20);
       doc.setFont('Helvetica', 'normal');
-      doc.text(`Total Amount Collected: ${Number(paymentData?.amount || pay?.amount || 0).toLocaleString()} GNF`, 15, finalY + 28);
+      doc.text(`Total Amount Collected: ${Number(pay.amount || 0).toLocaleString()} GNF`, 15, finalY + 28);
       doc.text(`Remaining Invoice Balance: ${Number(remainingBalance).toLocaleString()} GNF`, 15, finalY + 35);
 
-      const qrDataUrl = await QRCode.toDataURL(receiptData?.qrCode || 'https://verify.amfofana.edu');
+      // Generate QR code from the stored qrContent (contains invoice#, student name, userId)
+      const qrDataUrl = await QRCode.toDataURL(qrContent);
       doc.addImage(qrDataUrl, 'PNG', 140, finalY + 15, 45, 45);
       doc.setFontSize(8);
       doc.setTextColor(148, 163, 184);
       doc.text('Scan for official digital verification', 142, finalY + 63);
 
-      doc.save(`Receipt-${pay?.paymentNumber || 'GEN'}.pdf`);
+      doc.save(`Receipt-${pay.paymentNumber || 'GEN'}.pdf`);
       toast.success('PDF compiled successfully', { id: tid });
     } catch (e: any) {
       console.error('Receipt error:', e);
@@ -510,22 +518,51 @@ export default function StudentFinance() {
       const res = await api.get(`/school-finance/statements/${studentId}`);
       const data = res.data;
 
-      const doc = new jsPDF();
-      doc.setFillColor(15, 23, 42);
-      doc.rect(5, 5, 200, 40, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(16);
-      doc.text('AMFOFANA ACADEMY — STATEMENT OF ACCOUNT', 15, 22);
-      doc.setFontSize(10);
-      doc.text(`Student: ${data.studentProfile?.name || 'N/A'} | ID: ${data.studentProfile?.userId || 'N/A'}`, 15, 32);
+      const studentName = data.studentProfile?.name || 'N/A';
+      const studentUserId = data.studentProfile?.userId || 'N/A';
+      const studentEmail = data.studentProfile?.email || 'N/A';
 
-      doc.setTextColor(15, 23, 42);
-      doc.setFontSize(14);
-      doc.text('Ledger Summary Metrics', 15, 60);
+      const doc = new jsPDF();
+      // Border
+      doc.setDrawColor(59, 130, 246);
+      doc.setLineWidth(1.5);
+      doc.rect(5, 5, 200, 287);
+
+      // Header banner
+      doc.setFillColor(15, 23, 42);
+      doc.rect(5, 5, 200, 45, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(18);
+      doc.text('AMFOFANA ACADEMY', 15, 22);
       doc.setFontSize(10);
-      doc.text(`Total Invoiced: ${Number(data.totalInvoiced || 0).toLocaleString()} GNF`, 15, 70);
-      doc.text(`Total Paid: ${Number(data.totalPaid || 0).toLocaleString()} GNF`, 15, 77);
-      doc.text(`Outstanding Balance: ${Number(data.outstandingBalance || 0).toLocaleString()} GNF`, 15, 84);
+      doc.setFont('Helvetica', 'normal');
+      doc.text('STATEMENT OF ACCOUNT', 15, 30);
+      doc.text('Conakry, Guinea | billing@amfofana.edu', 15, 37);
+      doc.text(`Generated: ${new Date().toLocaleDateString()}`, 130, 22);
+
+      // Student info
+      doc.setTextColor(15, 23, 42);
+      doc.setFontSize(11);
+      doc.setFont('Helvetica', 'bold');
+      doc.text('Student Information', 15, 58);
+      doc.setFont('Helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text(`Name: ${studentName}`, 15, 66);
+      doc.text(`Student ID: ${studentUserId}`, 15, 73);
+      doc.text(`Email: ${studentEmail}`, 15, 80);
+
+      // Summary box
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.5);
+      doc.rect(120, 54, 85, 35);
+      doc.setFontSize(9);
+      doc.setFont('Helvetica', 'bold');
+      doc.text('Account Summary', 125, 62);
+      doc.setFont('Helvetica', 'normal');
+      doc.text(`Total Billed: ${Number(data.totalInvoiced || 0).toLocaleString()} GNF`, 125, 70);
+      doc.text(`Total Paid:   ${Number(data.totalPaid || 0).toLocaleString()} GNF`, 125, 77);
+      doc.text(`Outstanding:  ${Number(data.outstandingBalance || 0).toLocaleString()} GNF`, 125, 84);
 
       // Merge and sort activities chronologically
       const activities: any[] = [];
@@ -535,7 +572,7 @@ export default function StudentFinance() {
           date: inv.createdAt,
           ref: inv.invoiceNumber,
           type: 'INVOICE',
-          description: `Billing Invoice (${inv.month} ${inv.year})`,
+          description: `Invoice (${inv.month} ${inv.year})`,
           billed: Number(inv.subtotal || 0),
           paid: 0
         });
@@ -546,7 +583,7 @@ export default function StudentFinance() {
           date: pay.paymentDate || pay.createdAt,
           ref: pay.paymentNumber,
           type: 'PAYMENT',
-          description: `Payment Category: ${pay.paymentCategory || 'Fee'} (${pay.paymentMethod || 'N/A'})`,
+          description: `${pay.paymentCategory || 'Fee'} — ${pay.paymentMethod || 'N/A'}`,
           billed: 0,
           paid: Number(pay.amount || 0)
         });
@@ -574,25 +611,43 @@ export default function StudentFinance() {
         ];
       });
 
-      doc.setFontSize(14);
-      doc.text('Account Activity Ledger (Chronological)', 15, 100);
+      doc.setFontSize(11);
+      doc.setFont('Helvetica', 'bold');
+      doc.text('Account Activity Ledger (Chronological)', 15, 96);
 
       autoTable(doc, {
-        startY: 105,
-        head: [['Date', 'Reference #', 'Type', 'Description', 'Billed (Debit)', 'Paid (Credit)', 'Running Balance']],
-        body: ledgerRows,
+        startY: 100,
+        head: [['Date', 'Reference #', 'Type', 'Description', 'Billed (Dr)', 'Paid (Cr)', 'Balance']],
+        body: ledgerRows.length > 0 ? ledgerRows : [['—', '—', '—', 'No transactions found', '—', '—', '—']],
         theme: 'grid',
-        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255] },
-        styles: { fontSize: 8 }
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontSize: 8 },
+        styles: { fontSize: 8 },
+        columnStyles: {
+          4: { halign: 'right' },
+          5: { halign: 'right' },
+          6: { halign: 'right', fontStyle: 'bold' }
+        }
       });
 
-      doc.save(`Statement-${data.studentProfile?.userId || studentId}.pdf`);
+      // Add QR code with student info for verification
+      const finalY = (doc as any).lastAutoTable?.finalY || 180;
+      if (finalY < 240) {
+        const qrContent = `AMFOFANA ACADEMY\nStatement of Account\nStudent: ${studentName}\nID: ${studentUserId}\nTotal Billed: ${Number(data.totalInvoiced || 0).toLocaleString()} GNF\nTotal Paid: ${Number(data.totalPaid || 0).toLocaleString()} GNF\nOutstanding: ${Number(data.outstandingBalance || 0).toLocaleString()} GNF`;
+        const qrDataUrl = await QRCode.toDataURL(qrContent);
+        doc.addImage(qrDataUrl, 'PNG', 155, finalY + 5, 40, 40);
+        doc.setFontSize(7);
+        doc.setTextColor(148, 163, 184);
+        doc.text('Scan to verify this statement', 153, finalY + 47);
+      }
+
+      doc.save(`Statement-${studentUserId || studentId}.pdf`);
       toast.success('Statement generated successfully', { id: tid });
     } catch (e: any) {
       toast.error('Ledger export failed', { id: tid });
       console.error(e);
     }
   };
+
   // ─── Render Helpers ────────────────────────────────────────────────────────
   const statusBadgeClass = (status: string) => {
     if (status === 'PAID') return 'bg-emerald-500 hover:bg-emerald-600';

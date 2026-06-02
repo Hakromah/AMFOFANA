@@ -32,8 +32,10 @@ export default () => ({
     const totalPaid = allPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
     const remainingBalance = Math.max(0, Number(invoice.subtotal || 0) - totalPaid);
 
+    // Determine new status — only transition statuses that support auto-progression
     let invoiceStatus = invoice.status;
-    if (invoiceStatus !== 'DRAFT' && invoiceStatus !== 'REJECTED') {
+    if (invoiceStatus === 'APPROVED' || invoiceStatus === 'PAID' || invoiceStatus === 'PARTIALLY_PAID') {
+      // Auto-progress approved invoices based on payment totals
       if (remainingBalance === 0 && totalPaid > 0) {
         invoiceStatus = 'PAID';
       } else if (totalPaid > 0) {
@@ -42,6 +44,7 @@ export default () => ({
         invoiceStatus = 'APPROVED';
       }
     }
+    // DRAFT, SUBMITTED, REJECTED keep their status — only balances update
 
     await (strapi.entityService.update as any)('api::student-invoice.student-invoice' as any, invoiceId, {
       data: {
@@ -63,8 +66,8 @@ export default () => ({
     const totalPaid = allPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
 
     let recordStatus = record.status;
-    if (recordStatus !== 'DRAFT' && recordStatus !== 'REJECTED') {
-      if (totalPaid >= Number(record.netSalary || 0)) {
+    if (recordStatus === 'APPROVED' || recordStatus === 'PAID' || recordStatus === 'PARTIALLY_PAID') {
+      if (totalPaid >= Number(record.netSalary || 0) && totalPaid > 0) {
         recordStatus = 'PAID';
       } else if (totalPaid > 0) {
         recordStatus = 'PARTIALLY_PAID';
@@ -72,11 +75,13 @@ export default () => ({
         recordStatus = 'APPROVED';
       }
     }
+    // DRAFT, SUBMITTED, REJECTED keep their status
 
     await (strapi.entityService.update as any)('api::salary-record.salary-record' as any, salId, {
       data: { status: recordStatus }
     });
   },
+
 
   // ─── Dashboard Stats & Analytics ───────────────────────────────────────────
   async getStats() {
@@ -410,8 +415,13 @@ export default () => ({
     }) as any;
 
     // 2. Generate downloadable receipt record with QR verification signature
+    const invoiceNumber = payment.invoice?.invoiceNumber || 'N/A';
+    const studentName = payment.student?.username || payment.student?.name || 'Student';
+    const studentUserId = payment.student?.userId || 'N/A';
     const qrSignature = crypto.createHash('sha256').update(`${approvedPayment.paymentNumber}-${approvedPayment.amount}`).digest('hex').slice(0, 20).toUpperCase();
     const receiptNumber = `REC-${approvedPayment.paymentNumber.split('-')[2] || 'GEN'}-${Date.now().toString().slice(-4)}`;
+    // QR code contains human-readable data: invoice number, student name, student userId
+    const qrContent = `AMFOFANA ACADEMY\nReceipt: ${receiptNumber}\nInvoice: ${invoiceNumber}\nStudent: ${studentName}\nID: ${studentUserId}\nAmount: ${Number(approvedPayment.amount).toLocaleString()} GNF\nVerify: https://verify.amfofana.edu/receipt/${qrSignature}`;
     
     await (strapi.entityService.create as any)('api::receipt.receipt' as any, {
       data: {
@@ -419,7 +429,7 @@ export default () => ({
         paymentType: 'STUDENT_PAYMENT',
         studentPayment: approvedPayment.id,
         generatedDate: new Date().toISOString(),
-        qrCode: `https://verify.amfofana.edu/receipt/${qrSignature}`
+        qrCode: qrContent
       }
     });
 
@@ -479,28 +489,50 @@ export default () => ({
 
   // ─── Student Statement Compilations ────────────────────────────────────────
   async getStudentStatement(studentId: number) {
-    const [student, invoices, payments] = await Promise.all([
+    const [student, invoices] = await Promise.all([
       (strapi.entityService.findOne as any)('plugin::users-permissions.user' as any, studentId, {
         populate: ['role']
       }) as any,
       (strapi.entityService.findMany as any)('api::student-invoice.student-invoice' as any, {
         filters: { student: { id: studentId } },
         sort: [{ year: 'desc' }, { month: 'desc' }]
-      }) as any[],
-      (strapi.entityService.findMany as any)('api::student-payment.student-payment' as any, {
-        filters: {
-          status: 'APPROVED',
-          $or: [
-            { student: { id: studentId } },
-            { invoice: { student: { id: studentId } } }
-          ]
-        },
-        populate: ['invoice', 'student'],
-        sort: [{ paymentDate: 'desc' }]
       }) as any[]
     ]);
 
     if (!student) throw new Error('Student not found');
+
+    // Step 2: collect all payments for those invoices (by invoice ID) + direct student payments
+    const invoiceIds = invoices.map((inv: any) => inv.id);
+
+    let payments: any[] = [];
+
+    // Fetch payments linked directly to the student
+    const directPayments = await (strapi.entityService.findMany as any)('api::student-payment.student-payment' as any, {
+      filters: { student: { id: studentId }, status: 'APPROVED' },
+      sort: [{ paymentDate: 'desc' }]
+    }) as any[];
+
+    payments = [...directPayments];
+
+    // Also fetch payments linked to this student's invoices (that might not have direct student link)
+    if (invoiceIds.length > 0) {
+      const invoicePayments = await (strapi.entityService.findMany as any)('api::student-payment.student-payment' as any, {
+        filters: { invoice: { id: { $in: invoiceIds } }, status: 'APPROVED' },
+        sort: [{ paymentDate: 'desc' }]
+      }) as any[];
+
+      // Merge, deduplicate by ID
+      const existingIds = new Set(payments.map((p: any) => p.id));
+      for (const p of invoicePayments) {
+        if (!existingIds.has(p.id)) {
+          payments.push(p);
+          existingIds.add(p.id);
+        }
+      }
+    }
+
+    // Sort merged payments by paymentDate desc
+    payments.sort((a: any, b: any) => new Date(b.paymentDate || b.createdAt).getTime() - new Date(a.paymentDate || a.createdAt).getTime());
 
     const totalInvoiced = invoices.reduce((sum, inv) => sum + Number(inv.subtotal || 0), 0);
     const totalPaid = payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
@@ -521,6 +553,7 @@ export default () => ({
       payments
     };
   },
+
 
   // ─── Staff Payroll & Salaries ──────────────────────────────────────────────
   async createSalaryRecord(dto: any, userId: number) {
