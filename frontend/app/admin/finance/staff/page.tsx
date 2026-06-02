@@ -482,7 +482,7 @@ export default function StaffFinance() {
             </Button>
           )}
 
-          {role === 'ACCOUNTLEAD' && selectedRecordIds.length > 0 && (
+          {(role === 'ACCOUNTLEAD' || role === 'ADMIN') && selectedRecordIds.length > 0 && (
             <Button
               onClick={handleBulkApproveRecords}
               className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs px-5 duration-300"
@@ -516,7 +516,7 @@ export default function StaffFinance() {
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
-                {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && <TableHead className="w-12"></TableHead>}
+                {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD' || role === 'ADMIN') && <TableHead className="w-12"></TableHead>}
                 <TableHead className="font-bold text-slate-700">Record ID</TableHead>
                 <TableHead className="font-bold text-slate-700">Employee Name</TableHead>
                 <TableHead className="font-bold text-slate-700">Role</TableHead>
@@ -536,9 +536,10 @@ export default function StaffFinance() {
 
                 return (
                   <TableRow key={rec.id} className="hover:bg-slate-50/50 duration-200">
-                    {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && (
+                    {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD' || role === 'ADMIN') && (
                       <TableCell className="w-12">
-                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || (role === 'ACCOUNTLEAD' && rec.status !== 'PAID')) && (
+                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || 
+                          ((role === 'ACCOUNTLEAD' || role === 'ADMIN') && (rec.status === 'SUBMITTED' || rec.status === 'DRAFT' || rec.status === 'REJECTED'))) && (
                           <input
                             type="checkbox"
                             checked={selectedRecordIds.includes(rec.id)}
@@ -584,7 +585,7 @@ export default function StaffFinance() {
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         {((role === 'ACCOUNTANT' && isDraftOrRejected) || 
-                          (role === 'ACCOUNTLEAD' && (isDraftOrRejected || rec.status === 'SUBMITTED' || rec.status === 'APPROVED'))) && (
+                          ((role === 'ACCOUNTLEAD' || role === 'ADMIN') && (isDraftOrRejected || rec.status === 'SUBMITTED' || rec.status === 'APPROVED'))) && (
                           <>
                             <Button 
                               onClick={() => startEditRecord(rec)}
@@ -607,7 +608,7 @@ export default function StaffFinance() {
                           </>
                         )}
 
-                        {role === 'ACCOUNTLEAD' && (rec.status === 'SUBMITTED' || rec.status === 'DRAFT') && (
+                        {(role === 'ACCOUNTLEAD' || role === 'ADMIN') && (rec.status === 'SUBMITTED' || rec.status === 'DRAFT') && (
                           <>
                             <Button 
                               onClick={() => handleApprove(rec.id, 'RECORD')}
@@ -638,7 +639,7 @@ export default function StaffFinance() {
       </Card>
 
       {/* Salary Disbursements Awaiting Approval / Rejected Logs for Reviewer */}
-      {role === 'ACCOUNTLEAD' && (
+      {(role === 'ACCOUNTLEAD' || role === 'ADMIN') && (
         <Card className="border-0 shadow-xl shadow-slate-100/50 bg-white rounded-3xl overflow-hidden mt-8">
           <CardHeader className="px-6 py-5 border-b border-slate-50">
             <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500 flex items-center gap-2">
@@ -714,7 +715,7 @@ export default function StaffFinance() {
         <CardHeader className="px-6 py-5 border-b border-slate-50 flex items-center justify-between">
           <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500">Approved Payslips & Payout Ledger</CardTitle>
           <div className="flex gap-2">
-            {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && selectedPayoutIds.length > 0 && (
+            {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD' || role === 'ADMIN') && selectedPayoutIds.length > 0 && (
               <Button
                 onClick={handleSubmitSelectedPayouts}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-[10px] h-8 px-4"
@@ -722,7 +723,7 @@ export default function StaffFinance() {
                 Submit Selected ({selectedPayoutIds.length})
               </Button>
             )}
-            {role === 'ACCOUNTLEAD' && selectedPayoutIds.length > 0 && (
+            {(role === 'ACCOUNTLEAD' || role === 'ADMIN') && selectedPayoutIds.length > 0 && (
               <Button
                 onClick={handleBulkApprovePayouts}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-[10px] h-8 px-4"
@@ -736,7 +737,7 @@ export default function StaffFinance() {
           <Table>
             <TableHeader>
               <TableRow>
-                {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && <TableHead className="w-12"></TableHead>}
+                {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD' || role === 'ADMIN') && <TableHead className="w-12"></TableHead>}
                 <TableHead>Payout Reference</TableHead>
                 <TableHead>Employee</TableHead>
                 <TableHead>Method</TableHead>
@@ -752,9 +753,10 @@ export default function StaffFinance() {
 
                 return (
                   <TableRow key={p.id}>
-                    {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && (
+                    {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD' || role === 'ADMIN') && (
                       <TableCell className="w-12">
-                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || (role === 'ACCOUNTLEAD' && (isDraftOrRejected || p.status === 'SUBMITTED'))) && (
+                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || 
+                          ((role === 'ACCOUNTLEAD' || role === 'ADMIN') && (isDraftOrRejected || p.status === 'SUBMITTED'))) && (
                           <input
                             type="checkbox"
                             checked={selectedPayoutIds.includes(p.id)}
@@ -793,7 +795,7 @@ export default function StaffFinance() {
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         {((role === 'ACCOUNTANT' && isDraftOrRejected) || 
-                          (role === 'ACCOUNTLEAD' && (isDraftOrRejected || p.status === 'SUBMITTED' || p.status === 'APPROVED'))) && (
+                          ((role === 'ACCOUNTLEAD' || role === 'ADMIN') && (isDraftOrRejected || p.status === 'SUBMITTED' || p.status === 'APPROVED'))) && (
                           <>
                             <Button 
                               onClick={() => startEditPayout(p)}

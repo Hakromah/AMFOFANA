@@ -21,6 +21,63 @@ export default () => ({
     }
   },
 
+  async syncInvoiceBalances(invoiceId: number) {
+    const invoice = await (strapi.entityService.findOne as any)('api::student-invoice.student-invoice' as any, invoiceId) as any;
+    if (!invoice) return;
+
+    const allPayments = await (strapi.entityService.findMany as any)('api::student-payment.student-payment' as any, {
+      filters: { invoice: { id: invoiceId }, status: 'APPROVED' }
+    }) as any[];
+
+    const totalPaid = allPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+    const remainingBalance = Math.max(0, Number(invoice.subtotal || 0) - totalPaid);
+
+    let invoiceStatus = invoice.status;
+    if (invoiceStatus !== 'DRAFT' && invoiceStatus !== 'REJECTED') {
+      if (remainingBalance === 0 && totalPaid > 0) {
+        invoiceStatus = 'PAID';
+      } else if (totalPaid > 0) {
+        invoiceStatus = 'PARTIALLY_PAID';
+      } else {
+        invoiceStatus = 'APPROVED';
+      }
+    }
+
+    await (strapi.entityService.update as any)('api::student-invoice.student-invoice' as any, invoiceId, {
+      data: {
+        totalPaid,
+        remainingBalance,
+        status: invoiceStatus
+      }
+    });
+  },
+
+  async syncSalaryRecordStatus(salId: number) {
+    const record = await (strapi.entityService.findOne as any)('api::salary-record.salary-record' as any, salId) as any;
+    if (!record) return;
+
+    const allPayments = await (strapi.entityService.findMany as any)('api::salary-payment.salary-payment' as any, {
+      filters: { salaryRecord: { id: salId }, status: 'APPROVED' }
+    }) as any[];
+
+    const totalPaid = allPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+
+    let recordStatus = record.status;
+    if (recordStatus !== 'DRAFT' && recordStatus !== 'REJECTED') {
+      if (totalPaid >= Number(record.netSalary || 0)) {
+        recordStatus = 'PAID';
+      } else if (totalPaid > 0) {
+        recordStatus = 'PARTIALLY_PAID';
+      } else {
+        recordStatus = 'APPROVED';
+      }
+    }
+
+    await (strapi.entityService.update as any)('api::salary-record.salary-record' as any, salId, {
+      data: { status: recordStatus }
+    });
+  },
+
   // ─── Dashboard Stats & Analytics ───────────────────────────────────────────
   async getStats() {
     // Compile totals and distributions
@@ -367,30 +424,9 @@ export default () => ({
     });
 
     // 3. Recalculate related Invoice balances & status
-    if (approvedPayment.invoice?.id) {
-      const invId = approvedPayment.invoice.id;
-      const allPayments = await (strapi.entityService.findMany as any)('api::student-payment.student-payment' as any, {
-        filters: { invoice: invId, status: 'APPROVED' }
-      }) as any[];
-
-      const totalPaid = allPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
-      const invoice = await (strapi.entityService.findOne as any)('api::student-invoice.student-invoice' as any, invId) as any;
-      const remainingBalance = Math.max(0, Number(invoice.subtotal || 0) - totalPaid);
-
-      let invoiceStatus = invoice.status;
-      if (remainingBalance === 0) {
-        invoiceStatus = 'PAID';
-      } else if (totalPaid > 0) {
-        invoiceStatus = 'PARTIALLY_PAID';
-      }
-
-      await (strapi.entityService.update as any)('api::student-invoice.student-invoice' as any, invId, {
-        data: {
-          totalPaid,
-          remainingBalance,
-          status: invoiceStatus
-        }
-      });
+    const invoiceId = payment.invoice?.id;
+    if (invoiceId) {
+      await this.syncInvoiceBalances(invoiceId);
     }
 
     await this.logAction(
@@ -407,7 +443,7 @@ export default () => ({
   },
 
   async rejectPayment(id: number, reason: string, userId: number) {
-    const payment = await (strapi.entityService.findOne as any)('api::student-payment.student-payment' as any, id) as any;
+    const payment = await (strapi.entityService.findOne as any)('api::student-payment.student-payment' as any, id, { populate: ['invoice'] }) as any;
     if (!payment) throw new Error('Payment not found');
     // ACCOUNTLEAD can reject from DRAFT, SUBMITTED, or APPROVED
     const rejectableStatuses = ['DRAFT', 'SUBMITTED', 'APPROVED'];
@@ -423,6 +459,10 @@ export default () => ({
       },
       populate: ['invoice', 'student']
     }) as any;
+
+    if (payment.invoice?.id) {
+      await this.syncInvoiceBalances(payment.invoice.id);
+    }
 
     await this.logAction(
       'REJECT_PAYMENT',
@@ -444,11 +484,18 @@ export default () => ({
         populate: ['role']
       }) as any,
       (strapi.entityService.findMany as any)('api::student-invoice.student-invoice' as any, {
-        filters: { student: studentId },
+        filters: { student: { id: studentId } },
         sort: [{ year: 'desc' }, { month: 'desc' }]
       }) as any[],
       (strapi.entityService.findMany as any)('api::student-payment.student-payment' as any, {
-        filters: { student: studentId, status: 'APPROVED' },
+        filters: {
+          status: 'APPROVED',
+          $or: [
+            { student: { id: studentId } },
+            { invoice: { student: { id: studentId } } }
+          ]
+        },
+        populate: ['invoice', 'student'],
         sort: [{ paymentDate: 'desc' }]
       }) as any[]
     ]);
@@ -643,25 +690,9 @@ export default () => ({
     });
 
     // 3. Recalculate salary status
-    if (approvedPayment.salaryRecord?.id) {
-      const salId = approvedPayment.salaryRecord.id;
-      const allPayments = await (strapi.entityService.findMany as any)('api::salary-payment.salary-payment' as any, {
-        filters: { salaryRecord: salId, status: 'APPROVED' }
-      }) as any[];
-
-      const totalPaid = allPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
-      const record = await (strapi.entityService.findOne as any)('api::salary-record.salary-record' as any, salId) as any;
-
-      let recordStatus = record.status;
-      if (totalPaid >= Number(record.netSalary || 0)) {
-        recordStatus = 'PAID';
-      } else if (totalPaid > 0) {
-        recordStatus = 'PARTIALLY_PAID';
-      }
-
-      await (strapi.entityService.update as any)('api::salary-record.salary-record' as any, salId, {
-        data: { status: recordStatus }
-      });
+    const salaryRecordId = payment.salaryRecord?.id;
+    if (salaryRecordId) {
+      await this.syncSalaryRecordStatus(salaryRecordId);
     }
 
     await this.logAction(
@@ -678,7 +709,7 @@ export default () => ({
   },
 
   async rejectSalaryPayment(id: number, reason: string, userId: number) {
-    const payment = await (strapi.entityService.findOne as any)('api::salary-payment.salary-payment' as any, id) as any;
+    const payment = await (strapi.entityService.findOne as any)('api::salary-payment.salary-payment' as any, id, { populate: ['salaryRecord'] }) as any;
     if (!payment) throw new Error('Salary payment not found');
     // ACCOUNTLEAD can reject from DRAFT, SUBMITTED, or APPROVED
     const rejectableStatuses = ['DRAFT', 'SUBMITTED', 'APPROVED'];
@@ -694,6 +725,10 @@ export default () => ({
       },
       populate: ['salaryRecord', 'staff']
     }) as any;
+
+    if (payment.salaryRecord?.id) {
+      await this.syncSalaryRecordStatus(payment.salaryRecord.id);
+    }
 
     await this.logAction(
       'REJECT_SALARY_PAYMENT',

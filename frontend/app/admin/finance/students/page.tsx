@@ -527,22 +527,63 @@ export default function StudentFinance() {
       doc.text(`Total Paid: ${Number(data.totalPaid || 0).toLocaleString()} GNF`, 15, 77);
       doc.text(`Outstanding Balance: ${Number(data.outstandingBalance || 0).toLocaleString()} GNF`, 15, 84);
 
+      // Merge and sort activities chronologically
+      const activities: any[] = [];
+      
+      (data.invoices || []).forEach((inv: any) => {
+        activities.push({
+          date: inv.createdAt,
+          ref: inv.invoiceNumber,
+          type: 'INVOICE',
+          description: `Billing Invoice (${inv.month} ${inv.year})`,
+          billed: Number(inv.subtotal || 0),
+          paid: 0
+        });
+      });
+
+      (data.payments || []).forEach((pay: any) => {
+        activities.push({
+          date: pay.paymentDate || pay.createdAt,
+          ref: pay.paymentNumber,
+          type: 'PAYMENT',
+          description: `Payment Category: ${pay.paymentCategory || 'Fee'} (${pay.paymentMethod || 'N/A'})`,
+          billed: 0,
+          paid: Number(pay.amount || 0)
+        });
+      });
+
+      // Sort by date ascending
+      activities.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+      // Calculate running balance
+      let currentBal = 0;
+      const ledgerRows = activities.map((act) => {
+        if (act.type === 'INVOICE') {
+          currentBal += act.billed;
+        } else {
+          currentBal -= act.paid;
+        }
+        return [
+          new Date(act.date).toLocaleDateString(),
+          act.ref,
+          act.type,
+          act.description,
+          act.billed > 0 ? `${act.billed.toLocaleString()} GNF` : '—',
+          act.paid > 0 ? `${act.paid.toLocaleString()} GNF` : '—',
+          `${currentBal.toLocaleString()} GNF`
+        ];
+      });
+
       doc.setFontSize(14);
-      doc.text('Invoice Ledger History', 15, 100);
-      const invRows = (data.invoices || []).map((i: any) => [
-        i.invoiceNumber,
-        `${i.month} ${i.year}`,
-        i.status,
-        `${Number(i.subtotal || 0).toLocaleString()} GNF`,
-        `${Number(i.remainingBalance || 0).toLocaleString()} GNF`
-      ]);
+      doc.text('Account Activity Ledger (Chronological)', 15, 100);
 
       autoTable(doc, {
         startY: 105,
-        head: [['Invoice #', 'Billing Period', 'Status', 'Billed', 'Balance']],
-        body: invRows,
+        head: [['Date', 'Reference #', 'Type', 'Description', 'Billed (Debit)', 'Paid (Credit)', 'Running Balance']],
+        body: ledgerRows,
         theme: 'grid',
-        headStyles: { fillColor: [15, 23, 42] }
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255] },
+        styles: { fontSize: 8 }
       });
 
       doc.save(`Statement-${data.studentProfile?.userId || studentId}.pdf`);
@@ -552,7 +593,6 @@ export default function StudentFinance() {
       console.error(e);
     }
   };
-
   // ─── Render Helpers ────────────────────────────────────────────────────────
   const statusBadgeClass = (status: string) => {
     if (status === 'PAID') return 'bg-emerald-500 hover:bg-emerald-600';
@@ -567,24 +607,22 @@ export default function StudentFinance() {
   // AccountLead: edit/delete anything (DRAFT, REJECTED, SUBMITTED, APPROVED)
   const canEditDelete = (status: string) => {
     if (role === 'ACCOUNTANT') return status === 'DRAFT' || status === 'REJECTED';
-    if (role === 'ACCOUNTLEAD') return true; // full access
+    if (role === 'ACCOUNTLEAD' || role === 'ADMIN') return true; // full access
     return false;
   };
 
   // Checkbox eligibility
   const canCheckInvoice = (inv: FlatInvoice) => {
     if (role === 'ACCOUNTANT') return inv.status === 'DRAFT' || inv.status === 'REJECTED';
-    if (role === 'ACCOUNTLEAD') return inv.status !== 'PAID'; // can select any non-paid
+    if (role === 'ACCOUNTLEAD' || role === 'ADMIN') return inv.status !== 'PAID'; // can select any non-paid
     return false;
   };
 
   const canCheckPayment = (pay: FlatPayment) => {
     if (role === 'ACCOUNTANT') return pay.status === 'DRAFT' || pay.status === 'REJECTED';
-    if (role === 'ACCOUNTLEAD') return pay.status !== 'APPROVED'; // can select non-approved
+    if (role === 'ACCOUNTLEAD' || role === 'ADMIN') return pay.status !== 'APPROVED'; // can select non-approved
     return false;
   };
-
-  // ─── JSX ───────────────────────────────────────────────────────────────────
   return (
     <div className="p-8 space-y-8 bg-slate-50/50 min-h-screen">
       {/* Header */}
@@ -604,7 +642,7 @@ export default function StudentFinance() {
             </Button>
           )}
 
-          {role === 'ACCOUNTLEAD' && selectedInvoiceIds.length > 0 && (
+          {(role === 'ACCOUNTLEAD' || role === 'ADMIN') && selectedInvoiceIds.length > 0 && (
             <Button
               onClick={handleBulkApproveInvoices}
               className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs px-5"
@@ -672,7 +710,7 @@ export default function StudentFinance() {
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
-                {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && <TableHead className="w-12"></TableHead>}
+                {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD' || role === 'ADMIN') && <TableHead className="w-12"></TableHead>}
                 <TableHead className="font-bold text-slate-700">Invoice Number</TableHead>
                 <TableHead className="font-bold text-slate-700">Student</TableHead>
                 <TableHead className="font-bold text-slate-700">Billing Period</TableHead>
@@ -694,7 +732,7 @@ export default function StudentFinance() {
                 </TableRow>
               ) : filteredInvoices.map((inv) => (
                 <TableRow key={inv.id} className="hover:bg-slate-50/50 duration-200">
-                  {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && (
+                  {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD' || role === 'ADMIN') && (
                     <TableCell className="w-12">
                       {canCheckInvoice(inv) && (
                         <input
@@ -757,7 +795,7 @@ export default function StudentFinance() {
                       )}
 
                       {/* AccountLead: Approve/Reject buttons for SUBMITTED items */}
-                      {role === 'ACCOUNTLEAD' && (inv.status === 'SUBMITTED' || inv.status === 'DRAFT') && (
+                      {(role === 'ACCOUNTLEAD' || role === 'ADMIN') && (inv.status === 'SUBMITTED' || inv.status === 'DRAFT') && (
                         <>
                           <Button
                             onClick={() => handleApprove(inv.id, 'INVOICE')}
@@ -814,8 +852,8 @@ export default function StudentFinance() {
         </CardContent>
       </Card>
 
-      {/* ─── Payments Pending Review (AccountLead view) ──────────────────────── */}
-      {role === 'ACCOUNTLEAD' && (
+      {/* ─── Payments Pending Review (AccountLead/Admin view) ──────────────────────── */}
+      {(role === 'ACCOUNTLEAD' || role === 'ADMIN') && (
         <Card className="border-0 shadow-xl shadow-slate-100/50 bg-white rounded-3xl overflow-hidden">
           <CardHeader className="px-6 py-5 border-b border-slate-50">
             <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500 flex items-center gap-2">
@@ -901,7 +939,7 @@ export default function StudentFinance() {
                 Submit Selected ({selectedPaymentIds.length})
               </Button>
             )}
-            {role === 'ACCOUNTLEAD' && selectedPaymentIds.length > 0 && (
+            {(role === 'ACCOUNTLEAD' || role === 'ADMIN') && selectedPaymentIds.length > 0 && (
               <Button
                 onClick={handleBulkApprovePayments}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-[10px] h-8 px-4"
@@ -915,7 +953,7 @@ export default function StudentFinance() {
           <Table>
             <TableHeader>
               <TableRow>
-                {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && <TableHead className="w-12"></TableHead>}
+                {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD' || role === 'ADMIN') && <TableHead className="w-12"></TableHead>}
                 <TableHead>Payment Reference</TableHead>
                 <TableHead>Student</TableHead>
                 <TableHead>Method</TableHead>
@@ -928,7 +966,7 @@ export default function StudentFinance() {
             <TableBody>
               {payments.map((p) => (
                 <TableRow key={p.id}>
-                  {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && (
+                  {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD' || role === 'ADMIN') && (
                     <TableCell className="w-12">
                       {canCheckPayment(p) && (
                         <input
@@ -993,7 +1031,7 @@ export default function StudentFinance() {
                       )}
 
                       {/* AccountLead can approve/reject DRAFT payments directly */}
-                      {role === 'ACCOUNTLEAD' && (p.status === 'DRAFT' || p.status === 'SUBMITTED') && (
+                      {(role === 'ACCOUNTLEAD' || role === 'ADMIN') && (p.status === 'DRAFT' || p.status === 'SUBMITTED') && (
                         <>
                           <Button
                             onClick={() => handleApprove(p.id, 'PAYMENT')}

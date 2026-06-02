@@ -299,20 +299,37 @@ export default {
       return ctx.forbidden('Access denied');
     }
     const id = Number(ctx.params.id);
+    const existing = await (strapi.entityService.findOne as any)('api::student-invoice.student-invoice', id);
+    if (!existing) return ctx.notFound('Invoice not found');
+
     const body = ctx.request.body;
     const updateData: any = {};
     if (body.studentId) updateData.student = Number(body.studentId);
     if (body.month) updateData.month = body.month;
     if (body.year !== undefined) updateData.year = Number(body.year);
     if (body.notes !== undefined) updateData.notes = body.notes;
+    
+    let subtotal = existing.subtotal || 0;
     if (body.items) {
       updateData.items = body.items;
-      updateData.subtotal = body.items.reduce((sum: number, item: any) => sum + Number(item.amount || 0), 0);
+      subtotal = body.items.reduce((sum: number, item: any) => sum + Number(item.amount || 0), 0);
+      updateData.subtotal = subtotal;
+    } else if (body.subtotal !== undefined) {
+      subtotal = Number(body.subtotal);
+      updateData.subtotal = subtotal;
     }
-    if (body.subtotal !== undefined) updateData.subtotal = Number(body.subtotal);
-    if (body.remainingBalance !== undefined) updateData.remainingBalance = Number(body.remainingBalance);
-    if (body.status) updateData.status = body.status;
-    ctx.body = await (strapi.entityService.update as any)('api::student-invoice.student-invoice', id, { data: updateData, populate: ['student'] });
+    
+    if (body.status) {
+      updateData.status = body.status;
+    }
+
+    // Update base fields
+    await (strapi.entityService.update as any)('api::student-invoice.student-invoice', id, { data: updateData });
+    
+    // Always trigger recalculation engine to sync balances
+    await strapi.service('api::school-finance.school-finance').syncInvoiceBalances(id);
+
+    ctx.body = await (strapi.entityService.findOne as any)('api::student-invoice.student-invoice', id, { populate: ['student'] });
   },
 
   async deleteInvoice(ctx: any) {
@@ -329,6 +346,10 @@ export default {
       return ctx.forbidden('Access denied');
     }
     const id = Number(ctx.params.id);
+    const existing = await (strapi.entityService.findOne as any)('api::student-payment.student-payment', id, { populate: ['invoice'] });
+    if (!existing) return ctx.notFound('Payment not found');
+    const oldInvoiceId = existing.invoice?.id;
+
     const body = ctx.request.body;
     const updateData: any = {};
     if (body.invoiceId) updateData.invoice = Number(body.invoiceId);
@@ -338,7 +359,17 @@ export default {
     if (body.paymentCategory) updateData.paymentCategory = body.paymentCategory;
     if (body.notes !== undefined) updateData.notes = body.notes;
     if (body.status) updateData.status = body.status;
-    ctx.body = await (strapi.entityService.update as any)('api::student-payment.student-payment', id, { data: updateData, populate: ['student', 'invoice'] });
+
+    const updated = await (strapi.entityService.update as any)('api::student-payment.student-payment', id, { data: updateData, populate: ['student', 'invoice'] });
+    
+    const financeService = strapi.service('api::school-finance.school-finance');
+    if (oldInvoiceId) await financeService.syncInvoiceBalances(oldInvoiceId);
+    const newInvoiceId = updated?.invoice?.id;
+    if (newInvoiceId && newInvoiceId !== oldInvoiceId) {
+      await financeService.syncInvoiceBalances(newInvoiceId);
+    }
+    
+    ctx.body = updated;
   },
 
   async deletePayment(ctx: any) {
@@ -346,7 +377,16 @@ export default {
     if (!user || (user.schoolRole !== 'ACCOUNTANT' && user.schoolRole !== 'ACCOUNTLEAD' && user.schoolRole !== 'ADMIN')) {
       return ctx.forbidden('Access denied');
     }
-    ctx.body = await (strapi.entityService.delete as any)('api::student-payment.student-payment', Number(ctx.params.id));
+    const id = Number(ctx.params.id);
+    const existing = await (strapi.entityService.findOne as any)('api::student-payment.student-payment', id, { populate: ['invoice'] });
+    if (!existing) return ctx.notFound('Payment not found');
+    const oldInvoiceId = existing.invoice?.id;
+
+    const result = await (strapi.entityService.delete as any)('api::student-payment.student-payment', id);
+    if (oldInvoiceId) {
+      await strapi.service('api::school-finance.school-finance').syncInvoiceBalances(oldInvoiceId);
+    }
+    ctx.body = result;
   },
 
   async updateSalaryRecord(ctx: any) {
@@ -355,6 +395,9 @@ export default {
       return ctx.forbidden('Access denied');
     }
     const id = Number(ctx.params.id);
+    const existing = await (strapi.entityService.findOne as any)('api::salary-record.salary-record', id);
+    if (!existing) return ctx.notFound('Salary record not found');
+
     const body = ctx.request.body;
     const updateData: any = {};
     if (body.staffId) updateData.staff = Number(body.staffId);
@@ -365,8 +408,19 @@ export default {
     if (body.deductions !== undefined) updateData.deductions = Number(body.deductions);
     if (body.notes !== undefined) updateData.notes = body.notes;
     if (body.status) updateData.status = body.status;
-    updateData.netSalary = Number(body.baseSalary || 0) + Number(body.allowances || 0) - Number(body.deductions || 0);
-    ctx.body = await (strapi.entityService.update as any)('api::salary-record.salary-record', id, { data: updateData, populate: ['staff'] });
+
+    const baseSalary = body.baseSalary !== undefined ? Number(body.baseSalary) : Number(existing.baseSalary || 0);
+    const allowances = body.allowances !== undefined ? Number(body.allowances) : Number(existing.allowances || 0);
+    const deductions = body.deductions !== undefined ? Number(body.deductions) : Number(existing.deductions || 0);
+    updateData.netSalary = baseSalary + allowances - deductions;
+
+    // Update base fields
+    await (strapi.entityService.update as any)('api::salary-record.salary-record', id, { data: updateData });
+    
+    // Always trigger recalculation engine to sync salary status based on disbursements
+    await strapi.service('api::school-finance.school-finance').syncSalaryRecordStatus(id);
+
+    ctx.body = await (strapi.entityService.findOne as any)('api::salary-record.salary-record', id, { populate: ['staff'] });
   },
 
   async deleteSalaryRecord(ctx: any) {
@@ -383,6 +437,10 @@ export default {
       return ctx.forbidden('Access denied');
     }
     const id = Number(ctx.params.id);
+    const existing = await (strapi.entityService.findOne as any)('api::salary-payment.salary-payment', id, { populate: ['salaryRecord'] });
+    if (!existing) return ctx.notFound('Salary payment not found');
+    const oldSalaryRecordId = existing.salaryRecord?.id;
+
     const body = ctx.request.body;
     const updateData: any = {};
     if (body.salaryRecordId) updateData.salaryRecord = Number(body.salaryRecordId);
@@ -391,7 +449,17 @@ export default {
     if (body.paymentMethod) updateData.paymentMethod = body.paymentMethod;
     if (body.notes !== undefined) updateData.notes = body.notes;
     if (body.status) updateData.status = body.status;
-    ctx.body = await (strapi.entityService.update as any)('api::salary-payment.salary-payment', id, { data: updateData, populate: ['staff', 'salaryRecord'] });
+
+    const updated = await (strapi.entityService.update as any)('api::salary-payment.salary-payment', id, { data: updateData, populate: ['staff', 'salaryRecord'] });
+    
+    const financeService = strapi.service('api::school-finance.school-finance');
+    if (oldSalaryRecordId) await financeService.syncSalaryRecordStatus(oldSalaryRecordId);
+    const newSalaryRecordId = updated?.salaryRecord?.id;
+    if (newSalaryRecordId && newSalaryRecordId !== oldSalaryRecordId) {
+      await financeService.syncSalaryRecordStatus(newSalaryRecordId);
+    }
+    
+    ctx.body = updated;
   },
 
   async deleteSalaryPayment(ctx: any) {
@@ -399,6 +467,15 @@ export default {
     if (!user || (user.schoolRole !== 'ACCOUNTANT' && user.schoolRole !== 'ACCOUNTLEAD' && user.schoolRole !== 'ADMIN')) {
       return ctx.forbidden('Access denied');
     }
-    ctx.body = await (strapi.entityService.delete as any)('api::salary-payment.salary-payment', Number(ctx.params.id));
+    const id = Number(ctx.params.id);
+    const existing = await (strapi.entityService.findOne as any)('api::salary-payment.salary-payment', id, { populate: ['salaryRecord'] });
+    if (!existing) return ctx.notFound('Salary payment not found');
+    const oldSalaryRecordId = existing.salaryRecord?.id;
+
+    const result = await (strapi.entityService.delete as any)('api::salary-payment.salary-payment', id);
+    if (oldSalaryRecordId) {
+      await strapi.service('api::school-finance.school-finance').syncSalaryRecordStatus(oldSalaryRecordId);
+    }
+    ctx.body = result;
   }
 };
