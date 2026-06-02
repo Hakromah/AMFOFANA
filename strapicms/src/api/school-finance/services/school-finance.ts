@@ -66,16 +66,16 @@ export default () => ({
     const totalPaid = allPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
 
     let recordStatus = record.status;
-    if (recordStatus === 'APPROVED' || recordStatus === 'PAID' || recordStatus === 'PARTIALLY_PAID') {
+    if (recordStatus === 'APPROVED' || recordStatus === 'PAID' || recordStatus === 'PARTIALLY_PAID' || recordStatus === 'SUBMITTED') {
       if (totalPaid >= Number(record.netSalary || 0) && totalPaid > 0) {
         recordStatus = 'PAID';
       } else if (totalPaid > 0) {
         recordStatus = 'PARTIALLY_PAID';
-      } else {
+      } else if (recordStatus !== 'SUBMITTED') {
         recordStatus = 'APPROVED';
       }
     }
-    // DRAFT, SUBMITTED, REJECTED keep their status
+    // DRAFT, REJECTED keep their status
 
     await (strapi.entityService.update as any)('api::salary-record.salary-record' as any, salId, {
       data: { status: recordStatus }

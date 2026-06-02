@@ -200,10 +200,12 @@ export default function StaffFinance() {
   };
 
   // Submit selected records (Bulk submit)
-  const handleSubmitSelectedRecords = async () => {
-    const tid = toast.loading(`Submitting ${selectedRecordIds.length} salary records...`);
+  const handleSubmitSelectedRecords = async (recordIds?: number[]) => {
+    const ids = recordIds || selectedRecordIds;
+    if (ids.length === 0) return;
+    const tid = toast.loading(`Submitting ${ids.length} salary records...`);
     try {
-      await Promise.all(selectedRecordIds.map(id => {
+      await Promise.all(ids.map(id => {
         return api.put(`/school-finance/salaries/${id}/update`, { status: 'SUBMITTED' });
       }));
       toast.success('Salary records submitted successfully for review', { id: tid });
@@ -289,10 +291,12 @@ export default function StaffFinance() {
   };
 
   // Submit selected payouts (Bulk submit)
-  const handleSubmitSelectedPayouts = async () => {
-    const tid = toast.loading(`Submitting ${selectedPayoutIds.length} payouts...`);
+  const handleSubmitSelectedPayouts = async (payoutIds?: number[]) => {
+    const ids = payoutIds || selectedPayoutIds;
+    if (ids.length === 0) return;
+    const tid = toast.loading(`Submitting ${ids.length} payouts...`);
     try {
-      await Promise.all(selectedPayoutIds.map(id => {
+      await Promise.all(ids.map(id => {
         return api.put(`/school-finance/salary-payments/${id}/update`, { status: 'SUBMITTED' });
       }));
       toast.success('Disbursements submitted successfully for approval', { id: tid });
@@ -475,7 +479,7 @@ export default function StaffFinance() {
         <div className="flex items-center gap-3">
           {role === 'ACCOUNTANT' && selectedRecordIds.length > 0 && (
             <Button
-              onClick={handleSubmitSelectedRecords}
+              onClick={() => handleSubmitSelectedRecords()}
               className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs px-5 duration-300"
             >
               Submit Selected ({selectedRecordIds.length})
@@ -528,33 +532,35 @@ export default function StaffFinance() {
               </TableRow>
             </TableHeader>
             <TableBody>
+              {salaryRecords.length === 0 && (
+                <TableRow><TableCell colSpan={9} className="text-center text-slate-400 py-10">No payroll records found</TableCell></TableRow>
+              )}
               {salaryRecords.map((rec: any) => {
-                // Data is now flat from the backend endpoint
                 const staffName = rec.staffName || 'Unknown';
                 const staffRole = rec.staffRole || 'N/A';
                 const isDraftOrRejected = rec.status === 'DRAFT' || rec.status === 'REJECTED';
+                const isSubmitted = rec.status === 'SUBMITTED';
+                const canCheck = (role === 'ACCOUNTANT' && isDraftOrRejected) ||
+                  ((role === 'ACCOUNTLEAD' || role === 'ADMIN') && isSubmitted);
+                const canEdit = (role === 'ACCOUNTANT' && isDraftOrRejected) ||
+                  ((role === 'ACCOUNTLEAD' || role === 'ADMIN') && rec.status !== 'PAID');
+                const canApprove = (role === 'ACCOUNTLEAD' || role === 'ADMIN') && isSubmitted;
 
                 return (
                   <TableRow key={rec.id} className="hover:bg-slate-50/50 duration-200">
-                    {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD' || role === 'ADMIN') && (
-                      <TableCell className="w-12">
-                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || 
-                          ((role === 'ACCOUNTLEAD' || role === 'ADMIN') && (rec.status === 'SUBMITTED' || rec.status === 'DRAFT' || rec.status === 'REJECTED'))) && (
-                          <input
-                            type="checkbox"
-                            checked={selectedRecordIds.includes(rec.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedRecordIds([...selectedRecordIds, rec.id]);
-                              } else {
-                                setSelectedRecordIds(selectedRecordIds.filter(id => id !== rec.id));
-                              }
-                            }}
-                            className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                          />
-                        )}
-                      </TableCell>
-                    )}
+                    <TableCell className="w-12">
+                      {canCheck && (
+                        <input
+                          type="checkbox"
+                          checked={selectedRecordIds.includes(rec.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) setSelectedRecordIds([...selectedRecordIds, rec.id]);
+                            else setSelectedRecordIds(selectedRecordIds.filter(id => id !== rec.id));
+                          }}
+                          className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                        />
+                      )}
+                    </TableCell>
 
                     <TableCell className="font-bold text-slate-900">{rec.recordNumber}</TableCell>
                     <TableCell>
@@ -575,22 +581,20 @@ export default function StaffFinance() {
                         rec.status === 'PAID' ? 'bg-emerald-500 hover:bg-emerald-600' :
                         rec.status === 'PARTIALLY_PAID' ? 'bg-amber-500 hover:bg-amber-600' :
                         rec.status === 'APPROVED' ? 'bg-blue-600 hover:bg-blue-700' :
+                        rec.status === 'SUBMITTED' ? 'bg-violet-500 hover:bg-violet-600' :
                         rec.status === 'REJECTED' ? 'bg-rose-500 hover:bg-rose-600' :
-                        rec.status === 'DRAFT' ? 'bg-slate-300 text-slate-800 hover:bg-slate-400' :
-                        'bg-slate-500 hover:bg-slate-600'
+                        'bg-slate-300 text-slate-800 hover:bg-slate-400'
                       }>
                         {rec.status}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1.5">
-                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || 
-                          ((role === 'ACCOUNTLEAD' || role === 'ADMIN') && (isDraftOrRejected || rec.status === 'SUBMITTED' || rec.status === 'APPROVED'))) && (
+                        {canEdit && (
                           <>
                             <Button 
                               onClick={() => startEditRecord(rec)}
-                              size="icon" 
-                              variant="ghost"
+                              size="icon" variant="ghost"
                               className="rounded-xl border border-amber-100 bg-amber-50/50 hover:bg-amber-100 text-amber-700 h-8 w-8"
                               title="Edit Record"
                             >
@@ -598,8 +602,7 @@ export default function StaffFinance() {
                             </Button>
                             <Button 
                               onClick={() => handleDeleteRecord(rec)}
-                              size="icon" 
-                              variant="ghost"
+                              size="icon" variant="ghost"
                               className="rounded-xl border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 h-8 w-8"
                               title="Delete Record"
                             >
@@ -608,7 +611,18 @@ export default function StaffFinance() {
                           </>
                         )}
 
-                        {(role === 'ACCOUNTLEAD' || role === 'ADMIN') && (rec.status === 'SUBMITTED' || rec.status === 'DRAFT') && (
+                        {role === 'ACCOUNTANT' && isDraftOrRejected && (
+                          <Button
+                            onClick={() => handleSubmitSelectedRecords([rec.id])}
+                            size="sm"
+                            className="bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-xl text-xs h-8 px-3"
+                            title="Submit for Approval"
+                          >
+                            Submit
+                          </Button>
+                        )}
+
+                        {canApprove && (
                           <>
                             <Button 
                               onClick={() => handleApprove(rec.id, 'RECORD')}
@@ -638,68 +652,152 @@ export default function StaffFinance() {
         </CardContent>
       </Card>
 
-      {/* Salary Disbursements Awaiting Approval / Rejected Logs for Reviewer */}
-      {(role === 'ACCOUNTLEAD' || role === 'ADMIN') && (
-        <Card className="border-0 shadow-xl shadow-slate-100/50 bg-white rounded-3xl overflow-hidden mt-8">
-          <CardHeader className="px-6 py-5 border-b border-slate-50">
+      {/* ── Table 2A: Accountant — My Payout Drafts ─────────────────────────── */}
+      {role === 'ACCOUNTANT' && (
+        <Card className="border-0 shadow-xl shadow-slate-100/50 bg-white rounded-3xl overflow-hidden">
+          <CardHeader className="px-6 py-5 border-b border-slate-50 flex items-center justify-between">
             <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-500" /> Salary Payouts Pending Review / Revision
+              <Clock className="w-4 h-4 text-blue-500" /> My Payout Drafts — Pending Submission / Review
             </CardTitle>
+            {selectedPayoutIds.length > 0 && (
+              <Button
+                onClick={() => handleSubmitSelectedPayouts()}
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold uppercase tracking-wider text-[10px] h-8 px-4"
+              >
+                Submit Selected ({selectedPayoutIds.length})
+              </Button>
+            )}
           </CardHeader>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12"></TableHead>
                   <TableHead>Payout Ref</TableHead>
                   <TableHead>Employee</TableHead>
+                  <TableHead>Salary Record</TableHead>
                   <TableHead>Method</TableHead>
-                  <TableHead>Amount Paid</TableHead>
+                  <TableHead>Amount</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {salaryPayments.filter((p: any) => {
-                  return p.status === 'SUBMITTED' || p.status === 'REJECTED';
-                }).map((p: any) => {
-                  const staffName = p.staffName || 'Staff';
+                {salaryPayments.filter((p: any) => p.status === 'DRAFT' || p.status === 'REJECTED').length === 0 && (
+                  <TableRow><TableCell colSpan={8} className="text-center text-slate-400 py-8">No pending payout drafts</TableCell></TableRow>
+                )}
+                {salaryPayments.filter((p: any) => p.status === 'DRAFT' || p.status === 'REJECTED').map((p: any) => (
+                  <TableRow key={p.id}>
+                    <TableCell className="w-12">
+                      <input
+                        type="checkbox"
+                        checked={selectedPayoutIds.includes(p.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) setSelectedPayoutIds([...selectedPayoutIds, p.id]);
+                          else setSelectedPayoutIds(selectedPayoutIds.filter(id => id !== p.id));
+                        }}
+                        className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      />
+                    </TableCell>
+                    <TableCell className="font-bold">{p.paymentNumber}</TableCell>
+                    <TableCell>
+                      <div>
+                        <p className="font-semibold">{p.staffName || 'Staff'}</p>
+                        <p className="text-[10px] text-slate-400">{p.staffUserId || '—'}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-xs text-slate-500">{p.salaryRecordNumber || '—'}</TableCell>
+                    <TableCell>{p.paymentMethod}</TableCell>
+                    <TableCell className="font-black">{Number(p.amount || 0).toLocaleString()} GNF</TableCell>
+                    <TableCell>
+                      <Badge className={p.status === 'REJECTED' ? 'bg-rose-500' : 'bg-slate-300 text-slate-800'}>
+                        {p.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Button onClick={() => startEditPayout(p)} size="icon" variant="ghost" className="rounded-xl border border-amber-100 bg-amber-50/50 hover:bg-amber-100 text-amber-700 h-8 w-8"><Edit className="w-3.5 h-3.5" /></Button>
+                        <Button onClick={() => handleDeletePayout(p)} size="icon" variant="ghost" className="rounded-xl border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 h-8 w-8"><Trash2 className="w-3.5 h-3.5" /></Button>
+                        {p.status === 'DRAFT' && (
+                          <Button onClick={() => handleSubmitSelectedPayouts([p.id])} size="sm" className="bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-xl text-xs h-8 px-3">Submit</Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── Table 2B: AccountLead/Admin — Payouts Pending Review ─────────────── */}
+      {(role === 'ACCOUNTLEAD' || role === 'ADMIN') && (
+        <Card className="border-0 shadow-xl shadow-slate-100/50 bg-white rounded-3xl overflow-hidden">
+          <CardHeader className="px-6 py-5 border-b border-slate-50 flex items-center justify-between">
+            <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-amber-500" /> Salary Payouts Pending Review / Revision
+            </CardTitle>
+            {selectedPayoutIds.length > 0 && (
+              <Button onClick={handleBulkApprovePayouts} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-[10px] h-8 px-4">
+                Approve Selected ({selectedPayoutIds.length})
+              </Button>
+            )}
+          </CardHeader>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12"></TableHead>
+                  <TableHead>Payout Ref</TableHead>
+                  <TableHead>Employee</TableHead>
+                  <TableHead>Salary Record</TableHead>
+                  <TableHead>Method</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {salaryPayments.filter((p: any) => p.status === 'SUBMITTED').length === 0 && (
+                  <TableRow><TableCell colSpan={8} className="text-center text-slate-400 py-8">No pending payouts</TableCell></TableRow>
+                )}
+                {salaryPayments.filter((p: any) => p.status === 'SUBMITTED').map((p: any) => {
+                  const isPending = p.status === 'SUBMITTED';
                   return (
                     <TableRow key={p.id}>
+                      <TableCell className="w-12">
+                        {isPending && (
+                          <input type="checkbox" checked={selectedPayoutIds.includes(p.id)}
+                            onChange={(e) => { if (e.target.checked) setSelectedPayoutIds([...selectedPayoutIds, p.id]); else setSelectedPayoutIds(selectedPayoutIds.filter(id => id !== p.id)); }}
+                            className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                          />
+                        )}
+                      </TableCell>
                       <TableCell className="font-bold">{p.paymentNumber}</TableCell>
                       <TableCell>
                         <div>
-                          <p className="font-semibold">{staffName}</p>
+                          <p className="font-semibold">{p.staffName || 'Staff'}</p>
                           <p className="text-[10px] text-slate-400">{p.staffUserId || '—'}</p>
                         </div>
                       </TableCell>
+                      <TableCell className="text-xs text-slate-500">{p.salaryRecordNumber || '—'}</TableCell>
                       <TableCell>{p.paymentMethod}</TableCell>
                       <TableCell className="font-black">{Number(p.amount || 0).toLocaleString()} GNF</TableCell>
                       <TableCell>
-                        <Badge className={p.status === 'REJECTED' ? 'bg-rose-500' : 'bg-amber-500'}>
-                          {p.status}
-                        </Badge>
+                        <Badge className="bg-amber-500 hover:bg-amber-600">SUBMITTED</Badge>
                       </TableCell>
-                      <TableCell className="text-right space-x-2">
-                        {p.status === 'SUBMITTED' ? (
-                          <>
-                            <Button 
-                              onClick={() => handleApprove(p.id, 'DISBURSE')}
-                              size="sm" 
-                              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs"
-                            >
-                              Approve
-                            </Button>
-                            <Button 
-                              onClick={() => handleOpenReject(p.id, 'DISBURSE')}
-                              size="sm" 
-                              className="bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs"
-                            >
-                              Reject
-                            </Button>
-                          </>
-                        ) : (
-                          <span className="text-[10px] text-rose-500 font-extrabold uppercase bg-rose-50 px-2.5 py-1 rounded-xl">Waiting Accountant Revision</span>
-                        )}
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Button onClick={() => startEditPayout(p)} size="icon" variant="ghost" className="rounded-xl border border-amber-100 bg-amber-50/50 hover:bg-amber-100 text-amber-700 h-8 w-8"><Edit className="w-3.5 h-3.5" /></Button>
+                          <Button onClick={() => handleDeletePayout(p)} size="icon" variant="ghost" className="rounded-xl border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 h-8 w-8"><Trash2 className="w-3.5 h-3.5" /></Button>
+                          {isPending && (
+                            <>
+                              <Button onClick={() => handleApprove(p.id, 'DISBURSE')} size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs">Approve</Button>
+                              <Button onClick={() => handleOpenReject(p.id, 'DISBURSE')} size="sm" className="bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs">Reject</Button>
+                            </>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
@@ -710,36 +808,20 @@ export default function StaffFinance() {
         </Card>
       )}
 
-      {/* Historical Payroll payouts / Accountant Drafts & Rejected */}
-      <Card className="border-0 shadow-xl shadow-slate-100/50 bg-white rounded-3xl overflow-hidden mt-8">
-        <CardHeader className="px-6 py-5 border-b border-slate-50 flex items-center justify-between">
-          <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500">Approved Payslips & Payout Ledger</CardTitle>
-          <div className="flex gap-2">
-            {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD' || role === 'ADMIN') && selectedPayoutIds.length > 0 && (
-              <Button
-                onClick={handleSubmitSelectedPayouts}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-[10px] h-8 px-4"
-              >
-                Submit Selected ({selectedPayoutIds.length})
-              </Button>
-            )}
-            {(role === 'ACCOUNTLEAD' || role === 'ADMIN') && selectedPayoutIds.length > 0 && (
-              <Button
-                onClick={handleBulkApprovePayouts}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-[10px] h-8 px-4"
-              >
-                Approve Selected ({selectedPayoutIds.length})
-              </Button>
-            )}
-          </div>
+      {/* ── Table 3: Approved Payslips & Payout Ledger (APPROVED only) ────────── */}
+      <Card className="border-0 shadow-xl shadow-slate-100/50 bg-white rounded-3xl overflow-hidden">
+        <CardHeader className="px-6 py-5 border-b border-slate-50">
+          <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500 flex items-center gap-2">
+            <UserCheck className="w-4 h-4 text-emerald-500" /> Approved Payslips &amp; Payout Ledger
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD' || role === 'ADMIN') && <TableHead className="w-12"></TableHead>}
                 <TableHead>Payout Reference</TableHead>
                 <TableHead>Employee</TableHead>
+                <TableHead>Salary Record</TableHead>
                 <TableHead>Method</TableHead>
                 <TableHead>Amount Disbursed</TableHead>
                 <TableHead>Status</TableHead>
@@ -747,92 +829,29 @@ export default function StaffFinance() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {salaryPayments.map((p: any) => {
-                const staffName = p.staffName || 'N/A';
-                const isDraftOrRejected = p.status === 'DRAFT' || p.status === 'REJECTED';
-
-                return (
-                  <TableRow key={p.id}>
-                    {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD' || role === 'ADMIN') && (
-                      <TableCell className="w-12">
-                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || 
-                          ((role === 'ACCOUNTLEAD' || role === 'ADMIN') && (isDraftOrRejected || p.status === 'SUBMITTED'))) && (
-                          <input
-                            type="checkbox"
-                            checked={selectedPayoutIds.includes(p.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedPayoutIds([...selectedPayoutIds, p.id]);
-                              } else {
-                                setSelectedPayoutIds(selectedPayoutIds.filter(id => id !== p.id));
-                              }
-                            }}
-                            className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
-                          />
-                        )}
-                      </TableCell>
-                    )}
-
-                    <TableCell className="font-bold">{p.paymentNumber}</TableCell>
-                    <TableCell>
-                      <div>
-                        <p className="font-semibold">{staffName}</p>
-                        <p className="text-[10px] text-slate-400">{p.staffUserId || '—'}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell>{p.paymentMethod}</TableCell>
-                    <TableCell className="font-black">{Number(p.amount || 0).toLocaleString()} GNF</TableCell>
-                    <TableCell>
-                      <Badge className={
-                        p.status === 'APPROVED' ? 'bg-emerald-500' :
-                        p.status === 'REJECTED' ? 'bg-rose-500' :
-                        p.status === 'DRAFT' ? 'bg-slate-300 text-slate-800' :
-                        'bg-amber-500'
-                      }>
-                        {p.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        {((role === 'ACCOUNTANT' && isDraftOrRejected) || 
-                          ((role === 'ACCOUNTLEAD' || role === 'ADMIN') && (isDraftOrRejected || p.status === 'SUBMITTED' || p.status === 'APPROVED'))) && (
-                          <>
-                            <Button 
-                              onClick={() => startEditPayout(p)}
-                              size="icon" 
-                              variant="ghost"
-                              className="rounded-xl border border-amber-100 bg-amber-50/50 hover:bg-amber-100 text-amber-700 h-8 w-8"
-                              title="Edit Disbursement"
-                            >
-                              <Edit className="w-3.5 h-3.5" />
-                            </Button>
-                            <Button 
-                              onClick={() => handleDeletePayout(p)}
-                              size="icon" 
-                              variant="ghost"
-                              className="rounded-xl border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 h-8 w-8"
-                              title="Delete Disbursement"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
-                          </>
-                        )}
-
-                        {p.status === 'APPROVED' && (
-                          <Button 
-                            onClick={() => downloadPayslip(p.documentId || String(p.id), p.id)}
-                            size="sm" 
-                            variant="outline"
-                            className="rounded-lg gap-2 text-xs"
-                          >
-                            <Download className="w-3.5 h-3.5" /> PDF Payslip
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+              {salaryPayments.filter((p: any) => p.status === 'APPROVED').length === 0 && (
+                <TableRow><TableCell colSpan={7} className="text-center text-slate-400 py-10">No approved payslips yet</TableCell></TableRow>
+              )}
+              {salaryPayments.filter((p: any) => p.status === 'APPROVED').map((p: any) => (
+                <TableRow key={p.id}>
+                  <TableCell className="font-bold">{p.paymentNumber}</TableCell>
+                  <TableCell>
+                    <div>
+                      <p className="font-semibold">{p.staffName || 'N/A'}</p>
+                      <p className="text-[10px] text-slate-400">{p.staffUserId || '—'}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-xs text-slate-500">{p.salaryRecordNumber || '—'}</TableCell>
+                  <TableCell>{p.paymentMethod}</TableCell>
+                  <TableCell className="font-black text-emerald-700">{Number(p.amount || 0).toLocaleString()} GNF</TableCell>
+                  <TableCell><Badge className="bg-emerald-500 hover:bg-emerald-600">APPROVED</Badge></TableCell>
+                  <TableCell className="text-right">
+                    <Button onClick={() => downloadPayslip(p.documentId || String(p.id), p.id)} size="sm" variant="outline" className="rounded-lg gap-2 text-xs">
+                      <Download className="w-3.5 h-3.5" /> PDF Payslip
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </CardContent>
