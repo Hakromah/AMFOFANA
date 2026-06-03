@@ -493,12 +493,12 @@ export default function StudentFinance() {
       doc.text(`Total Amount Collected: ${Number(pay.amount || 0).toLocaleString()} GNF`, 15, finalY + 28);
       doc.text(`Remaining Invoice Balance: ${Number(remainingBalance).toLocaleString()} GNF`, 15, finalY + 35);
 
-      // Generate QR code from the stored qrContent (contains invoice#, student name, userId)
+      // Generate QR code — anchored to bottom-right corner of the page
       const qrDataUrl = await QRCode.toDataURL(qrContent);
-      doc.addImage(qrDataUrl, 'PNG', 140, finalY + 15, 45, 45);
-      doc.setFontSize(8);
+      doc.addImage(qrDataUrl, 'PNG', 155, 242, 42, 42);
+      doc.setFontSize(7);
       doc.setTextColor(148, 163, 184);
-      doc.text('Scan for official digital verification', 142, finalY + 63);
+      doc.text('Scan to verify receipt', 155, 286);
 
       doc.save(`Receipt-${pay.paymentNumber || 'GEN'}.pdf`);
       toast.success('PDF compiled successfully', { id: tid });
@@ -568,11 +568,15 @@ export default function StudentFinance() {
       const activities: any[] = [];
       
       (data.invoices || []).forEach((inv: any) => {
+        // Build a category summary from items if available
+        const cats = Array.isArray(inv.items) && inv.items.length
+          ? [...new Set(inv.items.map((it: any) => it.category || 'FEE'))].join(', ')
+          : 'FEE';
         activities.push({
           date: inv.createdAt,
           ref: inv.invoiceNumber,
           type: 'INVOICE',
-          description: `Invoice (${inv.month} ${inv.year})`,
+          description: `Invoice — ${cats} (${inv.month} ${inv.year})`,
           billed: Number(inv.subtotal || 0),
           paid: 0
         });
@@ -629,16 +633,13 @@ export default function StudentFinance() {
         }
       });
 
-      // Add QR code with student info for verification
-      const finalY = (doc as any).lastAutoTable?.finalY || 180;
-      if (finalY < 240) {
-        const qrContent = `AMFOFANA ACADEMY\nStatement of Account\nStudent: ${studentName}\nID: ${studentUserId}\nTotal Billed: ${Number(data.totalInvoiced || 0).toLocaleString()} GNF\nTotal Paid: ${Number(data.totalPaid || 0).toLocaleString()} GNF\nOutstanding: ${Number(data.outstandingBalance || 0).toLocaleString()} GNF`;
-        const qrDataUrl = await QRCode.toDataURL(qrContent);
-        doc.addImage(qrDataUrl, 'PNG', 155, finalY + 5, 40, 40);
-        doc.setFontSize(7);
-        doc.setTextColor(148, 163, 184);
-        doc.text('Scan to verify this statement', 153, finalY + 47);
-      }
+      // Add QR code — always anchored to bottom-right corner of the page
+      const qrContent = `AMFOFANA ACADEMY\nStatement of Account\nStudent: ${studentName}\nID: ${studentUserId}\nTotal Billed: ${Number(data.totalInvoiced || 0).toLocaleString()} GNF\nTotal Paid: ${Number(data.totalPaid || 0).toLocaleString()} GNF\nOutstanding: ${Number(data.outstandingBalance || 0).toLocaleString()} GNF`;
+      const qrDataUrl = await QRCode.toDataURL(qrContent);
+      doc.addImage(qrDataUrl, 'PNG', 155, 242, 42, 42);
+      doc.setFontSize(7);
+      doc.setTextColor(148, 163, 184);
+      doc.text('Scan to verify statement', 155, 286);
 
       doc.save(`Statement-${studentUserId || studentId}.pdf`);
       toast.success('Statement generated successfully', { id: tid });
@@ -1014,6 +1015,7 @@ export default function StudentFinance() {
                 <TableHead>Method</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Amount</TableHead>
+                <TableHead>Notes</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -1050,6 +1052,9 @@ export default function StudentFinance() {
                   <TableCell>{p.paymentMethod}</TableCell>
                   <TableCell><Badge variant="secondary">{p.paymentCategory}</Badge></TableCell>
                   <TableCell className="font-black">{Number(p.amount).toLocaleString()} GNF</TableCell>
+                  <TableCell className="text-xs text-slate-500 max-w-[100px] truncate" title={p.notes || ''}>
+                    {p.notes ? <span className="italic">{p.notes}</span> : <span className="text-slate-300">—</span>}
+                  </TableCell>
                   <TableCell>
                     <Badge className={
                       p.status === 'APPROVED' ? 'bg-emerald-500' :
@@ -1205,9 +1210,9 @@ export default function StudentFinance() {
                 </Button>
               </div>
 
-              <div className="space-y-3 max-h-[150px] overflow-y-auto pr-1">
+              <div className="space-y-3 max-h-[200px] overflow-y-auto pr-1">
                 {chargeItems.map((item, idx) => (
-                  <div key={idx} className="grid grid-cols-12 gap-2 items-center">
+                  <div key={idx} className="grid grid-cols-12 gap-1.5 items-center">
                     <Input
                       placeholder="e.g. Tuition Fee"
                       value={item.description}
@@ -1216,7 +1221,7 @@ export default function StudentFinance() {
                         next[idx].description = e.target.value;
                         setChargeItems(next);
                       }}
-                      className="col-span-6 h-9 rounded-lg bg-slate-50 text-xs"
+                      className="col-span-4 h-9 rounded-lg bg-slate-50 text-xs"
                     />
                     <Input
                       type="number"
@@ -1227,13 +1232,32 @@ export default function StudentFinance() {
                         next[idx].amount = Number(e.target.value);
                         setChargeItems(next);
                       }}
-                      className="col-span-4 h-9 rounded-lg bg-slate-50 text-xs"
+                      className="col-span-3 h-9 rounded-lg bg-slate-50 text-xs"
                     />
+                    <Select
+                      value={item.category || 'TUITION'}
+                      onValueChange={(val) => {
+                        const next = [...chargeItems];
+                        next[idx].category = val;
+                        setChargeItems(next);
+                      }}
+                    >
+                      <SelectTrigger className="col-span-4 h-9 rounded-lg bg-slate-50 text-xs">
+                        <SelectValue placeholder="Category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="TUITION">Tuition</SelectItem>
+                        <SelectItem value="TRANSPORT">Transport</SelectItem>
+                        <SelectItem value="TSHIRT">T-Shirt / Uniform</SelectItem>
+                        <SelectItem value="REGISTRATION">Registration</SelectItem>
+                        <SelectItem value="OTHER">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <Button
                       onClick={() => setChargeItems(chargeItems.filter((_, i) => i !== idx))}
-                      className="col-span-2 h-9 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg"
+                      className="col-span-1 h-9 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg px-0"
                     >
-                      Delete
+                      <X className="w-3.5 h-3.5" />
                     </Button>
                   </div>
                 ))}

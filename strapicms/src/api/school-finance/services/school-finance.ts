@@ -66,16 +66,21 @@ export default () => ({
     const totalPaid = allPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
 
     let recordStatus = record.status;
-    if (recordStatus === 'APPROVED' || recordStatus === 'PAID' || recordStatus === 'PARTIALLY_PAID' || recordStatus === 'SUBMITTED') {
+    // Only auto-transition APPROVED / PAID / PARTIALLY_PAID records based on payment totals.
+    // SUBMITTED must NOT be auto-transitioned — only an explicit AccountLead/Admin approve action
+    // should move a record from SUBMITTED → APPROVED.
+    // DRAFT and REJECTED are never touched here either.
+    if (recordStatus === 'APPROVED' || recordStatus === 'PAID' || recordStatus === 'PARTIALLY_PAID') {
       if (totalPaid >= Number(record.netSalary || 0) && totalPaid > 0) {
         recordStatus = 'PAID';
       } else if (totalPaid > 0) {
         recordStatus = 'PARTIALLY_PAID';
-      } else if (recordStatus !== 'SUBMITTED') {
+      } else {
+        // All payments were deleted — reset back to APPROVED (awaiting payout)
         recordStatus = 'APPROVED';
       }
     }
-    // DRAFT, REJECTED keep their status
+    // DRAFT, SUBMITTED, REJECTED — keep their status unchanged
 
     await (strapi.entityService.update as any)('api::salary-record.salary-record' as any, salId, {
       data: { status: recordStatus }
