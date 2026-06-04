@@ -147,7 +147,8 @@ export default {
     if (!user || (user.schoolRole !== 'ACCOUNTANT' && user.schoolRole !== 'ACCOUNTLEAD' && user.schoolRole !== 'ADMIN')) {
       return ctx.forbidden('Access denied');
     }
-    ctx.body = await strapi.service('api::school-finance.school-finance').getStats();
+    const year = ctx.query?.year ? Number(ctx.query.year) : undefined;
+    ctx.body = await strapi.service('api::school-finance.school-finance').getStats(year);
   },
 
   async recalculateSystem(ctx: any) {

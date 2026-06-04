@@ -177,7 +177,7 @@ export default function StudentFinance() {
   // Invoice Form State (Create & Edit)
   const [editingInvoice, setEditingInvoice] = useState<FlatInvoice | null>(null);
   const [selectedStudentId, setSelectedStudentId] = useState<string>('');
-  const [invoiceClassId, setInvoiceClassId] = useState<string>('');
+  const [invoiceClassId, setInvoiceClassId] = useState<string>('NONE');
   const [invoiceMonth, setInvoiceMonth] = useState<string>('June');
   const [invoiceYear, setInvoiceYear] = useState<number>(new Date().getFullYear());
   const [invoiceNotes, setInvoiceNotes] = useState<string>('');
@@ -188,7 +188,7 @@ export default function StudentFinance() {
   // Payment Form State (Receive & Edit)
   const [editingPayment, setEditingPayment] = useState<FlatPayment | null>(null);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string>('');
-  const [paymentClassId, setPaymentClassId] = useState<string>('');
+  const [paymentClassId, setPaymentClassId] = useState<string>('NONE');
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<string>('MOBILE_MONEY');
   const [paymentCategory, setPaymentCategory] = useState<string>('TUITION');
@@ -1254,7 +1254,7 @@ export default function StudentFinance() {
       </Card>
 
       {/* ─── Create / Edit Invoice Dialog ────────────────────────────────────── */}
-      <Dialog open={isInvoiceOpen} onOpenChange={(open) => { setIsInvoiceOpen(open); if (!open) { setEditingInvoice(null); setSelectedStudentId(''); setInvoiceClassId(''); } }}>
+      <Dialog open={isInvoiceOpen} onOpenChange={(open) => { setIsInvoiceOpen(open); if (!open) { setEditingInvoice(null); setSelectedStudentId(''); setInvoiceClassId('NONE'); } }}>
         <DialogContent className="max-w-md bg-white rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-lg font-black uppercase tracking-wide">
@@ -1278,7 +1278,7 @@ export default function StudentFinance() {
                   <SelectValue placeholder="Select class..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No Class</SelectItem>
+                  <SelectItem value="NONE">No Class</SelectItem>
                   {classes.map((cls: any) => (
                     <SelectItem key={cls.id} value={String(cls.id)}>
                       {cls.name || cls.className || `Class ${cls.id}`}
@@ -1401,7 +1401,7 @@ export default function StudentFinance() {
       </Dialog>
 
       {/* ─── Receive / Edit Payment Dialog ───────────────────────────────────── */}
-      <Dialog open={isPaymentOpen} onOpenChange={(open) => { setIsPaymentOpen(open); if (!open) { setEditingPayment(null); setSelectedInvoiceId(''); setPaymentClassId(''); } }}>
+      <Dialog open={isPaymentOpen} onOpenChange={(open) => { setIsPaymentOpen(open); if (!open) { setEditingPayment(null); setSelectedInvoiceId(''); setPaymentClassId('NONE'); } }}>
         <DialogContent className="max-w-md bg-white rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-lg font-black uppercase tracking-wide">
@@ -1416,7 +1416,7 @@ export default function StudentFinance() {
                   <SelectValue placeholder="Select class..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No Class</SelectItem>
+                  <SelectItem value="NONE">No Class</SelectItem>
                   {classes.map((cls: any) => (
                     <SelectItem key={cls.id} value={String(cls.id)}>
                       {cls.name || cls.className || `Class ${cls.id}`}

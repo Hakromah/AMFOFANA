@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
@@ -15,9 +15,12 @@ import {
 import api from '@/lib/api';
 import { toast } from 'sonner';
 
-// ─── Currency formatter ────────────────────────────────────────────────────────
-const fmtGNF = (v: number) =>
-  new Intl.NumberFormat('fr-GN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
+// ─── Currency formatter: 0.000.000,00 format ──────────────────────────────────
+const fmtGNF = (v: number) => {
+  const [int, dec] = Math.abs(v).toFixed(2).split('.');
+  const intFormatted = int.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return `${v < 0 ? '-' : ''}${intFormatted},${dec}`;
+};
 
 const fmtShort = (v: number) => {
   if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`;
@@ -61,10 +64,11 @@ export default function FinanceDashboard() {
   const [barMonth, setBarMonth] = useState<string>('ALL');
   const [barYear, setBarYear] = useState<string>(String(new Date().getFullYear()));
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async (year?: string) => {
     setLoading(true);
     try {
-      const res = await api.get('/school-finance/stats');
+      const yr = year || barYear;
+      const res = await api.get(`/school-finance/stats?year=${yr}`);
       setStats(res.data);
     } catch (e: any) {
       toast.error('Failed to sync financial analytics ledger');
@@ -72,9 +76,16 @@ export default function FinanceDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [barYear]);
 
-  useEffect(() => { fetchStats(); }, []);
+  // Initial load
+  useEffect(() => { fetchStats(barYear); }, []);
+
+  // Re-fetch when year changes
+  useEffect(() => {
+    setBarMonth('ALL'); // reset month filter when year changes
+    fetchStats(barYear);
+  }, [barYear]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Payment completion ratio — use billedStudents as denominator
   const paidRatio = useMemo(() => {
@@ -83,24 +94,37 @@ export default function FinanceDashboard() {
     return billed > 0 ? Math.round((paid / billed) * 100) : 0;
   }, [stats]);
 
-  // Bar chart data — filter by month if selected
+  // Bar chart data — uses yearlyTrends per-month category breakdown when a month is selected
   const barData = useMemo(() => {
     if (!stats) return [];
-    // When filter is ALL, show all-time totals per category
-    // When a specific month is chosen, extract from yearlyTrends if needed
-    // For now: categories don't change with month/year (all-time totals from backend)
-    // We show the raw category breakdowns
-    return [
-      { name: 'Tuition', value: stats.tuitionRevenue || 0, fill: '#3b82f6' },
-      { name: 'Transport', value: stats.transportationRevenue || 0, fill: '#10b981' },
-      { name: 'T-Shirt / Uniform', value: stats.tshirtRevenue || 0, fill: '#8b5cf6' },
-      { name: 'Registration', value: stats.registrationRevenue || 0, fill: '#f59e0b' },
-      { name: 'Other', value: stats.otherRevenue || 0, fill: '#64748b' },
-      { name: 'Salary Expenses', value: stats.salaryExpenses || 0, fill: '#f43f5e' },
-    ];
-  }, [stats, barMonth, barYear]);
 
-  // Line chart data — filter by year
+    if (barMonth === 'ALL') {
+      // All-time annual totals for selected year
+      return [
+        { name: 'Tuition', value: stats.tuitionRevenue || 0, fill: '#3b82f6' },
+        { name: 'Transport', value: stats.transportationRevenue || 0, fill: '#10b981' },
+        { name: 'T-Shirt / Uniform', value: stats.tshirtRevenue || 0, fill: '#8b5cf6' },
+        { name: 'Registration', value: stats.registrationRevenue || 0, fill: '#f59e0b' },
+        { name: 'Other', value: stats.otherRevenue || 0, fill: '#64748b' },
+        { name: 'Salary Expenses', value: stats.salaryExpenses || 0, fill: '#f43f5e' },
+      ];
+    }
+
+    // Specific month — use per-month category data from yearlyTrends
+    const monthIndex = parseInt(barMonth) - 1; // barMonth is "1".."12"
+    const m = stats.yearlyTrends?.[monthIndex];
+    if (!m) return [];
+    return [
+      { name: 'Tuition', value: m.tuition || 0, fill: '#3b82f6' },
+      { name: 'Transport', value: m.transport || 0, fill: '#10b981' },
+      { name: 'T-Shirt / Uniform', value: m.tshirt || 0, fill: '#8b5cf6' },
+      { name: 'Registration', value: m.registration || 0, fill: '#f59e0b' },
+      { name: 'Other', value: m.other || 0, fill: '#64748b' },
+      { name: 'Salary Expenses', value: m.salary || 0, fill: '#f43f5e' },
+    ];
+  }, [stats, barMonth]);
+
+  // Line chart data
   const lineData = useMemo(() => {
     if (!stats?.yearlyTrends) return [];
     return stats.yearlyTrends;
@@ -108,9 +132,9 @@ export default function FinanceDashboard() {
 
   const kpis = [
     {
-      title: 'Monthly Revenue',
+      title: 'Annual Revenue',
       value: `${fmtGNF(stats?.monthlyRevenue || 0)} GNF`,
-      desc: 'All approved payment entries',
+      desc: `All approved payments for ${barYear}`,
       icon: DollarSign,
       color: 'text-emerald-600 bg-emerald-50 border-emerald-100'
     },
@@ -159,7 +183,7 @@ export default function FinanceDashboard() {
           <p className="text-sm text-slate-500 font-medium">Real-time ledger audit totals and payment completion analytics</p>
         </div>
         <button
-          onClick={fetchStats}
+          onClick={() => fetchStats(barYear)}
           className="flex items-center gap-2 px-4 h-11 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all duration-300 shadow-sm text-xs font-black uppercase tracking-wider text-slate-700"
         >
           <RefreshCw className="w-3.5 h-3.5" /> Refresh Ledger
@@ -207,7 +231,7 @@ export default function FinanceDashboard() {
         <Card className="border-0 shadow-xl shadow-slate-100/50 rounded-3xl bg-white overflow-hidden">
           <CardHeader className="border-b border-slate-50 px-6 py-5">
             <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-blue-600" /> Revenue &amp; Debt Dynamics
+              <TrendingUp className="w-4 h-4 text-blue-600" /> Revenue &amp; Debt Dynamics ({barYear})
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -292,7 +316,7 @@ export default function FinanceDashboard() {
             </div>
           </CardHeader>
           <CardContent className="p-6">
-            <div className="h-[380px] w-full">
+            <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={barData}
@@ -324,7 +348,7 @@ export default function FinanceDashboard() {
                     {barData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.fill} />
                     ))}
-                    {/* Value labels above bars — always visible, not just on hover */}
+                    {/* Value labels above bars — always visible */}
                     <LabelList
                       dataKey="value"
                       position="top"

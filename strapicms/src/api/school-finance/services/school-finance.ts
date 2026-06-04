@@ -89,10 +89,10 @@ export default () => ({
 
 
   // ─── Dashboard Stats & Analytics ───────────────────────────────────────────
-  async getStats() {
-    const currentYear = new Date().getFullYear();
+  async getStats(year?: number) {
+    const targetYear = year || new Date().getFullYear();
 
-    const [invoices, payments, salaryRecords, students] = await Promise.all([
+    const [invoices, payments, salaryRecords, salaryPayments, students] = await Promise.all([
       (strapi.entityService.findMany as any)('api::student-invoice.student-invoice' as any, {
         filters: { status: { $in: ['APPROVED', 'PAID', 'PARTIALLY_PAID'] } },
         populate: ['student']
@@ -103,6 +103,9 @@ export default () => ({
       (strapi.entityService.findMany as any)('api::salary-record.salary-record' as any, {
         filters: { status: { $in: ['APPROVED', 'PAID', 'PARTIALLY_PAID'] } }
       }) as Promise<any[]>,
+      (strapi.entityService.findMany as any)('api::salary-payment.salary-payment' as any, {
+        filters: { status: 'APPROVED' }
+      }) as Promise<any[]>,
       (strapi.entityService.findMany as any)('plugin::users-permissions.user' as any, {
         filters: { schoolRole: 'STUDENT' }
       }) as Promise<any[]>
@@ -110,6 +113,7 @@ export default () => ({
 
     const totalStudents = students.length;
 
+    // ── All-time invoice totals ────────────────────────────────────────────────
     let totalInvoiced = 0;
     let outstandingDebt = 0;
     const billedStudents = new Set<number>();
@@ -124,20 +128,25 @@ export default () => ({
       }
     });
 
-    const totalRevenue = payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
-    const salaryExpenses = salaryRecords.reduce((sum, s) => sum + Number(s.netSalary || 0), 0);
+    // ── Year-filtered payments ────────────────────────────────────────────────
+    const yearPayments = payments.filter(p => {
+      const d = new Date(p.paymentDate || p.createdAt || new Date());
+      return d.getFullYear() === targetYear;
+    });
 
-    const paidStudentsCount = paidStudents.size;
-    const billedStudentsCount = billedStudents.size;
-    const debtorStudentsCount = billedStudentsCount - paidStudentsCount;
+    const yearSalaryPayments = salaryPayments.filter((p: any) => {
+      const d = new Date(p.paymentDate || p.createdAt || new Date());
+      return d.getFullYear() === targetYear;
+    });
 
-    // Revenue breakdown by category
+    // Annual category breakdown for the selected year
     let tuitionRevenue = 0;
     let transportationRevenue = 0;
     let tshirtRevenue = 0;
     let registrationRevenue = 0;
     let otherRevenue = 0;
-    payments.forEach(p => {
+
+    yearPayments.forEach(p => {
       const amt = Number(p.amount || 0);
       if (p.paymentCategory === 'TUITION') tuitionRevenue += amt;
       else if (p.paymentCategory === 'TRANSPORT') transportationRevenue += amt;
@@ -146,20 +155,38 @@ export default () => ({
       else otherRevenue += amt;
     });
 
-    // Real 12-month trend from actual timestamps
+    const totalRevenue = yearPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+    const salaryExpenses = yearSalaryPayments.reduce((sum: number, p: any) => sum + Number(p.amount || 0), 0);
+
+    // ── Monthly breakdown (12 months of targetYear) ────────────────────────────
     const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     const monthlyRevenue: number[] = new Array(12).fill(0);
     const monthlyDebt: number[] = new Array(12).fill(0);
+    const monthlyCategories = Array.from({ length: 12 }, () => ({
+      tuition: 0, transport: 0, tshirt: 0, registration: 0, other: 0, salary: 0
+    }));
 
-    payments.forEach(p => {
+    yearPayments.forEach(p => {
       const date = new Date(p.paymentDate || p.createdAt || new Date());
-      if (date.getFullYear() === currentYear) {
-        monthlyRevenue[date.getMonth()] += Number(p.amount || 0);
-      }
+      const mi = date.getMonth();
+      const amt = Number(p.amount || 0);
+      monthlyRevenue[mi] += amt;
+      if (p.paymentCategory === 'TUITION') monthlyCategories[mi].tuition += amt;
+      else if (p.paymentCategory === 'TRANSPORT') monthlyCategories[mi].transport += amt;
+      else if (p.paymentCategory === 'TSHIRT') monthlyCategories[mi].tshirt += amt;
+      else if (p.paymentCategory === 'REGISTRATION') monthlyCategories[mi].registration += amt;
+      else monthlyCategories[mi].other += amt;
     });
+
+    yearSalaryPayments.forEach((p: any) => {
+      const date = new Date(p.paymentDate || p.createdAt || new Date());
+      const mi = date.getMonth();
+      monthlyCategories[mi].salary += Number(p.amount || 0);
+    });
+
     invoices.forEach(inv => {
       const date = new Date(inv.createdAt || new Date());
-      if (date.getFullYear() === currentYear) {
+      if (date.getFullYear() === targetYear) {
         monthlyDebt[date.getMonth()] += Number(inv.remainingBalance || 0);
       }
     });
@@ -167,14 +194,20 @@ export default () => ({
     const yearlyTrends = monthNames.map((month, i) => ({
       month,
       revenue: Math.round(monthlyRevenue[i]),
-      debt: Math.round(monthlyDebt[i])
+      debt: Math.round(monthlyDebt[i]),
+      tuition: Math.round(monthlyCategories[i].tuition),
+      transport: Math.round(monthlyCategories[i].transport),
+      tshirt: Math.round(monthlyCategories[i].tshirt),
+      registration: Math.round(monthlyCategories[i].registration),
+      other: Math.round(monthlyCategories[i].other),
+      salary: Math.round(monthlyCategories[i].salary),
     }));
 
     return {
       totalStudents,
-      billedStudents: billedStudentsCount,
-      paidStudents: paidStudentsCount,
-      debtorStudents: debtorStudentsCount,
+      billedStudents: billedStudents.size,
+      paidStudents: paidStudents.size,
+      debtorStudents: billedStudents.size - paidStudents.size,
       monthlyRevenue: totalRevenue,
       tuitionRevenue,
       transportationRevenue,
