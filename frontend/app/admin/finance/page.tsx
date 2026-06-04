@@ -52,7 +52,6 @@ const BarTooltip = ({ active, payload, label }: any) => {
 };
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-const MONTH_SHORTS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 export default function FinanceDashboard() {
   const [stats, setStats] = useState<any>(null);
@@ -329,7 +328,7 @@ export default function FinanceDashboard() {
                     <LabelList
                       dataKey="value"
                       position="top"
-                      formatter={(v: number) => v > 0 ? fmtShort(v) : ''}
+                      formatter={(v: unknown) => { const n = Number(v); return n > 0 ? fmtShort(n) : ''; }}
                       style={{ fontSize: '10px', fontWeight: 700, fill: '#475569' }}
                     />
                   </Bar>

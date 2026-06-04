@@ -232,17 +232,6 @@ export default function StudentFinance() {
   }, []);
 
   // ─── Filtered Lists ────────────────────────────────────────────────────────
-  // Build a map of studentId → className for filtering
-  const studentClassMap = useMemo(() => {
-    const map: Record<number, string> = {};
-    classes.forEach((cls: any) => {
-      (cls.students || cls.users || []).forEach((s: any) => {
-        if (s.id) map[s.id] = cls.name || cls.className || String(cls.id);
-      });
-    });
-    return map;
-  }, [classes]);
-
   const filteredInvoices = useMemo(() => {
     return invoices.filter((inv) => {
       const nameMatch = (inv.studentName || '').toLowerCase().includes(search.toLowerCase());
@@ -876,6 +865,7 @@ export default function StudentFinance() {
           <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500">Student Billing Ledger Sheets</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
+          <div className="overflow-y-auto" style={{ maxHeight: '340px' }}>
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
@@ -1018,6 +1008,7 @@ export default function StudentFinance() {
               ))}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
 
@@ -1263,7 +1254,7 @@ export default function StudentFinance() {
       </Card>
 
       {/* ─── Create / Edit Invoice Dialog ────────────────────────────────────── */}
-      <Dialog open={isInvoiceOpen} onOpenChange={(open) => { setIsInvoiceOpen(open); if (!open) { setEditingInvoice(null); setSelectedStudentId(''); } }}>
+      <Dialog open={isInvoiceOpen} onOpenChange={(open) => { setIsInvoiceOpen(open); if (!open) { setEditingInvoice(null); setSelectedStudentId(''); setInvoiceClassId(''); } }}>
         <DialogContent className="max-w-md bg-white rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-lg font-black uppercase tracking-wide">
@@ -1410,7 +1401,7 @@ export default function StudentFinance() {
       </Dialog>
 
       {/* ─── Receive / Edit Payment Dialog ───────────────────────────────────── */}
-      <Dialog open={isPaymentOpen} onOpenChange={(open) => { setIsPaymentOpen(open); if (!open) { setEditingPayment(null); setSelectedInvoiceId(''); } }}>
+      <Dialog open={isPaymentOpen} onOpenChange={(open) => { setIsPaymentOpen(open); if (!open) { setEditingPayment(null); setSelectedInvoiceId(''); setPaymentClassId(''); } }}>
         <DialogContent className="max-w-md bg-white rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-lg font-black uppercase tracking-wide">
