@@ -90,10 +90,12 @@ export default () => ({
 
   // ─── Dashboard Stats & Analytics ───────────────────────────────────────────
   async getStats() {
-    // Compile totals and distributions
+    const currentYear = new Date().getFullYear();
+
     const [invoices, payments, salaryRecords, students] = await Promise.all([
       (strapi.entityService.findMany as any)('api::student-invoice.student-invoice' as any, {
-        filters: { status: { $in: ['APPROVED', 'PAID', 'PARTIALLY_PAID'] } }
+        filters: { status: { $in: ['APPROVED', 'PAID', 'PARTIALLY_PAID'] } },
+        populate: ['student']
       }) as Promise<any[]>,
       (strapi.entityService.findMany as any)('api::student-payment.student-payment' as any, {
         filters: { status: 'APPROVED' }
@@ -108,7 +110,6 @@ export default () => ({
 
     const totalStudents = students.length;
 
-    // Calculate invoice aggregate
     let totalInvoiced = 0;
     let outstandingDebt = 0;
     const billedStudents = new Set<number>();
@@ -119,9 +120,7 @@ export default () => ({
       outstandingDebt += Number(inv.remainingBalance || 0);
       if (inv.student?.id) {
         billedStudents.add(inv.student.id);
-        if (inv.status === 'PAID') {
-          paidStudents.add(inv.student.id);
-        }
+        if (inv.status === 'PAID') paidStudents.add(inv.student.id);
       }
     });
 
@@ -129,33 +128,62 @@ export default () => ({
     const salaryExpenses = salaryRecords.reduce((sum, s) => sum + Number(s.netSalary || 0), 0);
 
     const paidStudentsCount = paidStudents.size;
-    const debtorStudentsCount = totalStudents - paidStudentsCount;
+    const billedStudentsCount = billedStudents.size;
+    const debtorStudentsCount = billedStudentsCount - paidStudentsCount;
 
-    // Categorized tuition and transportation revenue
+    // Revenue breakdown by category
     let tuitionRevenue = 0;
     let transportationRevenue = 0;
+    let tshirtRevenue = 0;
+    let registrationRevenue = 0;
+    let otherRevenue = 0;
     payments.forEach(p => {
-      if (p.paymentCategory === 'TUITION') tuitionRevenue += Number(p.amount || 0);
-      else if (p.paymentCategory === 'TRANSPORT') transportationRevenue += Number(p.amount || 0);
+      const amt = Number(p.amount || 0);
+      if (p.paymentCategory === 'TUITION') tuitionRevenue += amt;
+      else if (p.paymentCategory === 'TRANSPORT') transportationRevenue += amt;
+      else if (p.paymentCategory === 'TSHIRT') tshirtRevenue += amt;
+      else if (p.paymentCategory === 'REGISTRATION') registrationRevenue += amt;
+      else otherRevenue += amt;
     });
+
+    // Real 12-month trend from actual timestamps
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const monthlyRevenue: number[] = new Array(12).fill(0);
+    const monthlyDebt: number[] = new Array(12).fill(0);
+
+    payments.forEach(p => {
+      const date = new Date(p.paymentDate || p.createdAt || new Date());
+      if (date.getFullYear() === currentYear) {
+        monthlyRevenue[date.getMonth()] += Number(p.amount || 0);
+      }
+    });
+    invoices.forEach(inv => {
+      const date = new Date(inv.createdAt || new Date());
+      if (date.getFullYear() === currentYear) {
+        monthlyDebt[date.getMonth()] += Number(inv.remainingBalance || 0);
+      }
+    });
+
+    const yearlyTrends = monthNames.map((month, i) => ({
+      month,
+      revenue: Math.round(monthlyRevenue[i]),
+      debt: Math.round(monthlyDebt[i])
+    }));
 
     return {
       totalStudents,
+      billedStudents: billedStudentsCount,
       paidStudents: paidStudentsCount,
       debtorStudents: debtorStudentsCount,
       monthlyRevenue: totalRevenue,
       tuitionRevenue,
       transportationRevenue,
+      tshirtRevenue,
+      registrationRevenue,
+      otherRevenue,
       salaryExpenses,
       outstandingDebt,
-      yearlyTrends: [
-        { month: 'Jan', revenue: totalRevenue * 0.08, debt: outstandingDebt * 0.1 },
-        { month: 'Feb', revenue: totalRevenue * 0.12, debt: outstandingDebt * 0.09 },
-        { month: 'Mar', revenue: totalRevenue * 0.18, debt: outstandingDebt * 0.08 },
-        { month: 'Apr', revenue: totalRevenue * 0.22, debt: outstandingDebt * 0.07 },
-        { month: 'May', revenue: totalRevenue * 0.28, debt: outstandingDebt * 0.06 },
-        { month: 'Jun', revenue: totalRevenue, debt: outstandingDebt }
-      ]
+      yearlyTrends
     };
   },
 

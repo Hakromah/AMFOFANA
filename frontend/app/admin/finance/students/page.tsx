@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Search, Plus, Check, X, FileText, Download, Edit, Trash2,
-  DollarSign, Filter, CheckCircle2, Clock, UserCircle2
+  DollarSign, Clock, UserCircle2, ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +17,84 @@ import { toast } from 'sonner';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import QRCode from 'qrcode';
+
+// ─── Searchable Student Combobox ───────────────────────────────────────────────
+function StudentCombobox({ students, value, onChange, placeholder = 'Search student name or ID...' }: {
+  students: any[];
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const ref = useRef<HTMLDivElement>(null);
+
+  const selected = students.find(s => String(s.id) === value);
+  const filtered = useMemo(() => {
+    const q = query.toLowerCase();
+    return students
+      .filter(s =>
+        (s.username || '').toLowerCase().includes(q) ||
+        (s.userId || '').toLowerCase().includes(q)
+      )
+      .slice(0, 10);
+  }, [students, query]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => { setOpen(o => !o); setQuery(''); }}
+        className="w-full h-11 flex items-center justify-between gap-2 px-3 rounded-xl bg-slate-50 border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors"
+      >
+        <span className={selected ? 'text-slate-900' : 'text-slate-400'}>
+          {selected ? `${selected.username}${selected.userId ? ` (${selected.userId})` : ''}` : placeholder}
+        </span>
+        <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+      </button>
+      {open && (
+        <div className="absolute z-50 top-12 left-0 right-0 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden">
+          <div className="p-2 border-b border-slate-50">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+              <input
+                autoFocus
+                placeholder="Search by name or student ID..."
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                className="w-full pl-8 pr-3 h-8 text-xs rounded-xl bg-slate-50 border border-slate-100 outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+          <div className="max-h-[220px] overflow-y-auto">
+            {filtered.length === 0 ? (
+              <p className="text-center text-xs text-slate-400 py-4">No students found</p>
+            ) : filtered.map(s => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => { onChange(String(s.id)); setOpen(false); setQuery(''); }}
+                className={`w-full text-left px-4 py-2.5 text-sm hover:bg-blue-50 transition-colors flex items-center gap-2 ${String(s.id) === value ? 'bg-blue-50 font-bold text-blue-700' : 'text-slate-700'}`}
+              >
+                <UserCircle2 className="w-4 h-4 text-slate-400 shrink-0" />
+                <span className="font-semibold">{s.username}</span>
+                {s.userId && <span className="text-slate-400 text-xs">({s.userId})</span>}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface FlatInvoice {
@@ -82,6 +160,7 @@ export default function StudentFinance() {
   // Search & Filter
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [classFilter, setClassFilter] = useState('ALL');
 
   // Multi-Select Checkboxes
   const [selectedInvoiceIds, setSelectedInvoiceIds] = useState<number[]>([]);
@@ -98,6 +177,7 @@ export default function StudentFinance() {
   // Invoice Form State (Create & Edit)
   const [editingInvoice, setEditingInvoice] = useState<FlatInvoice | null>(null);
   const [selectedStudentId, setSelectedStudentId] = useState<string>('');
+  const [invoiceClassId, setInvoiceClassId] = useState<string>('');
   const [invoiceMonth, setInvoiceMonth] = useState<string>('June');
   const [invoiceYear, setInvoiceYear] = useState<number>(new Date().getFullYear());
   const [invoiceNotes, setInvoiceNotes] = useState<string>('');
@@ -108,6 +188,7 @@ export default function StudentFinance() {
   // Payment Form State (Receive & Edit)
   const [editingPayment, setEditingPayment] = useState<FlatPayment | null>(null);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string>('');
+  const [paymentClassId, setPaymentClassId] = useState<string>('');
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<string>('MOBILE_MONEY');
   const [paymentCategory, setPaymentCategory] = useState<string>('TUITION');
@@ -151,14 +232,32 @@ export default function StudentFinance() {
   }, []);
 
   // ─── Filtered Lists ────────────────────────────────────────────────────────
+  // Build a map of studentId → className for filtering
+  const studentClassMap = useMemo(() => {
+    const map: Record<number, string> = {};
+    classes.forEach((cls: any) => {
+      (cls.students || cls.users || []).forEach((s: any) => {
+        if (s.id) map[s.id] = cls.name || cls.className || String(cls.id);
+      });
+    });
+    return map;
+  }, [classes]);
+
   const filteredInvoices = useMemo(() => {
     return invoices.filter((inv) => {
       const nameMatch = (inv.studentName || '').toLowerCase().includes(search.toLowerCase());
       const numMatch = inv.invoiceNumber.toLowerCase().includes(search.toLowerCase());
       const statusMatch = statusFilter === 'ALL' || inv.status === statusFilter;
-      return (nameMatch || numMatch) && statusMatch;
+      const classMatch = classFilter === 'ALL' || (
+        inv.studentId !== null &&
+        classes.some((cls: any) => {
+          if (String(cls.id) !== classFilter) return false;
+          return (cls.students || cls.users || []).some((s: any) => s.id === inv.studentId);
+        })
+      );
+      return (nameMatch || numMatch) && statusMatch && classMatch;
     });
-  }, [invoices, search, statusFilter]);
+  }, [invoices, search, statusFilter, classFilter, classes]);
 
   // ─── Invoice CRUD ──────────────────────────────────────────────────────────
   const handleCreateOrEditInvoice = async () => {
@@ -725,7 +824,7 @@ export default function StudentFinance() {
 
       {/* Filters */}
       <Card className="border-0 shadow-lg shadow-slate-100 bg-white rounded-3xl p-6">
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-4">
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
@@ -748,6 +847,20 @@ export default function StudentFinance() {
               <SelectItem value="PAID">Paid</SelectItem>
               <SelectItem value="PARTIALLY_PAID">Partially Paid</SelectItem>
               <SelectItem value="REJECTED">Rejected</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={classFilter} onValueChange={setClassFilter}>
+            <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-slate-100">
+              <SelectValue placeholder="All Classes" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All Classes</SelectItem>
+              {classes.map((cls: any) => (
+                <SelectItem key={cls.id} value={String(cls.id)}>
+                  {cls.name || cls.className || `Class ${cls.id}`}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
@@ -1006,6 +1119,7 @@ export default function StudentFinance() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
+          <div className="overflow-y-auto" style={{ maxHeight: '340px' }}>
           <Table>
             <TableHeader>
               <TableRow>
@@ -1144,6 +1258,7 @@ export default function StudentFinance() {
               ))}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
 
@@ -1158,15 +1273,24 @@ export default function StudentFinance() {
           <div className="space-y-4 py-4">
             <div className="space-y-1">
               <label className="text-xs font-black uppercase text-slate-400">Select Student</label>
-              {/* NOTE: dropdown is NOT disabled when editing — user can change student */}
-              <Select value={selectedStudentId} onValueChange={setSelectedStudentId}>
+              <StudentCombobox
+                students={students}
+                value={selectedStudentId}
+                onChange={setSelectedStudentId}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-black uppercase text-slate-400">Student Class (optional)</label>
+              <Select value={invoiceClassId} onValueChange={setInvoiceClassId}>
                 <SelectTrigger className="h-11 rounded-xl bg-slate-50">
-                  <SelectValue placeholder="Search student name..." />
+                  <SelectValue placeholder="Select class..." />
                 </SelectTrigger>
-                <SelectContent className="max-h-[250px] overflow-y-auto">
-                  {students.map((s) => (
-                    <SelectItem key={s.id} value={String(s.id)}>
-                      {s.username} {s.userId ? `(${s.userId})` : ''}
+                <SelectContent>
+                  <SelectItem value="">No Class</SelectItem>
+                  {classes.map((cls: any) => (
+                    <SelectItem key={cls.id} value={String(cls.id)}>
+                      {cls.name || cls.className || `Class ${cls.id}`}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -1294,6 +1418,23 @@ export default function StudentFinance() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            <div className="space-y-1">
+              <label className="text-xs font-black uppercase text-slate-400">Student Class (optional)</label>
+              <Select value={paymentClassId} onValueChange={setPaymentClassId}>
+                <SelectTrigger className="h-11 rounded-xl bg-slate-50">
+                  <SelectValue placeholder="Select class..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No Class</SelectItem>
+                  {classes.map((cls: any) => (
+                    <SelectItem key={cls.id} value={String(cls.id)}>
+                      {cls.name || cls.className || `Class ${cls.id}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-1">
               <label className="text-xs font-black uppercase text-slate-400">Select Billing Invoice</label>
               <Select

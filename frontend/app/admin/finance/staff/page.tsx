@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Plus, Check, X, Download, DollarSign, UserCheck, Clock, UserCircle2, Edit, Trash2, CreditCard
+  Plus, Check, X, Download, DollarSign, UserCheck, Clock, UserCircle2, Edit, Trash2, CreditCard, Search, ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,84 @@ import { toast } from 'sonner';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import QRCode from 'qrcode';
+
+// ─── Searchable Staff Combobox ────────────────────────────────────────────────────
+function StaffCombobox({ staff, value, onChange }: {
+  staff: any[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const ref = useRef<HTMLDivElement>(null);
+
+  const selected = staff.find(s => String(s.id) === value);
+  const filtered = useMemo(() => {
+    const q = query.toLowerCase();
+    return staff
+      .filter(s =>
+        (s.name || s.username || '').toLowerCase().includes(q) ||
+        (s.userId || '').toLowerCase().includes(q)
+      )
+      .slice(0, 10);
+  }, [staff, query]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => { setOpen(o => !o); setQuery(''); }}
+        className="w-full h-11 flex items-center justify-between gap-2 px-3 rounded-xl bg-slate-50 border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors"
+      >
+        <span className={selected ? 'text-slate-900' : 'text-slate-400'}>
+          {selected ? `${selected.name}${selected.userId ? ` (${selected.userId})` : ''}` : 'Search employee name or ID...'}
+        </span>
+        <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+      </button>
+      {open && (
+        <div className="absolute z-50 top-12 left-0 right-0 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden">
+          <div className="p-2 border-b border-slate-50">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+              <input
+                autoFocus
+                placeholder="Search by name or employee ID..."
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                className="w-full pl-8 pr-3 h-8 text-xs rounded-xl bg-slate-50 border border-slate-100 outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+          <div className="max-h-[220px] overflow-y-auto">
+            {filtered.length === 0 ? (
+              <p className="text-center text-xs text-slate-400 py-4">No staff found</p>
+            ) : filtered.map(s => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => { onChange(String(s.id)); setOpen(false); setQuery(''); }}
+                className={`w-full text-left px-4 py-2.5 text-sm hover:bg-blue-50 transition-colors flex items-center gap-2 ${String(s.id) === value ? 'bg-blue-50 font-bold text-blue-700' : 'text-slate-700'}`}
+              >
+                <UserCircle2 className="w-4 h-4 text-slate-400 shrink-0" />
+                <span className="font-semibold">{s.name}</span>
+                {s.userId && <span className="text-slate-400 text-xs">({s.userId})</span>}
+                <Badge variant="secondary" className="text-[10px] ml-auto">{s.schoolRole}</Badge>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function StaffFinance() {
   const [role, setRole] = useState<string>('ACCOUNTANT');
@@ -425,6 +503,7 @@ export default function StaffFinance() {
           <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500">Employee Monthly Payroll Accounts</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
+          <div className="overflow-y-auto" style={{ maxHeight: '340px' }}>
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
@@ -582,6 +661,7 @@ export default function StaffFinance() {
               })}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
 
@@ -660,6 +740,7 @@ export default function StaffFinance() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
+          <div className="overflow-y-auto" style={{ maxHeight: '340px' }}>
           <Table>
             <TableHeader>
               <TableRow>
@@ -729,6 +810,7 @@ export default function StaffFinance() {
               })}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
 
@@ -743,16 +825,11 @@ export default function StaffFinance() {
           <div className="space-y-4 py-4">
             <div className="space-y-1">
               <label className="text-xs font-black uppercase text-slate-400">Select Employee</label>
-              <Select value={selectedStaffId} onValueChange={setSelectedStaffId}>
-                <SelectTrigger className="h-11 rounded-xl bg-slate-50">
-                  <SelectValue placeholder="Search employee..." />
-                </SelectTrigger>
-                <SelectContent className="max-h-[250px] overflow-y-auto">
-                  {staff.map((s: any) => (
-                    <SelectItem key={s.id} value={String(s.id)}>{s.name} ({s.schoolRole})</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <StaffCombobox
+                staff={staff}
+                value={selectedStaffId}
+                onChange={setSelectedStaffId}
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
