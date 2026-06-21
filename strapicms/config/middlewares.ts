@@ -7,12 +7,13 @@ const config: Core.Config.Middlewares = [
   {
     name: 'strapi::cors',
     config: {
-     origin: [
+      origin: [
         'https://hassanskdev.online',
         'https://www.hassanskdev.online',
-        'http://localhost:3000', 
-        'http://127.0.0.1:3000', 
-        'http://192.168.1.137:3000', 
+        'https://api.hassanskdev.online',
+        'http://localhost:3002',
+        'http://127.0.0.1:3002',
+        'http://192.168.1.137:3002',
         'https://amfofana.vercel.app'
       ],
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
