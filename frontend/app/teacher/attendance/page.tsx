@@ -18,8 +18,9 @@ import { Progress } from '@/components/ui/progress';
 import {
   Calendar, Users, ClipboardCheck, Loader2, Save, History,
   PlusCircle, Search, CheckCheck, X, Clock, UserCheck,
-  ShieldCheck, BookOpen, FileEdit,
+  ShieldCheck, BookOpen, FileEdit, Upload
 } from 'lucide-react';
+import Papa from 'papaparse';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED' | 'SICK';
@@ -198,6 +199,59 @@ export default function TeacherAttendancePage() {
 
   const markAll = (status: AttendanceStatus) =>
     setAttendance(prev => prev.map(a => ({ ...a, status })));
+
+  const handleCsvUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        const data = results.data as any[];
+        if (data.length === 0) {
+          toast.error('CSV file is empty');
+          return;
+        }
+
+        const firstRow = data[0];
+        const statusKey = Object.keys(firstRow).find(k => k.toLowerCase() === 'status');
+        const idKey = Object.keys(firstRow).find(k => k.toLowerCase() === 'studentid' || k.toLowerCase() === 'userid' || k.toLowerCase() === 'student id' || k.toLowerCase() === 'user id');
+
+        if (!statusKey || !idKey) {
+          toast.error('CSV must contain column headers for Student ID/User ID and Status');
+          return;
+        }
+
+        let matchedCount = 0;
+        const newAttendance = attendance.map(item => {
+          const student = students.find(s => s.id === item.studentId);
+          if (!student) return item;
+
+          const csvRow = data.find(row => {
+            const csvId = String(row[idKey]).trim().toLowerCase();
+            return csvId === String(student.id).toLowerCase() || csvId === String(student.userId).trim().toLowerCase();
+          });
+
+          if (csvRow) {
+            const csvStatus = String(csvRow[statusKey]).trim().toUpperCase() as AttendanceStatus;
+            if (STATUS_CYCLE.includes(csvStatus)) {
+              matchedCount++;
+              return { ...item, status: csvStatus };
+            }
+          }
+          return item;
+        });
+
+        setAttendance(newAttendance);
+        toast.success(`Successfully imported ${matchedCount} records from CSV. Preview results below.`);
+        e.target.value = '';
+      },
+      error: () => {
+        toast.error('Failed to parse CSV file');
+      }
+    });
+  };
 
   // ── Submit / Update ─────────────────────────────────────────────────────────
   const handleSubmit = async () => {
@@ -524,17 +578,30 @@ export default function TeacherAttendancePage() {
             </div>
             <div className="flex gap-2 flex-wrap ml-auto">
               <Button size="sm" variant="outline"
-                className="rounded-xl gap-1.5 font-bold text-[11px] border-slate-200 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700"
+                onClick={() => document.getElementById('csv-file-input')?.click()}
+                className="rounded-xl gap-1.5 font-bold text-[11px] border-slate-200 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 cursor-pointer"
+              >
+                <Upload size={12} /> Import CSV
+              </Button>
+              <input
+                id="csv-file-input"
+                type="file"
+                accept=".csv"
+                className="hidden"
+                onChange={handleCsvUpload}
+              />
+              <Button size="sm" variant="outline"
+                className="rounded-xl gap-1.5 font-bold text-[11px] border-slate-200 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 cursor-pointer"
                 onClick={() => markAll('PRESENT')}>
                 <CheckCheck size={12} /> All Present
               </Button>
               <Button size="sm" variant="outline"
-                className="rounded-xl gap-1.5 font-bold text-[11px] border-slate-200 hover:bg-rose-50 hover:border-rose-300 hover:text-rose-700"
+                className="rounded-xl gap-1.5 font-bold text-[11px] border-slate-200 hover:bg-rose-50 hover:border-rose-300 hover:text-rose-700 cursor-pointer"
                 onClick={() => markAll('ABSENT')}>
                 <X size={12} /> All Absent
               </Button>
               <Button size="sm" variant="outline"
-                className="rounded-xl gap-1.5 font-bold text-[11px] border-slate-200 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700"
+                className="rounded-xl gap-1.5 font-bold text-[11px] border-slate-200 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 cursor-pointer"
                 onClick={() => markAll('LATE')}>
                 <Clock size={12} /> All Late
               </Button>

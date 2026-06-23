@@ -41,7 +41,7 @@ const userFormSchema = z.object({
    name: z.string().min(1, 'Name is required'),
    email: z.string().email('Invalid email'),
    password: z.string().min(6, 'Min 6 characters'),
-   role: z.enum(['STUDENT', 'TEACHER', 'ADMIN', 'ACCOUNTANT', 'ACCOUNTLEAD', 'DRIVER', 'WORKER']),
+   role: z.enum(['STUDENT', 'TEACHER', 'ADMIN', 'ACCOUNTANT', 'ACCOUNTLEAD', 'DRIVER', 'WORKER', 'PARENT']),
    birthDate: z.string().optional(),
    birthCountry: z.string().optional(),
    birthCity: z.string().optional(),
@@ -92,14 +92,15 @@ export default function UserManagement() {
 
    // --- DATA CALCULATIONS (The "Command Center" Logic) ---
     const statsData = useMemo(() => {
-       const counts = { STUDENT: 0, TEACHER: 0, ADMIN: 0, ACCOUNTANT: 0, ACCOUNTLEAD: 0, DRIVER: 0, WORKER: 0 };
+       const counts = { STUDENT: 0, TEACHER: 0, ADMIN: 0, ACCOUNTANT: 0, ACCOUNTLEAD: 0, DRIVER: 0, WORKER: 0, PARENT: 0 };
        users.forEach(u => { if (counts[u.role as keyof typeof counts] !== undefined) counts[u.role as keyof typeof counts]++; });
        return [
           { name: 'Students', value: counts.STUDENT, color: '#10b981' },
           { name: 'Teachers', value: counts.TEACHER, color: '#3b82f6' },
           { name: 'Admins', value: counts.ADMIN, color: '#f59e0b' },
           { name: 'Accountants', value: counts.ACCOUNTANT + counts.ACCOUNTLEAD, color: '#8b5cf6' },
-          { name: 'Drivers/Workers', value: counts.DRIVER + counts.WORKER, color: '#6366f1' }
+          { name: 'Drivers/Workers', value: counts.DRIVER + counts.WORKER, color: '#6366f1' },
+          { name: 'Parents', value: counts.PARENT, color: '#ec4899' }
        ];
     }, [users]);
 
@@ -217,40 +218,6 @@ export default function UserManagement() {
       }
    };
 
-   // const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-   //    const file = e.target.files?.[0];
-   //    if (!file) return;
-
-   //    Papa.parse(file, {
-   //       header: true,
-   //       skipEmptyLines: true,
-   //       complete: (results) => {
-   //          // Set preview so the Admin can verify before hitting the backend
-   //          setCsvPreview(results.data);
-   //          setImportSummary(null); // Clear previous reports
-   //       }
-   //    });
-   // };
-
-   // const processImport = async () => {
-   //    if (csvPreview.length === 0) return;
-
-   //    const tid = toast.loading("Processing registry injection...");
-   //    setImporting(true);
-
-   //    try {
-   //       const response = await api.post('/admin/users/bulk', csvPreview);
-   //       setImportSummary(response.data);
-   //       toast.success("Injection successful", { id: tid });
-   //       fetchUsers(); // Refresh the main table
-   //    } catch (error) {
-   //       toast.error("Registry mismatch: Check CSV headers", { id: tid });
-   //       console.log(error)
-   //    } finally {
-   //       setImporting(false);
-   //    }
-   // };
-
    const downloadTemplate = () => {
       const csv = "name,email,password,role,birthDate,birthCountry,birthCity,address,gender,phoneNumber\nJohn Doe,john@amf.edu,pass123,STUDENT,2005-12-01,USA,New York,123 Broadway,Male,+123456";
       const blob = new Blob([csv], { type: 'text/csv' });
@@ -268,12 +235,6 @@ export default function UserManagement() {
       } catch (e) { toast.error('Retrieval failed'); console.log(e) }
       finally { setIsLoadingClasses(false); }
    };
-
-   // const filteredUsers = users.filter(u => {
-   //    const matchesSearch = u.name.toLowerCase().includes(search.toLowerCase()) || u.userId.toLowerCase().includes(search.toLowerCase());
-   //    const matchesRole = roleFilter === 'ALL' || u.role === roleFilter;
-   //    return matchesSearch && matchesRole;
-   // });
 
    const filteredUsers = users.filter(u => {
       // Use optional chaining (?.) and provide a fallback empty string ('')
@@ -301,7 +262,8 @@ export default function UserManagement() {
          ACCOUNTANT: "bg-purple-600 hover:bg-purple-700",
          ACCOUNTLEAD: "bg-violet-600 hover:bg-violet-700",
          DRIVER: "bg-indigo-600 hover:bg-indigo-700",
-         WORKER: "bg-slate-700 hover:bg-slate-800"
+         WORKER: "bg-slate-700 hover:bg-slate-800",
+         PARENT: "bg-pink-500 hover:bg-pink-600"
       };
 
       return (
@@ -309,6 +271,7 @@ export default function UserManagement() {
             {role === 'ADMIN' && <ShieldCheck size={10} />}
             {role === 'TEACHER' && <UserCog size={10} />}
             {role === 'STUDENT' && <User size={10} />}
+            {role === 'PARENT' && <User size={10} />}
             {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD') && <Landmark size={10} />}
             {role === 'DRIVER' && <Bus size={10} />}
             {role === 'WORKER' && <Briefcase size={10} />}
@@ -381,14 +344,6 @@ export default function UserManagement() {
                         </div>
                      ))}
                   </div>
-                  {/* <div className="grid grid-cols-3 gap-2 mt-4">
-                     {statsData.map(s => (
-                        <div key={s.name} className="text-center p-2 rounded-2xl bg-slate-50 border border-slate-100">
-                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">{s.name}</p>
-                           <p className="text-lg font-black text-slate-800 leading-none mt-1">{s.value}</p>
-                        </div>
-                     ))}
-                  </div> */}
                </CardContent>
             </Card>
 
@@ -451,7 +406,7 @@ export default function UserManagement() {
                      <Input placeholder="Search registry by name, email, or fingerprint ID..." className="pl-12 h-12 bg-slate-50 border-none rounded-xl focus-visible:ring-2 focus-visible:ring-blue-600 font-medium" value={search} onChange={(e) => setSearch(e.target.value)} />
                   </div>
                   <div className="flex p-1 bg-slate-100 rounded-2xl gap-1">
-                     {['ALL', 'ADMIN', 'TEACHER', 'STUDENT', 'ACCOUNTANT', 'ACCOUNTLEAD', 'DRIVER', 'WORKER'].map((role) => (
+                     {['ALL', 'ADMIN', 'TEACHER', 'STUDENT', 'PARENT', 'ACCOUNTANT', 'ACCOUNTLEAD', 'DRIVER', 'WORKER'].map((role) => (
                         <Button key={role} variant="ghost" size="sm" onClick={() => setRoleFilter(role)} className={`rounded-xl h-10 px-5 font-black uppercase text-[10px] tracking-widest transition-all ${roleFilter === role ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}>{role}</Button>
                      ))}
                   </div>
@@ -601,6 +556,7 @@ export default function UserManagement() {
                                        <SelectItem value="STUDENT">Student</SelectItem>
                                        <SelectItem value="TEACHER">Teacher</SelectItem>
                                        <SelectItem value="ADMIN">Admin</SelectItem>
+                                       <SelectItem value="PARENT">Parent</SelectItem>
                                        <SelectItem value="ACCOUNTANT">Accountant</SelectItem>
                                        <SelectItem value="ACCOUNTLEAD">Account Lead</SelectItem>
                                        <SelectItem value="DRIVER">Driver</SelectItem>

@@ -15,9 +15,25 @@ import {
 import { toast } from 'sonner';
 import {
   Calendar, CheckCircle2, XCircle, Clock, Users, Loader2,
-  ClipboardList, BarChart2, Trash2, ShieldAlert, TrendingUp, RefreshCw, BookOpen, FileEdit, X,
+  ClipboardList, BarChart2, Trash2, ShieldAlert, TrendingUp, RefreshCw, BookOpen, FileEdit, X, Download
 } from 'lucide-react';
 import api from '@/lib/api';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { SCHOOL_CONFIG } from '@/lib/school-config';
+import {
+  ResponsiveContainer,
+  PieChart as RechartsPieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  BarChart as RechartsBarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from 'recharts';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface AttendanceSession {
@@ -125,6 +141,123 @@ export default function AdminAttendancePage() {
     }
   };
 
+  const exportCSV = () => {
+    if (!sessions || sessions.length === 0) {
+      toast.error('No sessions to export');
+      return;
+    }
+    const headers = ['Session ID', 'Date', 'Class Name', 'Subject', 'Session Time', 'Total Present', 'Total Absent', 'Total Late', 'Attendance Rate (%)'];
+    const rows = sessions.map(s => [
+      s.id,
+      s.date,
+      s.className,
+      s.subjectName || '—',
+      s.sessionTime || '—',
+      s.presentCount,
+      s.absentCount,
+      s.lateCount,
+      `${s.attendanceRate}%`
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + [headers.join(','), ...rows.map(e => e.map(val => `"${val}"`).join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `school_attendance_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('CSV exported successfully');
+  };
+
+  const exportPDF = () => {
+    if (!analytics) return;
+    try {
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pageW = doc.internal.pageSize.getWidth();
+
+      // Header
+      doc.setFillColor(15, 23, 42); // slate-900
+      doc.rect(0, 0, pageW, 40, 'F');
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(18);
+      doc.text(SCHOOL_CONFIG.name, 15, 15);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.text(SCHOOL_CONFIG.address || '', 15, 22);
+      doc.text(`Contact: ${SCHOOL_CONFIG.contact || ''}`, 15, 28);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.text('SCHOOL-WIDE ATTENDANCE REPORT', pageW - 15, 16, { align: 'right' });
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Date: ${new Date().toLocaleDateString()}`, pageW - 15, 22, { align: 'right' });
+
+      // Blue divider
+      doc.setFillColor(37, 99, 235);
+      doc.rect(0, 40, pageW, 1.5, 'F');
+
+      // Title
+      doc.setTextColor(15, 23, 42);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.text('Attendance Analytics Summary', 15, 55);
+
+      // Info box with stats
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(15, 62, pageW - 30, 25, 3, 3, 'F');
+      doc.setDrawColor(226, 232, 240);
+      doc.roundedRect(15, 62, pageW - 30, 25, 3, 3, 'S');
+
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139);
+      doc.setFont('helvetica', 'bold');
+      doc.text('OVERALL RATE', 20, 70);
+      doc.text('TOTAL RECORDS', 65, 70);
+      doc.text('PRESENT / ABSENT', 110, 70);
+
+      doc.setFontSize(12);
+      doc.setTextColor(15, 23, 42);
+      doc.text(`${analytics.overallRate}%`, 20, 78);
+      doc.text(`${analytics.totalRecords}`, 65, 78);
+      doc.text(`${analytics.presentCount} / ${analytics.absentCount}`, 110, 78);
+
+      // Class Rates Table
+      autoTable(doc, {
+        startY: 95,
+        head: [['Class Name', 'Total Attendance Checked', 'Present Count', 'Late Count', 'Attendance Rate']],
+        body: analytics.byClass.map(c => [
+          c.name,
+          c.total,
+          c.present,
+          c.late,
+          `${c.rate}%`
+        ]),
+        styles: { fontSize: 9, cellPadding: 4 },
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255] },
+        alternateRowStyles: { fillColor: [248, 250, 252] },
+      });
+
+      const pageH = doc.internal.pageSize.getHeight();
+      doc.setFillColor(248, 250, 252);
+      doc.rect(0, pageH - 12, pageW, 12, 'F');
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(100, 116, 139);
+      doc.text(`${SCHOOL_CONFIG.name} — Confidential Internal Document`, pageW / 2, pageH - 5, { align: 'center' });
+
+      doc.save(`school-attendance-report-${new Date().toISOString().split('T')[0]}.pdf`);
+      toast.success('Attendance PDF exported successfully');
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to export PDF');
+    }
+  };
+
   if (loading) {
     return (
       <div className="h-[80vh] flex flex-col items-center justify-center gap-4">
@@ -133,6 +266,13 @@ export default function AdminAttendancePage() {
       </div>
     );
   }
+
+  const attendanceRatioData = analytics ? [
+    { name: 'Present', value: analytics.presentCount, color: '#10b981' },
+    { name: 'Absent', value: analytics.absentCount, color: '#f43f5e' },
+    { name: 'Late', value: analytics.lateCount, color: '#f59e0b' },
+    { name: 'Excused', value: analytics.excusedCount, color: '#3b82f6' },
+  ] : [];
 
   return (
     <div className="p-6 lg:p-10 min-h-screen space-y-6 bg-[#f8fafc]">
@@ -151,20 +291,36 @@ export default function AdminAttendancePage() {
             School-wide attendance visibility &amp; management
           </p>
         </div>
-        <Button
-          variant="outline"
-          className="h-11 rounded-2xl gap-2 font-bold text-sm border-slate-200 hover:border-primary"
-          onClick={fetchData}
-        >
-          <RefreshCw size={14} /> Refresh
-        </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            variant="outline"
+            className="h-11 rounded-2xl gap-2 font-bold text-sm border-slate-200 hover:border-primary cursor-pointer"
+            onClick={exportCSV}
+          >
+            <Download size={14} /> Export CSV
+          </Button>
+          <Button
+            variant="outline"
+            className="h-11 rounded-2xl gap-2 font-bold text-sm border-slate-200 hover:border-primary cursor-pointer"
+            onClick={exportPDF}
+          >
+            <Download size={14} /> Export PDF
+          </Button>
+          <Button
+            variant="outline"
+            className="h-11 rounded-2xl gap-2 font-bold text-sm border-slate-200 hover:border-primary cursor-pointer"
+            onClick={fetchData}
+          >
+            <RefreshCw size={14} /> Refresh
+          </Button>
+        </div>
       </div>
 
       {/* ── Tabs ── */}
       <div className="flex gap-3">
         <Button
           onClick={() => setTab('analytics')}
-          className={`rounded-2xl font-black text-[10px] uppercase tracking-widest px-6 h-10 gap-2 transition-all ${
+          className={`rounded-2xl font-black text-[10px] uppercase tracking-widest px-6 h-10 gap-2 transition-all cursor-pointer ${
             tab === 'analytics' ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'
           }`}
         >
@@ -172,7 +328,7 @@ export default function AdminAttendancePage() {
         </Button>
         <Button
           onClick={() => setTab('sessions')}
-          className={`rounded-2xl font-black text-[10px] uppercase tracking-widest px-6 h-10 gap-2 transition-all ${
+          className={`rounded-2xl font-black text-[10px] uppercase tracking-widest px-6 h-10 gap-2 transition-all cursor-pointer ${
             tab === 'sessions' ? 'bg-primary text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'
           }`}
         >
@@ -216,6 +372,59 @@ export default function AdminAttendancePage() {
             <StatCard label="Absent"        value={analytics.absentCount}   icon={XCircle}      color="border-rose-100 hover:border-rose-300"     />
             <StatCard label="Late"          value={analytics.lateCount}     icon={Clock}        color="border-amber-100 hover:border-amber-300"    />
             <StatCard label="Excused/Sick"  value={analytics.excusedCount}  icon={ShieldAlert}  color="border-blue-100 hover:border-blue-300"     />
+          </div>
+
+          {/* Recharts Analytics Visualization */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
+              <div className="mb-4">
+                <h3 className="text-xs font-black uppercase tracking-widest text-slate-900">Attendance Ratio</h3>
+                <p className="text-[10px] font-bold text-slate-400">Status breakdown of all checked records</p>
+              </div>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartsPieChart>
+                    <Pie
+                      data={attendanceRatioData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {attendanceRatioData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => [value, 'Records']} />
+                    <Legend verticalAlign="bottom" height={36} />
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
+              <div className="mb-4">
+                <h3 className="text-xs font-black uppercase tracking-widest text-slate-900">Class Rate Comparison</h3>
+                <p className="text-[10px] font-bold text-slate-400">Compare average attendance rate across active classes</p>
+              </div>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartsBarChart data={analytics.byClass} margin={{ top: 20, right: 20, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis dataKey="name" tick={{ fontSize: 9, fontWeight: 'bold', fill: '#64748b' }} />
+                    <YAxis tick={{ fontSize: 9, fontWeight: 'bold', fill: '#64748b' }} unit="%" />
+                    <Tooltip formatter={(value) => [`${value}%`, 'Attendance Rate']} />
+                    <Bar dataKey="rate" fill="#3b82f6" radius={[6, 6, 0, 0]}>
+                      {analytics.byClass.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.rate >= 75 ? '#10b981' : '#f43f5e'} />
+                      ))}
+                    </Bar>
+                  </RechartsBarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </div>
 
           {/* Per-class breakdown */}
@@ -295,7 +504,7 @@ export default function AdminAttendancePage() {
               {dateFilter && (
                 <button
                   onClick={() => setDateFilter('')}
-                  className="text-slate-300 hover:text-rose-400 transition-colors ml-1"
+                  className="text-slate-300 hover:text-rose-400 transition-colors ml-1 cursor-pointer"
                   title="Clear date filter"
                 >
                   <X size={13} />
@@ -308,7 +517,7 @@ export default function AdminAttendancePage() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-11 rounded-2xl font-bold text-[11px] text-slate-400 hover:text-rose-500 hover:bg-rose-50 px-4"
+                className="h-11 rounded-2xl font-bold text-[11px] text-slate-400 hover:text-rose-500 hover:bg-rose-50 px-4 cursor-pointer"
                 onClick={() => { setClassFilter('all'); setDateFilter(''); }}
               >
                 <X size={12} className="mr-1" /> Clear Filters
@@ -391,7 +600,7 @@ export default function AdminAttendancePage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="rounded-xl text-rose-400 hover:text-rose-600 hover:bg-rose-50 p-2"
+                          className="rounded-xl text-rose-400 hover:text-rose-600 hover:bg-rose-50 p-2 cursor-pointer"
                           onClick={e => { e.stopPropagation(); handleDelete(session.id); }}
                           disabled={deleting === session.id}
                         >

@@ -10,12 +10,16 @@ import {
   Info,
   Loader2,
   ArrowRight,
-  GraduationCap
+  GraduationCap,
+  Download,
+  User
 } from 'lucide-react';
 import api from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { generateTimetable, TimetableData } from '@/lib/pdf-generator';
 
 const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
 
@@ -26,13 +30,14 @@ interface TimetableEntry {
   endTime: string;
   subject: { name: string };
   classe: { name: string };
+  teacher?: { name: string; username: string };
 }
 
 export default function UserTimetablePage() {
   const [timetable, setTimetable] = useState<TimetableEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [teacherName, setTeacherName] = useState('Teacher');
 
-  // FIXED: Correct TypeScript implementation for uppercase weekday
   const [activeDay, setActiveDay] = useState(() => {
     const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase();
     return DAYS.includes(today) ? today : 'MONDAY';
@@ -41,9 +46,12 @@ export default function UserTimetablePage() {
   useEffect(() => {
     const fetchTimetable = async () => {
       try {
-        // The endpoint should be specific to the role (e.g., /teacher/timetables)
-        const response = await api.get('/teacher/timetables');
-        setTimetable(Array.isArray(response.data) ? response.data : []);
+        const [timetableRes, userRes] = await Promise.all([
+          api.get('/teacher/timetables'),
+          api.get('/auth/me')
+        ]);
+        setTimetable(Array.isArray(timetableRes.data) ? timetableRes.data : []);
+        setTeacherName(userRes.data?.name || userRes.data?.username || 'Faculty Instructor');
       } catch (error) {
         console.error("Schedule Fetch Error:", error);
       } finally {
@@ -53,10 +61,34 @@ export default function UserTimetablePage() {
     fetchTimetable();
   }, []);
 
-  // Filter and Sort: Ensure classes are ordered by time
   const filteredSchedule = timetable
     .filter(item => item.dayOfWeek === activeDay)
     .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+  const handleExportPDF = () => {
+    if (timetable.length === 0) {
+      toast.error('No schedule data to export');
+      return;
+    }
+    try {
+      const timetableData: TimetableData = {
+        className: `Faculty Schedule: ${teacherName}`,
+        entries: timetable.map(item => ({
+          day: item.dayOfWeek,
+          startTime: item.startTime,
+          endTime: item.endTime,
+          subject: `${item.subject?.name} (${item.classe?.name})`,
+          teacher: item.teacher?.name || item.teacher?.username || teacherName
+        }))
+      };
+      const doc = generateTimetable(timetableData);
+      doc.save(`faculty-schedule-${teacherName.toLowerCase().replace(/\s+/g, '-')}.pdf`);
+      toast.success('Timetable PDF exported successfully');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to export timetable PDF');
+    }
+  };
 
   if (loading) {
     return (
@@ -80,13 +112,21 @@ export default function UserTimetablePage() {
           </h1>
         </div>
 
-        <div className="flex items-center gap-4 bg-white p-4 rounded-[clamp(1.3rem,1vw+0.5rem,2rem)] shadow-sm border border-primary/0 lg:hover:border-primary duration-300">
-          <div className="w-10 h-10 bg-blue-50 rounded-[clamp(1.3rem,1vw+0.5rem,2rem)] flex items-center justify-center text-primary">
-            <Calendar size={20} />
-          </div>
-          <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Today&apos;s Date</p>
-            <p className="font-bold text-slate-700">{new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}</p>
+        <div className="flex items-center gap-4">
+          <Button
+            onClick={handleExportPDF}
+            className="bg-slate-900 hover:bg-blue-600 text-white rounded-[clamp(1.3rem,1vw+0.5rem,2rem)] h-14 px-6 font-black transition-all cursor-pointer shadow-md"
+          >
+            <Download size={16} className="mr-2" /> Export Schedule
+          </Button>
+          <div className="flex items-center gap-4 bg-white p-4 rounded-[clamp(1.3rem,1vw+0.5rem,2rem)] shadow-sm border border-slate-100">
+            <div className="w-10 h-10 bg-blue-50 rounded-[clamp(1.3rem,1vw+0.5rem,2rem)] flex items-center justify-center text-primary">
+              <Calendar size={20} />
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Today&apos;s Date</p>
+              <p className="font-bold text-slate-700">{new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}</p>
+            </div>
           </div>
         </div>
       </header>
@@ -98,7 +138,7 @@ export default function UserTimetablePage() {
             <Button
               key={day}
               onClick={() => setActiveDay(day)}
-              className={`px-8 py-4 rounded-3xl font-black text-[11px] tracking-[0.2em] transition-all whitespace-nowrap border-2  ${activeDay === day
+              className={`px-8 py-4 rounded-3xl font-black text-[11px] tracking-[0.2em] transition-all whitespace-nowrap border-2 cursor-pointer ${activeDay === day
                 ? 'bg-slate-900 text-white border-slate-900 shadow-xl shadow-slate-200 scale-105'
                 : 'bg-white text-slate-400 border-transparent hover:border-slate-100 hover:text-slate-600'
                 }`}
@@ -146,16 +186,20 @@ export default function UserTimetablePage() {
                               <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest italic">Room 404</span>
                             </div>
                             <h3 className="text-2xl font-black text-slate-900 tracking-tight uppercase italic mb-1">
-                              {session.subject.name}
+                              {session.subject?.name || 'Academic Subject'}
                             </h3>
-                            <div className="flex items-center gap-4 text-slate-400">
+                            <div className="flex flex-wrap items-center gap-4 text-slate-400">
                               <span className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest">
                                 <GraduationCap size={14} className="text-blue-500" />
-                                {session.classe.name}
+                                {session.classe?.name || 'Class Group'}
+                              </span>
+                              <span className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest">
+                                <User size={14} className="text-emerald-500" />
+                                {session.teacher?.name || session.teacher?.username || 'Self'}
                               </span>
                               <span className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest">
                                 <MapPin size={14} className="text-blue-500" />
-                                Main Building
+                                Main Campus
                               </span>
                             </div>
                           </div>

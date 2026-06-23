@@ -1,4 +1,5 @@
 import Sidebar from '@/components/layout/Sidebar';
+import SessionGuard from '@/components/SessionGuard';
 
 export default function StudentLayout({
   children,
@@ -14,13 +15,19 @@ export default function StudentLayout({
     { name: 'Exam Results', href: '/student/results' },
     { name: 'Materials', href: '/student/materials' },
     { name: 'Transcripts', href: '/student/transcripts' },
+    { name: 'Finance', href: '/student/finance' },
+    { name: 'Transport', href: '/student/transport' },
+    { name: 'Calendar', href: '/student/calendar' },
+    { name: 'Notifications', href: '/student/notifications' },
     { name: 'Profile', href: '/student/profile' },
   ];
 
   return (
-    <div className="flex max-md:flex-col">
-      <Sidebar menuItems={menuItems} />
-      <main className="flex-1">{children}</main>
-    </div>
+    <SessionGuard>
+      <div className="flex max-md:flex-col">
+        <Sidebar menuItems={menuItems} />
+        <main className="flex-1">{children}</main>
+      </div>
+    </SessionGuard>
   );
 }

@@ -11,7 +11,7 @@ import {
    Users, Settings, ChevronRight, UserCircle, Activity, Bell,
    AlertCircle, MessageSquare, FileUp, UserCheck, BookOpen,
    Clock, UserPlus, BookOpenText, BarChart4, UsersRound, Landmark,
-   FileText
+   FileText, Bus
 } from 'lucide-react';
 import api from '@/lib/api';
 import { toast } from 'sonner';
@@ -32,9 +32,12 @@ const getIcon = (name: string) => {
    const n = name.toLowerCase();
    if (n.includes('dashboard')) return <LayoutDashboard className="w-4 h-4" />;
    if (n.includes('result') || n.includes('grade')) return <GraduationCap className="w-4 h-4" />;
-   if (n.includes('exam') || n.includes('schedule')) return <Calendar className="w-4 h-4" />;
+   if (n.includes('exam') || n.includes('schedule') || n.includes('calendar')) return <Calendar className="w-4 h-4" />;
    if (n.includes('timetable')) return <Clock className="w-4 h-4" />;
+   if (n.includes('transport') || n.includes('driver')) return <Bus className="w-4 h-4" />;
    if (n.includes('users management')) return <UsersRound className="w-4 h-4" />;
+   if (n.includes('parent')) return <UserCheck className="w-4 h-4" />;
+   if (n.includes('famil')) return <Users className="w-4 h-4" />;
    if (n.includes('subject management')) return <BookOpen className="w-4 h-4" />;
    if (n.includes('teacher assignment')) return <UserPlus className="w-4 h-4" />;
    if (n.includes('class management')) return <Landmark className="w-4 h-4" />;
@@ -43,10 +46,11 @@ const getIcon = (name: string) => {
    if (n.includes('message')) return <MessageSquare className="w-4 h-4" />;
    if (n.includes('material') || n.includes('upload')) return <FileUp className="w-4 h-4" />;
    if (n.includes('attendance')) return <UserCheck className="w-4 h-4" />;
-   if (n.includes('student') || n.includes('class')) return <Users className="w-4 h-4" />;
-   if (n.includes('transcripts')) return <FileText className="w-4 h-4" />;
+   if (n.includes('children') || n.includes('student') || n.includes('class')) return <Users className="w-4 h-4" />;
+   if (n.includes('transcripts') || n.includes('documents')) return <FileText className="w-4 h-4" />;
    if (n.includes('staff')) return <UsersRound className="w-4 h-4" />;
-   if (n.includes('utility')) return <Landmark className="w-4 h-4" />;
+   if (n.includes('finance') || n.includes('utility')) return <Landmark className="w-4 h-4" />;
+   if (n.includes('profile')) return <UserCircle className="w-4 h-4" />;
    return <Settings className="w-4 h-4" />;
 };
 

@@ -9,6 +9,8 @@ export default function AdminLayout({
   const menuItems = [
     { name: 'Dashboard', href: '/admin' },
     { name: 'Users Management', href: '/admin/users' },
+    { name: 'Parents Management', href: '/admin/parents' },
+    { name: 'Families Management', href: '/admin/families' },
     { name: 'Class Management', href: '/admin/classes' },
     { name: 'Subject Management', href: '/admin/subjects' },
     { name: 'Exam Management', href: '/admin/exams' },
@@ -18,6 +20,8 @@ export default function AdminLayout({
     { name: 'Teacher Assignment', href: '/admin/assign-teacher' },
     { name: 'Student Assignment', href: '/admin/assign-student' },
     { name: 'Timetable', href: '/admin/timetable' },
+    { name: 'Transport Management', href: '/admin/transport' },
+    { name: 'Messages', href: '/admin/messages' },
     { name: 'Reports', href: '/admin/reports' },
     { name: 'Transcripts', href: '/admin/transcripts' },
     { name: 'Settings', href: '/admin/settings' },

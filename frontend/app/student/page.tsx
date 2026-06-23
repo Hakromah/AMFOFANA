@@ -10,7 +10,8 @@ import {
   Clock,
   Award,
   Calendar as CalendarIcon,
-  ChevronRight
+  ChevronRight,
+  Loader2
 } from 'lucide-react';
 import {
   AreaChart,
@@ -26,15 +27,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
-// Mock data for the chart if backend doesn't provide weekly progress yet
-const attendanceData = [
-  { day: 'Mon', value: 100 },
-  { day: 'Tue', value: 80 },
-  { day: 'Wed', value: 95 },
-  { day: 'Thu', value: 90 },
-  { day: 'Fri', value: 100 },
-];
-
 export default function StudentDashboard() {
   const [stats, setStats] = useState({
     courseCount: 0,
@@ -46,16 +38,35 @@ export default function StudentDashboard() {
   });
   const [studentName, setStudentName] = useState('Student');
   const [loading, setLoading] = useState(true);
+  const [attendanceData, setAttendanceData] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [statsRes, userRes] = await Promise.all([
+        const [statsRes, userRes, attendanceRes] = await Promise.all([
           api.get('/student/dashboard-stats'),
-          api.get('/auth/me') // Assuming you have an endpoint for user profile
+          api.get('/auth/me'),
+          api.get('/student/attendance')
         ]);
         setStats(statsRes.data);
-        setStudentName(userRes.data.name);
+        setStudentName(userRes.data.name || userRes.data.username);
+
+        // Map recent 7 attendance records
+        const rawAttendance = Array.isArray(attendanceRes.data) ? attendanceRes.data : [];
+        const last7 = rawAttendance.slice(0, 7).reverse();
+        const formatted = last7.map((r: any) => ({
+          day: new Date(r.date).toLocaleDateString('en-US', { weekday: 'short' }),
+          value: r.status === 'PRESENT' || r.status === 'LATE' ? 100 : 0,
+          status: r.status,
+          dateStr: new Date(r.date).toLocaleDateString()
+        }));
+        setAttendanceData(formatted.length > 0 ? formatted : [
+          { day: 'Mon', value: 100 },
+          { day: 'Tue', value: 80 },
+          { day: 'Wed', value: 95 },
+          { day: 'Thu', value: 90 },
+          { day: 'Fri', value: 100 },
+        ]);
       } catch (error) {
         console.error("Dashboard sync error", error);
       } finally {
@@ -64,6 +75,15 @@ export default function StudentDashboard() {
     };
     fetchDashboardData();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="h-[80vh] flex flex-col items-center justify-center gap-4">
+        <Loader2 size={40} className="animate-spin text-primary" />
+        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Loading Student Intelligence...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#fcfcfd] p-5 md:p-[clamp(1rem,2.5vw+1rem,2rem)] lg:p-10 space-y-[clamp(1rem,1.5vw+1rem,2rem)]">
@@ -78,7 +98,7 @@ export default function StudentDashboard() {
           </p>
         </div>
         <div className="flex gap-3">
-          <Button className="bg-white border border-primary/0 md:hover:border-primary duration-500 hover:bg-slate-50 text-slate-900 rounded-2xl px-6 h-12 font-bold shadow-sm">
+          <Button className="bg-white border border-primary/0 md:hover:border-primary duration-500 hover:bg-slate-50 text-slate-900 rounded-2xl px-6 h-12 font-bold shadow-sm cursor-pointer">
             <CalendarIcon size={18} className="mr-1 text-primary" />
             Schedule
           </Button>
@@ -122,8 +142,8 @@ export default function StudentDashboard() {
         <Card className="lg:col-span-2 shadow-sm rounded-4 md:rounded-3xl border border-primary/0 md:hover:border-primary duration-500 bg-white p-4 md:p-[clamp(1rem,2.5vw+1rem,2rem)]">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-xl font-black text-slate-900  uppercase tracking-tight">Attendance Pulse</h2>
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Weekly consistency track</p>
+              <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight">Attendance Pulse</h2>
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Weekly consistency track (last 7 logs)</p>
             </div>
             <TrendingUp className="text-emerald-500" />
           </div>
@@ -145,6 +165,7 @@ export default function StudentDashboard() {
                 />
                 <YAxis hide domain={[0, 100]} />
                 <ReTooltip
+                  formatter={(value, name, props) => [`${value}% (${props.payload.status || 'Check'})`, 'Status']}
                   contentStyle={{ borderRadius: '15px', border: 'none', boxShadow: '0 10px 20px rgba(0,0,0,0.05)' }}
                 />
                 <Area
@@ -188,7 +209,7 @@ export default function StudentDashboard() {
                 </div>
               )}
 
-              <Button className="w-full mt-6 bg-white text-slate-900 md:hover:bg-primary md:hover:text-white rounded-2xl h-12 font-black uppercase text-[10px] tracking-widest transition-all duration-500">
+              <Button className="w-full mt-6 bg-white text-slate-900 md:hover:bg-primary md:hover:text-white rounded-2xl h-12 font-black uppercase text-[10px] tracking-widest transition-all duration-500 cursor-pointer">
                 Study Guide
               </Button>
             </div>
@@ -223,61 +244,3 @@ export default function StudentDashboard() {
     </div>
   );
 }
-
-
-// 'use client';
-
-// import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-// import { BookOpen, CheckCircle, FileText } from 'lucide-react';
-
-// export default function StudentDashboard() {
-//   return (
-//     <div className="p-8">
-//       <h1 className="text-3xl font-bold mb-8">Student Dashboard</h1>
-//       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-//         <Card>
-//           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-//             <CardTitle className="text-sm font-medium">
-//               Enrolled Courses
-//             </CardTitle>
-//             <BookOpen className="h-4 w-4 text-muted-foreground" />
-//           </CardHeader>
-//           <CardContent>
-//             <div className="text-2xl font-bold">6</div>
-//             <p className="text-xs text-muted-foreground">
-//               courses this semester
-//             </p>
-//           </CardContent>
-//         </Card>
-//         <Card>
-//           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-//             <CardTitle className="text-sm font-medium">
-//               Overall Attendance
-//             </CardTitle>
-//             <CheckCircle className="h-4 w-4 text-muted-foreground" />
-//           </CardHeader>
-//           <CardContent>
-//             <div className="text-2xl font-bold">95%</div>
-//             <p className="text-xs text-muted-foreground">
-//               Great work!
-//             </p>
-//           </CardContent>
-//         </Card>
-//         <Card>
-//           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-//             <CardTitle className="text-sm font-medium">
-//               Downloaded Materials
-//             </CardTitle>
-//             <FileText className="h-4 w-4 text-muted-foreground" />
-//           </CardHeader>
-//           <CardContent>
-//             <div className="text-2xl font-bold">15</div>
-//             <p className="text-xs text-muted-foreground">
-//               files downloaded
-//             </p>
-//           </CardContent>
-//         </Card>
-//       </div>
-//     </div>
-//   );
-// }

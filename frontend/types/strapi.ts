@@ -333,19 +333,7 @@ export interface Testimonial {
    image: string;
 }
 
-export interface FeatureCardData {
-   id: number;
-   icon: "BookOpen" | "HandHeart" | "Home" | "Star" | "Shield" | "GraduationCap";
-   title: string;
-   description: string;
-}
 
-export interface WhyChooseUsData {
-   subtitle: string;
-   title: string;
-   description: string;
-   cards: FeatureCardData[];
-}
 
 export interface AcademicProgram {
    id: number;
