@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
@@ -8,10 +10,13 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import { Fancybox } from "@fancyapps/ui";
 
+// @ts-ignore: Missing type declarations for CSS side-effect import
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
 
+// @ts-ignore: Missing type declarations for CSS side-effect import
 // Import Swiper styles
 import "swiper/css";
+// @ts-ignore: Missing type declarations for CSS side-effect import
 import "swiper/css/navigation";
 
 interface GalleryPageProps {
@@ -22,18 +27,28 @@ export default function GalleryPage({ items = [] }: GalleryPageProps) {
   const [activeMediaType, setActiveMediaType] = useState<"image" | "video">(
     "image",
   );
-  const [activeCategory, setActiveCategory] = useState<
-    "All" | "Campus" | "Events" | "Sports"
-  >("All");
+  const [activeCategory, setActiveCategory] = useState<string>("Tous");
   const [visibleGridCount, setVisibleGridCount] = useState(6);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Derive categories dynamically from whatever Strapi returns
+  const categories: string[] = [
+    "Tous",
+    ...Array.from(
+      new Set(
+        items
+          .map((item) => item.category)
+          .filter((cat) => cat !== null) as string[]
+      )
+    ),
+  ];
 
   const filteredItems = items.filter(
     (item) =>
       (activeMediaType === "video"
         ? item.type === "video"
         : item.type === "image") &&
-      (activeCategory === "All" || item.category === activeCategory),
+      (activeCategory === "Tous" || item.category === activeCategory),
   );
 
   // Filter items for the grid (only images)
@@ -63,41 +78,42 @@ export default function GalleryPage({ items = [] }: GalleryPageProps) {
           {/* 1. Toggle Switch (Segmented Control) */}
           <div className="flex justify-center w-fit max-w-500 mx-auto mb-8 absolute left-1/2 -translate-x-1/2 -top-7 z-10 ">
             <div className="bg-[#F8F9FA] p-1.5 rounded-full inline-flex items-center gap-1">
-              <button
+              <Button
                 onClick={() => setActiveMediaType("image")}
                 className={`px-8 py-2.5 rounded-full text-sm font-semibold cursor-pointer text-nowrap transition-all duration-300 ${activeMediaType === "image"
                   ? "bg-primary text-white shadow-sm"
                   : "text-gray-500 hover:text-gray-900 bg-transparent"
                   }`}
               >
-                Image Gallery
-              </button>
-              <button
+                Galerie Photos
+              </Button>
+              <Button
                 onClick={() => setActiveMediaType("video")}
                 className={`px-8 py-2.5 rounded-full text-sm font-semibold cursor-pointer text-nowrap transition-all duration-300 ${activeMediaType === "video"
-                  ? "bg-[#2857AE] text-white shadow-md"
+                  ? "bg-[#394995] text-white shadow-md"
                   : "text-gray-500 hover:text-gray-900 bg-transparent"
                   }`}
               >
-                Video Gallery
-              </button>
+                Galerie Vidéos
+              </Button>
             </div>
           </div>
+
 
           {/* 2. Filter Buttons (Pills) */}
           <div className="w-full h-fit flex justify-center items-center">
             <div className="galleryBtn flex overflow-x-auto whitespace-nowrap overflow-auto gap-3 mt-[clamp(40px,3vw,70px)] mb-[clamp(20px,3vw,50px)] z-10 pb-2 relative">
-              {["All", "Campus", "Events", "Sports"].map((cat) => (
-                <button
+              {categories.map((cat) => (
+                <Button
                   key={cat}
-                  onClick={() => setActiveCategory(cat as any)}
+                  onClick={() => setActiveCategory(cat)}
                   className={`min-w-[80px] flex justify-center items-center px-6 py-2 rounded-full border cursor-pointer text-sm font-medium transition-all duration-200 ${activeCategory === cat
-                    ? "bg-[#2857AE] text-white border-[#2857AE]"
-                    : "bg-white text-[#2857AE] border-[#2857AE] hover:bg-blue-50"
+                    ? "bg-[#394995] text-white border-[#394995]"
+                    : "bg-white text-[#394995] border-[#394995] hover:bg-blue-50"
                     }`}
                 >
                   {cat}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -142,7 +158,7 @@ export default function GalleryPage({ items = [] }: GalleryPageProps) {
                     {item.type === "video" && (
                       <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-colors">
                         <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                          <Play className="w-5 h-5 text-[#2857AE] fill-current ml-0.5" />
+                          <Play className="w-5 h-5 text-[#394995] fill-current ml-0.5" />
                         </div>
                       </div>
                     )}
@@ -153,17 +169,19 @@ export default function GalleryPage({ items = [] }: GalleryPageProps) {
 
             {/* 4. Custom Navigation Buttons (Centered Below) */}
             <div className="flex justify-center gap-4 mt-8">
-              <button className="custom-prev w-10 h-10 rounded-full bg-[#DCE4F2] text-[#2857AE] flex items-center justify-center hover:bg-[#2857AE] hover:text-white transition-colors duration-300 disabled:opacity-50">
+              <Button className="custom-prev w-10 h-10 rounded-full bg-[#DCE4F2] text-[#394995] flex items-center justify-center hover:bg-[#394995] hover:text-white transition-colors duration-300 disabled:opacity-50">
                 <ArrowLeft className="w-5 h-5" />
-              </button>
-              <button className="custom-next w-10 h-10 rounded-full bg-[#2857AE] text-white flex items-center justify-center hover:bg-[#1e408a] transition-colors duration-300 disabled:opacity-50">
+              </Button>
+              <Button className="custom-next w-10 h-10 rounded-full bg-[#394995] text-white flex items-center justify-center hover:bg-[#1e408a] transition-colors duration-300 disabled:opacity-50">
                 <ArrowRight className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
 
             {filteredItems.length === 0 && (
               <div className="text-center py-20 text-muted-foreground">
-                No media found for the selected category.
+                <p className="text-lg font-medium">
+                  Aucun élément trouvé pour cette catégorie.
+                </p>
               </div>
             )}
           </div>
@@ -173,7 +191,7 @@ export default function GalleryPage({ items = [] }: GalleryPageProps) {
         {/* 5. Past Events Grid Section */}
         <div className="mt-[clamp(20px,3vw,50px)] text-center">
           <h2 className="text-[clamp(20px,3vw,50px)] font-bold text-primary mb-[clamp(20px,3vw,50px)]">
-            From our past events
+            Nos événements passés
           </h2>
 
           <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-6 mb-[clamp(25px,3vw,50px)]">
@@ -203,9 +221,9 @@ export default function GalleryPage({ items = [] }: GalleryPageProps) {
           {visibleGridCount < gridItems.length && (
             <Button
               onClick={() => setVisibleGridCount((prev) => prev + 6)}
-              className="px-8 py-6 rounded-full bg-[#2857AE] cursor-pointer hover:bg-[#1e408a] text-white text-lg"
+              className="px-8 py-6 rounded-full bg-[#394995] cursor-pointer hover:bg-[#1e408a] text-white text-lg"
             >
-              Load More
+              Charger plus
             </Button>
           )}
         </div>

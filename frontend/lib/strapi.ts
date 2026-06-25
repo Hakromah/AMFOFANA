@@ -1,5 +1,5 @@
 import axios from 'axios';
-const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'https://api.hassanskdev.online';
+const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'https://api.2cscomplexes.com';
 const strapi = axios.create({
   baseURL: `${strapiUrl}/api`,
   headers: { 'Content-Type': 'application/json' },

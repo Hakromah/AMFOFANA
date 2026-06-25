@@ -4,6 +4,7 @@
 import React, { useRef } from 'react';
 import StrapiImage from '@/components/StrapiImage';
 import Link from 'next/link';
+
 import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay } from 'swiper/modules';
@@ -111,15 +112,15 @@ export default function NewsSection({ newsItems: newsItemsProp }: NewsSectionPro
 
                 <div className="news-header flex flex-col md:flex-row justify-between md:items-end md:mb-12 mb-6 gap-8">
                     <div>
-                        <h2 className="text-[clamp(20px,4vw,50px)] font-bold text-black mb-4">
-                            Latest from our Campus
+                        <h2 className="text-[clamp(20px,4vw,50px)] font-bold text-black mb-4 leading-tight">
+                            Dernières actualités du campus
                         </h2>
                         <p className="text-black text-[clamp(16px,3vw,18px)] lg:max-w-2xl">
-                            Stay updated with academic milestones, spiritual growth, and student achievements across all levels.
+                            Restez informé des étapes académiques, du développement personnel et des réussites des élèves à tous les niveaux.
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-6 md:gap-7">
                         <div className="flex gap-2">
                             {/* FIX 2: Replaced refs with CSS classes 'news-prev' and 'news-next' to avoid render access errors */}
                             <Button
@@ -138,8 +139,8 @@ export default function NewsSection({ newsItems: newsItemsProp }: NewsSectionPro
                             </Button>
                         </div>
 
-                        <Link href="/blog" className="flex items-center gap-2 text-primary font-medium hover:underline">
-                            All News <ArrowUpRight className="h-4 w-4" />
+                        <Link href="/blog" className="group/btn flex text-nowrap items-center gap-2 text-primary font-medium md:before:absolute md:before:bottom-0 md:before:left-0 md:before:w-0 md:hover:before:w-full md:before:h-px md:before:bg-primary before:duration-500  md:before:z-1 relative duration-500">
+                            Toutes les actualités <ArrowUpRight className="h-4 w-4 lg:group-hover/btn:rotate-45  duration-500" />
                         </Link>
                     </div>
                 </div>
@@ -163,16 +164,16 @@ export default function NewsSection({ newsItems: newsItemsProp }: NewsSectionPro
                         {activeItems.map((item) => (
                             <SwiperSlide key={item.id} className="h-auto">
                                 <div className="group cursor-pointer">
-                                    <div className="relative h-[336px] w-full rounded-2xl overflow-hidden mb-6">
+                                     <Link href={`/blog/${item.slug}`} className="relative block h-[336px] w-full rounded-2xl overflow-hidden mb-6">
                                         <StrapiImage
                                             src={item.image}
                                             alt={item.title}
                                             fill
                                             className="object-cover transition-transform duration-500 group-hover:scale-105"
                                         />
-                                    </div>
+                                    </Link>
 
-                                    <div className="space-y-3">
+                                    <Link href={`/blog/${item.slug}`} className="space-y-3">
                                         <div className="flex items-center gap-2 text-sm font-semibold">
                                             <span className="text-gray-900">{item.date}</span>
                                             <span className="text-primary">•</span>
@@ -186,7 +187,7 @@ export default function NewsSection({ newsItems: newsItemsProp }: NewsSectionPro
                                         <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
                                             {item.excerpt}
                                         </p>
-                                    </div>
+                                    </Link>
                                 </div>
                             </SwiperSlide>
                         ))}

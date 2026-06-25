@@ -1,5 +1,6 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+/* * @type {import('next').NextConfig} */
+import type { NextConfig } from 'next';
+const nextConfig: NextConfig = {
   output: 'standalone',
   images: {
     remotePatterns: [
@@ -11,14 +12,14 @@ const nextConfig = {
       {
         // Whitelist your new production Strapi media domain
         protocol: 'https',
-        hostname: 'api.hassanskdev.online',
+        hostname: 'api.2cscomplexes.com',
         pathname: '/uploads/**',
       },
       {
         // Strapi local dev server (Keep this for local computer testing)
         protocol: 'http',
         hostname: 'localhost',
-        port: '1337',
+        port: '1338',
         pathname: '/uploads/**',
       },
       {

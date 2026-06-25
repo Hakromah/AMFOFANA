@@ -188,7 +188,34 @@ export default {
       if (publicRole) {
         const publicActions = [
             'api::contact-message.contact-message.create',
-            'api::newsletter-subscription.newsletter-subscription.create'
+            'api::newsletter-subscription.newsletter-subscription.create',
+            // Academic public read access (used by the school's public website)
+            'api::academic-program.academic-program.find',
+            'api::academic-program.academic-program.findOne',
+            'api::academic-section.academic-section.find',
+            'api::academic-section.academic-section.findOne',
+            'api::academic-resource.academic-resource.find',
+            'api::academic-resource.academic-resource.findOne',
+            'api::school-calendar.school-calendar.find',
+            'api::school-calendar.school-calendar.findOne',
+            
+            // Custom public landing page & donation features
+            'api::donation.donation.find',
+            'api::donation.donation.findOne',
+            'api::map-setting.map-setting.find',
+            'api::map-setting.map-setting.findOne',
+            'api::about-page.about-page.find',
+            'api::about-page.about-page.findOne',
+            'api::contact-info.contact-info.find',
+            'api::contact-info.contact-info.findOne',
+            'api::footer.footer.find',
+            'api::footer.footer.findOne',
+            'api::gallery-item.gallery-item.find',
+            'api::gallery-item.gallery-item.findOne',
+            'api::opportunity.opportunity.find',
+            'api::opportunity.opportunity.findOne',
+            'api::staff-member.staff-member.find',
+            'api::staff-member.staff-member.findOne',
         ];
         
         for (const publicAction of publicActions) {

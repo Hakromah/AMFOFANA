@@ -14,14 +14,14 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet"
 import dynamic from 'next/dynamic';
-import type { ContactInfoData } from '@/types/strapi';
+import type { ContactInfoData, MapSettingData } from '@/types/strapi';
 import api from '@/lib/api';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
 const Map = dynamic(() => import('./Map'), {
     ssr: false,
-    loading: () => <div className="h-full w-full bg-gray-100 flex items-center justify-center">Loading Map...</div>
+    loading: () => <div className="h-full w-full bg-gray-100 flex items-center justify-center">Chargement de la carte...</div>
 });
 
 const fallbackSocialLinks = [
@@ -35,9 +35,10 @@ const fallbackSocialLinks = [
 
 interface ContactPageProps {
     contactInfo?: ContactInfoData | null;
+    mapSetting?: MapSettingData | null;
 }
 
-export default function ContactPage({ contactInfo }: ContactPageProps) {
+export default function ContactPage({ contactInfo, mapSetting }: ContactPageProps) {
 
     const breadcrumbData = contactInfo?.breadcrumb_item?.[0];
 
@@ -49,22 +50,24 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
         message: ''
     });
     const [isSubmitting, setIsSubmitting] = React.useState(false);
+    const [agreed, setAgreed] = React.useState(false);
 
     const socialLinks = contactInfo?.socialLinks ?? fallbackSocialLinks;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!agreed) return;
         setIsSubmitting(true);
-        const tid = toast.loading("Sending your message...");
+        const tid = toast.loading("Envoi de votre message...");
         try {
             await api.post('/contact-messages', {
                 data: formData
             });
-            toast.success("Message sent successfully! We will get back to you shortly.", { id: tid });
+            toast.success("Message envoyé avec succès ! Nous vous répondrons dans les plus brefs délais.", { id: tid });
             setFormData({ firstName: '', lastName: '', email: '', subject: '', message: '' });
         } catch (error) {
             console.error("Failed to submit contact form:", error);
-            toast.error("Failed to send message. Please try again later.", { id: tid });
+            toast.error("Échec de l'envoi du message. Veuillez réessayer plus tard.", { id: tid });
         } finally {
             setIsSubmitting(false);
         }
@@ -88,15 +91,15 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
                         {/* Address Card */}
                         <div className="md:bg-white max-md:w-full md:p-8 md:rounded-2xl md:shadow-sm md:border md:border-gray-100 flex flex-col md:items-center items-start md:text-center md:hover:shadow-md transition-shadow">
                             <a href="" className='max-md:w-full flex flex-col md:items-center items-start md:text-center'>
-                                <div className="h-12 max-sm:hidden w-12 bg-blue-50 rounded-full flex items-center justify-center text-[#2857AE] mb-6">
+                                <div className="h-12 max-sm:hidden w-12 bg-blue-50 rounded-full flex items-center justify-center text-[#394995] mb-6">
                                     <span className='icon icon-map flex items-center justify-center text-primary h-5 w-5'></span>
                                 </div>
                                 <h3 className="font-bold text-lg mb-2">Address</h3>
                                 <p className="text-gray-600 max-md:[&_br]:hidden max-md:w-full max-md:text-left text-sm leading-relaxed whitespace-pre-line">
                                     {contactInfo?.address ? contactInfo.address : (
-                                        <>A.M. FOFANA High School Sinkor<br />
-                                        Fish Market Monrovia, Liberia<br />
-                                        West Africa</>
+                                        <>2CS Ccomplexes dans la ville de Conakry<br />
+                                            Guin&eacute;<br />
+                                            West Africa</>
                                     )}
                                 </p>
                             </a>
@@ -104,7 +107,7 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
 
                         {/* Phone Card */}
                         <div className="md:bg-white max-md:w-full md:p-8 md:rounded-2xl md:shadow-sm md:border md:border-gray-100 flex flex-col md:items-center items-start md:text-center md:hover:shadow-md transition-shadow">
-                            <div className="h-12 w-12  max-sm:hidden bg-blue-50 rounded-full flex items-center justify-center text-[#2857AE] mb-6">
+                            <div className="h-12 w-12  max-sm:hidden bg-blue-50 rounded-full flex items-center justify-center text-[#394995] mb-6">
 
                                 <span className='icon icon-phone flex items-center justify-center text-primary h-5 w-5'></span>
                             </div>
@@ -125,7 +128,7 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
 
                         {/* Email Card */}
                         <div className="md:bg-white max-md:w-full md:p-8 md:rounded-2xl md:shadow-sm md:border md:border-gray-100 flex flex-col md:items-center items-start md:text-center md:hover:shadow-md transition-shadow">
-                            <div className="h-12  max-sm:hidden w-12 bg-blue-50 rounded-full flex items-center justify-center text-[#2857AE] mb-6">
+                            <div className="h-12  max-sm:hidden w-12 bg-blue-50 rounded-full flex items-center justify-center text-[#394995] mb-6">
                                 <span className='icon icon-mail flex items-center justify-center text-primary h-5 w-5'></span>
                             </div>
                             <h3 className="font-bold text-lg mb-2">Email</h3>
@@ -152,7 +155,7 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
 
                         {/* Office Hours Card */}
                         <div className="md:bg-white max-md:w-full md:p-8 md:rounded-2xl md:shadow-sm md:border md:border-gray-100 flex flex-col md:items-center items-start md:text-center md:hover:shadow-md transition-shadow">
-                            <div className="h-12  max-sm:hidden w-12 bg-blue-50 rounded-full flex items-center justify-center text-[#2857AE] mb-6">
+                            <div className="h-12  max-sm:hidden w-12 bg-blue-50 rounded-full flex items-center justify-center text-[#394995] mb-6">
                                 <span className='icon icon-clock flex items-center justify-center text-primary h-5 w-5'></span>
                             </div>
                             <h3 className="font-bold text-lg mb-2">Office Hours</h3>
@@ -165,13 +168,13 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
                     </div>
 
                     {/* Bottom Section: Connect & Map */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 md:gap-12 gap-5 items-center">
                         {/* Connect With Us */}
                         <div className="space-y-8">
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-900 mb-4">Connect With Us</h2>
+                                <h2 className="text-2xl font-bold text-gray-900 mb-4">{contactInfo?.connectText}</h2>
                                 <p className="text-gray-600">
-                                    Follow us on social media for updates, news, and student highlights.
+                                    {contactInfo?.connectDis}
                                 </p>
                             </div>
 
@@ -189,26 +192,26 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
 
                             <Sheet>
                                 <SheetTrigger asChild>
-                                    <Button className="bg-[#2857AE] cursor-pointer hover:bg-[#1e408a] text-white px-8 py-6 rounded-lg text-base font-medium w-full sm:w-auto">
-                                        Contact Form
+                                    <Button className="bg-[#394995] cursor-pointer hover:bg-[#1e408a] text-white px-8 py-6 rounded-lg text-base font-medium w-full sm:w-auto">
+                                        Formulaire de contact
                                     </Button>
                                 </SheetTrigger>
                                 <SheetContent side="bottom" className="sm:max-w-xl w-[calc(100%-2rem)] px-0 overflow-y-auto">
                                     <div className="px-6 py-6 h-full overflow-y-auto">
                                         <SheetHeader className="mb-6 text-left">
-                                            <SheetTitle className="text-2xl font-bold text-[#2857AE]">Send us a Message</SheetTitle>
+                                            <SheetTitle className="text-2xl font-bold text-[#394995]">Envoyez-nous un message</SheetTitle>
                                             <SheetDescription>
-                                                Fill out the form below and our team will get back to you shortly.
+                                                Remplissez le formulaire ci-dessous et notre équipe vous répondra dans les plus brefs délais.
                                             </SheetDescription>
                                         </SheetHeader>
 
                                         <form onSubmit={handleSubmit} className="space-y-6">
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <div className="space-y-2">
-                                                    <Input id="firstName" placeholder="First Name" required value={formData.firstName} onChange={(e) => setFormData({ ...formData, firstName: e.target.value })} disabled={isSubmitting} />
+                                                    <Input id="firstName" placeholder="Prénom" required value={formData.firstName} onChange={(e) => setFormData({ ...formData, firstName: e.target.value })} disabled={isSubmitting} />
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <Input id="lastName" placeholder="Last Name" required value={formData.lastName} onChange={(e) => setFormData({ ...formData, lastName: e.target.value })} disabled={isSubmitting} />
+                                                    <Input id="lastName" placeholder="Nom" required value={formData.lastName} onChange={(e) => setFormData({ ...formData, lastName: e.target.value })} disabled={isSubmitting} />
                                                 </div>
                                             </div>
 
@@ -217,14 +220,14 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
                                             </div>
 
                                             <div className="space-y-2">
-                                                <Input id="subject" placeholder="Inquiry about admissions" required value={formData.subject} onChange={(e) => setFormData({ ...formData, subject: e.target.value })} disabled={isSubmitting} />
+                                                <Input id="subject" placeholder="Sujet de votre message" required value={formData.subject} onChange={(e) => setFormData({ ...formData, subject: e.target.value })} disabled={isSubmitting} />
                                             </div>
 
                                             <div className="space-y-2">
                                                 <textarea
                                                     id="message"
                                                     className="flex min-h-[120px] max-h-40 w-full rounded-md border border-primary/20 lg:hover:border-primary duration-500 focus:duration-500 focus:border-primary bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                                                    placeholder="Write your message here"
+                                                    placeholder="Écrivez votre message ici"
                                                     required
                                                     value={formData.message}
                                                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
@@ -232,11 +235,41 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
                                                 ></textarea>
                                             </div>
 
-                                            <Button type="submit" className="w-full cursor-pointer bg-[#2857AE] hover:bg-[#1e408a] py-6 text-base transition-all" disabled={isSubmitting}>
+                                            {/* Consent checkbox */}
+                                            <label className="flex items-start gap-2.5 cursor-pointer group">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={agreed}
+                                                    onChange={(e) => setAgreed(e.target.checked)}
+                                                    className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-[#394995] cursor-pointer"
+                                                    required
+                                                />
+                                                <span className="text-gray-500 text-xs leading-relaxed group-hover:text-gray-700 transition-colors">
+                                                    J&apos;ai lu et j&apos;accepte la{" "}
+                                                    <Link
+                                                        href="/legal"
+                                                        target="_blank"
+                                                        className="text-[#394995] underline underline-offset-2 hover:text-[#1e408a] transition-colors"
+                                                    >
+                                                        politique de confidentialité
+                                                    </Link>{" "}
+                                                    et les{" "}
+                                                    <Link
+                                                        href="/legal#mentions-legales"
+                                                        target="_blank"
+                                                        className="text-[#394995] underline underline-offset-2 hover:text-[#1e408a] transition-colors"
+                                                    >
+                                                        mentions légales
+                                                    </Link>{" "}
+                                                    de 2 CS Complexes.
+                                                </span>
+                                            </label>
+
+                                            <Button type="submit" className="w-full cursor-pointer bg-[#394995] hover:bg-[#1e408a] py-6 text-base transition-all" disabled={isSubmitting || !agreed}>
                                                 {isSubmitting ? (
-                                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...</>
+                                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Envoi en cours...</>
                                                 ) : (
-                                                    <><Send className="mr-2 h-4 w-4" /> Send Message</>
+                                                    <><Send className="mr-2 h-4 w-4" /> Envoyer le message</>
                                                 )}
                                             </Button>
                                         </form>
@@ -246,8 +279,8 @@ export default function ContactPage({ contactInfo }: ContactPageProps) {
                         </div>
 
                         {/* Map Section */}
-                        <div className="bg-blue-50 rounded-3xl h-[400px] w-full relative overflow-hidden flex items-center justify-center border border-blue-100 z-0">
-                            <Map lat={contactInfo?.latitude} lng={contactInfo?.longitude} />
+                        <div className="bg-blue-50 rounded-3xl h-[400px] max-xs:h-[300px] w-full relative overflow-hidden flex items-center justify-center border border-blue-100 z-0">
+                            <Map lat={contactInfo?.latitude} lng={contactInfo?.longitude} mapSetting={mapSetting} />
                         </div>
                     </div>
                 </div>

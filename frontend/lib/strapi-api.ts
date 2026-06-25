@@ -34,10 +34,13 @@ import type {
    StrapiFooterLink,
    StrapiNavbar,
    StrapiNavItem,
-   StrapiNavSubItem,
    StrapiFeatureCard,
+   StrapiMapSetting,
+   StrapiDonation,
+   StrapiBankDetail,
    StrapiRichTextBlock,
    StrapiMediaItem,
+   StrapiImportantNewsPopup,
    HeroSlide,
    BlogPost,
    StaffMember,
@@ -55,6 +58,9 @@ import type {
    VideoSectionData,
    FooterData,
    NavbarData,
+   MapSettingData,
+   DonationData,
+   ImportantNewsPopupData,
 } from '@/types/strapi';
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
@@ -160,6 +166,8 @@ export async function fetchBlogPosts(params?: {
             content: richTextToString(item.content),
             date: formatDate(item.date),
             category: item.category,
+            // cearchText: item.cearch_text,
+            // categoryText: item.category_text,
             author: item.author,
             image: mediaUrl(item.image),
             slug: item.slug || String(item.id),
@@ -231,13 +239,6 @@ export async function fetchStaffMembers(filter?: {
       if (filter?.featured) filterStr += '&filters[is_featured][$eq]=true';
       if (filter?.leadership) filterStr += '&filters[isLeadership][$eq]=true';
 
-      // Updated populate to include both the profile image and the breadcrumb component
-      // const query = [
-      //   'populate[0]=image',
-      //   'populate[1]=breadcrumb_item.image',
-      //   'sort=sort_order:asc'
-      // ].join('&');
-
       const query = [
          'populate[image][populate]=*', // Get profile image
          'populate[breadcrumb_item][populate]=*', // Deeply get breadcrumb + its image
@@ -275,25 +276,86 @@ export async function fetchTestimonials(): Promise<Testimonial[]> {
 
 // ─── Academic Programs ────────────────────────────────────────────────────────
 
+function normalizeAcademicProgram(item: StrapiAcademicProgram): AcademicProgram {
+   return {
+      id: item.id,
+      title: item.title ?? '',
+      slug: item.slug ?? String(item.id),
+      category: item.category ?? '',
+      subtitle: item.subtitle ?? '',
+      description: item.description ?? '',
+      description_text: item.description_text ?? '',
+      middle_text: item.middle_text ?? '',
+      academic_link: item.academic_link ?? [],
+      mid_header: item.mid_header ?? '',
+      image: mediaUrl(item.image),
+      contentImage: mediaUrl(item.content_image) || mediaUrl(item.image),
+      sortOrder: item.sort_order ?? 0,
+      header: item.header ?? '',
+      subheader: item.subheader ?? '',
+      highlights: (item.highlights ?? []).map((h) => h.text),
+      curriculum: (item.curriculum ?? []).map((c) => ({ subject: c.subject, desc: c.desc ?? '' })),
+      breadcrumb_item: (item.breadcrumb_item ?? []).map((bc) => ({
+         id: bc.id,
+         breadcrumb_title: bc.breadcrumb_title,
+         description: bc.description,
+         imageUrl: mediaUrl(bc.image),
+      })),
+      // Detail page extras
+      prospectusFileUrl: mediaUrl(item.prospectus_file),
+      statValue1: item.stat_value_1 ?? '',
+      statLabel1: item.stat_label_1 ?? '',
+      statValue2: item.stat_value_2 ?? '',
+      statLabel2: item.stat_label_2 ?? '',
+      statValue3: item.stat_value_3 ?? '',
+      statLabel3: item.stat_label_3 ?? '',
+   };
+}
+
+const ACADEMIC_PROGRAM_POPULATE = [
+   'populate[0]=image',
+   'populate[1]=content_image',
+   'populate[2]=highlights',
+   'populate[3]=curriculum',
+   'populate[4]=breadcrumb_item.image',
+   'populate[5]=prospectus_file',
+   'populate[6]=academic_link',
+].join('&');
+
 export async function fetchAcademicPrograms(): Promise<AcademicProgram[]> {
    try {
       const { data } = await strapi.get<StrapiListResponse<StrapiAcademicProgram>>(
-         '/academic-programs?populate=image&sort=sort_order:asc'
+         `/academic-programs?${ACADEMIC_PROGRAM_POPULATE}&sort=sort_order:asc`
       );
-      return data.data.map((item) => ({
-         id: item.id,
-         title: item.title,
-         category: item.category,
-         description: item.description,
-         image: mediaUrl(item.image),
-         sortOrder: item.sort_order,
-         header: item.header,
-         subheader: item.subheader,
-      }));
+      return data.data.map(normalizeAcademicProgram);
    } catch {
       return [];
    }
 }
+
+export async function fetchAcademicProgramBySlug(slug: string): Promise<AcademicProgram | null> {
+   try {
+      const { data } = await strapi.get<StrapiListResponse<StrapiAcademicProgram>>(
+         `/academic-programs?filters[slug][$eq]=${encodeURIComponent(slug)}&${ACADEMIC_PROGRAM_POPULATE}`
+      );
+      if (!data.data.length) return null;
+      return normalizeAcademicProgram(data.data[0]);
+   } catch {
+      return null;
+   }
+}
+
+export async function fetchAcademicProgramSlugs(): Promise<string[]> {
+   try {
+      const { data } = await strapi.get<StrapiListResponse<StrapiAcademicProgram>>(
+         '/academic-programs?fields[0]=slug&sort=sort_order:asc'
+      );
+      return data.data.map((item) => item.slug).filter(Boolean);
+   } catch {
+      return [];
+   }
+}
+
 
 // ─── Gallery ──────────────────────────────────────────────────────────────────
 
@@ -337,7 +399,7 @@ export async function fetchOpportunities(): Promise<Opportunity[]> {
 export async function fetchOpportunityBySlug(slug: string): Promise<Opportunity | null> {
    try {
       const { data } = await strapi.get<StrapiListResponse<StrapiOpportunity>>(
-         `/opportunities?filters[slug][$eq]=${encodeURIComponent(slug)}&populate[0]=image&populate[1]=requirements&populate[2]=benefits`
+          `/opportunities?filters[slug][$eq]=${encodeURIComponent(slug)}&populate[0]=image&populate[1]=requirements&populate[2]=benefits&populate[3]=breadcrumb_item.image&populate[4]=apply_now`
       );
       if (!data.data.length) return null;
       return normalizeOpportunity(data.data[0]);
@@ -354,6 +416,8 @@ function normalizeBlogPost(item: StrapiBlogPost): BlogPost {
       content: richTextToString(item.content),
       date: formatDate(item.date),
       category: item.category,
+      // cearchText: item.cearch_text,
+      // categoryText: item.category_text,
       author: item.author,
       image: mediaUrl(item.image),
       slug: item.slug || String(item.id),
@@ -380,6 +444,14 @@ function normalizeOpportunity(item: StrapiOpportunity): Opportunity {
       deadline: item.deadline,
       dateNumber: item.date_number,
       slug: item.slug,
+
+      // New fields
+      overviewText: item.overview_text,
+      admissionReq: item.admission_req,
+      readyToApply: item.ready_to_apply,
+      dontMiss: item.dont_miss,
+      applyNow: item.apply_now ?? null,
+      byApplying: item.by_applying,
 
       // --- New Breadcrumb Mapping ---
       breadcrumb_item: (item.breadcrumb_item ?? []).map((bc) => ({
@@ -414,6 +486,8 @@ function normalizeStaffMember(item: StrapiStaffMember): StaffMember {
       image: mediaUrl(item.image),
       isLeadership: item.is_leadership,
       isFeatured: item.is_featured,
+      leadText: item.lead_text,
+      meetText: item.meet_text,
 
       // Mapping the breadcrumb component
       breadcrumb_item: (item.breadcrumb_item ?? []).map((bc) => ({
@@ -507,6 +581,17 @@ export async function fetchAboutPage(): Promise<AboutPageData | null> {
          },
          missionText: a.mission_text,
          visionText: a.vision_text,
+
+         // New fields
+         studentText: a.student_text,
+         yearText: a.year_text,
+         awardsText: a.awards_text,
+         principalText: a.principal_text,
+         visText: a.vis_text,
+         misText: a.mis_text,
+         valueText: a.value_text,
+         programText: a.program_text,
+
          values: a.values ?? [],
          principalName: a.principal_name,
          principalRole: a.principal_role,
@@ -540,6 +625,8 @@ export async function fetchContactInfo(): Promise<ContactInfoData | null> {
       const c = data.data;
       return {
          address: c.address,
+         connectText: c.connect_text,
+         connectDis: c.connect_dis,
          phones: (c.phones ?? []).map((p) => String(p.phones)),
          emails: (c.email ?? []).map((e) => e.address),
          officeHours: c.office_hours,
@@ -640,7 +727,13 @@ export async function fetchFooter(): Promise<FooterData | null> {
       return {
          logo: mediaUrl(f.logo),
          title: f.title,
+         allRight: f.all_right,
+         quickLink: f.quick_link,
+         academicLink: f.academic_link,
          subtitle: f.subtitle,
+         contactUs: f.contact_us,
+         addressText: f.address_text,
+         followUs: f.follow_us,
          description: f.description,
          quickLinks: (f.quick_links || []).map((l: StrapiFooterLink) => ({
             id: l.id,
@@ -683,6 +776,84 @@ export async function fetchNavbar(): Promise<NavbarData | null> {
                description: sub.description || null
             })) : null
          }))
+      };
+   } catch {
+      return null;
+   }
+}
+
+// ─── Map Setting (Single Type) ────────────────────────────────────────────────
+
+export async function fetchMapSetting(): Promise<MapSettingData | null> {
+   try {
+      const { data } = await strapi.get<StrapiSingleResponse<StrapiMapSetting>>(
+         '/map-setting'
+      );
+      if (!data.data) return null;
+      const m = data.data;
+      return {
+         schoolName: m.school_name ?? '',
+         popupSubtitle: m.popup_subtitle ?? '',
+         addressLine: m.address_line ?? '',
+         latitude: m.latitude ?? 9.5375,
+         longitude: m.longitude ?? -13.67733,
+         zoomLevel: m.zoom_level ?? 15,
+         directionsLabel: m.directions_label ?? "Obtenir l'itineraire",
+         googleMapsUrl: m.google_maps_url ?? `https://maps.google.com/?q=${m.latitude},${m.longitude}`,
+         markerPulse: m.marker_pulse ?? true,
+         sectionTitle: m.section_title ?? 'Notre Localisation',
+         sectionSubtitle: m.section_subtitle ?? '',
+      };
+   } catch {
+      return null;
+   }
+}
+
+// ─── Donation (Collection Type — fetch first entry) ─────────────────────────────────
+
+export async function fetchDonation(): Promise<DonationData | null> {
+   try {
+      const { data } = await strapi.get<StrapiListResponse<StrapiDonation>>(
+         '/donations?populate[0]=bank_details&pagination[pageSize]=1&sort=id:asc'
+      );
+      if (!data.data.length) return null;
+      const d = data.data[0];
+      return {
+         header: d.header ?? '',
+         description: d.description ?? '',
+         bankDetails: (d.bank_details ?? []).map((b: StrapiBankDetail) => ({
+            id: b.id,
+            bankName: b.bank_name ?? '',
+            branchName: b.branch_name ?? '',
+            swiftCode: b.swift_code ?? '',
+            bankAddress: b.bank_address ?? '',
+            accountName: b.account_name ?? '',
+            accountNumber: b.account_number ?? '',
+            ibanNumber: b.iban_number ?? '',
+         })),
+      };
+   } catch {
+      return null;
+   }
+}
+
+// ─── Important News Popup (Single Type) ──────────────────────────────────────────────
+
+export async function fetchImportantNewsPopup(): Promise<ImportantNewsPopupData | null> {
+   try {
+      const { data } = await strapi.get<StrapiSingleResponse<StrapiImportantNewsPopup>>(
+         '/important-news-popup?populate=image'
+      );
+      if (!data.data) return null;
+      const p = data.data;
+      // If is_active is explicitly set to false, don't show
+      if (p.is_active === false) return null;
+      const image = mediaUrl(p.image);
+      // Only return data if an image is configured
+      if (!image) return null;
+      return {
+         imageUrl: image,
+         link: p.link ?? null,
       };
    } catch {
       return null;

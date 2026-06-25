@@ -14,20 +14,38 @@
     "title": {
       "type": "string"
     },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true
+    },
     "category": {
       "type": "enumeration",
       "enum": [
         "Kindergarten",
         "Elementary",
         "Junior High",
-        "Senior High ",
+        "Senior High",
         "Vocational Training"
       ]
+    },
+    "subtitle": {
+      "type": "text"
     },
     "description": {
       "type": "text"
     },
     "image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "content_image": {
       "type": "media",
       "multiple": false,
       "allowedTypes": [
@@ -45,6 +63,60 @@
     },
     "subheader": {
       "type": "text"
+    },
+    "highlights": {
+      "type": "component",
+      "component": "shared.benefit",
+      "repeatable": true
+    },
+    "curriculum": {
+      "type": "component",
+      "component": "shared.curriculum-item",
+      "repeatable": true
+    },
+    "breadcrumb_item": {
+      "type": "component",
+      "component": "shared.readcrumb",
+      "repeatable": true
+    },
+    "prospectus_file": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "files"
+      ]
+    },
+    "stat_value_1": {
+      "type": "string"
+    },
+    "stat_label_1": {
+      "type": "string"
+    },
+    "stat_value_2": {
+      "type": "string"
+    },
+    "stat_label_2": {
+      "type": "string"
+    },
+    "stat_value_3": {
+      "type": "string"
+    },
+    "stat_label_3": {
+      "type": "string"
+    },
+    "middle_text": {
+      "type": "string"
+    },
+    "description_text": {
+      "type": "text"
+    },
+    "academic_link": {
+      "type": "component",
+      "component": "shared.social-links",
+      "repeatable": true
+    },
+    "mid_header": {
+      "type": "string"
     }
   }
 }

@@ -14,7 +14,7 @@ interface BlogPageProps {
 export default function BlogPage({ initialPosts = [] }: BlogPageProps) {
     const [visibleCount, setVisibleCount] = useState(6);
     const [searchQuery, setSearchQuery] = useState('');
-    const [activeCategory, setActiveCategory] = useState('All');
+    const [activeCategory, setActiveCategory] = useState('Tous');
 
     const postWithBreadcrumb = initialPosts.find(p => p.breadcrumb_item && p.breadcrumb_item.length > 0);
     const breadcrumbData = postWithBreadcrumb?.breadcrumb_item?.[0];
@@ -22,7 +22,7 @@ export default function BlogPage({ initialPosts = [] }: BlogPageProps) {
     // Auto-generate categories from blog data (future-proof)
     const categories = useMemo(() => {
         const uniqueCategories = [...new Set(initialPosts.map(post => post.category))];
-        return ['All', ...uniqueCategories];
+        return ['Tous', ...uniqueCategories];
     }, [initialPosts]);
 
     // Filter posts by search + category
@@ -32,17 +32,21 @@ export default function BlogPage({ initialPosts = [] }: BlogPageProps) {
                 post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
 
-            const matchesCategory = activeCategory === 'All' || post.category === activeCategory;
+
+            const matchesCategory = activeCategory === 'Tous' || post.category === activeCategory;
 
             return matchesSearch && matchesCategory;
         });
     }, [initialPosts, searchQuery, activeCategory]);
+
+
 
     // Reset visible count when filters change
     const handleCategoryChange = (category: string) => {
         setActiveCategory(category);
         setVisibleCount(6);
     };
+
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value);
@@ -63,16 +67,17 @@ export default function BlogPage({ initialPosts = [] }: BlogPageProps) {
                         {/* Main Content */}
                         <div className="w-full lg:w-2/3 max-lg:order-2">
                             <h2 className="text-[clamp(20px,3vw,50px)] font-bold text-gray-900 mb-8">
-                                {activeCategory === 'All' ? 'Latest Posts' : activeCategory}
+                                {activeCategory === 'Tous' ? 'Dernières articles' : activeCategory}
                                 {searchQuery && <span className="text-base font-normal text-gray-500 ml-3">({filteredPosts.length} result{filteredPosts.length !== 1 ? 's' : ''})</span>}
                             </h2>
+
 
                             {filteredPosts.length === 0 ? (
                                 <div className="text-center py-16">
                                     <p className="text-gray-500 text-lg">No posts found{searchQuery ? ` for "${searchQuery}"` : ''}.</p>
                                     <button
-                                        onClick={() => { setSearchQuery(''); setActiveCategory('All'); }}
-                                        className="mt-4 text-[#2857AE] font-medium hover:underline"
+                                        onClick={() => { setSearchQuery(''); setActiveCategory('Tous'); }}
+                                        className="mt-4 text-[#394995] font-medium hover:underline"
                                     >
                                         Clear filters
                                     </button>
@@ -90,7 +95,7 @@ export default function BlogPage({ initialPosts = [] }: BlogPageProps) {
                                                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                                                 />
                                                 {/* Arrow Button */}
-                                                <div className="absolute top-4 right-4 bg-[#2857AE] w-10 h-10 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                <div className="absolute top-4 right-4 bg-[#394995] w-10 h-10 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                                     <ArrowRight className="w-5 h-5" />
                                                 </div>
                                             </Link>
@@ -99,11 +104,11 @@ export default function BlogPage({ initialPosts = [] }: BlogPageProps) {
                                             <div className="flex flex-col">
                                                 <div className="flex items-center gap-2 text-sm mb-2 font-medium">
                                                     <span className="text-gray-900">{post.date}</span>
-                                                    <span className="text-[#2857AE]">•</span>
-                                                    <span className="text-[#2857AE]">{post.category}</span>
+                                                    <span className="text-[#394995]">•</span>
+                                                    <span className="text-[#394995]">{post.category}</span>
                                                 </div>
 
-                                                <h3 className="text-xl font-bold text-gray-900 mb-3 leading-tight group-hover:text-[#2857AE] transition-colors">
+                                                <h3 className="text-xl font-bold text-gray-900 mb-3 leading-tight group-hover:text-[#394995] transition-colors">
                                                     <Link href={`/blog/${post.slug}`}>
                                                         {post.title}
                                                     </Link>
@@ -123,8 +128,8 @@ export default function BlogPage({ initialPosts = [] }: BlogPageProps) {
                                 <div className="mt-[clamp(30px,3vw,60px)] flex justify-center">
                                     <Button
                                         onClick={() => setVisibleCount(prev => prev + 6)}
-                                        className="bg-[#2857AE] hover:bg-[#1f448c] cursor-pointer text-white px-8 py-6 rounded-full text-base font-medium">
-                                        Load More
+                                        className="bg-[#394995] hover:bg-[#1f448c] cursor-pointer text-white px-8 py-6 rounded-full text-base font-medium">
+                                        Charger plus
                                     </Button>
                                 </div>
                             )}
@@ -135,17 +140,17 @@ export default function BlogPage({ initialPosts = [] }: BlogPageProps) {
                             <div className="sticky top-24 space-y-8">
                                 {/* Search Widget */}
                                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                                    <h3 className="text-lg font-bold text-gray-900 mb-4">Search for news</h3>
+                                   <h3 className="text-lg font-bold text-gray-900 mb-4">Rechercher dans le blog</h3>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                                             <Search className="h-4 w-4 text-gray-400" />
                                         </div>
                                         <input
                                             type="text"
-                                            placeholder="Search by title or content..."
+                                            placeholder="Rechercher par titre ou contenu..."
                                             value={searchQuery}
                                             onChange={handleSearchChange}
-                                            className="w-full pl-10 pr-4 py-3 bg-[#EEF2F6] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#2857AE]/20 transition-all"
+                                            className="w-full pl-10 pr-4 py-3 bg-[#EEF2F6] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#394995]/20 transition-all"
                                         />
                                         {searchQuery && (
                                             <button
@@ -157,17 +162,16 @@ export default function BlogPage({ initialPosts = [] }: BlogPageProps) {
                                         )}
                                     </div>
                                 </div>
-
                                 {/* Categories Widget */}
                                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                                    <h3 className="text-lg font-bold text-gray-900 mb-4">Categories</h3>
+                                    <h3 className="text-lg font-bold text-gray-900 mb-4">Catégories</h3>
                                     <div className="flex flex-wrap gap-2">
                                         {categories.map((category) => (
                                             <button
                                                 key={category}
                                                 onClick={() => handleCategoryChange(category)}
                                                 className={`px-5 py-2 text-sm font-medium rounded-full transition-colors cursor-pointer ${activeCategory === category
-                                                    ? 'bg-[#2857AE] text-white'
+                                                    ? 'bg-[#394995] text-white'
                                                     : 'bg-[#EEF2F6] text-gray-600 hover:bg-gray-200'
                                                     }`}
                                             >

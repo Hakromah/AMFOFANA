@@ -4,10 +4,11 @@ import Breadcrumb from "@/components/Breadcrumb";
 import type { StaffMember } from "@/types/strapi";
 
 const fallbackStaff: StaffMember[] = [
-    { id: 1, name: "Sarah Mitchell", role: "Principal", email: "sarah.mitchell@edu.lb", bio: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1887&auto=format&fit=crop", isFeatured: true, isLeadership: true, breadcrumb_item: [], heading: "" },
-    { id: 2, name: "Ms. Emily Chen", role: "Vice Principal", email: "emily.chen@edu.lb", bio: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2070&auto=format&fit=crop", isFeatured: true, isLeadership: true, breadcrumb_item: [], heading: "" },
-    { id: 3, name: "Ms. Jonathan Lee", role: "Head of Science", email: "jonathan.lee@edu.lb", bio: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2070&auto=format&fit=crop", isFeatured: false, isLeadership: false, breadcrumb_item: [], heading: "" },
+    { id: 1, name: "Sarah Mitchell", role: "Principal", email: "sarah.mitchell@edu.lb", bio: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1887&auto=format&fit=crop", isFeatured: true, isLeadership: true, breadcrumb_item: [], heading: "", leadText: "", meetText: "" },
+    { id: 2, name: "Ms. Emily Chen", role: "Vice Principal", email: "emily.chen@edu.lb", bio: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2070&auto=format&fit=crop", isFeatured: true, isLeadership: true, breadcrumb_item: [], heading: "", leadText: "", meetText: "" },
+    { id: 3, name: "Ms. Jonathan Lee", role: "Head of Science", email: "jonathan.lee@edu.lb", bio: "Leading our institution with 15+ years of educational excellence. Committed to fostering innovation and academic achievement.", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2070&auto=format&fit=crop", isFeatured: false, isLeadership: false, breadcrumb_item: [], heading: "", leadText: "", meetText: "" },
 ];
+
 // const breadcrumbData = staffMembers?.[0]?.breadcrumb_item?.[0];
 
 interface StaffPageProps {
@@ -46,7 +47,7 @@ export default function StaffPage({ staffMembers: staffProp }: StaffPageProps) {
                         {activeStaff.map((staff) => (
 
 
-                            <div key={staff.id} className="bg-[linear-gradient(180deg,_#FFF_0%,_#2857AE_100%)] h-[470px] rounded-[20px] p-6 text-center max-md:h-full flex flex-col items-center justify-center group transition-transform duration-300 hover:-translate-y-2 shadow-lg">
+                            <div key={staff.id} className="bg-[linear-gradient(180deg,_#FFF_0%,_#394995_100%)] h-[470px] rounded-[20px] p-6 text-center max-md:h-full flex flex-col items-center justify-center group transition-transform duration-300 hover:-translate-y-2 shadow-lg">
 
                                 <div className="w-full h-full flex flex-col justify-center items-center  ">
                                     {/* Image Container */}

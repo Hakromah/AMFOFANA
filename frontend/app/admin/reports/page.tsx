@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
@@ -6,28 +7,28 @@ import {
   Users, School, BookOpen, FileText,
   TrendingUp, ShieldCheck, Briefcase,
   GraduationCap, Download, RefreshCcw,
-  PieChart, Activity, Loader2
+  PieChart as LucidePieChart, Activity, Loader2
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import api from '@/lib/api';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { SCHOOL_CONFIG } from '@/lib/school-config';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { SCHOOL_CONFIG } from '@/lib/school-config';
 import {
-  ResponsiveContainer,
   BarChart,
   Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
+  ResponsiveContainer,
+  Cell,
   PieChart as RechartsPieChart,
   Pie,
-  Cell,
   Legend
 } from 'recharts';
 
@@ -43,6 +44,7 @@ interface ReportDTO {
 export default function ReportsPage() {
   const [report, setReport] = useState<ReportDTO | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentYear, setCurrentYear] = useState<number | string>('');
 
   const fetchReport = async () => {
     setLoading(true);
@@ -50,7 +52,7 @@ export default function ReportsPage() {
       const response = await api.get('/admin/reports/summary');
       setReport(response.data);
     } catch (error) {
-      toast.error('Intelligence sync failed');
+      toast.error('Synchro intelligence échouée.');
       console.log(error);
     } finally {
       setLoading(false);
@@ -58,6 +60,9 @@ export default function ReportsPage() {
   };
 
   useEffect(() => { fetchReport(); }, []);
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
 
   const exportPDF = () => {
     if (!report) return;
@@ -81,7 +86,7 @@ export default function ReportsPage() {
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
-      doc.text('INSTITUTIONAL INTELLIGENCE REPORT', pageW - 15, 16, { align: 'right' });
+      doc.text('RAPPORT DE L\'INTELLIGENCE INSTITUTIONNELLE', pageW - 15, 16, { align: 'right' });
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
       doc.text(`Date: ${new Date().toLocaleDateString()}`, pageW - 15, 22, { align: 'right' });
@@ -94,20 +99,20 @@ export default function ReportsPage() {
       doc.setTextColor(15, 23, 42);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(14);
-      doc.text('Executive Summary & Metrics Overview', 15, 55);
+      doc.text('Résumé exécutif et aperçu des indicateurs', 15, 55);
 
       // Info Table
       autoTable(doc, {
         startY: 62,
-        head: [['Metric Indicator', 'Count / Value', 'Classification']],
+        head: [['Indicateur de mesure', 'Nombre / Valeur', 'Classification']],
         body: [
-          ['Total Active Students', report.totalStudents.toLocaleString(), 'Human Capital - Learners'],
-          ['Faculty Staff / Instructors', report.totalTeachers.toLocaleString(), 'Human Capital - Educators'],
-          ['System Administrators', report.totalAdmins.toLocaleString(), 'Governance & Ops'],
-          ['Active Classes / Groups', report.totalClasses.toLocaleString(), 'Structural capacity'],
-          ['Academic Exams / Assessments', report.totalExams.toLocaleString(), 'Quality assurance'],
-          ['Curriculum Catalog / Subjects', report.totalSubjects.toLocaleString(), 'Educational Assets'],
-          ['Total Managed System Accounts', (report.totalStudents + report.totalTeachers + report.totalAdmins).toLocaleString(), 'Total Roster Base'],
+          ['Total des étudiants actifs', report.totalStudents.toLocaleString(), 'Capital humain - Apprenants'],
+          ['Corps enseignant / Instructeurs', report.totalTeachers.toLocaleString(), 'Capital humain - Éducateurs'],
+          ['Administrateurs du système', report.totalAdmins.toLocaleString(), 'Gouvernance et Opérations'],
+          ['Classes actives / Groupes', report.totalClasses.toLocaleString(), 'Capacité structurelle'],
+          ['Examens académiques / Évaluations', report.totalExams.toLocaleString(), 'Assurance qualité'],
+          ['Catalogue des cours / Matières', report.totalSubjects.toLocaleString(), 'Actifs éducatifs'],
+          ['Total des comptes système gérés', (report.totalStudents + report.totalTeachers + report.totalAdmins).toLocaleString(), 'Base totale de l\'effectif'],
         ],
         styles: { fontSize: 9, cellPadding: 4 },
         headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255] },
@@ -123,8 +128,8 @@ export default function ReportsPage() {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8);
       doc.setTextColor(100, 116, 139);
-      doc.text('Office of the Registrar', 15, finalY + 5);
-      doc.text('System Operations Lead', pageW - 15, finalY + 5, { align: 'right' });
+      doc.text('Bureau du registraire', 15, finalY + 5);
+      doc.text('Responsable des opérations système', pageW - 15, finalY + 5, { align: 'right' });
 
       // Footer
       const pageH = doc.internal.pageSize.getHeight();
@@ -132,13 +137,13 @@ export default function ReportsPage() {
       doc.rect(0, pageH - 12, pageW, 12, 'F');
       doc.setFontSize(7);
       doc.setFont('helvetica', 'normal');
-      doc.text(`${SCHOOL_CONFIG.name} — Confidential Internal Document`, pageW / 2, pageH - 5, { align: 'center' });
+      doc.text(`${SCHOOL_CONFIG.name} — Document interne confidentiel`, pageW / 2, pageH - 5, { align: 'center' });
 
-      doc.save(`institutional-intelligence-report-${new Date().toISOString().split('T')[0]}.pdf`);
-      toast.success('Report PDF exported successfully');
+      doc.save(`rapport-intelligence-institutionnelle-${new Date().toISOString().split('T')[0]}.pdf`);
+      toast.success('Rapport PDF exporté avec succès');
     } catch (e) {
       console.error(e);
-      toast.error('Failed to export PDF');
+      toast.error('Échec de l\'exportation du PDF');
     }
   };
 
@@ -146,21 +151,21 @@ export default function ReportsPage() {
     <div className="h-screen flex flex-col items-center justify-center gap-4 bg-[#f8fafc]">
       <Loader2 className="animate-spin text-primary" size={40} />
       <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 text-center leading-relaxed">
-        Aggregating Institutional <br /> Intelligence...
+        Agrégation de l'intelligence <br /> Institutionnelle...
       </p>
     </div>
   );
 
   const humanCapitalData = [
-    { name: 'Students', value: report?.totalStudents || 0, color: '#3b82f6' },
-    { name: 'Teachers', value: report?.totalTeachers || 0, color: '#f59e0b' },
+    { name: 'Étudiants', value: report?.totalStudents || 0, color: '#3b82f6' },
+    { name: 'Enseignants', value: report?.totalTeachers || 0, color: '#f59e0b' },
     { name: 'Admins', value: report?.totalAdmins || 0, color: '#f43f5e' },
   ];
 
   const structuralData = [
     { name: 'Classes', count: report?.totalClasses || 0 },
-    { name: 'Exams', count: report?.totalExams || 0 },
-    { name: 'Subjects', count: report?.totalSubjects || 0 },
+    { name: 'Examens', count: report?.totalExams || 0 },
+    { name: 'Matières', count: report?.totalSubjects || 0 },
   ];
 
   return (
@@ -170,10 +175,10 @@ export default function ReportsPage() {
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-primary">
             <TrendingUp size={18} />
-            <span className="text-[10px] font-black uppercase tracking-[0.4em]">Live Analytics Hub</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em]">Hall d'analyse en direct</span>
           </div>
           <h1 className="text-[clamp(1.4rem,3.5vw,4rem)] font-black text-slate-900 tracking-tighter sm:text-[clamp(1.4rem,3.5vw,4rem)] italic uppercase">
-            School <span className="text-primary">Report.</span>
+            Rapports <span className="text-primary">de l'école.</span>
           </h1>
         </div>
         <div className="flex gap-3">
@@ -184,11 +189,8 @@ export default function ReportsPage() {
           >
             <RefreshCcw size={20} className="text-slate-600" />
           </Button>
-          <Button
-            onClick={exportPDF}
-            className="bg-slate-900 hover:bg-blue-600 text-white rounded-[clamp(1.2rem,2vw+1rem,2rem)] h-14 px-8 font-black transition-all shadow-xl shadow-slate-200 cursor-pointer"
-          >
-            <Download size={20} className="mr-2" /> EXPORT INTELLIGENCE
+          <Button onClick={exportPDF} className="bg-slate-900 hover:bg-blue-600 text-white rounded-[clamp(1.2rem,2vw+1rem,2rem)] h-14 px-8 font-black transition-all shadow-xl shadow-slate-200 cursor-pointer">
+            <Download size={20} className="mr-2" /> EXPORTER LES RAPPORTS
           </Button>
         </div>
       </header>
@@ -198,30 +200,30 @@ export default function ReportsPage() {
         {/* Section 1: Human Capital */}
         <div className="space-y-[clamp(0rem,2vw+1rem,2rem)]">
           <div className="flex items-center gap-3 px-2">
-            <PieChart className="text-slate-400" size={20} />
-            <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">Human Capital Index</h2>
+            <LucidePieChart className="text-slate-400" size={20} />
+            <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">Indice du capital humain</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <StatCard
-              label="Student Enrollment"
+              label="Inscription des étudiants"
               value={report?.totalStudents}
               icon={GraduationCap}
               color="blue"
-              sub="Active learners in registry"
+              sub="Apprenants actifs dans le registre"
             />
             <StatCard
-              label="Faculty Staff"
+              label="Corps enseignant"
               value={report?.totalTeachers}
               icon={Briefcase}
               color="amber"
-              sub="Certified instructors"
+              sub="Instructeurs certifiés"
             />
             <StatCard
-              label="System Authority"
+              label="Autorité du système"
               value={report?.totalAdmins}
               icon={ShieldCheck}
               color="rose"
-              sub="Administrative controllers"
+              sub="Contrôleurs administratifs"
             />
           </div>
         </div>
@@ -231,8 +233,8 @@ export default function ReportsPage() {
           {/* Human Capital Distribution */}
           <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col justify-between">
             <div className="mb-4">
-              <h3 className="text-sm font-black uppercase tracking-widest text-slate-900">Roster Ratio</h3>
-              <p className="text-xs font-bold text-slate-400">Proportional distribution of school members</p>
+              <h3 className="text-sm font-black uppercase tracking-widest text-slate-900">Ratio de l'effectif</h3>
+              <p className="text-xs font-bold text-slate-400">Distribution proportionnelle des membres de l'école</p>
             </div>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -250,7 +252,7 @@ export default function ReportsPage() {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => [value, 'Accounts']} />
+                  <Tooltip formatter={(value) => [value, 'Comptes']} />
                   <Legend verticalAlign="bottom" height={36} />
                 </RechartsPieChart>
               </ResponsiveContainer>
@@ -260,8 +262,8 @@ export default function ReportsPage() {
           {/* Academic & Structural Assets */}
           <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col justify-between">
             <div className="mb-4">
-              <h3 className="text-sm font-black uppercase tracking-widest text-slate-900">Academic Asset Load</h3>
-              <p className="text-xs font-bold text-slate-400">Inventory comparison of classes, exams and subjects</p>
+              <h3 className="text-sm font-black uppercase tracking-widest text-slate-900">Charge d'actifs académiques</h3>
+              <p className="text-xs font-bold text-slate-400">Comparaison d'inventaire des classes, examens et matières</p>
             </div>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -281,20 +283,20 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        {/* Section 3: Structural & Academic Assets */}
+        {/* Section 3: Structural Capacity */}
         <div className="space-y-6">
           <div className="flex items-center gap-3 px-2">
             <Activity className="text-slate-400" size={20} />
-            <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">Structural Capacity</h2>
+            <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">Capacité structurelle</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-slate-900 rounded-[clamp(1.2rem,2vw+1rem,2rem)] p-10 text-white shadow-2xl relative overflow-hidden group col-span-1 md:col-span-1">
               <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-700">
                 <School size={120} />
               </div>
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400 mb-4">Functional Units</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400 mb-4">Unités fonctionnelles</p>
               <h3 className="text-6xl font-black italic tracking-tighter mb-2">{report?.totalClasses}</h3>
-              <p className="text-sm font-bold opacity-60">Total Active Classes</p>
+              <p className="text-sm font-bold opacity-60">Total des classes actives</p>
             </div>
 
             <div className="bg-white rounded-[clamp(1.2rem,2vw+1rem,2rem)] p-10 shadow-sm border border-slate-100 md:hover:border-primary duration-500 transition-colors flex flex-col justify-between">
@@ -302,10 +304,10 @@ export default function ReportsPage() {
                 <div className="h-12 w-12 bg-blue-50 rounded-[clamp(1.2rem,2vw+1rem,2rem)] flex items-center justify-center text-primary mb-6">
                   <BookOpen size={24} />
                 </div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Academic Assessments</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Évaluations académiques</p>
                 <h3 className="text-5xl font-black text-slate-900 tracking-tighter italic">{report?.totalExams}</h3>
               </div>
-              <Badge className="w-fit bg-blue-100 text-primary border-none mt-6 font-black text-[9px] tracking-widest">TERM 2026 ACTIVE</Badge>
+              <Badge className="w-fit bg-blue-100 text-primary border-none mt-6 font-black text-[9px] tracking-widest">SESSION {currentYear || '2026'} ACTIVE</Badge>
             </div>
 
             <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100 md:hover:border-primary duration-500 transition-colors flex flex-col justify-between">
@@ -313,10 +315,10 @@ export default function ReportsPage() {
                 <div className="h-12 w-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 mb-6">
                   <FileText size={24} />
                 </div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Curriculum Catalog</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Catalogue de cours</p>
                 <h3 className="text-5xl font-black text-slate-900 tracking-tighter italic">{report?.totalSubjects}</h3>
               </div>
-              <p className="text-xs font-bold text-slate-400 mt-6">Defined Academic Subjects</p>
+              <p className="text-xs font-bold text-slate-400 mt-6">Matières académiques définies</p>
             </div>
           </div>
         </div>
@@ -328,8 +330,8 @@ export default function ReportsPage() {
               <Users size={32} />
             </div>
             <div>
-              <p className="text-2xl font-black italic tracking-tighter leading-none">System-Wide Roster</p>
-              <p className="text-sm font-bold opacity-80 mt-1">Total combined accounts managed by the platform</p>
+              <p className="text-2xl font-black italic tracking-tighter leading-none">Ensemble des comptes gérés par la plateforme</p>
+              <p className="text-sm font-bold opacity-80 mt-1">Ensemble total des comptes gérés par la plateforme</p>
             </div>
           </div>
           <div className="text-6xl font-black italic tracking-tighter">

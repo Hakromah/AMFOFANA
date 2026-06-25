@@ -80,6 +80,8 @@ export interface StrapiBlogPost {
    content: StrapiRichTextBlock[] | string;
    date: string;
    category: string;
+   // cearch_text: string;
+   // category_text: string;
    author: string;
    image: StrapiMediaItem | StrapiMediaItem[] | null;
    slug: string;
@@ -98,6 +100,8 @@ export interface StrapiStaffMember {
    name: string;
    role: string;
    email: string;
+   lead_text: string;
+   meet_text: string;
    bio: string;
    heading: string;
    image: StrapiMediaItem | StrapiMediaItem[] | null;
@@ -128,12 +132,35 @@ export interface StrapiAcademicProgram {
    id: number;
    documentId?: string;
    title: string;
+   slug: string;
    category: string;
+   subtitle: string | null;
    description: string;
    image: StrapiMediaItem | StrapiMediaItem[] | null;
+   content_image: StrapiMediaItem | StrapiMediaItem[] | null;
    sort_order: number;
    header: string;
    subheader: string;
+   description_text: string;
+   middle_text: string;
+   mid_header: string;
+   academic_link: Array<{ name: string; href: string }> | null;
+   highlights: Array<{ id: number; text: string }> | null;
+   curriculum: Array<{ id: number; subject: string; desc: string }> | null;
+   breadcrumb_item: Array<{
+      id: number;
+      breadcrumb_title: string;
+      description: string;
+      image: StrapiMediaItem | null;
+   }> | null;
+   // Detail page extras
+   prospectus_file: StrapiMediaItem | null;
+   stat_value_1: string | null;
+   stat_label_1: string | null;
+   stat_value_2: string | null;
+   stat_label_2: string | null;
+   stat_value_3: string | null;
+   stat_label_3: string | null;
 }
 
 /** gallery-items collection */
@@ -142,7 +169,7 @@ export interface StrapiGalleryItem {
    documentId?: string;
    title: string;
    type: 'image' | 'video';
-   category: 'Campus' | 'Events' | 'Sports';
+   category: 'Études' | 'Événements' | 'Sports' | 'Campus' | 'Actualités' | 'Annonces' | "Bourses d'études" | null;
    src: StrapiMediaItem | StrapiMediaItem[] | null;
    thumbnail: StrapiMediaItem | StrapiMediaItem[] | null;
    breadcrumb_item: Array<{
@@ -161,6 +188,14 @@ export interface StrapiOpportunity {
    title: string;
    header: string;
    subheader: string;
+
+   overview_text: string;
+   admission_req: string;
+   ready_to_apply: string;
+   dont_miss: string;
+   apply_now: { name: string; href: string } | null;
+   by_applying: string;
+
    description: string;
    image: StrapiMediaItem | StrapiMediaItem[] | null;
    published_date: string;
@@ -230,6 +265,17 @@ export interface StrapiAboutPage {
    history_image: StrapiMediaItem | StrapiMediaItem[] | null;
    stat_students: string;
    stat_years: string;
+
+   //new fields
+   student_text: string;
+   year_text: string;
+   principal_text: string;
+   vis_text: string;
+   mis_text: string;
+   value_text: string;
+   program_text: string;
+   awards_text: string;
+
    stat_programs: string;
    stat_awards: string;
    mission_text: string;
@@ -256,6 +302,8 @@ export interface StrapiContactInfo {
    id: number;
    documentId?: string;
    address: string;
+   connect_text: string;
+   connect_dis: string;
    phones: Array<{ phones: string | number }>;
    email: Array<{ address: string }>;
    office_hours: string;
@@ -282,6 +330,46 @@ export interface StrapiStudentLife {
    image_4: StrapiMediaItem | StrapiMediaItem[] | null;
 }
 
+/** donation collection type — raw Strapi */
+export interface StrapiBankDetail {
+   id: number;
+   bank_name: string | null;
+   branch_name: string | null;
+   swift_code: string | null;
+   bank_address: string | null;
+   account_name: string | null;
+   account_number: string | null;
+   iban_number: string | null;
+}
+
+export interface StrapiDonation {
+   id: number;
+   documentId?: string;
+   header: string | null;
+   description: string | null;
+   bank_details: StrapiBankDetail[] | null;
+}
+
+/** donation — normalized frontend DTO */
+export interface BankDetail {
+   id: number;
+   bankName: string;
+   branchName: string;
+   swiftCode: string;
+   bankAddress: string;
+   accountName: string;
+   accountNumber: string;
+   ibanNumber: string;
+}
+
+export interface DonationData {
+   header: string;
+   description: string;
+   bankDetails: BankDetail[];
+}
+
+
+
 // ─────────────────────────────────────────────
 // Normalised frontend DTOs  (flat, easy to use in components)
 // ─────────────────────────────────────────────
@@ -305,6 +393,8 @@ export interface BlogPost {
    content: string;  // always plain/HTML string in the DTO
    date: string;
    category: string;
+   // cearchText: string;
+   // categoryText: string;
    author: string;
    image: string;
    slug: string;
@@ -316,6 +406,8 @@ export interface StaffMember {
    name: string;
    role: string;
    email: string;
+   leadText: string;
+   meetText: string;
    bio: string;
    image: string;
    heading: string;
@@ -333,25 +425,54 @@ export interface Testimonial {
    image: string;
 }
 
+export interface FeatureCardData {
+   id: number;
+   icon: "BookOpen" | "HandHeart" | "Home" | "Star" | "Shield" | "GraduationCap";
+   title: string;
+   description: string;
+}
 
+export interface WhyChooseUsData {
+   subtitle: string;
+   title: string;
+   description: string;
+   cards: FeatureCardData[];
+}
 
 export interface AcademicProgram {
    id: number;
    title: string;
+   slug: string;
    category: string;
+   subtitle: string;
    description: string;
    image: string;
+   contentImage: string;
    sortOrder: number;
    header: string;
    subheader: string;
-
+   highlights: string[];
+   description_text: string;
+   middle_text: string;
+   mid_header: string;
+   academic_link: Array<{ name: string; href: string }> | null;
+   curriculum: { subject: string; desc: string }[];
+   breadcrumb_item: BreadcrumbItem[];
+   // Detail page extras
+   prospectusFileUrl: string;
+   statValue1: string;
+   statLabel1: string;
+   statValue2: string;
+   statLabel2: string;
+   statValue3: string;
+   statLabel3: string;
 }
 
 export interface GalleryItem {
    id: number;
    title: string;
    type: 'image' | 'video';
-   category: 'Campus' | 'Events' | 'Sports';
+   category: 'Études' | 'Événements' | 'Sports' | 'Campus' | 'Actualités' | 'Annonces' | "Bourses d'études" | null;
    src: string;
    thumbnail?: string;
    breadcrumb_item: BreadcrumbItem[];
@@ -377,6 +498,14 @@ export interface Opportunity {
    deadline: string;
    dateNumber: string;
    slug: string;
+
+   // New fields
+   overviewText: string;
+   admissionReq: string;
+   readyToApply: string;
+   dontMiss: string;
+   applyNow: { name: string; href: string } | null;
+   byApplying: string;
    // Added breadcrumb array
    breadcrumb_item: BreadcrumbItem[];
    details: {
@@ -424,6 +553,17 @@ export interface AboutPageData {
    principalRole: string;
    principalMessage: string;
    principalImage: string;
+
+   // New fields
+   studentText: string;
+   yearText: string;
+   programText: string;
+   principalText: string;
+   visText: string;
+   misText: string;
+   valueText: string;
+   awardsText: string;
+
    homeHeading: string;
    homeDescription: string;
    homeStat: string;
@@ -434,6 +574,8 @@ export interface AboutPageData {
 
 export interface ContactInfoData {
    address: string;
+   connectText: string;
+   connectDis: string;
    phones: string[];
    emails: string[];
    officeHours: string;
@@ -442,6 +584,39 @@ export interface ContactInfoData {
    socialLinks: Array<{ name: string; href: string }>;
    breadcrumb_item: BreadcrumbItem[];
 }
+
+/** map-setting single type — raw Strapi response */
+export interface StrapiMapSetting {
+   id: number;
+   documentId?: string;
+   school_name: string;
+   popup_subtitle: string | null;
+   address_line: string | null;
+   latitude: number;
+   longitude: number;
+   zoom_level: number | null;
+   directions_label: string | null;
+   google_maps_url: string | null;
+   marker_pulse: boolean | null;
+   section_title: string | null;
+   section_subtitle: string | null;
+}
+
+/** map-setting — normalized frontend DTO */
+export interface MapSettingData {
+   schoolName: string;
+   popupSubtitle: string;
+   addressLine: string;
+   latitude: number;
+   longitude: number;
+   zoomLevel: number;
+   directionsLabel: string;
+   googleMapsUrl: string;
+   markerPulse: boolean;
+   sectionTitle: string;
+   sectionSubtitle: string;
+}
+
 
 export interface StudentLifeData {
    heading: string;
@@ -492,7 +667,13 @@ export interface StrapiFooter {
    documentId?: string;
    logo: StrapiMediaItem | StrapiMediaItem[] | null;
    title: string;
+   all_right: string;
    subtitle: string;
+   contact_us: string;
+   address_text: string;
+   quick_link: string;
+   academic_link: string;
+   follow_us: string;
    description: string;
    quick_links: StrapiFooterLink[];
    academics_links: StrapiFooterLink[];
@@ -554,8 +735,14 @@ export interface FooterLinkData {
 export interface FooterData {
    logo: string;
    title: string;
+   allRight: string;
    subtitle: string;
    description: string;
+   academicLink: string;
+   quickLink: string;
+   contactUs: string;
+   addressText: string;
+   followUs: string;
    quickLinks: FooterLinkData[];
    academicsLinks: FooterLinkData[];
 }
@@ -580,4 +767,19 @@ export interface NavbarData {
    subtitle: string;
    establishmentDate: string;
    navItems: NavItemData[];
+}
+
+/** important-news-popup single type — raw Strapi response */
+export interface StrapiImportantNewsPopup {
+   id: number;
+   documentId?: string;
+   image: StrapiMediaItem | StrapiMediaItem[] | null;
+   link?: string | null;
+   is_active?: boolean | null;
+}
+
+/** important-news-popup — normalized frontend DTO */
+export interface ImportantNewsPopupData {
+   imageUrl: string;
+   link: string | null;
 }

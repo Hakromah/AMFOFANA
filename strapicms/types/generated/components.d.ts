@@ -1,5 +1,21 @@
 import type { Schema, Struct } from '@strapi/strapi';
 
+export interface SharedBankDetails extends Struct.ComponentSchema {
+  collectionName: 'components_shared_bank_details';
+  info: {
+    displayName: 'Bank Details';
+  };
+  attributes: {
+    account_name: Schema.Attribute.String;
+    account_number: Schema.Attribute.String;
+    bank_address: Schema.Attribute.Text;
+    bank_name: Schema.Attribute.String;
+    branch_name: Schema.Attribute.String;
+    iban_number: Schema.Attribute.String;
+    swift_code: Schema.Attribute.String;
+  };
+}
+
 export interface SharedBenefit extends Struct.ComponentSchema {
   collectionName: 'components_shared_benefits';
   info: {
@@ -7,6 +23,19 @@ export interface SharedBenefit extends Struct.ComponentSchema {
   };
   attributes: {
     text: Schema.Attribute.Text;
+  };
+}
+
+export interface SharedCurriculumItem extends Struct.ComponentSchema {
+  collectionName: 'components_shared_curriculum_items';
+  info: {
+    description: 'A single curriculum subject entry with title and description';
+    displayName: 'Curriculum Item';
+    icon: 'book';
+  };
+  attributes: {
+    desc: Schema.Attribute.Text;
+    subject: Schema.Attribute.String & Schema.Attribute.Required;
   };
 }
 
@@ -170,7 +199,9 @@ export interface SharedValues extends Struct.ComponentSchema {
 declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
+      'shared.bank-details': SharedBankDetails;
       'shared.benefit': SharedBenefit;
+      'shared.curriculum-item': SharedCurriculumItem;
       'shared.details': SharedDetails;
       'shared.emails': SharedEmails;
       'shared.feature-card': SharedFeatureCard;

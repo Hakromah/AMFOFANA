@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -33,6 +34,34 @@ export default function AdminDashboard() {
   const [recentLogs, setRecentLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // State to hold the dynamic semester text to prevent hydration mismatches
+  const [semesterText, setSemesterText] = useState<string>('');
+
+
+  const getDynamicSemester = () => {
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth(); // 0 = January, 11 = December
+
+    let semester = 1;
+
+    // Semester 1: September (8) to January (0)
+    // Semester 2: February (1) to August (7)
+    if (month >= 1 && month <= 7) {
+      semester = 2;
+    } else {
+      semester = 1;
+    }
+
+    // Get the current month name in French (e.g., "juin")
+    const monthName = currentDate.toLocaleDateString('fr-FR', { month: 'long' });
+
+    // Capitalize the first letter of the month name (e.g., "Juin")
+    const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+
+    return `Semestre ${semester}, ${capitalizedMonth} - Année ${year}`;
+  };
+
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -49,14 +78,16 @@ export default function AdminDashboard() {
           new Date(b.timestamp || b.createdAt).getTime() - new Date(a.timestamp || a.createdAt).getTime()
         ).slice(0, 5);
         setRecentLogs(sortedLogs);
+        setSemesterText(getDynamicSemester());
       } catch (error) {
-        toast.error('Failed to synchronize administrative dashboard');
+        toast.error('Données administratives non synchronisées.');
       } finally {
         setLoading(false);
       }
     };
     fetchDashboardData();
   }, []);
+
 
   const userData = report ? [
     { name: 'Students', value: report.totalStudents, color: '#3b82f6' },
@@ -69,21 +100,21 @@ export default function AdminDashboard() {
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-          <p className="font-bold text-slate-500 animate-pulse">Synchronizing Global Registry...</p>
+          <p className="font-bold text-slate-500 animate-pulse">Synchronisation du registre mondial...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 md:p-10 space-y-6 md:space-y-8 bg-[#fcfcfd] min-h-screen">
+    <div className="p-[clamp(1rem,2vw+1rem,2rem)] space-y-[clamp(1rem,2vw+1rem,2rem)] bg-[#f8fafc] min-h-screen">
       {/* HEADER SECTION */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-            Admin Console <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+          <h1 className="text-[clamp(1.2rem,2vw+1rem,2rem)] font-black text-slate-900 tracking-tight flex items-center gap-3">
+            Console administrative <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
           </h1>
-          <p className="text-slate-500 font-medium mt-1">Global School ERP Control Board</p>
+          <p className="text-slate-500 font-medium">Tableau de bord administratif • <span className="text-emerald-500">Actif</span> • {semesterText || 'Chargement...'}</p>
         </motion.div>
 
         <div className="flex items-center gap-4">
@@ -96,71 +127,47 @@ export default function AdminDashboard() {
             )}
           </a>
           <div className="flex items-center gap-2 px-4 py-2 bg-white text-slate-700 rounded-2xl border border-slate-200 shadow-sm font-bold text-sm">
-            <Globe className="w-4 h-4 text-blue-500" /> System: Online
+            <Globe className="w-4 h-4 text-blue-500" /> Système : En ligne
           </div>
           <div className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-2xl border border-slate-800 shadow-lg font-bold text-sm">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" /> Root Verified
+            <ShieldCheck className="w-4 h-4 text-emerald-400" /> Root Vérifié
           </div>
         </div>
       </div>
 
       {/* PRIMARY STATS GRID */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Enrollment" value={report?.totalStudents} icon={Users} color="blue" sub="Active Students" />
-        <StatCard title="Faculty" value={report?.totalTeachers} icon={UserCog} color="emerald" sub="Teaching Staff" />
-        <StatCard title="Classrooms" value={report?.totalClasses} icon={School} color="amber" sub="Active Classes" />
-        <StatCard title="Assessments" value={report?.totalExams} icon={BookOpen} color="rose" sub="Total Exams" />
+        <StatCard title="Inscription" value={report?.totalStudents} icon={Users} color="blue" sub="Élèves actifs" />
+        <StatCard title="Corps enseignant" value={report?.totalTeachers} icon={UserCog} color="emerald" sub="Corps enseignant" />
+        <StatCard title="Classes" value={report?.totalClasses} icon={School} color="amber" sub="Classes actives" />
+        <StatCard title="Évaluations" value={report?.totalExams} icon={BookOpen} color="rose" sub="Total des examens" />
       </div>
 
       {/* QUICK LINKS GRID */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-        <QuickDashboardLink href="/admin/families" label="Families" icon={Users} color="blue" />
+        <QuickDashboardLink href="/admin/families" label="Familles" icon={Users} color="blue" />
         <QuickDashboardLink href="/admin/parents" label="Parents" icon={UserCheck} color="emerald" />
         <QuickDashboardLink href="/admin/transport" label="Transport" icon={Bus} color="indigo" />
-        <QuickDashboardLink href="/admin/calendar" label="Calendar" icon={CalendarIcon} color="amber" />
-        <QuickDashboardLink href="/admin/notifications" label="Alerts" icon={Bell} color="rose" />
-        <QuickDashboardLink href="/admin/audit" label="Audit Trail" icon={Activity} color="violet" />
+        <QuickDashboardLink href="/admin/calendar" label="Calendrier" icon={CalendarIcon} color="amber" />
+        <QuickDashboardLink href="/admin/notifications" label="Alertes" icon={Bell} color="rose" />
+        <QuickDashboardLink href="/admin/audit" label="Journal d'audit" icon={Activity} color="violet" />
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* CHARTS SECTION */}
-        <Card className="lg:col-span-2 border border-slate-100 shadow-sm rounded-3xl overflow-hidden bg-white">
-          <CardHeader className="border-b border-slate-50 p-6">
-            <CardTitle className="text-lg font-black uppercase tracking-wider text-slate-850">Infrastructure Metrics</CardTitle>
+      <div className="grid lg:grid-cols-3 gap-[clamp(1.2rem,2vw+1rem,2rem)]">
+        {/* ANALYTICS: USER DISTRIBUTION */}
+        <Card className="lg:col-span-1 py-3 border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm rounded-3xl overflow-hidden bg-white">
+          <CardHeader className="border-b border-slate-50">
+            <CardTitle className="text-lg font-bold">Matrice des utilisateurs</CardTitle>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent className="pt-6">
             <div className="h-[280px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={[
-                  { name: 'Subjects', val: report?.totalSubjects },
-                  { name: 'Classes', val: report?.totalClasses },
-                  { name: 'Exams', val: report?.totalExams },
-                ]}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 700, fill: '#64748b' }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} />
-                  <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px rgba(0,0,0,0.05)' }} />
-                  <Bar dataKey="val" fill="#3b82f6" radius={[10, 10, 0, 0]} barSize={40} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* PIE CHART */}
-        <Card className="border border-slate-100 shadow-sm rounded-3xl overflow-hidden bg-white">
-          <CardHeader className="border-b border-slate-50 p-6">
-            <CardTitle className="text-lg font-black uppercase tracking-wider text-slate-850">User Segment Matrix</CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="h-[200px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <RePie>
                   <Pie
                     data={userData}
-                    innerRadius={55}
-                    outerRadius={75}
-                    paddingAngle={6}
+                    innerRadius={70}
+                    outerRadius={90}
+                    paddingAngle={8}
                     dataKey="value"
                     stroke="none"
                   >
@@ -172,12 +179,12 @@ export default function AdminDashboard() {
                 </RePie>
               </ResponsiveContainer>
             </div>
-            <div className="space-y-2 mt-4">
+            <div className="space-y-3 mt-6">
               {userData.map((u) => (
                 <div key={u.name} className="flex items-center justify-between p-2 bg-slate-50 rounded-xl">
                   <div className="flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: u.color }} />
-                    <span className="text-xs font-black text-slate-655 uppercase tracking-wider">{u.name}</span>
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: u.color }} />
+                    <span className="text-sm font-bold text-slate-600">{u.name}</span>
                   </div>
                   <span className="text-sm font-black text-slate-900">{u.value}</span>
                 </div>
@@ -185,15 +192,39 @@ export default function AdminDashboard() {
             </div>
           </CardContent>
         </Card>
+
+        {/* BAR CHART - INFRASTRUCTURE */}
+        <Card className="lg:col-span-2 border py-3 border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm rounded-3xl overflow-hidden bg-white">
+          <CardHeader className="border-b border-slate-50">
+            <CardTitle className="text-lg font-bold">Infrastructure académique</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-8">
+            <div className="h-[380px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={[
+                  { name: 'Subjects', val: report?.totalSubjects },
+                  { name: 'Classes', val: report?.totalClasses },
+                  { name: 'Exams', val: report?.totalExams },
+                ]}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 700, fill: '#64748b' }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#94a3b8' }} />
+                  <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px rgba(0,0,0,0.05)' }} />
+                  <Bar dataKey="val" fill="#4f46e5" radius={[10, 10, 0, 0]} barSize={50} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-2 gap-[clamp(1.2rem,2vw+1rem,2rem)]">
         {/* LIVE SYSTEM AUDIT TRAIL */}
         <Card className="border border-slate-100 shadow-sm rounded-3xl overflow-hidden bg-white">
           <CardHeader className="border-b border-slate-50 p-6 flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-lg font-black uppercase tracking-wider text-slate-850">Live Audit Trail Feed</CardTitle>
-              <CardDescription className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-0.5">State mutation logger</CardDescription>
+              <CardTitle className="text-lg font-black uppercase tracking-wider text-slate-800">Journal d'audit en direct</CardTitle>
+              <CardDescription className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-0.5">Enregistreur de mutations d'état</CardDescription>
             </div>
             <Activity className="text-slate-400" size={20} />
           </CardHeader>
@@ -212,39 +243,32 @@ export default function AdminDashboard() {
                       <p className="text-xs font-bold text-slate-800">{log.notes || `${log.entityName} mutation`}</p>
                     </div>
                     <span className="text-[10px] text-slate-400 font-black uppercase tracking-wider">
-                      {log.performedBy?.username || 'System'}
+                      {log.performedBy?.username || 'Système'}
                     </span>
                   </div>
                 ))
               ) : (
-                <p className="text-center py-10 text-slate-400 font-bold uppercase tracking-widest text-xs">No recent activity logged</p>
+                <p className="text-center py-10 text-slate-400 font-bold uppercase tracking-widest text-xs">Aucune activité récente</p>
               )}
             </div>
           </CardContent>
         </Card>
 
-        {/* SYSTEM INTEGRITY BANNER */}
         <motion.div
-          whileHover={{ scale: 1.005 }}
-          className="rounded-3xl bg-gradient-to-br from-blue-700 to-indigo-800 p-8 text-white relative overflow-hidden shadow-lg flex flex-col justify-between"
+          whileHover={{ scale: 1.01 }}
+          className="rounded-3xl bg-gradient-to-br duration-300 from-indigo-600 to-blue-700 p-8 text-white relative overflow-hidden shadow-2xl shadow-indigo-200"
         >
-          <div className="absolute right-[-20px] top-[-20px] w-48 h-48 opacity-10 rotate-12 bg-white rounded-full blur-2xl" />
-          <div>
-            <Badge className="bg-white/15 text-white border border-white/20 uppercase font-black tracking-widest text-[9px] py-1 px-3 mb-6">
-              Network Guard active
-            </Badge>
-            <h3 className="text-2xl font-black tracking-tight mb-2">School ERP Integrity Shield</h3>
-            <p className="text-blue-100 text-xs leading-relaxed max-w-sm">
-              All financial mutations, student profiles, parent links, and attendance entries are securely cryptographic-hashed and mapped in compliance with school ledger guidelines.
+          <ArrowUpRight className="absolute right-[-20px] top-[-20px] w-48 h-48 opacity-10 rotate-12" />
+          <div className="relative z-10">
+            <h3 className="text-2xl font-black mb-4">Intégrité du registre</h3>
+            <p className="text-indigo-100 mb-8 leading-relaxed max-w-sm">
+              Tous les dossiers académiques sont actuellement vérifiés et synchronisés avec le grand livre cloud sécurisé.
             </p>
-          </div>
-          <div className="flex items-center gap-3 mt-6">
-            <span className="px-4 py-2 bg-white/10 rounded-2xl text-[9px] font-black uppercase tracking-widest border border-white/20 backdrop-blur-sm">
-              TLS 1.3 Encryption
-            </span>
-            <span className="px-4 py-2 bg-white/10 rounded-2xl text-[9px] font-black uppercase tracking-widest border border-white/20 backdrop-blur-sm">
-              RBAC Enabled
-            </span>
+            <div className="flex flex-wrap gap-3">
+              <div className="px-4 py-2 bg-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-white/20 backdrop-blur-sm">
+                Base de données : 100% synchronisée
+              </div>
+            </div>
           </div>
         </motion.div>
       </div>
@@ -252,7 +276,7 @@ export default function AdminDashboard() {
   );
 }
 
-// --- SUB-COMPONENTS ---
+// --- VISUAL COMPONENTS ---
 
 function StatCard({ title, value, icon: Icon, color, sub }: any) {
   const colorMap: any = {
@@ -263,9 +287,9 @@ function StatCard({ title, value, icon: Icon, color, sub }: any) {
   };
 
   return (
-    <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300 }}>
-      <Card className="border border-slate-100 shadow-sm relative overflow-hidden bg-white rounded-3xl py-4">
-        <div className={`absolute top-0 left-0 w-1.5 h-full ${colorMap[color].split(' ')[0]}`} />
+    <motion.div whileHover={{ y: -5 }} transition={{ type: "spring", stiffness: 300 }}>
+      <Card className="border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm relative overflow-hidden bg-white rounded-3xl py-4">
+        <div className={`absolute top-0 left-0 w-2 h-full ${colorMap[color].split(' ')[0]}`} />
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{title}</CardTitle>
           <div className="p-2 rounded-xl bg-slate-50">
@@ -283,6 +307,25 @@ function StatCard({ title, value, icon: Icon, color, sub }: any) {
   );
 }
 
+function QuickAction({ href, label, color }: { href: string, label: string, color: string }) {
+  const colors: any = {
+    blue: "group-hover:text-blue-400",
+    emerald: "group-hover:text-emerald-400",
+    amber: "group-hover:text-amber-400",
+    rose: "group-hover:text-rose-400"
+  };
+
+  return (
+    <a
+      href={href}
+      className="p-5 bg-white/5 border border-white/10 rounded-2xl flex flex-col justify-between hover:bg-white/10 transition-all group min-h-[100px]"
+    >
+      <ArrowUpRight className={`w-5 h-5 ml-auto transition-all ${colors[color]}`} />
+      <span className="text-sm font-bold tracking-tight text-white">{label}</span>
+    </a>
+  );
+}
+
 function QuickDashboardLink({ href, label, icon: Icon, color }: { href: string, label: string, icon: any, color: string }) {
   const colors: Record<string, string> = {
     blue: 'text-blue-500 bg-blue-50 border-blue-100 hover:border-blue-300',
@@ -294,9 +337,12 @@ function QuickDashboardLink({ href, label, icon: Icon, color }: { href: string, 
   };
 
   return (
-    <a href={href} className={`p-4 border rounded-3xl flex flex-col items-center justify-center gap-2 transition-all duration-300 shadow-sm ${colors[color] || 'border-slate-200 hover:bg-slate-50'}`}>
-      <Icon size={24} />
-      <span className="text-xs font-black uppercase tracking-wider text-slate-700">{label}</span>
+    <a
+      href={href}
+      className={`flex flex-col items-center justify-center p-4 border rounded-3xl transition-all duration-300 ${colors[color]} hover:shadow-md`}
+    >
+      <Icon className="w-6 h-6 mb-2" />
+      <span className="text-xs font-bold">{label}</span>
     </a>
   );
 }

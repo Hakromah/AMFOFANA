@@ -36,6 +36,24 @@
       "type": "component",
       "component": "shared.footer-link",
       "repeatable": true
+    },
+    "all_right": {
+      "type": "text"
+    },
+    "contact_us": {
+      "type": "string"
+    },
+    "address_text": {
+      "type": "text"
+    },
+    "follow_us": {
+      "type": "text"
+    },
+    "quick_link": {
+      "type": "string"
+    },
+    "academic_link": {
+      "type": "string"
     }
   }
 }

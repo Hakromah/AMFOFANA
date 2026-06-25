@@ -441,6 +441,7 @@ export interface ApiAboutPageAboutPage extends Struct.SingleTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    awards_text: Schema.Attribute.String;
     breadcrumb_item: Schema.Attribute.Component<'shared.readcrumb', true>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -461,21 +462,28 @@ export interface ApiAboutPageAboutPage extends Struct.SingleTypeSchema {
       'api::about-page.about-page'
     > &
       Schema.Attribute.Private;
+    mis_text: Schema.Attribute.String;
     mission_text: Schema.Attribute.Text;
     principal_image: Schema.Attribute.Media<'images'>;
     principal_message: Schema.Attribute.Text;
     principal_name: Schema.Attribute.String;
     principal_role: Schema.Attribute.String;
+    principal_text: Schema.Attribute.String;
+    program_text: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     stat_awards: Schema.Attribute.String;
     stat_programs: Schema.Attribute.String;
     stat_students: Schema.Attribute.String;
     stat_years: Schema.Attribute.String;
+    student_text: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    value_text: Schema.Attribute.String;
     values: Schema.Attribute.Component<'shared.values', true>;
+    vis_text: Schema.Attribute.String;
     vision_text: Schema.Attribute.Text;
+    year_text: Schema.Attribute.String;
   };
 }
 
@@ -491,20 +499,28 @@ export interface ApiAcademicProgramAcademicProgram
     draftAndPublish: true;
   };
   attributes: {
+    academic_link: Schema.Attribute.Component<'shared.social-links', true>;
+    breadcrumb_item: Schema.Attribute.Component<'shared.readcrumb', true>;
     category: Schema.Attribute.Enumeration<
       [
         'Kindergarten',
         'Elementary',
         'Junior High',
-        'Senior High ',
+        'Senior High',
         'Vocational Training',
       ]
+    >;
+    content_image: Schema.Attribute.Media<
+      'images' | 'files' | 'videos' | 'audios'
     >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    curriculum: Schema.Attribute.Component<'shared.curriculum-item', true>;
     description: Schema.Attribute.Text;
+    description_text: Schema.Attribute.Text;
     header: Schema.Attribute.String;
+    highlights: Schema.Attribute.Component<'shared.benefit', true>;
     image: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
@@ -512,9 +528,20 @@ export interface ApiAcademicProgramAcademicProgram
       'api::academic-program.academic-program'
     > &
       Schema.Attribute.Private;
+    mid_header: Schema.Attribute.String;
+    middle_text: Schema.Attribute.String;
+    prospectus_file: Schema.Attribute.Media<'files'>;
     publishedAt: Schema.Attribute.DateTime;
+    slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     sort_order: Schema.Attribute.Integer;
+    stat_label_1: Schema.Attribute.String;
+    stat_label_2: Schema.Attribute.String;
+    stat_label_3: Schema.Attribute.String;
+    stat_value_1: Schema.Attribute.String;
+    stat_value_2: Schema.Attribute.String;
+    stat_value_3: Schema.Attribute.String;
     subheader: Schema.Attribute.Text;
+    subtitle: Schema.Attribute.Text;
     title: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -864,6 +891,8 @@ export interface ApiContactInfoContactInfo extends Struct.SingleTypeSchema {
   attributes: {
     address: Schema.Attribute.Text;
     breadcrumb_item: Schema.Attribute.Component<'shared.readcrumb', true>;
+    connect_dis: Schema.Attribute.Text;
+    connect_text: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -915,6 +944,36 @@ export interface ApiContactMessageContactMessage
     publishedAt: Schema.Attribute.DateTime;
     read: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     subject: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiDonationDonation extends Struct.CollectionTypeSchema {
+  collectionName: 'donations';
+  info: {
+    displayName: 'Donation';
+    pluralName: 'donations';
+    singularName: 'donation';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    bank_details: Schema.Attribute.Component<'shared.bank-details', true>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    header: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::donation.donation'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1106,11 +1165,16 @@ export interface ApiFooterFooter extends Struct.SingleTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    academic_link: Schema.Attribute.String;
     academics_links: Schema.Attribute.Component<'shared.footer-link', true>;
+    address_text: Schema.Attribute.Text;
+    all_right: Schema.Attribute.Text;
+    contact_us: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     description: Schema.Attribute.Text;
+    follow_us: Schema.Attribute.Text;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -1119,6 +1183,7 @@ export interface ApiFooterFooter extends Struct.SingleTypeSchema {
       Schema.Attribute.Private;
     logo: Schema.Attribute.Media<'images', true>;
     publishedAt: Schema.Attribute.DateTime;
+    quick_link: Schema.Attribute.String;
     quick_links: Schema.Attribute.Component<'shared.footer-link', true>;
     subtitle: Schema.Attribute.String;
     title: Schema.Attribute.String;
@@ -1140,7 +1205,17 @@ export interface ApiGalleryItemGalleryItem extends Struct.CollectionTypeSchema {
   };
   attributes: {
     breadcrumb_item: Schema.Attribute.Component<'shared.readcrumb', true>;
-    category: Schema.Attribute.Enumeration<['Campus', 'Events', 'Sports']>;
+    category: Schema.Attribute.Enumeration<
+      [
+        '\u00C9tudes',
+        '\u00C9v\u00E9nements',
+        'Sports',
+        'Campus',
+        'Actualit\u00E9s',
+        'Annonces',
+        "Bourses d'\u00E9tudes",
+      ]
+    >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1233,6 +1308,62 @@ export interface ApiLearningMaterialLearningMaterial
       'manyToOne',
       'plugin::users-permissions.user'
     >;
+  };
+}
+
+export interface ApiMapSettingMapSetting extends Struct.SingleTypeSchema {
+  collectionName: 'map_settings';
+  info: {
+    description: 'Controls all map display settings for the contact page';
+    displayName: 'Map Setting';
+    pluralName: 'map-settings';
+    singularName: 'map-setting';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    address_line: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    directions_label: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<"Obtenir l'itineraire">;
+    google_maps_url: Schema.Attribute.Text;
+    latitude: Schema.Attribute.Decimal &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<9.5375>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::map-setting.map-setting'
+    > &
+      Schema.Attribute.Private;
+    longitude: Schema.Attribute.Decimal &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<-13.67733>;
+    marker_pulse: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    popup_subtitle: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'Conakry, Guinee'>;
+    publishedAt: Schema.Attribute.DateTime;
+    school_name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'Complex Scolaire'>;
+    section_subtitle: Schema.Attribute.String;
+    section_title: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'Notre Localisation'>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    zoom_level: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 20;
+          min: 1;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<15>;
   };
 }
 
@@ -1347,8 +1478,11 @@ export interface ApiOpportunityOpportunity extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    admission_req: Schema.Attribute.String;
+    apply_now: Schema.Attribute.Component<'shared.social-links', false>;
     benefits: Schema.Attribute.Component<'shared.benefit', true>;
     breadcrumb_item: Schema.Attribute.Component<'shared.readcrumb', true>;
+    by_applying: Schema.Attribute.Text;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1356,6 +1490,7 @@ export interface ApiOpportunityOpportunity extends Struct.CollectionTypeSchema {
     deadline: Schema.Attribute.String;
     description: Schema.Attribute.Text;
     details_intro: Schema.Attribute.Text;
+    dont_miss: Schema.Attribute.Text;
     header: Schema.Attribute.Text;
     how_to_apply: Schema.Attribute.Text;
     image: Schema.Attribute.Media<
@@ -1369,8 +1504,10 @@ export interface ApiOpportunityOpportunity extends Struct.CollectionTypeSchema {
       'api::opportunity.opportunity'
     > &
       Schema.Attribute.Private;
+    overview_text: Schema.Attribute.String;
     published_date: Schema.Attribute.Date;
     publishedAt: Schema.Attribute.DateTime;
+    ready_to_apply: Schema.Attribute.String;
     requirements: Schema.Attribute.Component<'shared.benefit', true>;
     slug: Schema.Attribute.UID<'title'>;
     subheader: Schema.Attribute.Text;
@@ -1979,12 +2116,14 @@ export interface ApiStaffMemberStaffMember extends Struct.CollectionTypeSchema {
     image: Schema.Attribute.Media<'images'>;
     is_featured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     isLeadership: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    lead_text: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::staff-member.staff-member'
     > &
       Schema.Attribute.Private;
+    meet_text: Schema.Attribute.Text;
     name: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     role: Schema.Attribute.String;
@@ -3012,6 +3151,7 @@ declare module '@strapi/strapi' {
       'api::blog-post.blog-post': ApiBlogPostBlogPost;
       'api::contact-info.contact-info': ApiContactInfoContactInfo;
       'api::contact-message.contact-message': ApiContactMessageContactMessage;
+      'api::donation.donation': ApiDonationDonation;
       'api::exam-result.exam-result': ApiExamResultExamResult;
       'api::family.family': ApiFamilyFamily;
       'api::financial-report.financial-report': ApiFinancialReportFinancialReport;
@@ -3020,6 +3160,7 @@ declare module '@strapi/strapi' {
       'api::gallery-item.gallery-item': ApiGalleryItemGalleryItem;
       'api::hero-slide.hero-slide': ApiHeroSlideHeroSlide;
       'api::learning-material.learning-material': ApiLearningMaterialLearningMaterial;
+      'api::map-setting.map-setting': ApiMapSettingMapSetting;
       'api::navbar.navbar': ApiNavbarNavbar;
       'api::news-post.news-post': ApiNewsPostNewsPost;
       'api::newsletter-subscription.newsletter-subscription': ApiNewsletterSubscriptionNewsletterSubscription;

@@ -64,11 +64,11 @@ interface Analytics {
 }
 
 const STATUS_STYLE: Record<string, { bg: string; text: string; label: string }> = {
-  PRESENT: { bg: 'bg-emerald-50', text: 'text-emerald-700', label: 'Present' },
-  ABSENT:  { bg: 'bg-rose-50',    text: 'text-rose-700',    label: 'Absent'  },
-  LATE:    { bg: 'bg-amber-50',   text: 'text-amber-700',   label: 'Late'    },
-  EXCUSED: { bg: 'bg-blue-50',    text: 'text-blue-700',    label: 'Excused' },
-  SICK:    { bg: 'bg-purple-50',  text: 'text-purple-700',  label: 'Sick'    },
+  PRESENT: { bg: 'bg-emerald-50', text: 'text-emerald-700', label: 'Présent'  },
+  ABSENT:  { bg: 'bg-rose-50',    text: 'text-rose-700',    label: 'Absent'   },
+  LATE:    { bg: 'bg-amber-50',   text: 'text-amber-700',   label: 'Retard'   },
+  EXCUSED: { bg: 'bg-blue-50',    text: 'text-blue-700',    label: 'Justifié' },
+  SICK:    { bg: 'bg-purple-50',  text: 'text-purple-700',  label: 'Malade'   },
 };
 
 function StatCard({ label, value, icon: Icon, color, sub }: { label: string; value: string | number; icon: any; color: string; sub?: string }) {
@@ -108,7 +108,7 @@ export default function AdminAttendancePage() {
       setAnalytics(analyticsRes.data);
       setClasses(Array.isArray(classesRes.data) ? classesRes.data : []);
     } catch (err: any) {
-      toast.error('Failed to load attendance data');
+      toast.error('Échec du chargement des données de présence');
       console.error(err);
     } finally {
       setLoading(false);
@@ -128,14 +128,14 @@ export default function AdminAttendancePage() {
 
   // ── Delete session ───────────────────────────────────────────────────────────
   const handleDelete = async (id: number) => {
-    if (!confirm('Delete this session? All student records for this session will also be deleted.')) return;
+    if (!confirm('Supprimer cette session? Tous les enregistrements des étudiants pour cette session seront également supprimés.')) return;
     setDeleting(id);
     try {
       await api.delete(`/admin/attendance/${id}`);
       setSessions(prev => prev.filter(s => s.id !== id));
-      toast.success('Session deleted');
+      toast.success('Session supprimée');
     } catch {
-      toast.error('Failed to delete session');
+      toast.error('Échec de la suppression de la session');
     } finally {
       setDeleting(null);
     }
@@ -143,10 +143,10 @@ export default function AdminAttendancePage() {
 
   const exportCSV = () => {
     if (!sessions || sessions.length === 0) {
-      toast.error('No sessions to export');
+      toast.error('Aucune session à exporter');
       return;
     }
-    const headers = ['Session ID', 'Date', 'Class Name', 'Subject', 'Session Time', 'Total Present', 'Total Absent', 'Total Late', 'Attendance Rate (%)'];
+    const headers = ['ID Session', 'Date', 'Classe', 'Matière', 'Heure de la session', 'Total Présents', 'Total Absents', 'Total Retards', 'Taux de Présence (%)'];
     const rows = sessions.map(s => [
       s.id,
       s.date,
@@ -163,11 +163,11 @@ export default function AdminAttendancePage() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `school_attendance_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", `presence_ecole_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    toast.success('CSV exported successfully');
+    toast.success('CSV exporté avec succès');
   };
 
   const exportPDF = () => {
@@ -192,7 +192,7 @@ export default function AdminAttendancePage() {
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
-      doc.text('SCHOOL-WIDE ATTENDANCE REPORT', pageW - 15, 16, { align: 'right' });
+      doc.text('RAPPORT DE PRÉSENCE GLOBAL', pageW - 15, 16, { align: 'right' });
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
       doc.text(`Date: ${new Date().toLocaleDateString()}`, pageW - 15, 22, { align: 'right' });
@@ -205,7 +205,7 @@ export default function AdminAttendancePage() {
       doc.setTextColor(15, 23, 42);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(14);
-      doc.text('Attendance Analytics Summary', 15, 55);
+      doc.text('Résumé des statistiques de présence', 15, 55);
 
       // Info box with stats
       doc.setFillColor(248, 250, 252);
@@ -216,20 +216,20 @@ export default function AdminAttendancePage() {
       doc.setFontSize(8);
       doc.setTextColor(100, 116, 139);
       doc.setFont('helvetica', 'bold');
-      doc.text('OVERALL RATE', 20, 70);
-      doc.text('TOTAL RECORDS', 65, 70);
-      doc.text('PRESENT / ABSENT', 110, 70);
+      doc.text('TAUX GLOBAL', 20, 70);
+      doc.text('TOTAL ENREGISTREMENTS', 65, 70);
+      doc.text('PRÉSENTS / ABSENTS', 120, 70);
 
       doc.setFontSize(12);
       doc.setTextColor(15, 23, 42);
       doc.text(`${analytics.overallRate}%`, 20, 78);
       doc.text(`${analytics.totalRecords}`, 65, 78);
-      doc.text(`${analytics.presentCount} / ${analytics.absentCount}`, 110, 78);
+      doc.text(`${analytics.presentCount} / ${analytics.absentCount}`, 120, 78);
 
       // Class Rates Table
       autoTable(doc, {
         startY: 95,
-        head: [['Class Name', 'Total Attendance Checked', 'Present Count', 'Late Count', 'Attendance Rate']],
+        head: [['Classe', 'Total Vérifié', 'Présents', 'En retard', 'Taux de présence']],
         body: analytics.byClass.map(c => [
           c.name,
           c.total,
@@ -248,13 +248,13 @@ export default function AdminAttendancePage() {
       doc.setFontSize(7);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(100, 116, 139);
-      doc.text(`${SCHOOL_CONFIG.name} — Confidential Internal Document`, pageW / 2, pageH - 5, { align: 'center' });
+      doc.text(`${SCHOOL_CONFIG.name} — Document Interne Confidentiel`, pageW / 2, pageH - 5, { align: 'center' });
 
-      doc.save(`school-attendance-report-${new Date().toISOString().split('T')[0]}.pdf`);
-      toast.success('Attendance PDF exported successfully');
+      doc.save(`rapport-presence-ecole-${new Date().toISOString().split('T')[0]}.pdf`);
+      toast.success('Rapport de présence PDF exporté avec succès');
     } catch (e) {
       console.error(e);
-      toast.error('Failed to export PDF');
+      toast.error("Échec de l'exportation PDF");
     }
   };
 
@@ -262,16 +262,16 @@ export default function AdminAttendancePage() {
     return (
       <div className="h-[80vh] flex flex-col items-center justify-center gap-4">
         <Loader2 size={40} className="animate-spin text-primary" />
-        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Loading Attendance Data...</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Chargement des données de présence...</p>
       </div>
     );
   }
 
   const attendanceRatioData = analytics ? [
-    { name: 'Present', value: analytics.presentCount, color: '#10b981' },
-    { name: 'Absent', value: analytics.absentCount, color: '#f43f5e' },
-    { name: 'Late', value: analytics.lateCount, color: '#f59e0b' },
-    { name: 'Excused', value: analytics.excusedCount, color: '#3b82f6' },
+    { name: 'Présents', value: analytics.presentCount, color: '#10b981' },
+    { name: 'Absents', value: analytics.absentCount, color: '#f43f5e' },
+    { name: 'En retard', value: analytics.lateCount, color: '#f59e0b' },
+    { name: 'Justifiés', value: analytics.excusedCount, color: '#3b82f6' },
   ] : [];
 
   return (
@@ -285,10 +285,10 @@ export default function AdminAttendancePage() {
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Admin</span>
           </div>
           <h1 className="text-[clamp(1.4rem,3vw,2.5rem)] font-black tracking-tighter text-slate-900 italic">
-            Attendance <span className="text-primary">Control.</span>
+            Présence <span className="text-primary">Control.</span>
           </h1>
           <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-0.5">
-            School-wide attendance visibility &amp; management
+            Visibilité et gestion de la présence à l'échelle de l'école
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -297,21 +297,21 @@ export default function AdminAttendancePage() {
             className="h-11 rounded-2xl gap-2 font-bold text-sm border-slate-200 hover:border-primary cursor-pointer"
             onClick={exportCSV}
           >
-            <Download size={14} /> Export CSV
+            <Download size={14} /> Exporter CSV
           </Button>
           <Button
             variant="outline"
             className="h-11 rounded-2xl gap-2 font-bold text-sm border-slate-200 hover:border-primary cursor-pointer"
             onClick={exportPDF}
           >
-            <Download size={14} /> Export PDF
+            <Download size={14} /> Exporter PDF
           </Button>
           <Button
             variant="outline"
             className="h-11 rounded-2xl gap-2 font-bold text-sm border-slate-200 hover:border-primary cursor-pointer"
             onClick={fetchData}
           >
-            <RefreshCw size={14} /> Refresh
+            <RefreshCw size={14} /> Actualiser
           </Button>
         </div>
       </div>
@@ -332,7 +332,7 @@ export default function AdminAttendancePage() {
             tab === 'sessions' ? 'bg-primary text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'
           }`}
         >
-          <ClipboardList size={13} /> All Sessions
+          <ClipboardList size={13} /> Toutes les sessions
         </Button>
       </div>
 
@@ -344,20 +344,20 @@ export default function AdminAttendancePage() {
             <CardContent className="p-8 relative">
               <div className="flex justify-between items-start mb-6">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">School-Wide Attendance Rate</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Taux de présence global</p>
                   <h2 className={`text-7xl font-black italic tracking-tighter mt-1 ${analytics.overallRate >= 75 ? 'text-white' : 'text-rose-400'}`}>
                     {analytics.overallRate}%
                   </h2>
                 </div>
                 <Badge className="bg-primary/20 text-blue-400 border-none font-black px-4 py-1 uppercase text-[9px]">
-                  {analytics.totalRecords} Total Records
+                  {analytics.totalRecords} Données totales
                 </Badge>
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
-                  <span className="text-slate-500">Overall Attendance</span>
+                  <span className="text-slate-500">Présence globale</span>
                   <span className={analytics.overallRate >= 75 ? 'text-emerald-400' : 'text-rose-400'}>
-                    {analytics.presentCount + analytics.lateCount} / {analytics.totalRecords} Present
+                    {analytics.presentCount + analytics.lateCount} / {analytics.totalRecords} Présents
                   </span>
                 </div>
                 <Progress value={analytics.overallRate} className="h-2.5 bg-white/10" />
@@ -368,18 +368,18 @@ export default function AdminAttendancePage() {
 
           {/* Stat cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard label="Present"       value={analytics.presentCount}  icon={CheckCircle2} color="border-emerald-100 hover:border-emerald-300" />
-            <StatCard label="Absent"        value={analytics.absentCount}   icon={XCircle}      color="border-rose-100 hover:border-rose-300"     />
-            <StatCard label="Late"          value={analytics.lateCount}     icon={Clock}        color="border-amber-100 hover:border-amber-300"    />
-            <StatCard label="Excused/Sick"  value={analytics.excusedCount}  icon={ShieldAlert}  color="border-blue-100 hover:border-blue-300"     />
+            <StatCard label="Présents"       value={analytics.presentCount}  icon={CheckCircle2} color="border-emerald-100 hover:border-emerald-300" />
+            <StatCard label="Absents"        value={analytics.absentCount}   icon={XCircle}      color="border-rose-100 hover:border-rose-300"     />
+            <StatCard label="En retard"      value={analytics.lateCount}     icon={Clock}        color="border-amber-100 hover:border-amber-300"    />
+            <StatCard label="Excusés/Malades" value={analytics.excusedCount}  icon={ShieldAlert}  color="border-blue-100 hover:border-blue-300"     />
           </div>
 
           {/* Recharts Analytics Visualization */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
               <div className="mb-4">
-                <h3 className="text-xs font-black uppercase tracking-widest text-slate-900">Attendance Ratio</h3>
-                <p className="text-[10px] font-bold text-slate-400">Status breakdown of all checked records</p>
+                <h3 className="text-xs font-black uppercase tracking-widest text-slate-900">Répartition des présences</h3>
+                <p className="text-[10px] font-bold text-slate-400">Détail du statut de tous les enregistrements de présence</p>
               </div>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
@@ -397,7 +397,7 @@ export default function AdminAttendancePage() {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value) => [value, 'Records']} />
+                    <Tooltip formatter={(value) => [value, 'Enregistrements']} />
                     <Legend verticalAlign="bottom" height={36} />
                   </RechartsPieChart>
                 </ResponsiveContainer>
@@ -406,8 +406,8 @@ export default function AdminAttendancePage() {
 
             <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
               <div className="mb-4">
-                <h3 className="text-xs font-black uppercase tracking-widest text-slate-900">Class Rate Comparison</h3>
-                <p className="text-[10px] font-bold text-slate-400">Compare average attendance rate across active classes</p>
+                <h3 className="text-xs font-black uppercase tracking-widest text-slate-900">Comparaison par classe</h3>
+                <p className="text-[10px] font-bold text-slate-400">Taux moyen de présence pour chaque classe active</p>
               </div>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
@@ -415,7 +415,7 @@ export default function AdminAttendancePage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                     <XAxis dataKey="name" tick={{ fontSize: 9, fontWeight: 'bold', fill: '#64748b' }} />
                     <YAxis tick={{ fontSize: 9, fontWeight: 'bold', fill: '#64748b' }} unit="%" />
-                    <Tooltip formatter={(value) => [`${value}%`, 'Attendance Rate']} />
+                    <Tooltip formatter={(value) => [`${value}%`, 'Taux de présence']} />
                     <Bar dataKey="rate" fill="#3b82f6" radius={[6, 6, 0, 0]}>
                       {analytics.byClass.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.rate >= 75 ? '#10b981' : '#f43f5e'} />
@@ -431,17 +431,17 @@ export default function AdminAttendancePage() {
           {analytics.byClass.length > 0 && (
             <Card className="border border-slate-100 rounded-3xl overflow-hidden shadow-sm">
               <CardHeader className="border-b border-slate-50 px-8 py-5">
-                <p className="font-black text-xs uppercase tracking-widest text-slate-900">Attendance by Class</p>
+                <p className="font-black text-xs uppercase tracking-widest text-slate-900">Présence par classe</p>
               </CardHeader>
               <CardContent className="p-0">
                 <Table>
                   <TableHeader className="bg-slate-50/80">
                     <TableRow className="hover:bg-transparent">
-                      <TableHead className="pl-8 font-black text-[9px] uppercase tracking-widest text-slate-400">Class</TableHead>
+                      <TableHead className="pl-8 font-black text-[9px] uppercase tracking-widest text-slate-400">Classe</TableHead>
                       <TableHead className="text-center font-black text-[9px] uppercase tracking-widest text-slate-400">Total</TableHead>
-                      <TableHead className="text-center font-black text-[9px] uppercase tracking-widest text-slate-400">Present</TableHead>
-                      <TableHead className="text-center font-black text-[9px] uppercase tracking-widest text-slate-400">Late</TableHead>
-                      <TableHead className="pr-8 font-black text-[9px] uppercase tracking-widest text-slate-400">Rate</TableHead>
+                      <TableHead className="text-center font-black text-[9px] uppercase tracking-widest text-slate-400">Présents</TableHead>
+                      <TableHead className="text-center font-black text-[9px] uppercase tracking-widest text-slate-400">Retards</TableHead>
+                      <TableHead className="pr-8 font-black text-[9px] uppercase tracking-widest text-slate-400">Taux</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -481,10 +481,10 @@ export default function AdminAttendancePage() {
             {/* Class filter */}
             <Select value={classFilter} onValueChange={setClassFilter}>
               <SelectTrigger className="w-[200px] h-11 rounded-2xl bg-white border-slate-100 font-bold shadow-sm hover:border-primary transition-colors">
-                <SelectValue placeholder="Filter by Class" />
+                <SelectValue placeholder="Filtrer par classe" />
               </SelectTrigger>
               <SelectContent className="rounded-2xl border-none shadow-2xl">
-                <SelectItem value="all" className="font-bold">All Classes</SelectItem>
+                <SelectItem value="all" className="font-bold">Toutes les classes</SelectItem>
                 {classes.map((c: any) => (
                   <SelectItem key={c.id} value={String(c.id)} className="font-bold">{c.name}</SelectItem>
                 ))}
@@ -499,13 +499,13 @@ export default function AdminAttendancePage() {
                 value={dateFilter}
                 onChange={e => setDateFilter(e.target.value)}
                 className="text-sm font-bold text-slate-700 bg-transparent outline-none w-[140px]"
-                placeholder="Filter by date"
+                placeholder="Filtrer par date"
               />
               {dateFilter && (
                 <button
                   onClick={() => setDateFilter('')}
                   className="text-slate-300 hover:text-rose-400 transition-colors ml-1 cursor-pointer"
-                  title="Clear date filter"
+                  title="Supprimer le filtre date"
                 >
                   <X size={13} />
                 </button>
@@ -520,21 +520,21 @@ export default function AdminAttendancePage() {
                 className="h-11 rounded-2xl font-bold text-[11px] text-slate-400 hover:text-rose-500 hover:bg-rose-50 px-4 cursor-pointer"
                 onClick={() => { setClassFilter('all'); setDateFilter(''); }}
               >
-                <X size={12} className="mr-1" /> Clear Filters
+                <X size={12} className="mr-1" /> Supprimer les filtres
               </Button>
             )}
 
             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-auto">
-              {filtered.length} session{filtered.length !== 1 ? 's' : ''} found
+              {filtered.length} session{filtered.length !== 1 ? 's' : ''} trouvées
             </p>
           </div>
 
-          {/* Sessions scrollable list — shows ~5 rows, rest scrollable */}
+          {/* Sessions list */}
           {filtered.length === 0 ? (
             <div className="h-64 flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-white">
               <Users size={40} className="text-slate-200 mb-3" />
               <p className="text-slate-400 font-black text-xs uppercase tracking-widest">
-                {dateFilter || classFilter !== 'all' ? 'No sessions match your filters.' : 'No sessions found.'}
+                {dateFilter || classFilter !== 'all' ? 'Aucune session ne correspond à vos filtres.' : 'Aucune session trouvée.'}
               </p>
             </div>
           ) : (
@@ -557,7 +557,7 @@ export default function AdminAttendancePage() {
                         </div>
                         <div>
                           <p className="font-black text-slate-900 text-sm">
-                            {new Date(session.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                            {new Date(session.date).toLocaleDateString('fr-FR', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
                           </p>
                           <div className="flex flex-wrap gap-2 mt-1">
                             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{session.className}</span>
@@ -573,7 +573,7 @@ export default function AdminAttendancePage() {
                             {session.sessionTime && (
                               <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 flex items-center gap-1">
                                 <Clock size={8} />
-                                {new Date(`2000-01-01T${session.sessionTime}`).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                                {new Date(`2000-01-01T${session.sessionTime}`).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                               </span>
                             )}
                           </div>
@@ -583,14 +583,14 @@ export default function AdminAttendancePage() {
                       <div className="flex items-center gap-6 flex-wrap">
                         <div className="flex gap-4">
                           <span className="text-[10px] font-black text-slate-500 flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-emerald-400" />{session.presentCount} Present
+                            <span className="w-2 h-2 rounded-full bg-emerald-400" />{session.presentCount} Présents
                           </span>
                           <span className="text-[10px] font-black text-slate-500 flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-rose-400" />{session.absentCount} Absent
+                            <span className="w-2 h-2 rounded-full bg-rose-400" />{session.absentCount} Absents
                           </span>
                           {session.lateCount > 0 && (
                             <span className="text-[10px] font-black text-slate-500 flex items-center gap-1.5">
-                              <span className="w-2 h-2 rounded-full bg-amber-400" />{session.lateCount} Late
+                              <span className="w-2 h-2 rounded-full bg-amber-400" />{session.lateCount} Retards
                             </span>
                           )}
                         </div>
@@ -615,9 +615,9 @@ export default function AdminAttendancePage() {
                         <Table>
                           <TableHeader className="bg-slate-50">
                             <TableRow className="hover:bg-transparent">
-                              <TableHead className="pl-8 font-black text-[9px] uppercase tracking-widest text-slate-400">Student</TableHead>
+                              <TableHead className="pl-8 font-black text-[9px] uppercase tracking-widest text-slate-400">Étudiant</TableHead>
                               <TableHead className="font-black text-[9px] uppercase tracking-widest text-slate-400">ID</TableHead>
-                              <TableHead className="pr-8 text-right font-black text-[9px] uppercase tracking-widest text-slate-400">Status</TableHead>
+                              <TableHead className="pr-8 text-right font-black text-[9px] uppercase tracking-widest text-slate-400">Statut</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -626,7 +626,7 @@ export default function AdminAttendancePage() {
                               return (
                                 <TableRow key={i} className="border-slate-50 hover:bg-white/60">
                                   <TableCell className="pl-8 py-3 font-bold text-slate-800 text-sm capitalize">
-                                    {rec.studentName || 'Unknown'}
+                                    {rec.studentName || 'Inconnu'}
                                   </TableCell>
                                   <TableCell className="font-mono text-[10px] text-slate-400">
                                     {rec.userId || rec.studentId}

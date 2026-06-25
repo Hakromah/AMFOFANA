@@ -43,7 +43,7 @@ export default function NotificationsManagement() {
     body: '',
     type: 'ANNOUNCEMENT',
     priority: 'HIGH',
-    role: '', // empty means all users
+    role: 'ALL', // ALL means all users
   });
 
   const fetchNotifications = async () => {
@@ -105,7 +105,7 @@ export default function NotificationsManagement() {
     try {
       const payload = {
         ...broadcastData,
-        role: broadcastData.role || undefined
+        role: broadcastData.role === 'ALL' ? undefined : (broadcastData.role || undefined)
       };
 
       const res = await api.post('/admin/notifications/broadcast', payload);
@@ -146,7 +146,7 @@ export default function NotificationsManagement() {
       body: '',
       type: 'ANNOUNCEMENT',
       priority: 'HIGH',
-      role: '',
+      role: 'ALL',
     });
   };
 
@@ -393,7 +393,7 @@ export default function NotificationsManagement() {
                   <SelectValue placeholder="Broadcast to all users" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Portal Users (Broadcast)</SelectItem>
+                  <SelectItem value="ALL">All Portal Users (Broadcast)</SelectItem>
                   <SelectItem value="STUDENT">Students Only</SelectItem>
                   <SelectItem value="TEACHER">Teachers Only</SelectItem>
                   <SelectItem value="PARENT">Parents Only</SelectItem>
