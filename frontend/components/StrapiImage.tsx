@@ -2,7 +2,7 @@
 import NextImage, { type ImageProps } from "next/image";
 
 const STRAPI_URL =
-   process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1338";
+   process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 
 /**
  * Drop-in replacement for next/image that:
@@ -27,10 +27,10 @@ export default function StrapiImage({ src, ...props }: ImageProps) {
       );
    }
 
-   // const isStrapiSrc = srcStr.startsWith(STRAPI_URL) || srcStr.includes("localhost:1338");
+   // const isStrapiSrc = srcStr.startsWith(STRAPI_URL) || srcStr.includes("localhost:1337");
    const isStrapiSrc =
       srcStr.includes("strapiapp.com") ||
-      srcStr.includes(":1338") ||
+      srcStr.includes(":1337") ||
       srcStr.includes(STRAPI_URL) ||
       srcStr.startsWith("/"); // relative paths
 

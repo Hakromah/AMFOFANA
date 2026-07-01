@@ -200,6 +200,8 @@ export default {
             'api::school-calendar.school-calendar.findOne',
             
             // Custom public landing page & donation features
+            'api::login-page.login-page.find',
+            'api::login-page.login-page.findOne',
             'api::donation.donation.find',
             'api::donation.donation.findOne',
             'api::map-setting.map-setting.find',

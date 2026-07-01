@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -34,6 +34,33 @@ const formSchema = z.object({
 export default function LoginPage() {
    const router = useRouter();
    const [isLoading, setIsLoading] = useState(false);
+   const [loginPageData, setLoginPageData] = useState<{
+      logo: string;
+      backgroundImage: string;
+      title: string;
+      description: string;
+   } | null>(null);
+
+   useEffect(() => {
+      api.get('/login-page?populate=*')
+         .then((res) => {
+            const d = res.data?.data;
+            if (d) {
+               const strapiBaseUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'https://api.hassanskdev.online';
+               const logoUrl = d.logo?.url ? `${strapiBaseUrl}${d.logo.url}` : '';
+               const bgUrl = d.background_image?.url ? `${strapiBaseUrl}${d.background_image.url}` : '';
+               setLoginPageData({
+                  logo: logoUrl,
+                  backgroundImage: bgUrl,
+                  title: d.title || '',
+                  description: d.description || '',
+               });
+            }
+         })
+         .catch((err) => {
+            console.error('Error fetching login page data:', err);
+         });
+   }, []);
 
    const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
@@ -121,7 +148,7 @@ export default function LoginPage() {
          {/* Full Screen Background Image */}
          <div className="absolute inset-0 z-0">
             <Image
-               src="/students.webp"
+               src={loginPageData?.backgroundImage || "/students.webp"}
                alt="Background"
                fill
                className="object-cover"
@@ -133,20 +160,20 @@ export default function LoginPage() {
          </div>
 
          {/* Centered Glassmorphism Card */}
-         <motion.div 
+         <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: "easeOut" }}
             className="w-full max-w-lg z-10"
          >
             <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-8 sm:p-12 rounded-[2.5rem] shadow-2xl">
-               
+
                <div className="text-center mb-10">
                   <div className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center overflow-hidden border border-white/30 bg-white/5 shadow-inner">
-                     <Image src="/logo/2cslogo.jpeg" alt="Logo" width={80} height={80} className="object-cover" />
+                     <Image unoptimized src={loginPageData?.logo || "/logo/fofana.png"} alt="Logo" width={80} height={80} className="object-cover" />
                   </div>
-                  <h2 className="text-3xl font-bold text-white tracking-tight">Bienvenue</h2>
-                  <p className="text-sm text-gray-300 mt-3 font-medium">Connectez-vous pour accéder à votre espace</p>
+                  <h2 className="text-3xl font-bold text-white tracking-tight">{loginPageData?.title || "Bienvenue"}</h2>
+                  <p className="text-sm text-gray-300 mt-3 font-medium">{loginPageData?.description || "Connectez-vous pour accéder à votre espace"}</p>
                </div>
 
                <Form {...form}>
@@ -158,10 +185,10 @@ export default function LoginPage() {
                            <FormItem>
                               <FormLabel className="text-gray-200 font-medium ml-1">Adresse Email</FormLabel>
                               <FormControl>
-                                 <Input 
-                                    className="py-6 px-4 bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:bg-white/20 focus:border-white/40 focus:ring-2 focus:ring-white/20 rounded-xl transition-all" 
-                                    placeholder="votre.email@example.com" 
-                                    {...field} 
+                                 <Input
+                                    className="py-6 px-4 bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:bg-white/20 focus:border-white/40 focus:ring-2 focus:ring-white/20 rounded-xl transition-all"
+                                    placeholder="votre.email@example.com"
+                                    {...field}
                                  />
                               </FormControl>
                               <FormMessage className="text-red-300" />
@@ -177,21 +204,21 @@ export default function LoginPage() {
                                  <FormLabel className="text-gray-200 font-medium">Mot de passe</FormLabel>
                               </div>
                               <FormControl>
-                                 <Input 
-                                    type="password" 
-                                    className="py-6 px-4 bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:bg-white/20 focus:border-white/40 focus:ring-2 focus:ring-white/20 rounded-xl transition-all" 
-                                    placeholder="••••••••" 
-                                    {...field} 
+                                 <Input
+                                    type="password"
+                                    className="py-6 px-4 bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:bg-white/20 focus:border-white/40 focus:ring-2 focus:ring-white/20 rounded-xl transition-all"
+                                    placeholder="••••••••"
+                                    {...field}
                                  />
                               </FormControl>
                               <FormMessage className="text-red-300" />
                            </FormItem>
                         )}
                      />
-                     
-                     <Button 
-                        type="submit" 
-                        className="w-full py-6 rounded-xl bg-[#394995] hover:bg-[#356ad0] text-white font-bold text-base mt-8 transition-all shadow-[0_0_20px_rgba(40,87,174,0.4)] hover:shadow-[0_0_30px_rgba(40,87,174,0.6)] cursor-pointer" 
+
+                     <Button
+                        type="submit"
+                        className="w-full py-6 rounded-xl bg-[#394995] hover:bg-[#356ad0] text-white font-bold text-base mt-8 transition-all shadow-[0_0_20px_rgba(40,87,174,0.4)] hover:shadow-[0_0_30px_rgba(40,87,174,0.6)] cursor-pointer"
                         disabled={isLoading}
                      >
                         {isLoading ? (
