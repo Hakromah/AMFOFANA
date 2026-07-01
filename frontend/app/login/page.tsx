@@ -21,7 +21,7 @@ import api from '@/lib/api';
 import { getUserRole } from '@/lib/auth';
 import { AxiosError } from 'axios';
 import Cookies from 'js-cookie';
-import Image from 'next/image';
+import StrapiImage from '@/components/StrapiImage';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -147,13 +147,12 @@ export default function LoginPage() {
       <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
          {/* Full Screen Background Image */}
          <div className="absolute inset-0 z-0">
-            <Image
+            <StrapiImage
                src={loginPageData?.backgroundImage || "/students.webp"}
                alt="Background"
                fill
                className="object-cover"
                priority
-               unoptimized
             />
             {/* Dark Overlay for better contrast */}
             <div className="absolute inset-0 bg-black/0 "></div>
@@ -170,7 +169,7 @@ export default function LoginPage() {
 
                <div className="text-center mb-10">
                   <div className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center overflow-hidden border border-white/30 bg-white/5 shadow-inner">
-                     <Image unoptimized src={loginPageData?.logo || "/logo/fofana.png"} alt="Logo" width={80} height={80} className="object-cover" />
+                     <StrapiImage src={loginPageData?.logo || "/logo/fofana.png"} alt="Logo" width={80} height={80} className="object-cover" />
                   </div>
                   <h2 className="text-3xl font-bold text-white tracking-tight">{loginPageData?.title || "Bienvenue"}</h2>
                   <p className="text-sm text-gray-300 mt-3 font-medium">{loginPageData?.description || "Connectez-vous pour accéder à votre espace"}</p>

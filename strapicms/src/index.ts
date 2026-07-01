@@ -333,6 +333,23 @@ export default {
         strapi.log.error('Migration failed:', migrationError);
       }
 
+      // Automatically bootstrap a default login-page entry if it doesn't exist
+      try {
+        const loginPageCount = await strapi.db.query('api::login-page.login-page').count();
+        if (loginPageCount === 0) {
+          await strapi.db.query('api::login-page.login-page').create({
+            data: {
+              title: 'Welcome To Login Portal',
+              description: 'Connect to your dashboard',
+              publishedAt: new Date(),
+            }
+          });
+          strapi.log.info('[Bootstrap] Created default login page entry.');
+        }
+      } catch (e: any) {
+        strapi.log.error(`[Bootstrap] Error creating default login page: ${e.message}`);
+      }
+
       // 2. Attach a permanent database lifecycle hook so future dashboard users never get locked out again
       strapi.db.lifecycles.subscribe({
         models: ['plugin::users-permissions.user'],
