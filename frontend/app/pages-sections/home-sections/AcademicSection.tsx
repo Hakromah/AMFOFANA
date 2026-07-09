@@ -247,9 +247,9 @@ export default function AcademicSection({ programs: programsProp }: AcademicSect
                                             {program.description}
                                         </p>
 
-                                        <div className="mt-auto">#394995
+                                        <div className="mt-auto">
                                             <Button className="w-full rounded-full font-bold bg-[#2857AE]/10 lg:hover:bg-primary lg:hover:text-white text-primary text-[clamp(16px,1.5vw,18px)] italic transition-all duration-500 border border-primary">
-                                                Explorer le programme
+                                                Explore the programe
                                             </Button>
                                         </div>
                                     </div>

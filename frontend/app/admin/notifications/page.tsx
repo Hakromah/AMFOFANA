@@ -68,7 +68,11 @@ export default function NotificationsManagement() {
   useEffect(() => {
     const init = async () => {
       setLoading(true);
-      await Promise.all([fetchNotifications(), fetchUsers()]);
+      await Promise.all([
+        fetchNotifications(),
+        fetchUsers(),
+        api.post('/notifications/mark-all-read').catch(() => {})
+      ]);
       setLoading(false);
     };
     init();
