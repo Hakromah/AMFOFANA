@@ -7,6 +7,7 @@ import {
   Search, Plus, Check, X, FileText, Download, Edit, Trash2,
   DollarSign, Clock, UserCircle2, ChevronDown
 } from 'lucide-react';
+import { CIRCULAR_LOGO, getCircularLogo } from '@/lib/logo-base64';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -20,7 +21,7 @@ import autoTable from 'jspdf-autotable';
 import QRCode from 'qrcode';
 
 // ─── Searchable Student Combobox ───────────────────────────────────────────────
-function StudentCombobox({ students, value, onChange, placeholder = 'Nom ou ID de l\'étudiant...' }: {
+function StudentCombobox({ students, value, onChange, placeholder = 'Student Name or ID...' }: {
   students: any[];
   value: string;
   onChange: (v: string) => void;
@@ -68,7 +69,7 @@ function StudentCombobox({ students, value, onChange, placeholder = 'Nom ou ID d
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
               <input
                 autoFocus
-                placeholder="Par nom ou ID de l'étudiant..."
+                placeholder="Search by student name or ID..."
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 className="w-full pl-8 pr-3 h-8 text-xs rounded-xl bg-slate-50 border border-slate-100 outline-none focus:ring-2 focus:ring-blue-500"
@@ -77,7 +78,7 @@ function StudentCombobox({ students, value, onChange, placeholder = 'Nom ou ID d
           </div>
           <div className="max-h-[220px] overflow-y-auto">
             {filtered.length === 0 ? (
-              <p className="text-center text-xs text-slate-400 py-4">Aucun étudiant trouvé</p>
+              <p className="text-center text-xs text-slate-400 py-4">No students found</p>
             ) : filtered.map(s => (
               <button
                 key={s.id}
@@ -179,11 +180,11 @@ export default function StudentFinance() {
   const [editingInvoice, setEditingInvoice] = useState<FlatInvoice | null>(null);
   const [selectedStudentId, setSelectedStudentId] = useState<string>('');
   const [invoiceClassId, setInvoiceClassId] = useState<string>('NONE');
-  const [invoiceMonth, setInvoiceMonth] = useState<string>('Juin');
+  const [invoiceMonth, setInvoiceMonth] = useState<string>('June');
   const [invoiceYear, setInvoiceYear] = useState<number>(new Date().getFullYear());
   const [invoiceNotes, setInvoiceNotes] = useState<string>('');
   const [chargeItems, setChargeItems] = useState<any[]>([
-    { description: 'Scolarité', amount: 500000, category: 'TUITION' }
+    { description: 'Tuition', amount: 500000, category: 'TUITION' }
   ]);
 
   // Payment Form State (Receive & Edit)
@@ -243,7 +244,7 @@ export default function StudentFinance() {
           setChargeItems(prev => {
             const filtered = prev.filter(item => item.category !== 'TRANSPORT');
             return [...filtered, {
-              description: `Frais de transport (${activeAssignment.routeName})`,
+              description: `Transport fee (${activeAssignment.routeName})`,
               amount: activeAssignment.transportFee,
               category: 'TRANSPORT'
             }];
@@ -280,16 +281,16 @@ export default function StudentFinance() {
   // ─── Invoice CRUD ──────────────────────────────────────────────────────────
   const handleCreateOrEditInvoice = async () => {
     if (!selectedStudentId) {
-      toast.error('Veuillez sélectionner un étudiant');
+      toast.error('Please select a student');
       return;
     }
     const subtotal = chargeItems.reduce((sum, item) => sum + Number(item.amount || 0), 0);
     if (subtotal <= 0) {
-      toast.error('Les montants de la ventilation doivent être supérieurs à 0');
+      toast.error('Invoice breakdown amounts must be greater than 0');
       return;
     }
 
-    const tid = toast.loading(editingInvoice ? 'Enregistrer les modifications...' : 'Générer la facture...');
+    const tid = toast.loading(editingInvoice ? 'Saving changes...' : 'Generating invoice...');
     try {
       if (editingInvoice) {
         await api.put(`/school-finance/invoices/${editingInvoice.id}/update`, {
@@ -299,7 +300,7 @@ export default function StudentFinance() {
           notes: invoiceNotes,
           items: chargeItems,
         });
-        toast.success('Facture mise à jour avec succès', { id: tid });
+        toast.success('Invoice updated successfully', { id: tid });
       } else {
         await api.post('/school-finance/invoices', {
           studentId: Number(selectedStudentId),
@@ -309,18 +310,18 @@ export default function StudentFinance() {
           items: chargeItems,
           dueDate: new Date(new Date().setDate(new Date().getDate() + 14)).toISOString().split('T')[0]
         });
-        toast.success('Facture préparée avec succès', { id: tid });
+        toast.success('Invoice created successfully', { id: tid });
       }
 
       setIsInvoiceOpen(false);
       setEditingInvoice(null);
       setSelectedStudentId('');
       setInvoiceNotes('');
-      setChargeItems([{ description: 'Frais de scolarité', amount: 500000, category: 'SCOLARITE' }]);
+      setChargeItems([{ description: 'Tuition fee', amount: 500000, category: 'TUITION' }]);
       setSelectedInvoiceIds([]);
       fetchAllData();
     } catch (e: any) {
-      toast.error(e.response?.data?.error?.message || 'La création de la facture a échoué', { id: tid });
+      toast.error(e.response?.data?.error?.message || 'Invoice creation failed', { id: tid });
     }
   };
 
@@ -331,51 +332,51 @@ export default function StudentFinance() {
     setInvoiceMonth(inv.month);
     setInvoiceYear(Number(inv.year));
     setInvoiceNotes(inv.notes || '');
-    setChargeItems(inv.items?.length ? inv.items : [{ description: 'Frais de scolarité', amount: 500000, category: 'SCOLARITE' }]);
+    setChargeItems(inv.items?.length ? inv.items : [{ description: 'Tuition fee', amount: 500000, category: 'TUITION' }]);
     setIsInvoiceOpen(true);
   };
 
   const handleDeleteInvoice = async (inv: FlatInvoice) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette facture ?')) return;
+    if (!confirm('Are you sure you want to delete this invoice?')) return;
     const tid = toast.loading('Deleting invoice...');
     try {
       await api.delete(`/school-finance/invoices/${inv.id}`);
-      toast.success('Facture supprimée avec succès', { id: tid });
+      toast.success('Invoice deleted successfully', { id: tid });
       setSelectedInvoiceIds(selectedInvoiceIds.filter(x => x !== inv.id));
       setInvoices(prev => prev.filter(i => i.id !== inv.id));
     } catch (e) {
-      toast.error('La suppression de la facture a échoué', { id: tid });
+      toast.error('Failed to delete invoice', { id: tid });
     }
   };
 
   const handleSubmitSelectedInvoices = async () => {
-    const tid = toast.loading(`Soumission de ${selectedInvoiceIds.length} factures...`);
+    const tid = toast.loading(`Submitting ${selectedInvoiceIds.length} invoices...`);
     try {
       await Promise.all(selectedInvoiceIds.map(id => {
         return api.put(`/school-finance/invoices/${id}/update`, { status: 'SUBMITTED' });
       }));
-      toast.success('Factures soumises avec succès', { id: tid });
+      toast.success('Invoices submitted successfully', { id: tid });
       setSelectedInvoiceIds([]);
       fetchAllData();
     } catch (e) {
-      toast.error('La soumission des factures a échoué', { id: tid });
+      toast.error('Failed to submit invoices', { id: tid });
     }
   };
 
   // ─── Payment CRUD ──────────────────────────────────────────────────────────
   const handleCreateOrEditPayment = async () => {
     if (!selectedInvoiceId) {
-      toast.error('Veuillez sélectionner une facture');
+      toast.error('Please select an invoice');
       return;
     }
     if (Number(paymentAmount) <= 0) {
-      toast.error('Veuillez spécifier un montant de paiement positif');
+      toast.error('Please specify a positive payment amount');
       return;
     }
 
     const inv = invoices.find(i => String(i.id) === selectedInvoiceId);
 
-    const tid = toast.loading(editingPayment ? 'Enregistrer les modifications...' : 'Enregistrement du paiement...');
+    const tid = toast.loading(editingPayment ? 'Saving changes...' : 'Recording payment...');
     try {
       if (editingPayment) {
         await api.put(`/school-finance/payments/${editingPayment.id}/update`, {
@@ -386,7 +387,7 @@ export default function StudentFinance() {
           paymentCategory,
           notes: paymentNotes
         });
-        toast.success('Paiement mis à jour avec succès', { id: tid });
+        toast.success('Payment updated successfully', { id: tid });
       } else {
         await api.post('/school-finance/payments', {
           invoiceId: Number(selectedInvoiceId),
@@ -396,7 +397,7 @@ export default function StudentFinance() {
           paymentCategory,
           notes: paymentNotes
         });
-        toast.success('Paiement enregistré sous DRAFT', { id: tid });
+        toast.success('Payment recorded as DRAFT', { id: tid });
       }
 
       setIsPaymentOpen(false);
@@ -407,7 +408,7 @@ export default function StudentFinance() {
       setSelectedPaymentIds([]);
       fetchAllData();
     } catch (e: any) {
-      toast.error('Échec de l\'enregistrement du paiement', { id: tid });
+      toast.error('Failed to record payment', { id: tid });
     }
   };
 
@@ -422,29 +423,29 @@ export default function StudentFinance() {
   };
 
   const handleDeletePayment = async (pay: FlatPayment) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce paiement ?')) return;
-    const tid = toast.loading('Suppression du paiement...');
+    if (!confirm('Are you sure you want to delete this payment?')) return;
+    const tid = toast.loading('Deleting payment...');
     try {
       await api.delete(`/school-finance/payments/${pay.id}`);
-      toast.success('Paiement supprimé avec succès', { id: tid });
+      toast.success('Payment deleted successfully', { id: tid });
       setSelectedPaymentIds(selectedPaymentIds.filter(x => x !== pay.id));
       setPayments(prev => prev.filter(p => p.id !== pay.id));
     } catch (e) {
-      toast.error('Échec de la suppression du paiement', { id: tid });
+      toast.error('Failed to delete payment', { id: tid });
     }
   };
 
   const handleSubmitSelectedPayments = async () => {
-    const tid = toast.loading(`Soumission de ${selectedPaymentIds.length} paiements...`);
+    const tid = toast.loading(`Submitting ${selectedPaymentIds.length} payments...`);
     try {
       await Promise.all(selectedPaymentIds.map(id => {
         return api.put(`/school-finance/payments/${id}/update`, { status: 'SUBMITTED' });
       }));
-      toast.success('Paiements soumis avec succès', { id: tid });
+      toast.success('Payments submitted successfully', { id: tid });
       setSelectedPaymentIds([]);
       fetchAllData();
     } catch (e) {
-      toast.error('Échec de la soumission des paiements', { id: tid });
+      toast.error('Failed to submit payments', { id: tid });
     }
   };
 
@@ -453,13 +454,13 @@ export default function StudentFinance() {
     const endpoint = type === 'INVOICE'
       ? `/school-finance/invoices/${id}/approve`
       : `/school-finance/payments/${id}/approve`;
-    const tid = toast.loading(`Approbation de ${type.toLowerCase()}...`);
+    const tid = toast.loading(`Approving ${type.toLowerCase()}...`);
     try {
       await api.put(endpoint);
-      toast.success(`${type} approuvé avec succès`, { id: tid });
+      toast.success(`${type} approved successfully`, { id: tid });
       fetchAllData();
     } catch (e: any) {
-      toast.error(e.response?.data?.error?.message || 'Échec de l\'approbation', { id: tid });
+      toast.error(e.response?.data?.error?.message || 'Approval failed', { id: tid });
     }
   };
 
@@ -478,59 +479,59 @@ export default function StudentFinance() {
     const endpoint = rejectType === 'INVOICE'
       ? `/school-finance/invoices/${selectedRecordId}/reject`
       : `/school-finance/payments/${selectedRecordId}/reject`;
-    const tid = toast.loading('Enregistrement du rejet...');
+    const tid = toast.loading('Recording rejection...');
     try {
       await api.put(endpoint, { reason: rejectionReason });
-      toast.success(`${rejectType} rejeté`, { id: tid });
+      toast.success(`${rejectType} rejected`, { id: tid });
       setIsRejectOpen(false);
       fetchAllData();
     } catch (e: any) {
-      toast.error(e.response?.data?.error?.message || 'Échec de l\'approbation', { id: tid });
+      toast.error(e.response?.data?.error?.message || 'Rejection failed', { id: tid });
     }
   };
 
   const handleBulkApproveInvoices = async () => {
     if (selectedInvoiceIds.length === 0) return;
-    const tid = toast.loading(`Approbation de ${selectedInvoiceIds.length} factures...`);
+    const tid = toast.loading(`Approving ${selectedInvoiceIds.length} invoices...`);
     try {
       await Promise.all(selectedInvoiceIds.map(id =>
         api.put(`/school-finance/invoices/${id}/approve`)
       ));
-      toast.success('Factures approuvées avec succès', { id: tid });
+      toast.success('Invoices approved successfully', { id: tid });
       setSelectedInvoiceIds([]);
       fetchAllData();
     } catch (e: any) {
-      toast.error(e.response?.data?.error?.message || 'Échec de l\'approbation', { id: tid });
+      toast.error(e.response?.data?.error?.message || 'Approval failed', { id: tid });
     }
   };
 
   const handleBulkApprovePayments = async () => {
     if (selectedPaymentIds.length === 0) return;
-    const tid = toast.loading(`Approbation de ${selectedPaymentIds.length} paiements...`);
+    const tid = toast.loading(`Approving ${selectedPaymentIds.length} payments...`);
     try {
       await Promise.all(selectedPaymentIds.map(id =>
         api.put(`/school-finance/payments/${id}/approve`)
       ));
-      toast.success('Paiements approuvés avec succès', { id: tid });
+      toast.success('Payments approved successfully', { id: tid });
       setSelectedPaymentIds([]);
       fetchAllData();
     } catch (e: any) {
-      toast.error(e.response?.data?.error?.message || 'Échec de l\'approbation', { id: tid });
+      toast.error(e.response?.data?.error?.message || 'Approval failed', { id: tid });
     }
   };
 
   // ─── PDF Downloads ─────────────────────────────────────────────────────────
   const downloadReceipt = async (paymentDocId: string, paymentId: number) => {
-    const tid = toast.loading('Compilation du reçu...');
+    const tid = toast.loading('Compiling receipt...');
     try {
       // Use flat payment from state — avoids Strapi v5 populate REST failures
       const pay = payments.find(p => p.id === paymentId) || payments.find(p => p.documentId === paymentDocId);
       if (!pay) {
-        toast.error('Aucun enregistrement de paiement trouvé', { id: tid });
+        toast.error('No payment record found', { id: tid });
         return;
       }
 
-      const studentName = pay.studentName || 'Étudiant';
+      const studentName = pay.studentName || 'Student';
       const studentUserId = pay.studentUserId || 'N/A';
       const studentEmail = pay.studentEmail || 'N/A';
       const invoiceNumber = pay.invoiceNumber || 'N/A';
@@ -538,7 +539,7 @@ export default function StudentFinance() {
 
       // Try to fetch receipt number — gracefully fall back if not found
       let receiptNumber = `REC-TEMP-${paymentId}`;
-      let qrContent = `2CS COMPLEXE SCOLAIRE\nFacture: ${invoiceNumber}\nÉlève: ${studentName}\nID: ${studentUserId}\nMontant: ${Number(pay.amount).toLocaleString()} GNF`;
+      let qrContent = `AMFOFANA ACADEMY\nInvoice: ${invoiceNumber}\nStudent: ${studentName}\nID: ${studentUserId}\nAmount: ${Number(pay.amount).toLocaleString()} GNF`;
       try {
         const rcRes = await api.get(`/receipts?filters[studentPayment][id][$eq]=${paymentId}&fields[0]=receiptNumber&fields[1]=qrCode`);
         const receiptArr = rcRes.data?.data || rcRes.data || [];
@@ -555,47 +556,57 @@ export default function StudentFinance() {
       }
 
       const doc = new jsPDF();
+      const logoToUse = await getCircularLogo();
+
       doc.setDrawColor(59, 130, 246);
       doc.setLineWidth(1.5);
       doc.rect(5, 5, 200, 287);
 
+      // Header Banner
       doc.setFillColor(15, 23, 42);
       doc.rect(5, 5, 200, 45, 'F');
+
+      // Draw school logo
+      try {
+        doc.addImage(logoToUse, 'PNG', 15, 12, 30, 30);
+      } catch (e) {
+        console.error("Failed to add logo to receipt", e);
+      }
 
       doc.setTextColor(255, 255, 255);
       doc.setFont('Helvetica', 'bold');
       doc.setFontSize(22);
-      doc.text('2CS COMPLEXE SCOLAIRE', 15, 23);
+      doc.text('AMFOFANA ACADEMY', 52, 23);
       doc.setFontSize(9);
       doc.setFont('Helvetica', 'normal');
-      doc.text('REÇU DE PAIEMENT SCOLAIRE', 15, 30);
-      doc.text('Conakry, Guinée | 2cscomplexes@gmail.com', 15, 36);
+      doc.text('SCHOOL PAYMENT RECEIPT', 52, 30);
+      doc.text('Conakry, Guinea | billing@amfofana.edu', 52, 36);
 
       doc.setTextColor(15, 23, 42);
       doc.setFontSize(20);
       doc.setFont('Helvetica', 'bold');
-      doc.text('REÇU DE PAIEMENT SCOLAIRE', 15, 70);
+      doc.text('SCHOOL PAYMENT RECEIPT', 15, 70);
       doc.setFontSize(10);
       doc.setFont('Helvetica', 'normal');
 
-      doc.text(`Numéro de reçu: ${receiptNumber}`, 15, 80);
-      doc.text(`Facture Ref: ${invoiceNumber}`, 15, 87);
-      doc.text(`Date du paiement: ${new Date(pay.paymentDate || new Date()).toLocaleDateString()}`, 15, 94);
+      doc.text(`Receipt Number: ${receiptNumber}`, 15, 80);
+      doc.text(`Invoice Ref: ${invoiceNumber}`, 15, 87);
+      doc.text(`Payment Date: ${new Date(pay.paymentDate || new Date()).toLocaleDateString()}`, 15, 94);
 
       doc.setFont('Helvetica', 'bold');
-      doc.text('Profil de l\'élève facturé:', 120, 80);
+      doc.text('Billed Student Profile:', 120, 80);
       doc.setFont('Helvetica', 'normal');
-      doc.text(`Nom: ${studentName}`, 120, 87);
+      doc.text(`Name: ${studentName}`, 120, 87);
       doc.text(`ID: ${studentUserId}`, 120, 94);
       doc.text(`Email: ${studentEmail}`, 120, 101);
 
       autoTable(doc, {
         startY: 115,
-        head: [['Catégorie', 'Méthode', 'Description', 'Montant Payé']],
+        head: [['Category', 'Method', 'Description', 'Amount Paid']],
         body: [[
-          pay.paymentCategory || 'Frais',
-          pay.paymentMethod || 'Espèces',
-          pay.notes || 'Paiement reçu',
+          pay.paymentCategory || 'Fee',
+          pay.paymentMethod || 'Cash',
+          pay.notes || 'Payment received',
           `${Number(pay.amount || 0).toLocaleString()} GNF`
         ]],
         theme: 'grid',
@@ -605,32 +616,32 @@ export default function StudentFinance() {
 
       const finalY = (doc as any).lastAutoTable?.finalY || 140;
       doc.setFont('Helvetica', 'bold');
-      doc.text('Statut du grand livre:', 15, finalY + 20);
+      doc.text('Ledger Status:', 15, finalY + 20);
       doc.setFont('Helvetica', 'normal');
-      doc.text(`Montant total collecté: ${Number(pay.amount || 0).toLocaleString()} GNF`, 15, finalY + 28);
-      doc.text(`Solde restant de la facture: ${Number(remainingBalance).toLocaleString()} GNF`, 15, finalY + 35);
+      doc.text(`Total Amount Collected: ${Number(pay.amount || 0).toLocaleString()} GNF`, 15, finalY + 28);
+      doc.text(`Remaining Invoice Balance: ${Number(remainingBalance).toLocaleString()} GNF`, 15, finalY + 35);
 
       // Generate QR code — anchored to bottom-right corner of the page
       const qrDataUrl = await QRCode.toDataURL(qrContent);
       doc.addImage(qrDataUrl, 'PNG', 155, 242, 42, 42);
       doc.setFontSize(7);
       doc.setTextColor(148, 163, 184);
-      doc.text('Scannez pour vérifier le reçu', 155, 286);
+      doc.text('Scan to verify receipt', 155, 286);
 
-      doc.save(`Reçu-${pay.paymentNumber || 'GEN'}.pdf`);
-      toast.success('PDF compilé avec succès', { id: tid });
+      doc.save(`Receipt-${pay.paymentNumber || 'GEN'}.pdf`);
+      toast.success('Receipt PDF downloaded successfully', { id: tid });
     } catch (e: any) {
       console.error('Receipt error:', e);
-      toast.error('La génération du PDF de reçu a échoué', { id: tid });
+      toast.error('Failed to generate receipt PDF', { id: tid });
     }
   };
 
   const downloadStatement = async (studentId: number | null) => {
     if (!studentId) {
-      toast.error('Export de grand livre : ID d\'élève invalide');
+      toast.error('Statement Export: Invalid student ID');
       return;
     }
-    const tid = toast.loading('Compilation du grand livre...');
+    const tid = toast.loading('Compiling statement ledger...');
     try {
       const res = await api.get(`/school-finance/statements/${studentId}`);
       const data = res.data;
@@ -640,6 +651,7 @@ export default function StudentFinance() {
       const studentEmail = data.studentProfile?.email || 'N/A';
 
       const doc = new jsPDF();
+      const logoToUse = await getCircularLogo();
       // Border
       doc.setDrawColor(59, 130, 246);
       doc.setLineWidth(1.5);
@@ -648,24 +660,32 @@ export default function StudentFinance() {
       // Header banner
       doc.setFillColor(15, 23, 42);
       doc.rect(5, 5, 200, 45, 'F');
+
+      // Draw school logo
+      try {
+        doc.addImage(logoToUse, 'PNG', 15, 12, 30, 30);
+      } catch (e) {
+        console.error("Failed to add logo to statement", e);
+      }
+
       doc.setTextColor(255, 255, 255);
       doc.setFont('Helvetica', 'bold');
       doc.setFontSize(18);
-      doc.text('2CS COMPLEXE SCOLAIRE', 15, 22);
+      doc.text('AMFOFANA ACADEMY', 52, 22);
       doc.setFontSize(10);
       doc.setFont('Helvetica', 'normal');
-      doc.text('RELEVÉ DE COMPTE', 15, 30);
-      doc.text('Conakry, Guinée | 2cscomplexes@gmail.com', 15, 37);
-      doc.text(`Généré le: ${new Date().toLocaleDateString()}`, 130, 22);
+      doc.text('STATEMENT OF ACCOUNT', 52, 30);
+      doc.text('Conakry, Guinea | billing@amfofana.edu', 52, 37);
+      doc.text(`Generated: ${new Date().toLocaleDateString()}`, 196, 22, { align: 'right' });
 
       // Student info
       doc.setTextColor(15, 23, 42);
       doc.setFontSize(11);
       doc.setFont('Helvetica', 'bold');
-      doc.text('Informations sur l\'élève', 15, 58);
+      doc.text('Student Information', 15, 58);
       doc.setFont('Helvetica', 'normal');
       doc.setFontSize(10);
-      doc.text(`Nom: ${studentName}`, 15, 66);
+      doc.text(`Name: ${studentName}`, 15, 66);
       doc.text(`ID: ${studentUserId}`, 15, 73);
       doc.text(`Email: ${studentEmail}`, 15, 80);
 
@@ -675,11 +695,11 @@ export default function StudentFinance() {
       doc.rect(120, 54, 85, 35);
       doc.setFontSize(9);
       doc.setFont('Helvetica', 'bold');
-      doc.text('Résumé du compte', 125, 62);
+      doc.text('Account Summary', 125, 62);
       doc.setFont('Helvetica', 'normal');
-      doc.text(`Total facturé: ${Number(data.totalInvoiced || 0).toLocaleString()} GNF`, 125, 70);
-      doc.text(`Total payé:   ${Number(data.totalPaid || 0).toLocaleString()} GNF`, 125, 77);
-      doc.text(`En souffrance:  ${Number(data.outstandingBalance || 0).toLocaleString()} GNF`, 125, 84);
+      doc.text(`Total Billed: ${Number(data.totalInvoiced || 0).toLocaleString()} GNF`, 125, 70);
+      doc.text(`Total Paid:   ${Number(data.totalPaid || 0).toLocaleString()} GNF`, 125, 77);
+      doc.text(`Outstanding:  ${Number(data.outstandingBalance || 0).toLocaleString()} GNF`, 125, 84);
 
       // Merge and sort activities chronologically
       const activities: any[] = [];
@@ -734,11 +754,11 @@ export default function StudentFinance() {
 
       doc.setFontSize(11);
       doc.setFont('Helvetica', 'bold');
-      doc.text('Grand livre des activités du compte (Chronologique)', 15, 96);
+      doc.text('Account Ledger Activity (Chronological)', 15, 96);
 
       autoTable(doc, {
         startY: 100,
-        head: [['Date', 'Référence #', 'Type', 'Description', 'Billed (Dr)', 'Paid (Cr)', 'Balance']],
+        head: [['Date', 'Reference #', 'Type', 'Description', 'Billed (Dr)', 'Paid (Cr)', 'Balance']],
         body: ledgerRows.length > 0 ? ledgerRows : [['—', '—', '—', 'No transactions found', '—', '—', '—']],
         theme: 'grid',
         headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontSize: 8 },
@@ -756,12 +776,12 @@ export default function StudentFinance() {
       doc.addImage(qrDataUrl, 'PNG', 155, 242, 42, 42);
       doc.setFontSize(7);
       doc.setTextColor(148, 163, 184);
-      doc.text('Scannez pour vérifier le relevé de compte', 155, 286);
+      doc.text('Scan to verify account statement', 155, 286);
 
-      doc.save(`Relevé-${studentUserId || studentId}.pdf`);
-      toast.success('Relevé de compte généré avec succès', { id: tid });
+      doc.save(`Account-Statement-${studentUserId || studentId}.pdf`);
+      toast.success('Account statement generated successfully', { id: tid });
     } catch (e: any) {
-      toast.error('La génération du relevé de compte a échoué', { id: tid });
+      toast.error('Failed to generate account statement', { id: tid });
       console.error(e);
     }
   };
@@ -801,8 +821,8 @@ export default function StudentFinance() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h1 className="text-3xl font-black tracking-tight text-slate-900 italic uppercase">Grand Livre des Finances des Élèves</h1>
-          <p className="text-sm text-slate-500 font-medium">Gérer la facturation des élèves, les catégories de facturation et les flux d approbation</p>
+          <h1 className="text-3xl font-black tracking-tight text-slate-900 italic uppercase">Students' Financial Ledger</h1>
+          <p className="text-sm text-slate-500 font-medium">Manage student invoicing, billing categories, and approval workflows</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -811,7 +831,7 @@ export default function StudentFinance() {
               onClick={handleSubmitSelectedInvoices}
               className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs px-5"
             >
-              Soumettre la sélection ({selectedInvoiceIds.length})
+              Submit Selection ({selectedInvoiceIds.length})
             </Button>
           )}
 
@@ -820,7 +840,7 @@ export default function StudentFinance() {
               onClick={handleBulkApproveInvoices}
               className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs px-5"
             >
-              Approuver la sélection ({selectedInvoiceIds.length})
+              Approve Selection ({selectedInvoiceIds.length})
             </Button>
           )}
 
@@ -828,14 +848,14 @@ export default function StudentFinance() {
             onClick={() => { setEditingInvoice(null); setSelectedStudentId(''); setIsInvoiceOpen(true); }}
             className="flex items-center gap-2 px-5 bg-slate-900 text-white rounded-xl font-bold uppercase tracking-wider text-xs"
           >
-            <Plus className="w-4 h-4" /> Créer une facture
+            <Plus className="w-4 h-4" /> Create Invoice
           </Button>
 
           <Button
             onClick={() => { setEditingPayment(null); setSelectedInvoiceId(''); setIsPaymentOpen(true); }}
             className="flex items-center gap-2 px-5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs"
           >
-            <DollarSign className="w-4 h-4" /> Enregistrer un paiement
+            <DollarSign className="w-4 h-4" /> Record Payment
           </Button>
         </div>
       </div>
@@ -846,7 +866,7 @@ export default function StudentFinance() {
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
-              placeholder="Rechercher par nom d'élève ou numéro de facture..."
+              placeholder="Search by student name or invoice number..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10 h-11 rounded-xl bg-slate-50 border-slate-100"
@@ -855,28 +875,28 @@ export default function StudentFinance() {
 
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-slate-100">
-              <SelectValue placeholder="Toutes les statuts" />
+              <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">Toutes les statuts</SelectItem>
-              <SelectItem value="DRAFT">Brouillon</SelectItem>
-              <SelectItem value="SUBMITTED">Soumise / En attente</SelectItem>
-              <SelectItem value="APPROVED">Approuvée</SelectItem>
-              <SelectItem value="PAID">Payée</SelectItem>
-              <SelectItem value="PARTIALLY_PAID">Partiellement payée</SelectItem>
-              <SelectItem value="REJECTED">Rejetée</SelectItem>
+              <SelectItem value="ALL">All Statuses</SelectItem>
+              <SelectItem value="DRAFT">Draft</SelectItem>
+              <SelectItem value="SUBMITTED">Submitted / Pending</SelectItem>
+              <SelectItem value="APPROVED">Approved</SelectItem>
+              <SelectItem value="PAID">Paid</SelectItem>
+              <SelectItem value="PARTIALLY_PAID">Partially Paid</SelectItem>
+              <SelectItem value="REJECTED">Rejected</SelectItem>
             </SelectContent>
           </Select>
 
           <Select value={classFilter} onValueChange={setClassFilter}>
             <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-slate-100">
-              <SelectValue placeholder="Toutes les classes" />
+              <SelectValue placeholder="All Classes" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">Toutes les classes</SelectItem>
+              <SelectItem value="ALL">All Classes</SelectItem>
               {classes.map((cls: any) => (
                 <SelectItem key={cls.id} value={String(cls.id)}>
-                  {cls.name || cls.className || `Classe ${cls.id}`}
+                  {cls.name || cls.className || `Class ${cls.id}`}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -891,7 +911,7 @@ export default function StudentFinance() {
       {/* ─── Invoice Ledger Table ───────────────────────────────────────────── */}
       <Card className="border-0 shadow-xl shadow-slate-100/50 bg-white rounded-3xl overflow-hidden">
         <CardHeader className="px-6 py-5 border-b border-slate-50">
-          <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500">Grand Livre des Finances des Élèves</CardTitle>
+          <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500">Student Finance Ledger</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-y-auto" style={{ maxHeight: '340px' }}>
@@ -899,24 +919,24 @@ export default function StudentFinance() {
               <TableHeader>
                 <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
                   {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD' || role === 'ADMIN') && <TableHead className="w-12"></TableHead>}
-                  <TableHead className="font-bold text-slate-700">Numéro de facture</TableHead>
-                  <TableHead className="font-bold text-slate-700">Élève</TableHead>
-                  <TableHead className="font-bold text-slate-700">Période de facturation</TableHead>
-                  <TableHead className="font-bold text-slate-700">Total facturé</TableHead>
-                  <TableHead className="font-bold text-slate-700">Payé</TableHead>
-                  <TableHead className="font-bold text-slate-700">Solde</TableHead>
-                  <TableHead className="font-bold text-slate-700">Statut</TableHead>
+                  <TableHead className="font-bold text-slate-700">Invoice Number</TableHead>
+                  <TableHead className="font-bold text-slate-700">Student</TableHead>
+                  <TableHead className="font-bold text-slate-700">Billing Period</TableHead>
+                  <TableHead className="font-bold text-slate-700">Total Billed</TableHead>
+                  <TableHead className="font-bold text-slate-700">Paid</TableHead>
+                  <TableHead className="font-bold text-slate-700">Balance</TableHead>
+                  <TableHead className="font-bold text-slate-700">Status</TableHead>
                   <TableHead className="text-right font-bold text-slate-700">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-10 text-slate-400">Chargement des données du grand livre...</TableCell>
+                    <TableCell colSpan={9} className="text-center py-10 text-slate-400">Loading ledger data...</TableCell>
                   </TableRow>
                 ) : filteredInvoices.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-10 text-slate-400 font-bold uppercase text-[10px]">Aucune facture trouvée</TableCell>
+                    <TableCell colSpan={9} className="text-center py-10 text-slate-400 font-bold uppercase text-[10px]">No invoices found</TableCell>
                   </TableRow>
                 ) : filteredInvoices.map((inv) => (
                   <TableRow key={inv.id} className="hover:bg-slate-50/50 duration-200">
@@ -1008,16 +1028,16 @@ export default function StudentFinance() {
                         {role === 'ACCOUNTANT' && (inv.status === 'DRAFT' || inv.status === 'REJECTED') && (
                           <Button
                             onClick={() => {
-                              const tid = toast.loading('Soumission de la facture...');
+                              const tid = toast.loading('Submitting invoice...');
                               api.put(`/school-finance/invoices/${inv.id}/update`, { status: 'SUBMITTED' })
-                                .then(() => { toast.success('Facture soumise', { id: tid }); fetchAllData(); })
-                                .catch(() => toast.error('Soumission échouée', { id: tid }));
+                                .then(() => { toast.success('Invoice submitted', { id: tid }); fetchAllData(); })
+                                .catch(() => toast.error('Submission failed', { id: tid }));
                             }}
                             size="sm"
                             className="bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl text-xs font-bold px-3 h-8"
                             title="Submit to AccountLead"
                           >
-                            Soumettre
+                            Submit
                           </Button>
                         )}
 
@@ -1027,7 +1047,7 @@ export default function StudentFinance() {
                           size="icon"
                           variant="ghost"
                           className="rounded-xl border hover:bg-slate-50"
-                          title="Télécharger le relevé de compte"
+                          title="Download Statement of Account"
                         >
                           <FileText className="w-4 h-4 text-slate-600" />
                         </Button>
@@ -1046,26 +1066,26 @@ export default function StudentFinance() {
         <Card className="border-0 shadow-xl shadow-slate-100/50 bg-white rounded-3xl overflow-hidden">
           <CardHeader className="px-6 py-5 border-b border-slate-50">
             <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-500" /> Paiements en attente de révision / révision
+              <Clock className="w-4 h-4 text-amber-500" /> Payments Pending Review
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>N° Récépissé</TableHead>
-                  <TableHead>Élève</TableHead>
-                  <TableHead>Méthode</TableHead>
-                  <TableHead>Catégorie</TableHead>
-                  <TableHead>Montant Payé</TableHead>
-                  <TableHead>Statut</TableHead>
+                  <TableHead>Receipt No</TableHead>
+                  <TableHead>Student</TableHead>
+                  <TableHead>Method</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Amount Paid</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {payments.filter(p => p.status === 'SUBMITTED' || p.status === 'REJECTED').length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center p-6 text-slate-400 font-bold uppercase text-[10px]">Aucun paiement en attente de révision trouvé</TableCell>
+                    <TableCell colSpan={7} className="text-center p-6 text-slate-400 font-bold uppercase text-[10px]">No payments pending review found</TableCell>
                   </TableRow>
                 ) : payments.filter(p => p.status === 'SUBMITTED' || p.status === 'REJECTED').map((p) => (
                   <TableRow key={p.id}>
@@ -1090,20 +1110,20 @@ export default function StudentFinance() {
                             size="sm"
                             className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs"
                           >
-                            Approuver
+                            Approve
                           </Button>
                           <Button
                             onClick={() => handleOpenReject(p.id, 'PAYMENT')}
                             size="sm"
                             className="bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs"
                           >
-                            Rejeter
+                            Reject
                           </Button>
                         </>
                       )}
                       {p.status === 'REJECTED' && (
                         <span className="text-[10px] text-rose-500 font-extrabold uppercase bg-rose-50 px-2.5 py-1 rounded-xl">
-                          En attente de révision
+                          Pending Review
                         </span>
                       )}
                     </TableCell>
@@ -1118,14 +1138,14 @@ export default function StudentFinance() {
       {/* ─── Payments & Receipts Ledger ──────────────────────────────────────── */}
       <Card className="border-0 shadow-xl shadow-slate-100/50 bg-white rounded-3xl overflow-hidden">
         <CardHeader className="px-6 py-5 border-b border-slate-50 flex items-center justify-between">
-          <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500">Historique des paiements et des recettes</CardTitle>
+          <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500">Payments & Receipts History</CardTitle>
           <div className="flex gap-2">
             {role === 'ACCOUNTANT' && selectedPaymentIds.length > 0 && (
               <Button
                 onClick={handleSubmitSelectedPayments}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-[10px] h-8 px-4"
               >
-                Soumettre ({selectedPaymentIds.length})
+                Submit ({selectedPaymentIds.length})
               </Button>
             )}
             {(role === 'ACCOUNTLEAD' || role === 'ADMIN') && selectedPaymentIds.length > 0 && (
@@ -1133,7 +1153,7 @@ export default function StudentFinance() {
                 onClick={handleBulkApprovePayments}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-[10px] h-8 px-4"
               >
-                Approuver ({selectedPaymentIds.length})
+                Approve ({selectedPaymentIds.length})
               </Button>
             )}
           </div>
@@ -1144,13 +1164,13 @@ export default function StudentFinance() {
               <TableHeader>
                 <TableRow>
                   {(role === 'ACCOUNTANT' || role === 'ACCOUNTLEAD' || role === 'ADMIN') && <TableHead className="w-12"></TableHead>}
-                  <TableHead>N° Récépissé</TableHead>
-                  <TableHead>Élève</TableHead>
-                  <TableHead>Méthode</TableHead>
-                  <TableHead>Catégorie</TableHead>
-                  <TableHead>Montant</TableHead>
+                  <TableHead>Receipt No</TableHead>
+                  <TableHead>Student</TableHead>
+                  <TableHead>Method</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Amount</TableHead>
                   <TableHead>Notes</TableHead>
-                  <TableHead>Statut</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -1250,15 +1270,15 @@ export default function StudentFinance() {
                         {role === 'ACCOUNTANT' && (p.status === 'DRAFT' || p.status === 'REJECTED') && (
                           <Button
                             onClick={() => {
-                              const tid = toast.loading('Soumission du paiement...');
+                              const tid = toast.loading('Submitting payment...');
                               api.put(`/school-finance/payments/${p.id}/update`, { status: 'SUBMITTED' })
-                                .then(() => { toast.success('Paiement soumis', { id: tid }); fetchAllData(); })
-                                .catch(() => toast.error('Soumission échouée', { id: tid }));
+                                .then(() => { toast.success('Payment submitted', { id: tid }); fetchAllData(); })
+                                .catch(() => toast.error('Submission failed', { id: tid }));
                             }}
                             size="sm"
                             className="bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl text-xs font-bold px-3 h-8"
                           >
-                            Soumettre
+                            Submit
                           </Button>
                         )}
 
@@ -1287,12 +1307,12 @@ export default function StudentFinance() {
         <DialogContent className="max-w-md bg-white rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-lg font-black uppercase tracking-wide">
-              {editingInvoice ? 'Modifier la facture' : 'Générer la facture'}
+              {editingInvoice ? 'Edit Invoice' : 'Generate Invoice'}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-1">
-              <label className="text-xs font-black uppercase text-slate-400">Sélectionner l élève</label>
+              <label className="text-xs font-black uppercase text-slate-400">Select Student</label>
               <StudentCombobox
                 students={students}
                 value={selectedStudentId}
@@ -1301,13 +1321,13 @@ export default function StudentFinance() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-black uppercase text-slate-400">Classe de l élève (optionnel)</label>
+              <label className="text-xs font-black uppercase text-slate-400">Student Class (Optional)</label>
               <Select value={invoiceClassId} onValueChange={setInvoiceClassId}>
                 <SelectTrigger className="h-11 rounded-xl bg-slate-50">
-                  <SelectValue placeholder="Sélectionner une classe..." />
+                  <SelectValue placeholder="Select a class..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="NONE">Pas de classe</SelectItem>
+                  <SelectItem value="NONE">No class</SelectItem>
                   {classes.map((cls: any) => (
                     <SelectItem key={cls.id} value={String(cls.id)}>
                       {cls.name || cls.className || `Class ${cls.id}`}
@@ -1319,10 +1339,10 @@ export default function StudentFinance() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-black uppercase text-slate-400">Mois de facturation</label>
+                <label className="text-xs font-black uppercase text-slate-400">Billing Month</label>
                 <Select value={invoiceMonth} onValueChange={setInvoiceMonth}>
                   <SelectTrigger className="h-11 rounded-xl bg-slate-50">
-                    <SelectValue placeholder="Mois" />
+                    <SelectValue placeholder="Month" />
                   </SelectTrigger>
                   <SelectContent>
                     {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((m) => (
@@ -1333,7 +1353,7 @@ export default function StudentFinance() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-black uppercase text-slate-400">Année de facturation</label>
+                <label className="text-xs font-black uppercase text-slate-400">Billing Year</label>
                 <Input
                   type="number"
                   value={invoiceYear}
@@ -1345,12 +1365,12 @@ export default function StudentFinance() {
 
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <label className="text-xs font-black uppercase text-slate-400">Détails des frais</label>
+                <label className="text-xs font-black uppercase text-slate-400">Fee Details</label>
                 <Button
                   onClick={() => setChargeItems([...chargeItems, { description: '', amount: 0, category: 'OTHER' }])}
                   className="h-7 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-black uppercase tracking-wider"
                 >
-                  Ajouter un article personnalisé
+                  Add Custom Item
                 </Button>
               </div>
 
@@ -1358,7 +1378,7 @@ export default function StudentFinance() {
                 {chargeItems.map((item, idx) => (
                   <div key={idx} className="grid grid-cols-12 gap-1.5 items-center">
                     <Input
-                      placeholder="Exemple: Frais de scolarité"
+                      placeholder="Example: Tuition fee"
                       value={item.description}
                       onChange={(e) => {
                         const next = [...chargeItems];
@@ -1369,7 +1389,7 @@ export default function StudentFinance() {
                     />
                     <Input
                       type="number"
-                      placeholder="Montant"
+                      placeholder="Amount"
                       value={item.amount || ''}
                       onChange={(e) => {
                         const next = [...chargeItems];
@@ -1387,14 +1407,14 @@ export default function StudentFinance() {
                       }}
                     >
                       <SelectTrigger className="col-span-4 h-9 rounded-lg bg-slate-50 text-xs">
-                        <SelectValue placeholder="Catégorie" />
+                        <SelectValue placeholder="Category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="TUITION">Frais de scolarité</SelectItem>
+                        <SelectItem value="TUITION">Tuition fee</SelectItem>
                         <SelectItem value="TRANSPORT">Transport</SelectItem>
                         <SelectItem value="TSHIRT">T-Shirt / Uniform</SelectItem>
                         <SelectItem value="REGISTRATION">Registration</SelectItem>
-                        <SelectItem value="OTHER">Autre</SelectItem>
+                        <SelectItem value="OTHER">Other</SelectItem>
                       </SelectContent>
                     </Select>
                     <Button
@@ -1409,11 +1429,11 @@ export default function StudentFinance() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-black uppercase text-slate-400">Notes supplémentaires</label>
+              <label className="text-xs font-black uppercase text-slate-400">Additional Notes</label>
               <Input
                 value={invoiceNotes}
                 onChange={(e) => setInvoiceNotes(e.target.value)}
-                placeholder="Termes, directives bancaires, notes personnalisées..."
+                placeholder="Terms, banking guidelines, custom notes..."
                 className="h-11 rounded-xl bg-slate-50"
               />
             </div>
@@ -1423,7 +1443,7 @@ export default function StudentFinance() {
               onClick={handleCreateOrEditInvoice}
               className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold uppercase tracking-wider text-xs"
             >
-              {editingInvoice ? 'Sauvegarder' : 'Générer la facture'}
+              {editingInvoice ? 'Save' : 'Generate Invoice'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1434,18 +1454,18 @@ export default function StudentFinance() {
         <DialogContent className="max-w-md bg-white rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-lg font-black uppercase tracking-wide">
-              {editingPayment ? 'Modifier le reçu de paiement' : 'Recevoir le paiement'}
+              {editingPayment ? 'Edit Payment Receipt' : 'Receive Payment'}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-1">
-              <label className="text-xs font-black uppercase text-slate-400">Classe de l élève (optionnel)</label>
+              <label className="text-xs font-black uppercase text-slate-400">Student Class (Optional)</label>
               <Select value={paymentClassId} onValueChange={setPaymentClassId}>
                 <SelectTrigger className="h-11 rounded-xl bg-slate-50">
-                  <SelectValue placeholder="Sélectionner une classe..." />
+                  <SelectValue placeholder="Select a class..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="NONE">Pas de classe</SelectItem>
+                  <SelectItem value="NONE">No class</SelectItem>
                   {classes.map((cls: any) => (
                     <SelectItem key={cls.id} value={String(cls.id)}>
                       {cls.name || cls.className || `Class ${cls.id}`}
@@ -1456,7 +1476,7 @@ export default function StudentFinance() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-black uppercase text-slate-400">Sélectionner la facture</label>
+              <label className="text-xs font-black uppercase text-slate-400">Select Invoice</label>
               <Select
                 value={selectedInvoiceId}
                 onValueChange={(val) => {
@@ -1466,14 +1486,14 @@ export default function StudentFinance() {
                 }}
               >
                 <SelectTrigger className="h-11 rounded-xl bg-slate-50">
-                  <SelectValue placeholder="Sélectionner la facture..." />
+                  <SelectValue placeholder="Select invoice..." />
                 </SelectTrigger>
                 <SelectContent className="max-h-[250px] overflow-y-auto">
                   {invoices.filter(i => {
                     if (editingPayment) return true;
                     return i.status === 'APPROVED' || i.status === 'PARTIALLY_PAID';
                   }).map((inv) => {
-                    const studentName = inv.studentName || 'Élève';
+                    const studentName = inv.studentName || 'Student';
                     const studentUID = inv.studentUserId ? ` (${inv.studentUserId})` : '';
                     return (
                       <SelectItem key={inv.id} value={String(inv.id)}>
@@ -1486,7 +1506,7 @@ export default function StudentFinance() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-black uppercase text-slate-400">Montant décaissé (GNF)</label>
+              <label className="text-xs font-black uppercase text-slate-400">Amount Disbursed (GNF)</label>
               <Input
                 type="number"
                 value={paymentAmount || ''}
@@ -1497,39 +1517,39 @@ export default function StudentFinance() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-black uppercase text-slate-400">Catégorie de paiement</label>
+                <label className="text-xs font-black uppercase text-slate-400">Payment Category</label>
                 <Select value={paymentCategory} onValueChange={setPaymentCategory}>
                   <SelectTrigger className="h-11 rounded-xl bg-slate-50">
-                    <SelectValue placeholder="Catégorie" />
+                    <SelectValue placeholder="Category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="TUITION">Scolarité</SelectItem>
+                    <SelectItem value="TUITION">Tuition</SelectItem>
                     <SelectItem value="TRANSPORT">Transport</SelectItem>
                     <SelectItem value="TSHIRT">T-Shirt / Uniform</SelectItem>
-                    <SelectItem value="REGISTRATION">Inscription</SelectItem>
-                    <SelectItem value="OTHER">Autre</SelectItem>
+                    <SelectItem value="REGISTRATION">Registration</SelectItem>
+                    <SelectItem value="OTHER">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-black uppercase text-slate-400">Méthode de paiement</label>
+                <label className="text-xs font-black uppercase text-slate-400">Payment Method</label>
                 <Select value={paymentMethod} onValueChange={setPaymentMethod}>
                   <SelectTrigger className="h-11 rounded-xl bg-slate-50">
-                    <SelectValue placeholder="Méthode" />
+                    <SelectValue placeholder="Method" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="CASH">Espèces</SelectItem>
-                    <SelectItem value="BANK">Virement bancaire</SelectItem>
+                    <SelectItem value="CASH">Cash</SelectItem>
+                    <SelectItem value="BANK">Bank Transfer</SelectItem>
                     <SelectItem value="MOBILE_MONEY">Mobile Money</SelectItem>
-                    <SelectItem value="CARD">Carte bancaire</SelectItem>
+                    <SelectItem value="CARD">Credit Card</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-black uppercase text-slate-400">Notes de collecte</label>
+              <label className="text-xs font-black uppercase text-slate-400">Collection Notes</label>
               <Input
                 value={paymentNotes}
                 onChange={(e) => setPaymentNotes(e.target.value)}
@@ -1543,7 +1563,7 @@ export default function StudentFinance() {
               onClick={handleCreateOrEditPayment}
               className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs"
             >
-              {editingPayment ? 'Enregistrer les modifications' : 'Soumettre le reçu de paiement'}
+              {editingPayment ? 'Save Changes' : 'Submit Payment Receipt'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1553,15 +1573,15 @@ export default function StudentFinance() {
       <Dialog open={isRejectOpen} onOpenChange={setIsRejectOpen}>
         <DialogContent className="max-w-sm bg-white rounded-3xl">
           <DialogHeader>
-            <DialogTitle className="text-md font-black uppercase tracking-wide text-rose-600">Rejeter {rejectType}</DialogTitle>
+            <DialogTitle className="text-md font-black uppercase tracking-wide text-rose-600">Reject {rejectType}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-3">
             <div className="space-y-1">
-              <label className="text-xs font-black uppercase text-slate-400">Préciser la raison du rejet</label>
+              <label className="text-xs font-black uppercase text-slate-400">Specify rejection reason</label>
               <Input
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder="Spécifier la raison du rejet..."
+                placeholder="Specify rejection reason..."
                 className="h-11 rounded-xl bg-slate-50"
               />
             </div>
@@ -1571,7 +1591,7 @@ export default function StudentFinance() {
               onClick={handleRejectSubmit}
               className="w-full h-11 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs"
             >
-              Confirmer le rejet
+              Confirm Rejection
             </Button>
           </DialogFooter>
         </DialogContent>

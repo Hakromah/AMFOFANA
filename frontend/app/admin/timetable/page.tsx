@@ -47,21 +47,21 @@ const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
 
 // French display labels — backend always receives the English key
 const DAY_LABELS: Record<string, string> = {
-  MONDAY:    'LUNDI',
-  TUESDAY:   'MARDI',
-  WEDNESDAY: 'MERCREDI',
-  THURSDAY:  'JEUDI',
-  FRIDAY:    'VENDREDI',
-  SATURDAY:  'SAMEDI',
-  SUNDAY:    'DIMANCHE',
+  MONDAY:    'MONDAY',
+  TUESDAY:   'TUESDAY',
+  WEDNESDAY: 'WEDNESDAY',
+  THURSDAY:  'THURSDAY',
+  FRIDAY:    'FRIDAY',
+  SATURDAY:  'SATURDAY',
+  SUNDAY:    'SUNDAY',
 };
 
 const formSchema = z.object({
-  classId: z.string().min(1, "Classe requise"),
-  subjectId: z.string().min(1, "Sujet requis"),
-  dayOfWeek: z.string().min(1, "Jour requis"),
-  startTime: z.string().min(1, "Heure de début requise"),
-  endTime: z.string().min(1, "Heure de fin requise"),
+  classId: z.string().min(1, "Class is required"),
+  subjectId: z.string().min(1, "Subject is required"),
+  dayOfWeek: z.string().min(1, "Day is required"),
+  startTime: z.string().min(1, "Start time is required"),
+  endTime: z.string().min(1, "End time is required"),
 });
 
 export default function TimetableManagement() {
@@ -95,13 +95,13 @@ export default function TimetableManagement() {
       semester = 1;
     }
 
-    // Get the current month name in French (e.g., "juin")
-    const monthName = currentDate.toLocaleDateString('fr-FR', { month: 'long' });
+    // Get the current month name in English (e.g., "June")
+    const monthName = currentDate.toLocaleDateString('en-US', { month: 'long' });
 
-    // Capitalize the first letter of the month name (e.g., "Juin")
+    // Capitalize the first letter of the month name (e.g., "June")
     const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
 
-    return `Semestre ${semester}, ${capitalizedMonth} - Année ${year}`;
+    return `Semester ${semester}, ${capitalizedMonth} - Year ${year}`;
   };
 
   const fetchData = async () => {
@@ -115,7 +115,7 @@ export default function TimetableManagement() {
       setClasses(cRes.data);
       setSubjects(sRes.data);
     } catch (error) {
-      toast.error("Échec de la synchronisation du registre");
+      toast.error("Failed to sync registry");
       console.log(error)
     }
   };
@@ -143,16 +143,16 @@ export default function TimetableManagement() {
     try {
       if (editingEntry) {
         await api.put(`/admin/timetables/${editingEntry.id}`, payload);
-        toast.success("Entrée mise à jour");
+        toast.success("Entry updated");
       } else {
         await api.post('/admin/timetables', payload);
-        toast.success("Entrée ajoutée au planning");
+        toast.success("Entry added to schedule");
       }
       fetchData();
       setIsDialogOpen(false);
     } catch (e: any) {
-      const msg = e?.response?.data?.error?.message || e?.message || 'Erreur serveur';
-      toast.error(`Échec : ${msg}`);
+      const msg = e?.response?.data?.error?.message || e?.message || 'Server error';
+      toast.error(`Failed: ${msg}`);
       console.error('Timetable error — status:', e?.response?.status, '| data:', JSON.stringify(e?.response?.data), '| msg:', e?.message);
     }
   };
@@ -163,17 +163,17 @@ export default function TimetableManagement() {
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-[clamp(1.2rem,3.5vw,4rem)] font-black text-slate-900 tracking-tighter italic">
-            Emploi du temps <span className="text-primary">par semaine</span>
+            Weekly <span className="text-primary">Timetable</span>
           </h1>
           <p className="text-slate-500 font-bold text-[10px] uppercase tracking-[0.3em] mt-2">
-            Portail Administrateur • {semesterText || 'Chargement...'}
+            Administrator Portal • {semesterText || 'Loading...'}
           </p>
         </div>
         <Button
           onClick={() => { setEditingEntry(null); form.reset(); setIsDialogOpen(true); }}
           className="bg-slate-900 hover:bg-blue-600 text-white rounded-2xl px-6 h-12 font-black transition-all shadow-lg shadow-blue-500/10"
         >
-          <Plus size={18} className="mr-2" /> AJOUTER UNE ENTRÉE
+          <Plus size={18} className="mr-2" /> ADD ENTRY
         </Button>
       </header>
 
@@ -224,10 +224,10 @@ export default function TimetableManagement() {
                             <BookOpen size={20} />
                           </div>
                           <div>
-                            <h3 className="font-black text-slate-900 uppercase italic tracking-tight">{entry.subject?.name || 'Aucune matière'}</h3>
+                            <h3 className="font-black text-slate-900 uppercase italic tracking-tight">{entry.subject?.name || 'No subject'}</h3>
                             <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
                               <Layers size={12} className="text-slate-300" />
-                              {entry.classe?.name || 'Aucune classe'}
+                              {entry.classe?.name || 'No class'}
                             </div>
                           </div>
                         </div>
@@ -258,7 +258,7 @@ export default function TimetableManagement() {
                             onClick={async () => {
                               await api.delete(`/admin/timetables/${entry.id}`);
                               fetchData();
-                              toast.success("Supprimé du planning");
+                              toast.success("Removed from schedule");
                             }}
                           >
                             <Trash2 size={18} />
@@ -273,7 +273,7 @@ export default function TimetableManagement() {
             {timetable.filter(item => item.dayOfWeek === selectedDay).length === 0 && (
               <div className="h-64 flex flex-col items-center justify-center border-2 border-dashed border-slate-100 md:hover:border-primary duration-500 transition-colors rounded-[3rem] text-slate-300">
                 <CalendarIcon size={48} className="mb-4 opacity-20" />
-                <p className="font-black uppercase text-xs tracking-widest">Aucun cours prévu pour {DAY_LABELS[selectedDay] ?? selectedDay}</p>
+                <p className="font-black uppercase text-xs tracking-widest">No classes scheduled for {DAY_LABELS[selectedDay] ?? selectedDay}</p>
               </div>
             )}
           </motion.div>
@@ -285,10 +285,10 @@ export default function TimetableManagement() {
         <DialogContent className="rounded-[2.5rem] border-none shadow-2xl p-8 max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-2xl font-black italic tracking-tighter">
-              {editingEntry ? 'Modifier' : 'Nouvelle'} <span className="text-primary">Entrée</span>
+              {editingEntry ? 'Edit' : 'New'} <span className="text-primary">Entry</span>
             </DialogTitle>
             <DialogDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">
-              Configurer les paramètres de session pour l emploi du temps.
+              Configure session settings for the timetable.
             </DialogDescription>
           </DialogHeader>
 
@@ -297,7 +297,7 @@ export default function TimetableManagement() {
               <div className="grid grid-cols-2 gap-4">
                 <FormField control={form.control} name="classId" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Classe</FormLabel>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Class</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl><SelectTrigger className="rounded-xl border-slate-100 bg-slate-50 font-bold"><SelectValue placeholder="Select class" /></SelectTrigger></FormControl>
                       <SelectContent className="rounded-xl border-none shadow-xl">
@@ -308,9 +308,9 @@ export default function TimetableManagement() {
                 )} />
                 <FormField control={form.control} name="subjectId" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Matière</FormLabel>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Subject</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl><SelectTrigger className="rounded-xl border-slate-100 bg-slate-50 font-bold"><SelectValue placeholder="Choisir une matière" /></SelectTrigger></FormControl>
+                      <FormControl><SelectTrigger className="rounded-xl border-slate-100 bg-slate-50 font-bold"><SelectValue placeholder="Choose a subject" /></SelectTrigger></FormControl>
                       <SelectContent className="rounded-xl border-none shadow-xl">
                         {subjects.map(s => <SelectItem key={s.id} value={String(s.id)} className="font-bold">{s.name}</SelectItem>)}
                       </SelectContent>
@@ -321,9 +321,9 @@ export default function TimetableManagement() {
 
               <FormField control={form.control} name="dayOfWeek" render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Jour de la semaine</FormLabel>
+                  <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Day of Week</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl><SelectTrigger className="rounded-xl border-slate-100 bg-slate-50 font-bold"><SelectValue placeholder="Choisir un jour" /></SelectTrigger></FormControl>
+                    <FormControl><SelectTrigger className="rounded-xl border-slate-100 bg-slate-50 font-bold"><SelectValue placeholder="Choose a day" /></SelectTrigger></FormControl>
                     <SelectContent className="rounded-xl border-none shadow-xl">
                       {DAYS.map(day => <SelectItem key={day} value={day} className="font-bold">{DAY_LABELS[day] ?? day}</SelectItem>)}
                     </SelectContent>
@@ -334,20 +334,20 @@ export default function TimetableManagement() {
               <div className="grid grid-cols-2 gap-4">
                 <FormField control={form.control} name="startTime" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Heure de début</FormLabel>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Start Time</FormLabel>
                     <FormControl><Input type="time" {...field} className="rounded-xl border-slate-100 bg-slate-50 font-bold" /></FormControl>
                   </FormItem>
                 )} />
                 <FormField control={form.control} name="endTime" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Heure de fin</FormLabel>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">End Time</FormLabel>
                     <FormControl><Input type="time" {...field} className="rounded-xl border-slate-100 bg-slate-50 font-bold" /></FormControl>
                   </FormItem>
                 )} />
               </div>
 
               <Button type="submit" className="w-full h-14 bg-blue-600 hover:bg-slate-900 text-white font-black rounded-2xl shadow-lg shadow-blue-500/20 transition-all uppercase tracking-widest text-xs">
-                {editingEntry ? 'Mettre à jour' : 'Confirmer l\'entrée'}
+                {editingEntry ? 'Update' : 'Confirm Entry'}
               </Button>
             </form>
           </Form>

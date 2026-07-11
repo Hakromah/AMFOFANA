@@ -54,8 +54,8 @@ export default function TeacherStudentsPage() {
         const response = await api.get('/teacher/classes');
         setClasses(response.data);
       } catch (error) {
-        console.error('Échec de la récupération des classes', error);
-        toast.error('Impossible de charger vos classes');
+        console.error('Failed to fetch classes', error);
+        toast.error('Unable to load your classes');
       }
     };
     fetchClasses();
@@ -74,7 +74,7 @@ export default function TeacherStudentsPage() {
         const response = await api.get(url);
         setStudents(response.data);
       } catch (error) {
-        toast.error('Échec de la récupération des étudiants');
+        toast.error('Failed to fetch students');
         console.log(error);
       } finally {
         setIsLoading(false);
@@ -98,16 +98,16 @@ export default function TeacherStudentsPage() {
 
   return (
     <div className="p-[clamp(1.3rem,1vw+0.5rem,2rem)]">
-      <h1 className="text-[clamp(1rem,2.5vw+1rem,2rem)] font-bold mb-[clamp(1rem,2vw+1rem,1.5rem)]">Mes Étudiants</h1>
+      <h1 className="text-[clamp(1rem,2.5vw+1rem,2rem)] font-bold mb-[clamp(1rem,2vw+1rem,1.5rem)]">My Students</h1>
 
       <Card className="mb-[clamp(1rem,2vw+1rem,1.5rem)] border py-3 border-slate-200 md:hover:border-primary duration-500 transition-colors shadow-sm">
         <CardHeader>
-          <CardTitle>Filtrer et Rechercher</CardTitle>
+          <CardTitle>Filter & Search</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col md:flex-row gap-4">
           {/* Search Input */}
           <Input
-            placeholder="Rechercher par nom ou ID..."
+            placeholder="Search by name or ID..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="max-w-sm"
@@ -115,10 +115,10 @@ export default function TeacherStudentsPage() {
           {/* Class Filter Dropdown */}
           <Select value={selectedClassId} onValueChange={setSelectedClassId}>
             <SelectTrigger className="w-[280px] border-border lg:hover:border-primary transition-colors duration-300">
-              <SelectValue placeholder="Toutes mes classes" />
+              <SelectValue placeholder="All my classes" />
             </SelectTrigger>
             <SelectContent className="border-border hover:border-primary transition-colors duration-300">
-              <SelectItem value="all" >Toutes les classes / Tous les étudiants</SelectItem>
+              <SelectItem value="all" >All classes / All students</SelectItem>
               {classes.map((c) => (
                 <SelectItem key={c.id} value={String(c.id)}>
                   {c.name} - {c.grade}
@@ -133,18 +133,18 @@ export default function TeacherStudentsPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>ID ÉTUDIANT</TableHead>
-              <TableHead>NOM</TableHead>
-              <TableHead>GENRE</TableHead>
+              <TableHead>STUDENT ID</TableHead>
+              <TableHead>NAME</TableHead>
+              <TableHead>GENDER</TableHead>
               <TableHead>EMAIL</TableHead>
-              <TableHead>TÉLÉPHONE</TableHead>
+              <TableHead>PHONE</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-10">
-                  Chargement des étudiants...
+                  Loading students...
                 </TableCell>
               </TableRow>
             ) : filteredStudents.length > 0 ? (
@@ -160,7 +160,7 @@ export default function TeacherStudentsPage() {
             ) : (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
-                  Aucun étudiant trouvé.
+                  No students found.
                 </TableCell>
               </TableRow>
             )}

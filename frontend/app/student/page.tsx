@@ -76,13 +76,13 @@ export default function StudentDashboard() {
       semester = 1;
     }
 
-    // Get the current month name in French (e.g., "juin")
-    const monthName = currentDate.toLocaleDateString('fr-FR', { month: 'long' });
-
-    // Capitalize the first letter of the month name (e.g., "Juin")
+    // Get the current month name in English (e.g., "June")
+    const monthName = currentDate.toLocaleDateString('en-US', { month: 'long' });
+ 
+    // Capitalize the first letter of the month name (e.g., "June")
     const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-
-    return `Semestre ${semester}, ${capitalizedMonth} - Année ${year}`;
+ 
+    return `Semester ${semester}, ${capitalizedMonth} - Year ${year}`;
   };
 
   useEffect(() => {
@@ -99,13 +99,7 @@ export default function StudentDashboard() {
         const statsRes = await api.get('/student/dashboard-stats');
         setStats(statsRes.data);
         if (statsRes.data?.weeklyAttendance && Array.isArray(statsRes.data.weeklyAttendance)) {
-          // Translate English weekday tags to French for the chart labels
-          const frMap: Record<string, string> = { Mon: 'Lun', Tue: 'Mar', Wed: 'Mer', Thu: 'Jeu', Fri: 'Ven', Sat: 'Sam', Sun: 'Dim' };
-          const mapped = statsRes.data.weeklyAttendance.map((item: any) => ({
-            ...item,
-            day: frMap[item.day] || item.day
-          }));
-          setAttendanceData(mapped);
+          setAttendanceData(statsRes.data.weeklyAttendance);
         }
       } catch (error) {
         console.error("Failed to fetch dashboard stats:", error);
@@ -124,16 +118,16 @@ export default function StudentDashboard() {
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-[clamp(1.2rem,2.5vw+1rem,3rem)] font-black text-slate-900 tracking-tighter">
-            Bienvenue ! <span className="text-primary">{(studentName || 'Student').split(' ')[0]}</span> 👋
+            Welcome! <span className="text-primary">{(studentName || 'Student').split(' ')[0]}</span> 👋
           </h1>
           <p className="text-slate-500 font-medium mt-1 uppercase text-[10px] tracking-[0.2em]">
-            Statut du système: <span className="text-emerald-500">Actif</span> • {semesterText || 'Chargement...'}
+            System Status: <span className="text-emerald-500">Active</span> • {semesterText || 'Loading...'}
           </p>
         </div>
         <div className="flex gap-3">
           <Button className="bg-white border border-primary/0 md:hover:border-primary duration-500 hover:bg-slate-50 text-slate-900 rounded-2xl px-6 h-12 font-bold shadow-sm">
             <CalendarIcon size={18} className="mr-1 text-primary" />
-            Emploi du temps
+            Timetable
           </Button>
         </div>
       </header>
@@ -141,10 +135,10 @@ export default function StudentDashboard() {
       {/* Stats Grid */}
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { label: 'Cours Actifs', value: stats.courseCount, icon: BookOpen, color: 'text-primary', bg: 'bg-blue-50' },
-          { label: 'Présence', value: `${stats.attendance}%`, icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'Ressources', value: stats.materials, icon: FileText, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'Moy. Générale', value: stats.averageGrade, icon: Award, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+          { label: 'Active Courses', value: stats.courseCount, icon: BookOpen, color: 'text-primary', bg: 'bg-blue-50' },
+          { label: 'Attendance', value: `${stats.attendance}%`, icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Resources', value: stats.materials, icon: FileText, color: 'text-amber-600', bg: 'bg-amber-50' },
+          { label: 'Average Grade', value: stats.averageGrade, icon: Award, color: 'text-indigo-600', bg: 'bg-indigo-50' },
         ].map((item, i) => (
           <motion.div
             key={item.label}
@@ -175,8 +169,8 @@ export default function StudentDashboard() {
         <Card className="lg:col-span-2 shadow-sm rounded-4 md:rounded-3xl border border-primary/0 md:hover:border-primary duration-500 bg-white p-4 md:p-[clamp(1rem,2.5vw+1rem,2rem)]">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-xl font-black text-slate-900  uppercase tracking-tight">Pouls de présence</h2>
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Suivi de la cohérence hebdomadaire</p>
+              <h2 className="text-xl font-black text-slate-900  uppercase tracking-tight">Attendance Pulse</h2>
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Weekly consistency tracking</p>
             </div>
             <TrendingUp className="text-emerald-500" />
           </div>
@@ -218,7 +212,7 @@ export default function StudentDashboard() {
           <Card className="border border-slate-200 md:hover:border-primary duration-500 transition-colors shadow-md rounded-2xl bg-white text-slate-800 p-5 overflow-hidden relative group">
             <div className="relative z-10">
               <h2 className="text-xs font-black uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
-                <Clock className="w-4 h-4 text-blue-500 animate-pulse" /> Rappel d'examen
+                <Clock className="w-4 h-4 text-blue-500 animate-pulse" /> Exam Reminder
               </h2>
 
               {stats.upcomingExam ? (
@@ -236,28 +230,28 @@ export default function StudentDashboard() {
                   </h3>
                   <div className="text-[11px] font-bold text-slate-500 mt-2 flex flex-col gap-1.5">
                     <span className="flex items-center gap-1.5"><Clock size={12} className="text-slate-400" /> {stats.upcomingExam.time?.slice(0, 5) || '12:00'}</span>
-                    <span className="flex items-center gap-1.5"><BookOpen size={12} className="text-slate-400" /> Enseignant : {stats.upcomingExam.teacherName || 'Non assigné'}</span>
+                    <span className="flex items-center gap-1.5"><BookOpen size={12} className="text-slate-400" /> Teacher: {stats.upcomingExam.teacherName || 'Not assigned'}</span>
                   </div>
                 </div>
               ) : (
                 <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
                   <CheckCircle className="text-emerald-500 w-5 h-5" />
                   <div>
-                    <p className="text-xs font-bold text-slate-700">Aucun examen à venir</p>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Vous êtes à jour !</p>
+                    <p className="text-xs font-bold text-slate-700">No upcoming exams</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">You are all caught up!</p>
                   </div>
                 </div>
               )}
 
               <Button className="w-full mt-4 bg-slate-900 text-white md:hover:bg-primary duration-500 rounded-xl h-10 font-bold text-xs uppercase tracking-wider transition-all" asChild>
-                 <a href="/student/exams">Guide d'étude</a>
+                 <a href="/student/exams">Study guide</a>
               </Button>
             </div>
             <BookOpen className="absolute -right-8 -bottom-8 text-slate-100 pointer-events-none" size={150} />
           </Card>
 
           <Card className="group/card border border-primary/0 md:hover:border-primary duration-500 shadow-sm rounded-4 md:rounded-3xl bg-white p-4 md:p-[clamp(1rem,2.5vw+1rem,2rem)]">
-            <h2 className="text-xs font-black uppercase text-slate-400 group-hover/card:text-primary duration-500 tracking-widest mb-6">Activités récentes</h2>
+            <h2 className="text-xs font-black uppercase text-slate-400 group-hover/card:text-primary duration-500 tracking-widest mb-6">Recent Activities</h2>
             <div className="space-y-6">
               {stats.recentActivity.length > 0 ? (
                 stats.recentActivity.map((activity, i) => (
@@ -275,7 +269,7 @@ export default function StudentDashboard() {
                   </div>
                 ))
               ) : (
-                <div className="text-center py-4 text-slate-400 text-sm font-medium">Aucune activité récente</div>
+                <div className="text-center py-4 text-slate-400 text-sm font-medium">No recent activities</div>
               )}
             </div>
           </Card>

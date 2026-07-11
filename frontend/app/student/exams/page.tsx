@@ -34,8 +34,8 @@ export default function StudentExamsPage() {
             // Sort by date: upcoming first
             setExams(response.data.sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime()));
          } catch (error) {
-            toast.error('Echec de la connexion', {
-               description: 'Impossible de se connecter aux serveurs.',
+            toast.error('Connection Failed', {
+               description: 'Unable to connect to the servers.',
             });
             console.log(error)
          } finally {
@@ -52,7 +52,7 @@ export default function StudentExamsPage() {
    if (loading) return (
       <div className="h-screen flex flex-col items-center justify-center gap-4">
          <Loader2 className="animate-spin text-primary" size={40} />
-         <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 italic">Synchronisation des évaluations en cours...</p>
+         <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 italic">Syncing evaluations in progress...</p>
       </div>
    );
 
@@ -61,8 +61,8 @@ export default function StudentExamsPage() {
          {/* Header Section */}
          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>
-               <h1 className="text-[clamp(1.2rem,2.5vw+1rem,3rem)] font-black text-slate-900 tracking-tighter italic">Évaluations <span className="text-primary">Pulse.</span></h1>
-               <p className="text-slate-500 font-bold text-sm mt-2 uppercase tracking-widest text-[10px]">Calendrier et Statut des Évaluations à Venir</p>
+               <h1 className="text-[clamp(1.2rem,2.5vw+1rem,3rem)] font-black text-slate-900 tracking-tighter italic">Evaluation <span className="text-primary">Pulse.</span></h1>
+               <p className="text-slate-500 font-bold text-sm mt-2 uppercase tracking-widest text-[10px]">Schedule and Status of Upcoming Evaluations</p>
             </div>
 
             <Card className="shadow-sm rounded-2xl bg-white px-6 py-4 flex items-center gap-4 border border-slate-100 md:hover:border-primary duration-500 transition-colors">
@@ -70,7 +70,7 @@ export default function StudentExamsPage() {
                   <BookOpen size={20} />
                </div>
                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nombre total d'évaluations</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total number of evaluations</p>
                   <p className="text-xl font-black text-slate-900">{exams.length}</p>
                </div>
             </Card>
@@ -81,10 +81,10 @@ export default function StudentExamsPage() {
             <Table>
                <TableHeader className="bg-slate-50/50">
                   <TableRow className="border-none">
-                     <TableHead className="py-8 pl-10 font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Évaluation</TableHead>
-                     <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Semestre et Poids</TableHead>
-                     <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Horaire</TableHead>
-                     <TableHead className="text-right pr-10 font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Statut</TableHead>
+                     <TableHead className="py-8 pl-10 font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Evaluation</TableHead>
+                     <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Term & Weight</TableHead>
+                     <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Schedule</TableHead>
+                     <TableHead className="text-right pr-10 font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Status</TableHead>
                   </TableRow>
                </TableHeader>
                <TableBody>
@@ -92,15 +92,15 @@ export default function StudentExamsPage() {
                      <TableRow key={exam.id} className="hover:bg-blue-50/10 transition-colors duration-500 border-slate-50 group">
                         <TableCell className="pl-10 py-6">
                            <div className="font-black text-slate-900 italic uppercase text-sm tracking-tight">{exam.name}</div>
-                           <div className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mt-1">Classe: {exam.classe.name}</div>
-                           <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Enseignant: {exam.teacher?.username || exam.teacher?.name || 'Non assigné'}</div>
+                           <div className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mt-1">Class: {exam.classe.name}</div>
+                           <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Teacher: {exam.teacher?.username || exam.teacher?.name || 'Not assigned'}</div>
                         </TableCell>
 
                         <TableCell>
                            <div className="flex flex-col gap-1">
                               <span className="font-black text-[10px] text-slate-800 uppercase tracking-tighter italic">{exam.term}</span>
                               <Badge variant="outline" className="w-fit text-[9px] font-black border-slate-200 text-slate-500 rounded-md">
-                                 PONDÉRATION: {exam.weight}%
+                                 WEIGHT: {exam.weight}%
                               </Badge>
                            </div>
                         </TableCell>
@@ -117,11 +117,11 @@ export default function StudentExamsPage() {
                         <TableCell className="text-right pr-10">
                            {exam.closed ? (
                               <div className="inline-flex items-center gap-2 bg-slate-100 text-slate-400 px-4 py-2 rounded-xl font-black text-[9px] uppercase tracking-widest italic">
-                                 <Hourglass size={12} /> Résultats en attente
+                                 <Hourglass size={12} /> Results pending
                               </div>
                            ) : (
                               <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-600 px-4 py-2 rounded-xl font-black text-[9px] uppercase tracking-widest italic shadow-sm shadow-emerald-100">
-                                 <AlertCircle size={12} className="animate-pulse" /> Examen à venir
+                                 <AlertCircle size={12} className="animate-pulse" /> Upcoming exam
                               </div>
                            )}
                         </TableCell>
@@ -133,7 +133,7 @@ export default function StudentExamsPage() {
             {/* Pagination Footer */}
             <div className="p-8 bg-slate-50/30 flex items-center justify-between border-t border-slate-50">
                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
-                  Affichage de la période d'évaluation {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, exams.length)}
+                  Showing evaluation period {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, exams.length)}
                </p>
                <div className="flex gap-2">
                   <Button
@@ -164,12 +164,12 @@ export default function StudentExamsPage() {
                      <CheckCircle2 size={32} />
                   </div>
                   <div>
-                     <h3 className="text-xl font-black uppercase italic">Intégrité Académique</h3>
-                     <p className="text-blue-100 text-xs font-medium mt-1">Consultez votre emploi du temps régulièrement. Les enseignants peuvent verrouiller les évaluations à la fin du semestre.</p>
+                     <h3 className="text-xl font-black uppercase italic">Academic Integrity</h3>
+                     <p className="text-blue-100 text-xs font-medium mt-1">Check your timetable regularly. Teachers can lock evaluations at the end of the semester.</p>
                   </div>
                </div>
                <Button variant="outline" className="bg-white/10 border-white/20 md:hover:border-white duration-500 hover:bg-white/20 text-white rounded-2xl h-12 px-6 font-black text-[10px] uppercase tracking-widest transition-colors">
-                  Télécharger les règlements
+                  Download regulations
                </Button>
             </div>
             <Lock className="absolute -right-10 -bottom-10 text-white/5" size={200} />

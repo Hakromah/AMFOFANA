@@ -214,7 +214,7 @@ export default function Navbar({ navbarData, contactInfo, donationData }: Navbar
             {/* Unified Menu Wrapper */}
             <div
               className={`
-                        menu-wrapper 
+                        menu-wrapper
                         absolute top-full left-0 w-full
                         flex flex-col md:flex-row items-center max-md:bg-primary gap-5 lg:gap-10
                         transition-all duration-300 ease-in-out
@@ -252,20 +252,20 @@ export default function Navbar({ navbarData, contactInfo, donationData }: Navbar
                           </div>
                           <div
                             className={`
-                                           gap-from-15 gap-to-20 z-100! grid md:grid-cols-1  scale-100 opacity-100
-                                           max-md:grid-rows-[0fr] duration-500
-                                            md:group-not-[&:hover]/sub:scale-90 
-                                            md:group-not-[&:hover]/sub:opacity-0 
-                                              md:group-hover/sub:opacity-100 
-                                              md:group-hover/sub:pointer-events-auto 
-                                              md:group-hover/sub:scale-100 
-                                            md:group-not-[&:hover]/sub:pointer-events-none  
-                                             md:group-hover/sub:delay-200 
+                                          gap-from-15 gap-to-20 z-100! grid md:grid-cols-1  scale-100 opacity-100
+                                          max-md:grid-rows-[0fr] duration-500
+                                            md:group-not-[&:hover]/sub:scale-90
+                                            md:group-not-[&:hover]/sub:opacity-0
+                                              md:group-hover/sub:opacity-100
+                                              md:group-hover/sub:pointer-events-auto
+                                              md:group-hover/sub:scale-100
+                                            md:group-not-[&:hover]/sub:pointer-events-none
+                                            md:group-hover/sub:delay-200
                                               relative max-md:w-full
-                                               md:absolute md:top-full
+                                              md:absolute md:top-full
                                                 md:w-[277px] md:z-150 md:left-1/2 h-full md:-translate-x-1/2
                                             ${mobileSubmenu === (item.label || item.name) ? "max-md:grid max-md:grid-rows-[1fr] max-md:opacity-100 max-md:mt-2 max-md:relative max-md:h-full max-md:w-full" : "max-md:grid max-md:grid-rows-[0fr] max-md:opacity-0 max-md:mt-0 max-md:px-0 max-md:w-full"}
-                                        
+
                                         `}
                           >
                             <div className="h-full w-full max-md:overflow-hidden md:bg-white md:relative md:rounded-bl-[10px] md:shadow-sm md:rounded-br-[10px]">
@@ -334,7 +334,7 @@ export default function Navbar({ navbarData, contactInfo, donationData }: Navbar
                     <button
                       className="w-full h-full py-3 px-5 text-nowrap flex items-center justify-center transition-colors max-md:text-primary max-md:bg-white lg:hover:bg-primary/10 lg:hover:text-primary bg-primary border border-primary/0 lg:hover:border-primary text-white duration-500 rounded-full text-sm font-medium cursor-pointer"
                     >
-                      Faire un don
+                      Make a donation
                     </button>
                   ) : (
                     <Dialog onOpenChange={(open) => { if (open) setIsMobileMenuOpen(false); }}>
@@ -342,161 +342,161 @@ export default function Navbar({ navbarData, contactInfo, donationData }: Navbar
                         <button
                           className="w-full h-full py-3 px-5 text-nowrap flex items-center justify-center transition-colors max-md:text-primary max-md:bg-white lg:hover:bg-primary/10 lg:hover:text-primary bg-primary border border-primary/0 lg:hover:border-primary text-white duration-500 rounded-full text-sm font-medium cursor-pointer"
                         >
-                          Faire un don
+                          Make a donation
                         </button>
                       </DialogTrigger>
-                    <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>{donationData?.header ?? 'Informations Bancaires'}</DialogTitle>
-                        <DialogDescription>
-                          {donationData?.description ?? 'Merci pour votre soutien. Voici nos coordonnées bancaires pour effectuer un don.'}
-                        </DialogDescription>
-                      </DialogHeader>
+                      <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>{donationData?.header ?? 'Bank Information'}</DialogTitle>
+                          <DialogDescription>
+                            {donationData?.description ?? 'Thank you for your support. Here are our bank details to make a donation.'}
+                          </DialogDescription>
+                        </DialogHeader>
 
-                      <div className="flex flex-col gap-4 py-4">
-                        {(donationData?.bankDetails ?? []).length > 0 ? (
-                          donationData!.bankDetails.map((bank, index) => (
-                            <div key={bank.id} className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden divide-y divide-slate-200">
-                              {/* Bank header row */}
-                              <div className="flex items-center gap-4 p-4 bg-primary/5">
+                        <div className="flex flex-col gap-4 py-4">
+                          {(donationData?.bankDetails ?? []).length > 0 ? (
+                            donationData!.bankDetails.map((bank, index) => (
+                              <div key={bank.id} className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden divide-y divide-slate-200">
+                                {/* Bank header row */}
+                                <div className="flex items-center gap-4 p-4 bg-primary/5">
+                                  <Landmark className="h-5 w-5 text-primary shrink-0" />
+                                  <div className="flex-1">
+                                    <p className="text-sm font-semibold text-slate-900">
+                                      {bank.bankName || `Bank ${index + 1}`}
+                                    </p>
+                                    {bank.branchName && (
+                                      <p className="text-xs text-slate-500">{bank.branchName}</p>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Account Name */}
+                                {bank.accountName && (
+                                  <div className="flex items-center gap-4 px-4 py-2 hover:bg-slate-100 transition-colors group">
+                                    <div className="h-5 w-5 shrink-0 max-xs:hidden" />
+                                    <div className="flex-1 max-xs:flex max-xs:justify-between xs:flex-row xs:items-center xs:justify-between xs:pr-8 xs:flex max-xs:gap-2 max-xs:items-center ">
+                                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Account Name</p>
+                                      <p className="text-sm text-slate-900 font-medium">{bank.accountName}</p>
+                                    </div>
+                                    <button
+                                      onClick={() => copyToClipboard(bank.accountName, `name-${bank.id}`)}
+                                      className="p-2 bg-white shadow-sm border border-slate-200 hover:bg-primary/5 hover:text-primary hover:border-primary/30 rounded-md transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                                      title="Copy Account Name"
+                                    >
+                                      {copiedItem === `name-${bank.id}` ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4 text-slate-500" />}
+                                    </button>
+                                  </div>
+                                )}
+
+                                {/* Account Number */}
+                                {bank.accountNumber && (
+                                  <div className="flex items-center gap-4 px-4 py-2 hover:bg-slate-100 transition-colors group">
+                                    <div className="h-5 w-5 shrink-0 max-xs:hidden" />
+                                    <div className="flex-1 max-xs:flex max-xs:justify-between xs:flex-row xs:items-center xs:justify-between xs:pr-8 xs:flex max-xs:gap-2 max-xs:items-center">
+                                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Account Number</p>
+                                      <p className="text-sm text-slate-900 font-mono">{bank.accountNumber}</p>
+                                    </div>
+                                    <button
+                                      onClick={() => copyToClipboard(bank.accountNumber, `acc-${bank.id}`)}
+                                      className="p-2 bg-white shadow-sm border border-slate-200 hover:bg-primary/5 hover:text-primary hover:border-primary/30 rounded-md transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                                      title="Copy Account Number"
+                                    >
+                                      {copiedItem === `acc-${bank.id}` ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4 text-slate-500" />}
+                                    </button>
+                                  </div>
+                                )}
+
+                                {/* IBAN */}
+                                {bank.ibanNumber && (
+                                  <div className="flex items-center gap-4 px-4 py-2 hover:bg-slate-100 transition-colors group">
+                                    <div className="h-5 w-5 shrink-0 max-xs:hidden" />
+                                    <div className="flex-1 max-xs:flex max-xs:justify-between xs:flex-row xs:items-center xs:justify-between xs:pr-8 xs:flex max-xs:gap-2 max-xs:items-center">
+                                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">IBAN / RIB</p>
+                                      <p className="text-sm text-slate-900 font-mono">{bank.ibanNumber}</p>
+                                    </div>
+                                    <button
+                                      onClick={() => copyToClipboard(bank.ibanNumber, `iban-${bank.id}`)}
+                                      className="p-2 bg-white shadow-sm border border-slate-200 hover:bg-primary/5 hover:text-primary hover:border-primary/30 rounded-md transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                                      title="Copy IBAN / RIB"
+                                    >
+                                      {copiedItem === `iban-${bank.id}` ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4 text-slate-500" />}
+                                    </button>
+                                  </div>
+                                )}
+
+                                {/* SWIFT */}
+                                {bank.swiftCode && (
+                                  <div className="flex items-center gap-4 px-4 py-2 hover:bg-slate-100 transition-colors group">
+                                    <div className="h-5 w-5 shrink-0 max-xs:hidden" />
+                                    <div className="flex-1 max-xs:flex max-xs:justify-between xs:flex-row xs:items-center xs:justify-between xs:pr-8 xs:flex max-xs:gap-2 max-xs:items-center">
+                                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Code SWIFT / BIC</p>
+                                      <p className="text-sm text-slate-900 font-mono">{bank.swiftCode}</p>
+                                    </div>
+                                    <button
+                                      onClick={() => copyToClipboard(bank.swiftCode, `swift-${bank.id}`)}
+                                      className="p-2 bg-white shadow-sm border border-slate-200 hover:bg-primary/5 hover:text-primary hover:border-primary/30 rounded-md transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                                      title="Copy SWIFT / BIC"
+                                    >
+                                      {copiedItem === `swift-${bank.id}` ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4 text-slate-500" />}
+                                    </button>
+                                  </div>
+                                )}
+
+                                {/* Bank Address */}
+                                {bank.bankAddress && (
+                                  <div className="flex items-center gap-4 p-4">
+                                    <div className="h-5 w-5 shrink-0 max-xs:hidden" />
+                                    <div className="flex-1 max-xs:flex max-xs:justify-between xs:flex-row xs:items-center xs:justify-between xs:pr-8 xs:flex max-xs:gap-2 max-xs:items-center">
+                                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Address</p>
+                                      <p className="text-sm text-slate-900">{bank.bankAddress}</p>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))
+                          ) : (
+                            /* Fallback when no Strapi data */
+                            <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden divide-y divide-slate-200">
+                              <div className="flex items-center gap-4 p-4">
                                 <Landmark className="h-5 w-5 text-primary shrink-0" />
-                                <div className="flex-1">
-                                  <p className="text-sm font-semibold text-slate-900">
-                                    {bank.bankName || `Banque ${index + 1}`}
-                                  </p>
-                                  {bank.branchName && (
-                                    <p className="text-xs text-slate-500">{bank.branchName}</p>
-                                  )}
+                                <div className="flex-1 max-xs:flex max-xs:justify-between xs:flex-row xs:items-center xs:justify-between xs:pr-8 xs:flex max-xs:gap-2 max-xs:items-center">
+                                  <p className="text-sm font-medium text-slate-900">Bank</p>
+                                  <p className="text-sm text-slate-500">Bank Name</p>
                                 </div>
                               </div>
-
-                              {/* Account Name */}
-                              {bank.accountName && (
-                                <div className="flex items-center gap-4 px-4 py-2 hover:bg-slate-100 transition-colors group">
-                                  <div className="h-5 w-5 shrink-0 max-xs:hidden" />
-                                  <div className="flex-1 max-xs:flex max-xs:justify-between xs:flex-row xs:items-center xs:justify-between xs:pr-8 xs:flex max-xs:gap-2 max-xs:items-center ">
-                                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Nom du compte</p>
-                                    <p className="text-sm text-slate-900 font-medium">{bank.accountName}</p>
-                                  </div>
-                                  <button
-                                    onClick={() => copyToClipboard(bank.accountName, `name-${bank.id}`)}
-                                    className="p-2 bg-white shadow-sm border border-slate-200 hover:bg-primary/5 hover:text-primary hover:border-primary/30 rounded-md transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
-                                    title="Copier"
-                                  >
-                                    {copiedItem === `name-${bank.id}` ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4 text-slate-500" />}
-                                  </button>
+                              <div className="flex items-center gap-4 px-4 py-2 hover:bg-slate-100 transition-colors group">
+                                <div className="h-5 w-5 shrink-0 max-xs:hidden" />
+                                <div className="flex-1 max-xs:flex max-xs:justify-between xs:flex-row xs:items-center xs:justify-between xs:pr-8 xs:flex max-xs:gap-2 max-xs:items-center">
+                                  <p className="text-sm font-medium text-slate-900">Account Name</p>
+                                  <p className="text-sm text-slate-500">A.M. FOFANA</p>
                                 </div>
-                              )}
-
-                              {/* Account Number */}
-                              {bank.accountNumber && (
-                                <div className="flex items-center gap-4 px-4 py-2 hover:bg-slate-100 transition-colors group">
-                                  <div className="h-5 w-5 shrink-0 max-xs:hidden" />
-                                  <div className="flex-1 max-xs:flex max-xs:justify-between xs:flex-row xs:items-center xs:justify-between xs:pr-8 xs:flex max-xs:gap-2 max-xs:items-center">
-                                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Numéro de compte</p>
-                                    <p className="text-sm text-slate-900 font-mono">{bank.accountNumber}</p>
-                                  </div>
-                                  <button
-                                    onClick={() => copyToClipboard(bank.accountNumber, `acc-${bank.id}`)}
-                                    className="p-2 bg-white shadow-sm border border-slate-200 hover:bg-primary/5 hover:text-primary hover:border-primary/30 rounded-md transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
-                                    title="Copier"
-                                  >
-                                    {copiedItem === `acc-${bank.id}` ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4 text-slate-500" />}
-                                  </button>
+                                <button
+                                  onClick={() => copyToClipboard('A.M. FOFANA', 'name')}
+                                  className="p-2 bg-white shadow-sm border border-slate-200 hover:bg-primary/5 hover:text-primary hover:border-primary/30 rounded-md transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                                  title="Copy Account Name"
+                                >
+                                  {copiedItem === 'name' ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4 text-slate-500" />}
+                                </button>
+                              </div>
+                              <div className="flex items-center gap-4 px-4 py-2 hover:bg-slate-100 transition-colors group">
+                                <div className="h-5 w-5 shrink-0 max-xs:hidden" />
+                                <div className="flex-1 max-xs:flex max-xs:justify-between xs:flex-row xs:items-center xs:justify-between xs:pr-8 xs:flex max-xs:gap-2 max-xs:items-center">
+                                  <p className="text-sm font-medium text-slate-900">IBAN / RIB</p>
+                                  <p className="text-sm text-slate-500 font-mono">XX00 0000 0000 0000 0000 00</p>
                                 </div>
-                              )}
-
-                              {/* IBAN */}
-                              {bank.ibanNumber && (
-                                <div className="flex items-center gap-4 px-4 py-2 hover:bg-slate-100 transition-colors group">
-                                  <div className="h-5 w-5 shrink-0 max-xs:hidden" />
-                                  <div className="flex-1 max-xs:flex max-xs:justify-between xs:flex-row xs:items-center xs:justify-between xs:pr-8 xs:flex max-xs:gap-2 max-xs:items-center">
-                                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">IBAN / RIB</p>
-                                    <p className="text-sm text-slate-900 font-mono">{bank.ibanNumber}</p>
-                                  </div>
-                                  <button
-                                    onClick={() => copyToClipboard(bank.ibanNumber, `iban-${bank.id}`)}
-                                    className="p-2 bg-white shadow-sm border border-slate-200 hover:bg-primary/5 hover:text-primary hover:border-primary/30 rounded-md transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
-                                    title="Copier"
-                                  >
-                                    {copiedItem === `iban-${bank.id}` ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4 text-slate-500" />}
-                                  </button>
-                                </div>
-                              )}
-
-                              {/* SWIFT */}
-                              {bank.swiftCode && (
-                                <div className="flex items-center gap-4 px-4 py-2 hover:bg-slate-100 transition-colors group">
-                                  <div className="h-5 w-5 shrink-0 max-xs:hidden" />
-                                  <div className="flex-1 max-xs:flex max-xs:justify-between xs:flex-row xs:items-center xs:justify-between xs:pr-8 xs:flex max-xs:gap-2 max-xs:items-center">
-                                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Code SWIFT / BIC</p>
-                                    <p className="text-sm text-slate-900 font-mono">{bank.swiftCode}</p>
-                                  </div>
-                                  <button
-                                    onClick={() => copyToClipboard(bank.swiftCode, `swift-${bank.id}`)}
-                                    className="p-2 bg-white shadow-sm border border-slate-200 hover:bg-primary/5 hover:text-primary hover:border-primary/30 rounded-md transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
-                                    title="Copier"
-                                  >
-                                    {copiedItem === `swift-${bank.id}` ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4 text-slate-500" />}
-                                  </button>
-                                </div>
-                              )}
-
-                              {/* Bank Address */}
-                              {bank.bankAddress && (
-                                <div className="flex items-center gap-4 p-4">
-                                  <div className="h-5 w-5 shrink-0 max-xs:hidden" />
-                                  <div className="flex-1 max-xs:flex max-xs:justify-between xs:flex-row xs:items-center xs:justify-between xs:pr-8 xs:flex max-xs:gap-2 max-xs:items-center">
-                                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Adresse</p>
-                                    <p className="text-sm text-slate-900">{bank.bankAddress}</p>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          ))
-                        ) : (
-                          /* Fallback when no Strapi data */
-                          <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden divide-y divide-slate-200">
-                            <div className="flex items-center gap-4 p-4">
-                              <Landmark className="h-5 w-5 text-primary shrink-0" />
-                              <div className="flex-1 max-xs:flex max-xs:justify-between xs:flex-row xs:items-center xs:justify-between xs:pr-8 xs:flex max-xs:gap-2 max-xs:items-center">
-                                <p className="text-sm font-medium text-slate-900">Banque</p>
-                                <p className="text-sm text-slate-500">Nom de la banque</p>
+                                <button
+                                  onClick={() => copyToClipboard('XX00 0000 0000 0000 0000 00', 'iban')}
+                                  className="p-2 bg-white shadow-sm border border-slate-200 hover:bg-primary/5 hover:text-primary hover:border-primary/30 rounded-md transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                                  title="Copy IBAN / RIB"
+                                >
+                                  {copiedItem === 'iban' ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4 text-slate-500" />}
+                                </button>
                               </div>
                             </div>
-                            <div className="flex items-center gap-4 px-4 py-2 hover:bg-slate-100 transition-colors group">
-                              <div className="h-5 w-5 shrink-0 max-xs:hidden" />
-                              <div className="flex-1 max-xs:flex max-xs:justify-between xs:flex-row xs:items-center xs:justify-between xs:pr-8 xs:flex max-xs:gap-2 max-xs:items-center">
-                                <p className="text-sm font-medium text-slate-900">Nom du compte</p>
-                                <p className="text-sm text-slate-500">A.M. FOFANA</p>
-                              </div>
-                              <button
-                                onClick={() => copyToClipboard('A.M. FOFANA', 'name')}
-                                className="p-2 bg-white shadow-sm border border-slate-200 hover:bg-primary/5 hover:text-primary hover:border-primary/30 rounded-md transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
-                                title="Copier"
-                              >
-                                {copiedItem === 'name' ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4 text-slate-500" />}
-                              </button>
-                            </div>
-                            <div className="flex items-center gap-4 px-4 py-2 hover:bg-slate-100 transition-colors group">
-                              <div className="h-5 w-5 shrink-0 max-xs:hidden" />
-                              <div className="flex-1 max-xs:flex max-xs:justify-between xs:flex-row xs:items-center xs:justify-between xs:pr-8 xs:flex max-xs:gap-2 max-xs:items-center">
-                                <p className="text-sm font-medium text-slate-900">IBAN / RIB</p>
-                                <p className="text-sm text-slate-500 font-mono">XX00 0000 0000 0000 0000 00</p>
-                              </div>
-                              <button
-                                onClick={() => copyToClipboard('XX00 0000 0000 0000 0000 00', 'iban')}
-                                className="p-2 bg-white shadow-sm border border-slate-200 hover:bg-primary/5 hover:text-primary hover:border-primary/30 rounded-md transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
-                                title="Copier"
-                              >
-                                {copiedItem === 'iban' ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4 text-slate-500" />}
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                          )}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   )}
                 </div>
                 {/* Donate Button with Dialog end */}
@@ -518,7 +518,7 @@ export default function Navbar({ navbarData, contactInfo, donationData }: Navbar
                 onClick={toggleMobileMenu}
                 className="
                         hamburger-menu group/burger relative cursor-pointer flex flex-col justify-between w-[26px] h-[18px]
-                       "
+                      "
               >
                 <span
                   className={`

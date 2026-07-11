@@ -54,7 +54,7 @@ const exportGradebookPDF = (
   schoolName = '2CS COMPLEXE SCOLAIRE CAMARA SALEMATOU',
 ) => {
   if (reportData.length === 0) {
-    toast.error('Aucune donnée du carnet de notes à exporter.');
+    toast.error('No gradebook data to export.');
     return;
   }
 
@@ -75,8 +75,8 @@ const exportGradebookPDF = (
     doc.setFont('Helvetica', 'normal');
     doc.setFontSize(8);
     doc.setTextColor(156, 163, 175);
-    doc.text('Rapport de notes officiel  •  Système de gestion des résultats', 14, 17);
-    doc.text(`Généré le : ${date}`, 14, 22);
+    doc.text('Official Grade Report  •  Results Management System', 14, 17);
+    doc.text(`Generated on: ${date}`, 14, 22);
 
     // Class badge (right side)
     doc.setFillColor(37, 99, 235);
@@ -90,18 +90,18 @@ const exportGradebookPDF = (
     doc.setTextColor(15, 23, 42);
     doc.setFont('Helvetica', 'bold');
     doc.setFontSize(11);
-    doc.text('MATRICE DE PERFORMANCE ACADÉMIQUE', 14, 38);
+    doc.text('ACADEMIC PERFORMANCE MATRIX', 14, 38);
 
     doc.setFont('Helvetica', 'normal');
     doc.setFontSize(8);
     doc.setTextColor(100, 116, 139);
-    doc.text(`Total des élèves : ${reportData.length}   |   Total des évaluations : ${exams.length}`, 14, 44);
+    doc.text(`Total Students: ${reportData.length}   |   Total Assessments: ${exams.length}`, 14, 44);
 
     // ── Table columns ──
     const head = [
-      ['#', 'Nom et prénom de l\'élève', 'ID de l\'élève',
+      ['#', 'Student Full Name', 'Student ID',
         ...exams.map((e: any) => `${e?.name || '?'}\n(${e?.weight ?? 0}%)`),
-        'Moyenne pondérée', 'Note',
+        'Weighted Average', 'Grade',
       ],
     ];
 
@@ -192,15 +192,15 @@ const exportGradebookPDF = (
     doc.setTextColor(156, 163, 175);
     doc.setFont('Helvetica', 'normal');
     doc.text(
-      `${schoolName}  |  Rapport de notes officiel pour ${className}  |  ${date}  |  Confidentiel – Usage interne uniquement`,
+      `${schoolName}  |  Official grade report for ${className}  |  ${date}  |  Confidential – Internal use only`,
       pageW / 2, footerY + 5, { align: 'center' }
     );
 
-    doc.save(`Rapport de notes_${className.replace(/\s+/g, '_')}_${new Date().getFullYear()}.pdf`);
-    toast.success('Rapport de notes PDF exporté avec succès !');
+    doc.save(`Grade_Report_${className.replace(/\s+/g, '_')}_${new Date().getFullYear()}.pdf`);
+    toast.success('Gradebook PDF report successfully exported!');
   } catch (err) {
-    console.error('Génération du PDF échouée :', err);
-    toast.error('Export échoué. Veuillez réessayer.');
+    console.error('PDF generation failed:', err);
+    toast.error('Export failed. Please try again.');
   }
 };
 
@@ -247,7 +247,7 @@ export default function AdminResultsPage() {
       const res = await api.get(`/admin/results/filter?${params.toString()}`);
       setResults(Array.isArray(res.data) ? res.data : []);
     } catch (err: any) {
-      toast.error('Échec de la récupération des résultats.');
+      toast.error('Failed to retrieve results.');
       console.error(err);
     } finally {
       setLoading(false);
@@ -272,7 +272,7 @@ export default function AdminResultsPage() {
       const studentMap: any = {};
       (Array.isArray(resultsRes.data) ? resultsRes.data : []).forEach((r: any) => {
         const sId = r?.student?.userId || r?.student?.id || `unknown-${r?.id}`;
-        const studentName = r.student?.username || r.student?.name || 'Élève Inconnu';
+        const studentName = r.student?.username || r.student?.name || 'Unknown Student';
         const studentId = r?.student?.id || null;
         const examId = r?.exam?.id;
         if (!examId) return;
@@ -284,10 +284,10 @@ export default function AdminResultsPage() {
 
       setReportData(Object.values(studentMap));
     } catch (err) {
-      toast.error('Échec du chargement des données du cahier de notes.');
+      toast.error('Failed to load gradebook data.');
       console.error(err);
     } finally {
-      setGradebookLoading(false);
+      setLoading(false);
     }
   }, [selectedClassId]);
 
@@ -330,13 +330,13 @@ export default function AdminResultsPage() {
         <div>
           <div className="flex items-center gap-2 text-primary mb-1">
             <GraduationCap size={18} />
-            <span className="text-[10px] font-black uppercase tracking-[0.4em]">Gestion des résultats</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em]">Results Management</span>
           </div>
           <h1 className="text-[clamp(1.5rem,3vw,3.5rem)] font-black tracking-tight text-slate-900 italic uppercase">
-            Gestion des résultats
+            Results Management
           </h1>
           <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mt-1">
-            Surveillez tous les résultats publiés et les matrices de performance.
+            Monitor all published results and performance matrices.
           </p>
         </div>
 
@@ -344,10 +344,10 @@ export default function AdminResultsPage() {
           {/* Class selector */}
           <Select value={selectedClassId} onValueChange={setSelectedClassId}>
             <SelectTrigger className="w-44 rounded-xl border-slate-200 bg-white font-bold h-12">
-              <SelectValue placeholder="Sélectionner la classe" />
+              <SelectValue placeholder="Select class" />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-none shadow-xl">
-              <SelectItem value="all">Toutes les classes</SelectItem>
+              <SelectItem value="all">All Classes</SelectItem>
               {classes.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
             </SelectContent>
           </Select>
@@ -366,10 +366,10 @@ export default function AdminResultsPage() {
       <Tabs defaultValue="list" className="w-full">
         <TabsList className="grid grid-cols-2 max-w-xs rounded-2xl bg-slate-100 p-1">
           <TabsTrigger value="list" className="rounded-xl gap-2 font-bold text-xs uppercase tracking-wider data-[state=active]:bg-slate-900 data-[state=active]:text-white transition-all">
-            <ListFilter size={14} /> Afficher les résultats
+            <ListFilter size={14} /> View Results
           </TabsTrigger>
           <TabsTrigger value="gradebook" className="rounded-xl gap-2 font-bold text-xs uppercase tracking-wider data-[state=active]:bg-slate-900 data-[state=active]:text-white transition-all">
-            <LayoutGrid size={14} /> Cahier de notes
+            <LayoutGrid size={14} /> Gradebook
           </TabsTrigger>
         </TabsList>
 
@@ -380,10 +380,10 @@ export default function AdminResultsPage() {
             <CardContent className="py-4 grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
               <div className="space-y-1">
                 <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1">
-                  <Search size={10} /> Recherche d'étudiant
+                  <Search size={10} /> Search Student
                 </label>
                 <Input
-                  placeholder="Nom ou identifiant..."
+                  placeholder="Name or ID..."
                   className="rounded-xl border-slate-100 bg-slate-50 font-bold h-11"
                   value={studentQuery}
                   onChange={e => setStudentQuery(e.target.value)}
@@ -392,13 +392,13 @@ export default function AdminResultsPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Semestre</label>
+                <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Semester</label>
                 <Select value={selectedSemester} onValueChange={setSelectedSemester}>
                   <SelectTrigger className="rounded-xl border-slate-100 bg-slate-50 font-bold h-11">
-                    <SelectValue placeholder="Tout" />
+                    <SelectValue placeholder="All" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-none shadow-xl">
-                    <SelectItem value="all">Tous les semestres</SelectItem>
+                    <SelectItem value="all">All Semesters</SelectItem>
                     {uniqueSemesters.map(sem => <SelectItem key={sem} value={sem}>{sem}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -406,7 +406,7 @@ export default function AdminResultsPage() {
 
               <Button onClick={fetchResults} disabled={loading} className="h-11 rounded-xl font-black text-xs uppercase tracking-widest bg-slate-900 hover:bg-primary">
                 {loading ? <Loader2 size={14} className="animate-spin mr-2" /> : <Search size={14} className="mr-2" />}
-                Filtrer
+                Filter
               </Button>
             </CardContent>
           </Card>
@@ -417,13 +417,13 @@ export default function AdminResultsPage() {
               <Table>
                 <TableHeader className="sticky top-0 z-10">
                   <TableRow className="bg-slate-900 hover:bg-slate-900 border-none">
-                    <TableHead className="text-white font-black text-[9px] uppercase tracking-wider py-4 pl-6">ETUDIANT</TableHead>
-                    <TableHead className="text-white font-black text-[9px] uppercase tracking-wider">CLASSE</TableHead>
-                    <TableHead className="text-white font-black text-[9px] uppercase tracking-wider">ÉVALUATION</TableHead>
-                    <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-center">POIDS</TableHead>
-                    <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-center">NOTE</TableHead>
-                    <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-center">MENTION</TableHead>
-                    <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-right pr-6">STATUT</TableHead>
+                    <TableHead className="text-white font-black text-[9px] uppercase tracking-wider py-4 pl-6">STUDENT</TableHead>
+                    <TableHead className="text-white font-black text-[9px] uppercase tracking-wider">CLASS</TableHead>
+                    <TableHead className="text-white font-black text-[9px] uppercase tracking-wider">ASSESSMENT</TableHead>
+                    <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-center">WEIGHT</TableHead>
+                    <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-center">MARK</TableHead>
+                    <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-center">GRADE</TableHead>
+                    <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-right pr-6">STATUS</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -469,11 +469,11 @@ export default function AdminResultsPage() {
                           <div className="flex flex-col items-end gap-1">
                             {isPassing ? (
                               <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-100 font-black text-[9px] rounded-md px-2 py-0.5">
-                                <CheckCircle2 size={10} className="mr-1" /> RÉUSSI
+                                <CheckCircle2 size={10} className="mr-1" /> PASSED
                               </Badge>
                             ) : (
                               <Badge className="bg-rose-50 text-rose-600 border border-rose-100 font-black text-[9px] rounded-md px-2 py-0.5">
-                                <AlertCircle size={10} className="mr-1" /> ÉCHOUÉ
+                                <AlertCircle size={10} className="mr-1" /> FAILED
                               </Badge>
                             )}
                             <Badge variant="outline" className={`font-black text-[9px] rounded-md px-2 py-0.5 ${r.status === 'DRAFT' ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-green-50 text-green-700 border-green-100'
@@ -482,7 +482,7 @@ export default function AdminResultsPage() {
                             </Badge>
                             {r.exam?.locked && (
                               <span className="flex items-center gap-1 text-[9px] text-slate-300 font-bold">
-                                <Lock size={10} /> Verrouillé
+                                <Lock size={10} /> Locked
                               </span>
                             )}
                           </div>
@@ -492,7 +492,7 @@ export default function AdminResultsPage() {
                   }) : (
                     <TableRow>
                       <TableCell colSpan={7} className="h-48 text-center text-slate-400 italic text-sm">
-                        Aucun résultat trouvé correspondant à vos filtres.
+                        No results found matching your filters.
                       </TableCell>
                     </TableRow>
                   )}
@@ -501,7 +501,7 @@ export default function AdminResultsPage() {
             </div>
             {filteredResults.length > 0 && (
               <div className="border-t px-6 py-2 bg-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                {filteredResults.length} résultat{filteredResults.length !== 1 ? 's' : ''} trouvé{filteredResults.length !== 1 ? 's' : ''}
+                {filteredResults.length} result{filteredResults.length !== 1 ? 's' : ''} found
               </div>
             )}
           </Card>
@@ -517,7 +517,7 @@ export default function AdminResultsPage() {
                 <div className="flex items-center gap-3">
                   <TrendingUp className="w-5 h-5 text-primary" />
                   <span className="font-black text-slate-900 text-sm uppercase tracking-wide">
-                    Statistique: {selectedStudentForChart?.name || 'N/A'}
+                    Analytics: {selectedStudentForChart?.name || 'N/A'}
                   </span>
                 </div>
                 <Button
@@ -537,9 +537,9 @@ export default function AdminResultsPage() {
                     <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
                     <Tooltip
                       contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.12)' }}
-                      formatter={(value: any, name?: string) => [value, name === 'studentScore' ? 'Note' : 'Moyenne']}
+                      formatter={(value: any, name?: string) => [value, name === 'studentScore' ? 'Mark' : 'Average']}
                     />
-                    <Legend formatter={(value) => value === 'studentScore' ? 'Note' : 'Moyenne'} />
+                    <Legend formatter={(value) => value === 'studentScore' ? 'Mark' : 'Average'} />
                     <Line name="studentScore" type="monotone" dataKey="studentScore" stroke="#2563eb" strokeWidth={3} dot={{ r: 5, fill: '#2563eb' }} />
                     <Line name="classAverage" type="monotone" dataKey="classAverage" stroke="#94a3b8" strokeDasharray="5 5" strokeWidth={2} dot={false} />
                   </LineChart>
@@ -554,12 +554,12 @@ export default function AdminResultsPage() {
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2">
                   <BookOpen size={16} className="text-primary" />
-                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-900">Matrice des performances</h3>
+                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-900">Performance Matrix</h3>
                 </div>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                   {selectedClassId === 'all'
-                    ? 'Sélectionnez une classe pour afficher le cahier de notes'
-                    : `Affichage: ${selectedClassName} — Cliquez sur une ligne d'élève pour afficher son graphique`}
+                    ? 'Select a class to display the gradebook'
+                    : `Viewing: ${selectedClassName} — Click on a student row to display their graph`}
                 </p>
               </div>
               {selectedClassId !== 'all' && reportData.length > 0 && (
@@ -567,7 +567,7 @@ export default function AdminResultsPage() {
                   onClick={() => exportGradebookPDF(reportData, exams, selectedClassName)}
                   className="bg-slate-900 hover:bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest h-11 px-5 gap-2"
                 >
-                  <Download size={14} /> Exporter le PDF
+                  <Download size={14} /> Export PDF
                 </Button>
               )}
             </CardHeader>
@@ -576,7 +576,7 @@ export default function AdminResultsPage() {
               {selectedClassId === 'all' ? (
                 <div className="flex flex-col items-center justify-center py-24 text-slate-400 gap-3">
                   <LayoutGrid size={40} className="opacity-30" />
-                  <p className="text-sm font-bold italic">Sélectionnez une classe dans le menu déroulant supérieur droit pour charger le cahier de notes.</p>
+                  <p className="text-sm font-bold italic">Select a class from the top right dropdown menu to load the gradebook.</p>
                 </div>
               ) : gradebookLoading ? (
                 <div className="flex justify-center py-24">
@@ -585,7 +585,7 @@ export default function AdminResultsPage() {
               ) : reportData.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-24 text-slate-400 gap-3">
                   <BookOpen size={40} className="opacity-30" />
-                  <p className="text-sm font-bold italic">Aucune donnée de résultat trouvée pour cette classe.</p>
+                  <p className="text-sm font-bold italic">No result data found for this class.</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
@@ -594,7 +594,7 @@ export default function AdminResultsPage() {
                     <Table>
                       <TableHeader className="sticky top-0 z-10">
                         <TableRow className="bg-slate-900 hover:bg-slate-900 border-none">
-                          <TableHead className="text-white font-black text-[9px] uppercase tracking-wider py-4 pl-8 w-64">Élève</TableHead>
+                          <TableHead className="text-white font-black text-[9px] uppercase tracking-wider py-4 pl-8 w-64">Student</TableHead>
                           {exams.map(e => (
                             <TableHead key={e.id} className="text-white font-black text-[9px] uppercase tracking-wider text-center">
                               <div>{e?.name || '—'}</div>
@@ -602,7 +602,7 @@ export default function AdminResultsPage() {
                             </TableHead>
                           ))}
                           <TableHead className="text-white font-black text-[9px] uppercase tracking-wider text-right pr-8">
-                            Moyenne Pondérée
+                            Weighted Average
                           </TableHead>
                         </TableRow>
                       </TableHeader>
@@ -623,7 +623,7 @@ export default function AdminResultsPage() {
                                 : 'hover:bg-slate-50/80'
                                 }`}
                               onClick={() => setSelectedStudentForChart(isSelected ? null : student)}
-                              title="Cliquez pour afficher le graphique des performances"
+                              title="Click to view performance graph"
                             >
                               <TableCell className="pl-8 py-4">
                                 <div className="flex items-center gap-2">
@@ -670,7 +670,7 @@ export default function AdminResultsPage() {
                     </Table>
                   </div>
                   <div className="border-t px-8 py-2 bg-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    {reportData.length} élève{reportData.length !== 1 ? 's' : ''} — cliquez sur n'importe quelle ligne pour afficher le graphique des performances
+                    {reportData.length} student{reportData.length !== 1 ? 's' : ''} — click on any row to view performance graph
                   </div>
                 </div>
               )}

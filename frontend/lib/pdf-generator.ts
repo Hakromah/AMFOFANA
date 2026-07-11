@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { SCHOOL_CONFIG } from './school-config';
+import { CIRCULAR_LOGO } from './logo-base64';
 
 // ─── Color Palette ────────────────────────────────────────────────────────────
 const COLORS = {
@@ -24,15 +25,22 @@ function addSchoolHeader(doc: jsPDF, subtitle?: string) {
   doc.setFillColor(...COLORS.primary);
   doc.rect(0, 0, pageW, 42, 'F');
 
+  // Draw school logo
+  try {
+    doc.addImage(CIRCULAR_LOGO, 'PNG', 15, 8, 26, 26);
+  } catch (e) {
+    console.error("Failed to add logo to PDF header", e);
+  }
+
   doc.setTextColor(...COLORS.white);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(18);
-  doc.text(SCHOOL_CONFIG.name, 15, 16);
+  doc.text(SCHOOL_CONFIG.name, 46, 16);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
-  doc.text(SCHOOL_CONFIG.address || '', 15, 23);
-  doc.text(`Contact: ${SCHOOL_CONFIG.contact || ''}`, 15, 29);
+  doc.text(SCHOOL_CONFIG.address || '', 46, 23);
+  doc.text(`Contact: ${SCHOOL_CONFIG.contact || ''}`, 46, 29);
 
   if (subtitle) {
     doc.setFont('helvetica', 'bold');

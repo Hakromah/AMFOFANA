@@ -84,7 +84,7 @@ export default function TeacherDashboard() {
         setRecentResults(resultsList.slice(0, 5));
         setUpcomingExams(upcoming);
       } catch (error) {
-        console.error("Erreur de synchro du tableau de bord", error);
+        console.error("Dashboard sync error", error);
       } finally {
         setLoading(false);
       }
@@ -112,11 +112,11 @@ export default function TeacherDashboard() {
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 text-blue-300 text-[10px] font-black uppercase tracking-widest mb-6 border border-blue-500/30">
               <CheckCircle2 className="w-3 h-3 text-blue-400" />
-              Registre Académique En Direct
+              Academic Register Live
             </div>
-            <h1 className="text-[clamp(1.2rem,2.5vw+1rem,3rem)] font-black mb-2 tracking-tight">Bienvenue,</h1>
-            <h2 className="text-[clamp(1.2rem,2.5vw+1rem,4rem)] text-blue-400 font-extrabold mb-4">{stats.teacherName || 'Éducateur'}</h2>
-            <p className="text-slate-400 text-lg max-w-md leading-relaxed">Système synchronisé. Vous avez <span className="text-white font-bold">{stats.classes} classes</span> actives ce semestre.</p>
+            <h1 className="text-[clamp(1.2rem,2.5vw+1rem,3rem)] font-black mb-2 tracking-tight">Welcome,</h1>
+            <h2 className="text-[clamp(1.2rem,2.5vw+1rem,4rem)] text-blue-400 font-extrabold mb-4">{stats.teacherName || 'Educator'}</h2>
+            <p className="text-slate-400 text-lg max-w-md leading-relaxed">System synced. You have <span className="text-white font-bold">{stats.classes} classes</span> active this semester.</p>
           </motion.div>
 
           <Button
@@ -124,8 +124,8 @@ export default function TeacherDashboard() {
             className="hidden md:flex items-center gap-4 bg-white/10 md:hover:bg-white/20 border border-white/10 md:hover:border-white duration-500 rounded-2xl h-16 px-6 backdrop-blur-md transition-all group"
           >
             <div className="text-left">
-              <p className="text-[10px] font-black uppercase text-blue-400 font-mono">Recherche dans le registre</p>
-              <p className="text-sm font-bold text-white">Trouver un profil d'étudiant</p>
+              <p className="text-[10px] font-black uppercase text-blue-400 font-mono">Search in the register</p>
+              <p className="text-sm font-bold text-white">Find a student profile</p>
             </div>
             <Search className="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform" />
           </Button>
@@ -145,9 +145,9 @@ export default function TeacherDashboard() {
       {/* STATS GRID */}
       <div className="grid gap-6 md:grid-cols-3">
         {[
-          { label: 'Classes Assignées', val: stats.classes, icon: BookOpen, color: 'bg-blue-600' },
-          { label: 'Élèves Inscrits', val: stats.students, icon: Users, color: 'bg-emerald-500' },
-          { label: 'Matériaux Académiques', val: stats.exams, icon: FileText, color: 'bg-amber-500' }
+          { label: 'Assigned Classes', val: stats.classes, icon: BookOpen, color: 'bg-blue-600' },
+          { label: 'Enrolled Students', val: stats.students, icon: Users, color: 'bg-emerald-500' },
+          { label: 'Academic Materials', val: stats.exams, icon: FileText, color: 'bg-amber-500' }
         ].map((item, i) => (
           <motion.div key={i} whileHover={{ y: -5 }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
             <Card className="border border-slate-100 py-3 md:hover:border-primary duration-500 transition-colors shadow-sm bg-white relative overflow-hidden">
@@ -169,10 +169,10 @@ export default function TeacherDashboard() {
           <CardHeader className="border-b bg-slate-50/50 pt-3 flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-slate-400" />
-              <CardTitle className="text-[clamp(1rem,2vw+0.5rem,1.2rem)] font-bold">Activité Récente du Registre</CardTitle>
+              <CardTitle className="text-[clamp(1rem,2vw+0.5rem,1.2rem)] font-bold">Recent Register Activity</CardTitle>
             </div>
             <Button variant="ghost" size="sm" className="text-xs font-bold" asChild>
-              <a href="/teacher/results">Voir les logs <ArrowRight className="ml-1 w-3 h-3" /></a>
+              <a href="/teacher/results">View logs <ArrowRight className="ml-1 w-3 h-3" /></a>
             </Button>
           </CardHeader>
           <CardContent className="p-0">
@@ -204,7 +204,7 @@ export default function TeacherDashboard() {
           <Card className="border border-slate-100 py-3 md:hover:border-primary duration-500 transition-colors shadow-sm bg-white overflow-hidden">
             <CardHeader className="pb-2 border-b bg-slate-50/50">
               <CardTitle className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-blue-500" /> Calendrier à venir
+                <Calendar className="w-4 h-4 text-blue-500" /> Upcoming Calendar
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-4 space-y-4 w-full">
@@ -223,10 +223,10 @@ export default function TeacherDashboard() {
 
           <div className="grid grid-cols-2 gap-3">
             <Button className="h-14 flex sm:flex-col gap-1 bg-slate-800 md:hover:bg-primary duration-500 transition-colors" asChild>
-              <a href="/teacher/results"><GraduationCap size={16} /><span className="text-[9px] font-black uppercase tracking-widest">SAISIE DES NOTES</span></a>
+              <a href="/teacher/results"><GraduationCap size={16} /><span className="text-[9px] font-black uppercase tracking-widest">GRADE ENTRY</span></a>
             </Button>
             <Button className="h-14 flex sm:flex-col gap-1 md:hover:bg-primary duration-500 transition-colors" asChild>
-              <a href="/teacher/exams"><Calendar size={16} /><span className="text-[9px] font-black uppercase tracking-widest">EXAMENS</span></a>
+              <a href="/teacher/exams"><Calendar size={16} /><span className="text-[9px] font-black uppercase tracking-widest">EXAMS</span></a>
             </Button>
           </div>
         </div>
@@ -236,7 +236,7 @@ export default function TeacherDashboard() {
       <Card className="border-none shadow-sm bg-white overflow-hidden">
         <CardHeader className="border-b bg-slate-50/50 flex flex-row items-center gap-2">
           <BarChart3 className="w-5 h-5 text-indigo-500" />
-          <CardTitle className="text-lg font-bold text-slate-700">Matrice de performance des classes</CardTitle>
+          <CardTitle className="text-lg font-bold text-slate-700">Class Performance Matrix</CardTitle>
         </CardHeader>
         <CardContent className="pt-8">
           <div className="h-[350px] w-full">
@@ -263,12 +263,12 @@ export default function TeacherDashboard() {
           <DialogContent className="max-w-2xl p-0 overflow-hidden border-none bg-white rounded-3xl shadow-2xl">
             <DialogHeader className="p-6 bg-slate-50 border-b">
               {/* Mandatory Title for Accessibility */}
-              <DialogTitle className="sr-only">Recherche globale d'étudiant</DialogTitle>
+              <DialogTitle className="sr-only">Global student search</DialogTitle>
               <div className="flex items-center gap-4">
                 <Search className="w-6 h-6 text-primary" />
                 <Input
                   autoFocus
-                  placeholder="Trouver un élève par ID ou nom..."
+                  placeholder="Find a student by ID or name..."
                   className="text-xl border-none focus-visible:ring-0 bg-transparent p-0 font-medium"
                   value={searchQuery}
                   onChange={(e) => handleSearch(e.target.value)}
@@ -288,18 +288,18 @@ export default function TeacherDashboard() {
               )) : searchQuery.length > 1 ? (
                 <div className="py-12 text-center text-slate-400 flex flex-col items-center gap-2">
                   <AlertCircle size={32} strokeWidth={1} />
-                  <p className="font-medium italic">Aucune correspondance trouvée pour <span>{searchQuery}</span></p>
+                  <p className="font-medium italic">No match found for <span>{searchQuery}</span></p>
                 </div>
               ) : (
                 <div className="py-12 text-center text-slate-400 flex flex-col items-center gap-2">
                   <CheckCircle2 size={32} strokeWidth={1} className="text-blue-200" />
-                  <p className="text-sm">Entrez les détails de l'élève pour rechercher dans le registre...</p>
+                  <p className="text-sm">Enter student details to search the register...</p>
                 </div>
               )}
             </div>
             <div className="p-3 bg-slate-900 flex justify-between items-center text-[9px] font-bold text-slate-500 uppercase tracking-widest">
-              <span>Réseau d'intelligence 2CS</span>
-              <span className="flex gap-4"><span>↵ Sélectionner</span><span>ESC Fermer</span></span>
+              <span>AMFOFANA Intelligence Network</span>
+              <span className="flex gap-4"><span>↵ Select</span><span>ESC Close</span></span>
             </div>
           </DialogContent>
         </Dialog>

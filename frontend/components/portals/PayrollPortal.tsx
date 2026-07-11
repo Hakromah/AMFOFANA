@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
@@ -16,6 +17,7 @@ import autoTable from 'jspdf-autotable';
 import QRCode from 'qrcode';
 import Cookies from 'js-cookie';
 import { SCHOOL_CONFIG } from '@/lib/school-config';
+import { CIRCULAR_LOGO, getCircularLogo } from '@/lib/logo-base64';
 
 interface PayrollPortalProps {
   role: 'DRIVER' | 'WORKER';
@@ -94,20 +96,29 @@ export default function PayrollPortal({ role, icon: Icon, portalName }: PayrollP
       const outstanding = Math.max(0, net - totalDisbursed);
 
       const doc = new jsPDF();
+      await getCircularLogo();
       doc.setDrawColor(...SCHOOL_CONFIG.accentColor);
       doc.setLineWidth(1.5);
       doc.rect(5, 5, 200, 287);
       doc.setFillColor(...SCHOOL_CONFIG.primaryColor);
       doc.rect(5, 5, 200, 45, 'F');
+
+      // Draw school logo
+      try {
+        doc.addImage(CIRCULAR_LOGO, 'PNG', 15, 12, 30, 30);
+      } catch (e) {
+        console.error("Failed to add logo to payslip", e);
+      }
+
       doc.setTextColor(255, 255, 255);
       doc.setFont('Helvetica', 'bold');
       doc.setFontSize(22);
-      doc.text(SCHOOL_CONFIG.name, 15, 23);
+      doc.text(SCHOOL_CONFIG.name, 52, 23);
       doc.setFontSize(9);
       doc.setFont('Helvetica', 'normal');
-      doc.text(`${SCHOOL_CONFIG.subtitle} — ${role} SALARY PAYSLIP`, 15, 30);
-      doc.text(SCHOOL_CONFIG.contact, 15, 36);
-      doc.text(`Generated: ${new Date().toLocaleDateString()}`, 150, 22);
+      doc.text(`${SCHOOL_CONFIG.subtitle} — ${role} SALARY PAYSLIP`, 52, 30);
+      doc.text(SCHOOL_CONFIG.contact, 52, 36);
+      doc.text(`Generated: ${new Date().toLocaleDateString()}`, 196, 22, { align: 'right' });
 
       doc.setTextColor(...SCHOOL_CONFIG.primaryColor);
       doc.setFontSize(20);
@@ -132,7 +143,7 @@ export default function PayrollPortal({ role, icon: Icon, portalName }: PayrollP
         body: [
           ['Base Salary', fmtGNF(base)],
           ['Allowances (+)', `+ ${fmtGNF(allow)}`],
-          ['Deductions (−)', `− ${fmtGNF(ded)}`],
+          ['Deductions (-)', `- ${fmtGNF(ded)}`],
           ['Net Salary Due', fmtGNF(net)],
           ['Total Disbursed', fmtGNF(totalDisbursed)],
           ['Outstanding', outstanding > 0 ? fmtGNF(outstanding) : '—'],

@@ -24,16 +24,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 // --- SCHEMA ---
 const formSchema = z.object({
-   subjectId: z.string().min(1, ' Matière est requise'),
-   classId: z.string().min(1, 'Classe est requise'),
-   date: z.string().min(1, 'Date est requise'),
-   startTime: z.string().min(1, 'Heure de début est requise'),
-   endTime: z.string().min(1, 'Heure de fin est requise'),
-   academicYearId: z.string().min(1, 'Année académique est requise'),
-   semesterId: z.string().min(1, 'Semestre est requis'),
-   termId: z.string().min(1, 'Terme est requis'),
+   subjectId: z.string().min(1, 'Subject is required'),
+   classId: z.string().min(1, 'Class is required'),
+   date: z.string().min(1, 'Date is required'),
+   startTime: z.string().min(1, 'Start time is required'),
+   endTime: z.string().min(1, 'End time is required'),
+   academicYearId: z.string().min(1, 'Academic year is required'),
+   semesterId: z.string().min(1, 'Semester is required'),
+   termId: z.string().min(1, 'Term is required'),
    weight: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-      message: 'Le poids doit être un nombre positif',
+      message: 'Weight must be a positive number',
    }),
 });
 
@@ -87,7 +87,7 @@ export default function TeacherExamsPage() {
          setSemesters(semestersRes.data.data || []);
          setTerms(termsRes.data.data || []);
       } catch (e) {
-         console.error('Erreur de chargement des sessions académiques:', e);
+         console.error('Error loading academic sessions:', e);
       }
    };
 
@@ -106,8 +106,8 @@ export default function TeacherExamsPage() {
          await loadAcademicSessions();
       } catch (error: any) {
          console.error("400 Error Source:", error.response?.config.url);
-         toast.error('Erreur de synchronisation', {
-            description: `Verrifier la console: ${error.response?.config.url} returned 400`
+         toast.error('Sync error', {
+            description: `Check console: ${error.response?.config.url} returned 400`
          });
       } finally {
          setLoading(false);
@@ -116,23 +116,23 @@ export default function TeacherExamsPage() {
 
    const handleAddYear = async () => {
       if (!newYearName.trim()) return;
-      const tid = toast.loading(' Creation en cours...');
+      const tid = toast.loading('Creating...');
       try {
          const res = await api.post('/academic-years', { data: { name: newYearName.trim() } });
-         toast.success('Creation reussie', { id: tid });
+         toast.success('Created successfully', { id: tid });
          const created = res.data.data;
          await loadAcademicSessions();
          setIsAddYearOpen(false);
          setNewYearName('');
          if (created) form.setValue('academicYearId', String(created.id));
       } catch (err: any) {
-         toast.error(err.response?.data?.message || 'Erreur de creation', { id: tid });
+         toast.error(err.response?.data?.message || 'Creation error', { id: tid });
       }
    };
 
    const handleAddSemester = async () => {
       if (!newSemesterName.trim() || !newSemesterYearId) return;
-      const tid = toast.loading('Creation en cours...');
+      const tid = toast.loading('Creating...');
       try {
          const res = await api.post('/semesters', {
             data: {
@@ -140,20 +140,20 @@ export default function TeacherExamsPage() {
                academicYear: parseInt(newSemesterYearId)
             }
          });
-         toast.success('Creation reussie', { id: tid });
+         toast.success('Created successfully', { id: tid });
          const created = res.data.data;
          await loadAcademicSessions();
          setIsAddSemesterOpen(false);
          setNewSemesterName('');
          if (created) form.setValue('semesterId', String(created.id));
       } catch (err: any) {
-         toast.error(err.response?.data?.message || 'Erreur de creation', { id: tid });
+         toast.error(err.response?.data?.message || 'Creation error', { id: tid });
       }
    };
 
    const handleAddTerm = async () => {
       if (!newTermName.trim() || !newTermSemesterId) return;
-      const tid = toast.loading('Creation en cours...');
+      const tid = toast.loading('Creating...');
       try {
          const res = await api.post('/terms', {
             data: {
@@ -161,14 +161,14 @@ export default function TeacherExamsPage() {
                semester: parseInt(newTermSemesterId)
             }
          });
-         toast.success('Creation reussie', { id: tid });
+         toast.success('Created successfully', { id: tid });
          const created = res.data.data;
          await loadAcademicSessions();
          setIsAddTermOpen(false);
          setNewTermName('');
          if (created) form.setValue('termId', String(created.id));
       } catch (err: any) {
-         toast.error(err.response?.data?.message || 'Erreur de creation', { id: tid });
+         toast.error(err.response?.data?.message || 'Creation error', { id: tid });
       }
    };
 
@@ -193,26 +193,26 @@ export default function TeacherExamsPage() {
       try {
          if (editingExam) {
             await api.put(`/teacher/exams/${editingExam.id}`, payload);
-            toast.success('Modification reussie');
+            toast.success('Updated successfully');
          } else {
             await api.post('/teacher/exams', payload);
-            toast.success('Creation reussie');
+            toast.success('Created successfully');
          }
          loadAllData();
          setIsDialogOpen(false);
       } catch (error: any) {
-         toast.error(error.response?.data?.message || 'Erreur lors de l\'action');
+         toast.error(error.response?.data?.message || 'Error performing action');
       }
    };
 
    const handleDelete = async (id: number) => {
-      if (!confirm("Voulez-vous vraiment supprimer cette évaluation?")) return;
+      if (!confirm("Are you sure you want to delete this assessment?")) return;
       try {
          await api.delete(`/teacher/exams/${id}`);
-         toast.success("Examen supprimé avec succès");
+         toast.success("Assessment deleted successfully");
          loadAllData();
       } catch (e) {
-         toast.error("Erreur de suppression");
+         toast.error("Deletion error");
          console.log(e)
       }
    };
@@ -220,13 +220,13 @@ export default function TeacherExamsPage() {
    const toggleStatus = async (exam: any) => {
       try {
          const newStatus = !exam.closed;
-         console.log("Envoi de la mise à jour du statut :", { closed: newStatus });
+         console.log("Sending status update:", { closed: newStatus });
          await api.patch(`/teacher/exams/${exam.id}/toggle-status`, { closed: newStatus });
-         toast.success(newStatus ? "Examen marqué comme terminé" : "Examen ré-ouvert");
+         toast.success(newStatus ? "Exam marked as completed" : "Exam re-opened");
          loadAllData();
       } catch (e: any) {
-         console.error("Détails de l'erreur de basculement de statut :", e.response?.data);
-         toast.error("Erreur de mise à jour du statut");
+         console.error("Toggle status error details:", e.response?.data);
+         toast.error("Status update error");
       }
    };
 
@@ -253,7 +253,7 @@ export default function TeacherExamsPage() {
    if (loading) return (
       <div className="h-screen flex flex-col items-center justify-center gap-4">
          <Loader2 className="animate-spin text-primary" size={40} />
-         <p className="text-xs font-black uppercase tracking-widest text-slate-400">Chargement du centre d'examens...</p>
+         <p className="text-xs font-black uppercase tracking-widest text-slate-400">Loading exam center...</p>
       </div>
    );
 
@@ -266,7 +266,7 @@ export default function TeacherExamsPage() {
                <p className="text-slate-500 font-bold text-sm mt-2 uppercase tracking-widest text-[10px]">Registry & Assessments • 2026</p>
             </div>
             <Button onClick={() => { setEditingExam(null); form.reset(); setIsDialogOpen(true); }} className="bg-slate-900 hover:bg-blue-600 rounded-2xl h-14 px-8 font-black transition-all shadow-xl">
-               <Plus className="mr-2 h-5 w-5" /> CREER UNE NOUVELLE ÉVALUATION
+               <Plus className="mr-2 h-5 w-5" /> CREATE NEW ASSESSMENT
             </Button>
          </div>
 
@@ -275,10 +275,10 @@ export default function TeacherExamsPage() {
             <Table>
                <TableHeader className="bg-slate-50/50">
                   <TableRow className="border-none">
-                     <TableHead className="py-8 pl-10 font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Details de l'examen</TableHead>
-                     <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 text-center">Poids</TableHead>
-                     <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Programme</TableHead>
-                     <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Statut</TableHead>
+                     <TableHead className="py-8 pl-10 font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Exam Details</TableHead>
+                     <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 text-center">Weight</TableHead>
+                     <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Schedule</TableHead>
+                     <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Status</TableHead>
                      <TableHead className="text-right pr-10 font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Actions</TableHead>
                   </TableRow>
                </TableHeader>
@@ -302,7 +302,7 @@ export default function TeacherExamsPage() {
                         </TableCell>
                         <TableCell>
                            <Badge className={`rounded-lg px-3 py-1 font-black text-[9px] tracking-widest border-none ${exam.closed ? 'bg-slate-100 text-slate-400' : 'bg-emerald-100 text-emerald-600'}`}>
-                              {exam.closed ? 'TERMINÉ' : 'ACTIF'}
+                              {exam.closed ? 'COMPLETED' : 'ACTIVE'}
                            </Badge>
                         </TableCell>
                         <TableCell className="text-right pr-10">
@@ -310,13 +310,13 @@ export default function TeacherExamsPage() {
                               <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="rounded-xl"><MoreHorizontal size={20} /></Button></DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="rounded-2xl p-2 border-slate-100 shadow-2xl">
                                  <DropdownMenuItem onClick={() => toggleStatus(exam)} className="rounded-xl font-black text-[10px] p-3 uppercase tracking-widest">
-                                    <Power size={14} className="mr-2 text-primary" /> {exam.closed ? "Ouvrir l'examen" : "Fermer l'examen"}
+                                    <Power size={14} className="mr-2 text-primary" /> {exam.closed ? "Open exam" : "Close exam"}
                                  </DropdownMenuItem>
                                  <DropdownMenuItem disabled={exam.locked} onClick={() => onOpenEdit(exam)} className="rounded-xl font-black text-[10px] p-3 uppercase tracking-widest">
-                                    <Pencil size={14} className="mr-2 text-amber-500" /> Modifier
+                                    <Pencil size={14} className="mr-2 text-amber-500" /> Edit
                                  </DropdownMenuItem>
                                  <DropdownMenuItem disabled={exam.locked} onClick={() => handleDelete(exam.id)} className="rounded-xl font-black text-[10px] p-3 uppercase tracking-widest text-rose-600">
-                                    <Trash2 size={14} className="mr-2" /> Supprimer
+                                    <Trash2 size={14} className="mr-2" /> Delete
                                  </DropdownMenuItem>
                               </DropdownMenuContent>
                            </DropdownMenu>
@@ -328,7 +328,7 @@ export default function TeacherExamsPage() {
 
             {/* Pagination */}
             <div className="p-8 bg-slate-50/50 flex items-center justify-between border-t border-slate-100">
-               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest"> Page {currentPage} sur {totalPages}</p>
+               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest"> Page {currentPage} of {totalPages}</p>
                <div className="flex gap-2">
                   <Button variant="outline" className="rounded-xl h-10 w-10 p-0" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}><ChevronLeft size={16} /></Button>
                   <Button variant="outline" className="rounded-xl h-10 w-10 p-0" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}><ChevronRight size={16} /></Button>
@@ -341,25 +341,25 @@ export default function TeacherExamsPage() {
             <DialogContent className="sm:max-w-[550px] rounded-[3rem] p-10 border-none shadow-2xl">
                <DialogHeader>
                   <DialogTitle className="text-3xl font-black italic tracking-tighter">
-                     {editingExam ? 'Modifier' : 'Créer'} <span className="text-primary">une évaluation.</span>
+                     {editingExam ? 'Edit' : 'Create'} <span className="text-primary">an assessment.</span>
                   </DialogTitle>
-                  <DialogDescription className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-2">Configurez le poids et l'heure de l'évaluation.</DialogDescription>
+                  <DialogDescription className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-2">Configure the weight and time of the assessment.</DialogDescription>
                </DialogHeader>
 
                <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
                      console.log('Exam form validation errors:', errors);
-                     toast.error('Veuillez remplir tous les champs obligatoires');
+                     toast.error('Please fill in all required fields');
                   })} className="space-y-6 mt-6">
                      <FormField control={form.control} name="academicYearId" render={({ field }) => (
                         <FormItem>
                            <div className="flex items-center gap-2">
-                              <FormLabel className="text-[10px] font-black uppercase text-slate-400">Année scolaire</FormLabel>
+                              <FormLabel className="text-[10px] font-black uppercase text-slate-400">Academic Year</FormLabel>
                               <Button type="button" onClick={() => setIsAddYearOpen(true)} variant="link" className="h-fit p-0 text-[10px] font-black text-blue-600 uppercase hover:no-underline">
-                                 + Ajouter une année
+                                 + Add a year
                               </Button>
                            </div>
-                           <Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger className="rounded-xl bg-slate-50 border-none font-bold"><SelectValue placeholder="Sélectionner l'année scolaire" /></SelectTrigger></FormControl>
+                           <Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger className="rounded-xl bg-slate-50 border-none font-bold"><SelectValue placeholder="Select academic year" /></SelectTrigger></FormControl>
                               <SelectContent className="rounded-xl border-none shadow-xl animate-in fade-in zoom-in duration-200">
                                  {academicYears.map(y => (
                                     <SelectItem key={y.id} value={String(y.id)} className="font-bold">{y.name}</SelectItem>
@@ -373,15 +373,15 @@ export default function TeacherExamsPage() {
                         <FormField control={form.control} name="semesterId" render={({ field }) => (
                            <FormItem>
                               <div className="flex items-center gap-2">
-                                 <FormLabel className="text-[10px] font-black uppercase text-slate-400">Semestre</FormLabel>
+                                 <FormLabel className="text-[10px] font-black uppercase text-slate-400">Semester</FormLabel>
                                  <Button type="button" onClick={() => {
                                     setNewSemesterYearId(form.watch('academicYearId'));
                                     setIsAddSemesterOpen(true);
                                  }} variant="link" className="h-fit p-0 text-[10px] font-black text-blue-600 uppercase hover:no-underline">
-                                    + Ajouter un semestre
+                                    + Add a semester
                                  </Button>
                               </div>
-                              <Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger className="rounded-xl bg-slate-50 border-none font-bold"><SelectValue placeholder="Sélectionner un semestre" /></SelectTrigger></FormControl>
+                              <Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger className="rounded-xl bg-slate-50 border-none font-bold"><SelectValue placeholder="Select a semester" /></SelectTrigger></FormControl>
                                  <SelectContent className="rounded-xl border-none shadow-xl animate-in fade-in zoom-in duration-200">
                                     {semesters.filter(s => !form.watch('academicYearId') || String(s.academicYear?.id) === form.watch('academicYearId')).map(s => (
                                        <SelectItem key={s.id} value={String(s.id)} className="font-bold">{s.name}</SelectItem>
@@ -393,15 +393,15 @@ export default function TeacherExamsPage() {
                         <FormField control={form.control} name="termId" render={({ field }) => (
                            <FormItem>
                               <div className="flex items-center gap-2">
-                                 <FormLabel className="text-[10px] font-black uppercase text-slate-400">Trimestre</FormLabel>
+                                 <FormLabel className="text-[10px] font-black uppercase text-slate-400">Term</FormLabel>
                                  <Button type="button" onClick={() => {
                                     setNewTermSemesterId(form.watch('semesterId'));
                                     setIsAddTermOpen(true);
                                  }} variant="link" className="h-fit p-0 text-[10px] font-black text-blue-600 uppercase hover:no-underline" disabled={!form.watch('semesterId')}>
-                                    + Ajouter un trimestre
+                                    + Add a term
                                  </Button>
                               </div>
-                              <Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger className="rounded-xl bg-slate-50 border-none font-bold"><SelectValue placeholder="Sélectionner un trimestre" /></SelectTrigger></FormControl>
+                              <Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger className="rounded-xl bg-slate-50 border-none font-bold"><SelectValue placeholder="Select a term" /></SelectTrigger></FormControl>
                                  <SelectContent className="rounded-xl border-none shadow-xl animate-in fade-in zoom-in duration-200">
                                     {terms.filter(t => !form.watch('semesterId') || String(t.semester?.id) === form.watch('semesterId')).map(t => (
                                        <SelectItem key={t.id} value={String(t.id)} className="font-bold">{t.name}</SelectItem>
@@ -415,7 +415,7 @@ export default function TeacherExamsPage() {
                      <div className="grid grid-cols-2 gap-4">
                         <FormField control={form.control} name="subjectId" render={({ field }) => (
                            <FormItem>
-                              <FormLabel className="text-[10px] font-black uppercase text-slate-400">Matière</FormLabel>
+                              <FormLabel className="text-[10px] font-black uppercase text-slate-400">Subject</FormLabel>
                               <Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger className="rounded-xl bg-slate-50 border-none font-bold"><SelectValue /></SelectTrigger></FormControl>
                                  <SelectContent className="rounded-xl border-none shadow-xl">
                                     {subjects.map(s => <SelectItem key={s.id} value={String(s.id)} className="font-bold">{s.name}</SelectItem>)}
@@ -425,7 +425,7 @@ export default function TeacherExamsPage() {
                         )} />
                         <FormField control={form.control} name="weight" render={({ field }) => (
                            <FormItem>
-                              <FormLabel className="text-[10px] font-black uppercase text-slate-400">Poids (%)</FormLabel>
+                              <FormLabel className="text-[10px] font-black uppercase text-slate-400">Weight (%)</FormLabel>
                               <FormControl><Input type="number" {...field} className="rounded-xl bg-slate-50 border-none font-bold" /></FormControl>
                               <FormMessage />
                            </FormItem>
@@ -434,7 +434,7 @@ export default function TeacherExamsPage() {
 
                      <FormField control={form.control} name="classId" render={({ field }) => (
                         <FormItem>
-                           <FormLabel className="text-[10px] font-black uppercase text-slate-400">Salle de classe</FormLabel>
+                           <FormLabel className="text-[10px] font-black uppercase text-slate-400">Classroom</FormLabel>
                            <Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger className="rounded-xl bg-slate-50 border-none font-bold"><SelectValue /></SelectTrigger></FormControl>
                               <SelectContent className="rounded-xl border-none shadow-xl">
                                  {classes.map(c => <SelectItem key={c.id} value={String(c.id)} className="font-bold">{c.name}</SelectItem>)}
@@ -448,15 +448,15 @@ export default function TeacherExamsPage() {
                            <FormItem><FormLabel className="text-[10px] font-black uppercase text-slate-400">Date</FormLabel><FormControl><Input type="date" {...field} className="rounded-xl bg-slate-50 border-none font-bold" /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="startTime" render={({ field }) => (
-                           <FormItem><FormLabel className="text-[10px] font-black uppercase text-slate-400">Heure de début</FormLabel><FormControl><Input type="time" {...field} className="rounded-xl bg-slate-50 border-none font-bold" /></FormControl><FormMessage /></FormItem>
+                           <FormItem><FormLabel className="text-[10px] font-black uppercase text-slate-400">Start Time</FormLabel><FormControl><Input type="time" {...field} className="rounded-xl bg-slate-50 border-none font-bold" /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="endTime" render={({ field }) => (
-                           <FormItem><FormLabel className="text-[10px] font-black uppercase text-slate-400">Heure de fin</FormLabel><FormControl><Input type="time" {...field} className="rounded-xl bg-slate-50 border-none font-bold" /></FormControl><FormMessage /></FormItem>
+                           <FormItem><FormLabel className="text-[10px] font-black uppercase text-slate-400">End Time</FormLabel><FormControl><Input type="time" {...field} className="rounded-xl bg-slate-50 border-none font-bold" /></FormControl><FormMessage /></FormItem>
                         )} />
                      </div>
 
                      <Button type="submit" className="w-full h-14 bg-blue-600 hover:bg-slate-900 text-white font-black rounded-2xl transition-all uppercase text-[10px] tracking-[0.2em] shadow-xl shadow-blue-500/20">
-                        Confirmer l'évaluation
+                        Confirm assessment
                      </Button>
                   </form>
                </Form>
@@ -467,16 +467,16 @@ export default function TeacherExamsPage() {
          <Dialog open={isAddYearOpen} onOpenChange={setIsAddYearOpen}>
             <DialogContent className="sm:max-w-[400px] rounded-[2rem] p-8 border border-slate-100 shadow-2xl bg-white">
                <DialogHeader>
-                  <DialogTitle className="text-xl font-black italic tracking-tighter">Ajouter <span className="text-primary">une année scolaire.</span></DialogTitle>
-                  <DialogDescription className="text-[9px] font-black uppercase tracking-widest text-slate-400 mt-1">Créez une nouvelle période scolaire.</DialogDescription>
+                  <DialogTitle className="text-xl font-black italic tracking-tighter">Add <span className="text-primary">an academic year.</span></DialogTitle>
+                  <DialogDescription className="text-[9px] font-black uppercase tracking-widest text-slate-400 mt-1">Create a new academic period.</DialogDescription>
                </DialogHeader>
                <div className="space-y-4 mt-4">
                   <div className="space-y-2">
-                     <label className="text-[10px] font-black uppercase text-slate-400">Nom de l'année</label>
+                     <label className="text-[10px] font-black uppercase text-slate-400">Year name</label>
                      <Input placeholder="e.g. 2026-2027" value={newYearName} onChange={(e) => setNewYearName(e.target.value)} className="rounded-xl bg-slate-50 border-none font-bold" />
                   </div>
                   <Button onClick={handleAddYear} className="w-full h-12 bg-blue-600 hover:bg-slate-900 text-white font-black rounded-xl uppercase text-[9px] tracking-wider" disabled={!newYearName}>
-                     Enregistrer l'année scolaire
+                     Save academic year
                   </Button>
                </div>
             </DialogContent>
@@ -486,25 +486,25 @@ export default function TeacherExamsPage() {
          <Dialog open={isAddSemesterOpen} onOpenChange={setIsAddSemesterOpen}>
             <DialogContent className="sm:max-w-[400px] rounded-[2rem] p-8 border border-slate-100 shadow-2xl bg-white">
                <DialogHeader>
-                  <DialogTitle className="text-xl font-black italic tracking-tighter">Ajouter <span className="text-primary">un trimestre.</span></DialogTitle>
-                  <DialogDescription className="text-[9px] font-black uppercase tracking-widest text-slate-400 mt-1">Créez une nouvelle période scolaire.</DialogDescription>
+                  <DialogTitle className="text-xl font-black italic tracking-tighter">Add <span className="text-primary">a semester.</span></DialogTitle>
+                  <DialogDescription className="text-[9px] font-black uppercase tracking-widest text-slate-400 mt-1">Create a new academic period.</DialogDescription>
                </DialogHeader>
                <div className="space-y-4 mt-4">
                   <div className="space-y-2">
-                     <label className="text-[10px] font-black uppercase text-slate-400">Nom du trimestre</label>
-                     <Input placeholder="e.g. Trimester 1" value={newSemesterName} onChange={(e) => setNewSemesterName(e.target.value)} className="rounded-xl bg-slate-50 border-none font-bold" />
+                     <label className="text-[10px] font-black uppercase text-slate-400">Semester name</label>
+                     <Input placeholder="e.g. Semester 1" value={newSemesterName} onChange={(e) => setNewSemesterName(e.target.value)} className="rounded-xl bg-slate-50 border-none font-bold" />
                   </div>
                   <div className="space-y-2">
-                     <label className="text-[10px] font-black uppercase text-slate-400">Année scolaire</label>
+                     <label className="text-[10px] font-black uppercase text-slate-400">Academic Year</label>
                      <Select onValueChange={setNewSemesterYearId} value={newSemesterYearId}>
-                        <SelectTrigger className="rounded-xl bg-slate-50 border-none font-bold"><SelectValue placeholder="Sélectionner une année" /></SelectTrigger>
+                        <SelectTrigger className="rounded-xl bg-slate-50 border-none font-bold"><SelectValue placeholder="Select a year" /></SelectTrigger>
                         <SelectContent className="rounded-xl border-none shadow-xl">
                            {academicYears.map(y => <SelectItem key={y.id} value={String(y.id)} className="font-bold">{y.name}</SelectItem>)}
                         </SelectContent>
                      </Select>
                   </div>
                   <Button onClick={handleAddSemester} className="w-full h-12 bg-blue-600 hover:bg-slate-900 text-white font-black rounded-xl uppercase text-[9px] tracking-wider" disabled={!newSemesterName || !newSemesterYearId}>
-                     Enregistrer le trimestre
+                     Save semester
                   </Button>
                </div>
             </DialogContent>
@@ -514,25 +514,25 @@ export default function TeacherExamsPage() {
          <Dialog open={isAddTermOpen} onOpenChange={setIsAddTermOpen}>
             <DialogContent className="sm:max-w-[400px] rounded-[2rem] p-8 border border-slate-100 shadow-2xl bg-white">
                <DialogHeader>
-                  <DialogTitle className="text-xl font-black italic tracking-tighter">Ajouter <span className="text-primary">un trimestre.</span></DialogTitle>
-                  <DialogDescription className="text-[9px] font-black uppercase tracking-widest text-slate-400 mt-1">Créez une nouvelle période scolaire.</DialogDescription>
+                  <DialogTitle className="text-xl font-black italic tracking-tighter">Add <span className="text-primary">a term.</span></DialogTitle>
+                  <DialogDescription className="text-[9px] font-black uppercase tracking-widest text-slate-400 mt-1">Create a new academic period.</DialogDescription>
                </DialogHeader>
                <div className="space-y-4 mt-4">
                   <div className="space-y-2">
-                     <label className="text-[10px] font-black uppercase text-slate-400">Nom du trimestre</label>
+                     <label className="text-[10px] font-black uppercase text-slate-400">Term name</label>
                      <Input placeholder="e.g. First Quarter" value={newTermName} onChange={(e) => setNewTermName(e.target.value)} className="rounded-xl bg-slate-50 border-none font-bold" />
                   </div>
                   <div className="space-y-2">
-                     <label className="text-[10px] font-black uppercase text-slate-400">Semestre</label>
+                     <label className="text-[10px] font-black uppercase text-slate-400">Semester</label>
                      <Select onValueChange={setNewTermSemesterId} value={newTermSemesterId}>
-                        <SelectTrigger className="rounded-xl bg-slate-50 border-none font-bold"><SelectValue placeholder="Sélectionner un semestre" /></SelectTrigger>
+                        <SelectTrigger className="rounded-xl bg-slate-50 border-none font-bold"><SelectValue placeholder="Select a semester" /></SelectTrigger>
                         <SelectContent className="rounded-xl border-none shadow-xl">
                            {semesters.map(s => <SelectItem key={s.id} value={String(s.id)} className="font-bold">{s.name} ({s.academicYear?.name})</SelectItem>)}
                         </SelectContent>
                      </Select>
                   </div>
                   <Button onClick={handleAddTerm} className="w-full h-12 bg-blue-600 hover:bg-slate-900 text-white font-black rounded-xl uppercase text-[9px] tracking-wider" disabled={!newTermName || !newTermSemesterId}>
-                     Enregistrer le trimestre
+                     Save term
                   </Button>
                </div>
             </DialogContent>

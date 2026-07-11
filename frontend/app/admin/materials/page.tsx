@@ -42,7 +42,7 @@ export default function AdminMaterialsPage() {
          setMaterials(filtered);
          setAnalytics(analyticsRes.data || []);
       } catch (err) {
-         toast.error('Échec de la synchronisation du système.');
+         toast.error('System synchronization failed.');
          console.error(err);
       } finally {
          setLoading(false);
@@ -55,15 +55,15 @@ export default function AdminMaterialsPage() {
 
    // --- ACTIONS ---
    const deleteMaterial = async (id: number) => {
-      if (!confirm("Êtes-vous sûr ? Cela supprimera définitivement le fichier de Cloudinary.")) return;
+      if (!confirm("Are you sure? This will permanently delete the file from Cloudinary.")) return;
 
-      const t = toast.loading('Purge de l\'actif numérique...');
+      const t = toast.loading('Purging digital asset...');
       try {
          await api.delete(`/api/admin/materials/${id}`);
-         toast.success('Ressource supprimée du registre.', { id: t });
+         toast.success('Resource deleted from the registry.', { id: t });
          fetchData();
       } catch (err) {
-         toast.error('Échec du contournement du système : impossible de supprimer', { id: t });
+         toast.error('System bypass failed: unable to delete', { id: t });
          console.error(err);
       }
    };
@@ -93,11 +93,11 @@ export default function AdminMaterialsPage() {
    const handleDownload = async (mat: any) => {
       const actualUrl = getValidUrl(mat);
       if (!actualUrl) return;
-      const tid = toast.loading("Preparation du téléchargement...");
+      const tid = toast.loading("Preparing download...");
 
       try {
          const response = await fetch(actualUrl);
-         if (!response.ok) throw new Error('La réponse du réseau n\'était pas correcte');
+         if (!response.ok) throw new Error('Network response was not ok');
          const blob = await response.blob();
          const url = window.URL.createObjectURL(blob);
          const link = document.createElement('a');
@@ -108,9 +108,9 @@ export default function AdminMaterialsPage() {
          link.click();
          link.parentNode?.removeChild(link);
          window.URL.revokeObjectURL(url);
-         toast.success("Téléchargement lancé", { id: tid });
+         toast.success("Download started", { id: tid });
       } catch (err) {
-         console.error("Erreur de téléchargement:", err);
+         console.error("Download error:", err);
          window.open(actualUrl, '_blank');
          toast.dismiss(tid);
       }
@@ -122,10 +122,10 @@ export default function AdminMaterialsPage() {
          <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-end gap-6">
             <div className="space-y-2">
                <div className="flex items-center gap-2 text-rose-600 font-black text-[10px] uppercase tracking-[0.4em]">
-                  <HardDrive size={14} /> Registre du Matériel Global
+                  <HardDrive size={14} /> Global Materials Registry
                </div>
                <h1 className="text-[clamp(1.2rem,2vw+1rem,3rem)] font-black text-slate-900 tracking-tighter  italic uppercase leading-none">
-                  Matériel <span className="text-rose-600">Admin.</span>
+                  Materials <span className="text-rose-600">Admin.</span>
                </h1>
             </div>
 
@@ -141,7 +141,7 @@ export default function AdminMaterialsPage() {
                   />
                </div>
                <Button onClick={fetchData} className="h-14 px-8 bg-slate-900 text-white rounded-[clamp(1rem,2vw+1rem,2rem)] font-black italic hover:bg-rose-600 transition-colors">
-                  EXECUTER
+                  EXECUTE
                </Button>
             </div>
          </header>
@@ -167,7 +167,7 @@ export default function AdminMaterialsPage() {
                ))
             ) : (
                <div className="col-span-full py-6 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest border-2 border-dashed border-slate-100 rounded-3xl">
-                  En attente des données d'analyse...
+                  Waiting for analytical data...
                </div>
             )}
          </div>
@@ -204,12 +204,12 @@ export default function AdminMaterialsPage() {
                                        <div className="flex items-center gap-1.5">
                                           {(m.targetClasses || (m.classe ? [m.classe] : [])).map((c: any) => (
                                              <Badge key={c.id || 'no-class'} className="bg-blue-50 text-blue-600 border-none font-bold text-[9px] uppercase px-1.5 py-0.5 rounded">
-                                                {c.name || 'Non assigné'}
+                                                {c.name || 'Unassigned'}
                                              </Badge>
                                           ))}
                                           {!(m.targetClasses?.length || m.classe) && (
                                              <Badge className="bg-slate-50 text-slate-400 border-none font-bold text-[9px] uppercase px-1.5 py-0.5 rounded">
-                                                Aucune classe
+                                                No Classes
                                              </Badge>
                                           )}
                                           <Button
@@ -244,13 +244,13 @@ export default function AdminMaterialsPage() {
                                           onClick={() => handlePreview(m)}
                                           className="flex-1 h-8 rounded-lg bg-white border border-slate-100 text-slate-700 font-bold uppercase text-[9px] hover:bg-slate-50 transition-all"
                                        >
-                                          <Eye size={12} className="mr-1" /> Aperçu
+                                          <Eye size={12} className="mr-1" /> Preview
                                        </Button>
                                        <Button
                                           onClick={() => handleDownload(m)}
                                           className="flex-1 h-8 rounded-lg bg-rose-600 text-white font-bold uppercase text-[9px] hover:bg-rose-700 transition-all shadow-sm"
                                        >
-                                          <Download size={12} className="mr-1" /> Télécharger
+                                          <Download size={12} className="mr-1" /> Download
                                        </Button>
                                     </div>
                                  </div>

@@ -21,7 +21,7 @@ export default function PaymentConfig() {
   const [configValues, setConfigValues] = useState<Record<string, any>>({
     ORANGE_MONEY: { merchantId: 'OM-908234-X', apiKey: '••••••••••••••••••••', isSimulatedEnabled: false },
     MTN_MOBILE_MONEY: { apiUser: 'MTN-USER-2311', apiKey: '••••••••••••••••••••', isSimulatedEnabled: false },
-    BANK_TRANSFER: { bankName: 'Société Générale de Banques en Guinée', accountNumber: '20192348-12', isSimulatedEnabled: false },
+    BANK_TRANSFER: { bankName: 'Societe Generale de Banques en Guinee', accountNumber: '20192348-12', isSimulatedEnabled: false },
     CARD: { publicKey: 'pk_live_51P...', secretKey: '••••••••••••••••••••', isSimulatedEnabled: false },
   });
 

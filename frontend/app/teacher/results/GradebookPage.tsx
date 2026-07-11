@@ -50,7 +50,7 @@ export default function GradebookPage() {
 
             setReportData(Object.values(studentMap));
          } catch (error) {
-            toast.error('Échec du chargement du carnet de notes');
+            toast.error('Failed to load gradebook');
             console.log(error);
          }
       };
@@ -61,12 +61,12 @@ export default function GradebookPage() {
    // --- PDF GENERATION LOGIC ---
    const downloadPDF = () => {
       if (reportData.length === 0) {
-         toast.error('Aucune donnée disponible pour le téléchargement');
+         toast.error('No data available for download');
          return;
       }
 
       try {
-         const className = classes.find((c: any) => String(c.id) === selectedClassId)?.name || 'Classe';
+         const className = classes.find((c: any) => String(c.id) === selectedClassId)?.name || 'Class';
          const schoolName = '2CS COMPLEXE SCOLAIRE CAMARA SALEMATOU';
          const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' }) as any;
          const pageW = doc.internal.pageSize.getWidth();
@@ -82,8 +82,8 @@ export default function GradebookPage() {
          doc.setFont('Helvetica', 'normal');
          doc.setFontSize(8);
          doc.setTextColor(156, 163, 175);
-         doc.text('Rapport Académique Officiel • Système de Gestion des Résultats', 14, 17);
-         doc.text(`Généré: ${date}`, 14, 22);
+         doc.text('Official Academic Report • Results Management System', 14, 17);
+         doc.text(`Generated: ${date}`, 14, 22);
 
          // Class badge (right side)
          doc.setFillColor(37, 99, 235);
@@ -97,14 +97,14 @@ export default function GradebookPage() {
          doc.setTextColor(15, 23, 42);
          doc.setFont('Helvetica', 'bold');
          doc.setFontSize(11);
-         doc.text('MATRICE DE PERFORMANCE ACADÉMIQUE', 14, 38);
+         doc.text('ACADEMIC PERFORMANCE MATRIX', 14, 38);
          doc.setFont('Helvetica', 'normal');
          doc.setFontSize(8);
          doc.setTextColor(100, 116, 139);
-         doc.text(`Total des élèves: ${reportData.length}   |   Total des évaluations: ${exams.length}`, 14, 44);
+         doc.text(`Total students: ${reportData.length}   |   Total assessments: ${exams.length}`, 14, 44);
 
          // Table header
-         const head = [['#', 'Nom de l\'élève', 'ID de l\'élève', ...exams.map((e: any) => `${e}\n`), 'Moy.', 'Note']];
+         const head = [['#', 'Student Name', 'Student ID', ...exams.map((e: any) => `${e}\n`), 'Avg.', 'Grade']];
 
          // Table body
          const body = reportData.map((student: any, idx: number) => {
@@ -186,15 +186,15 @@ export default function GradebookPage() {
          doc.setTextColor(156, 163, 175);
          doc.setFont('Helvetica', 'normal');
          doc.text(
-            `${schoolName}  |  Rapport Académique Officiel pour ${className}  |  ${date}  |  Confidentiel`,
+            `${schoolName}  |  Official Academic Report for ${className}  |  ${date}  |  Confidential`,
             pageW / 2, footerY + 5, { align: 'center' }
          );
 
-         doc.save(`Rapport_Academique_${className.replace(/\s+/g, '_')}_${new Date().getFullYear()}.pdf`);
-         toast.success('Rapport Académique PDF exporté avec succès!');
+         doc.save(`Academic_Report_${className.replace(/\s+/g, '_')}_${new Date().getFullYear()}.pdf`);
+         toast.success('Academic Report PDF exported successfully!');
       } catch (err) {
-         console.error('Export PDF a échoué:', err);
-         toast.error('L\'exportation a échoué. Veuillez réessayer.');
+         console.error('PDF export failed:', err);
+         toast.error('Export failed. Please try again.');
       }
    };
 
@@ -202,20 +202,20 @@ export default function GradebookPage() {
       <div className="p-8 space-y-6">
          <div className="flex justify-between items-center">
             <div>
-               <h1 className="text-[clamp(1.3rem,1vw+0.5rem,2rem)] font-bold tracking-tight">Carnet de notes</h1>
-               <p className="text-muted-foreground">Surveillez et exportez les résultats des élèves.</p>
+               <h1 className="text-[clamp(1.3rem,1vw+0.5rem,2rem)] font-bold tracking-tight">Gradebook</h1>
+               <p className="text-muted-foreground">Monitor and export student results.</p>
             </div>
 
             <div className="flex items-center gap-4">
                {reportData.length > 0 && (
                   <Button onClick={downloadPDF} variant="outline" className="flex gap-2">
-                     <Download className="w-4 h-4" /> Télécharger le PDF
+                     <Download className="w-4 h-4" /> Download PDF
                   </Button>
                )}
 
                <Select onValueChange={setSelectedClassId}>
                   <SelectTrigger className="w-[250px] border-border hover:border-primary transition-colors duration-300">
-                     <SelectValue placeholder="Selectionner une classe" />
+                     <SelectValue placeholder="Select a class" />
                   </SelectTrigger>
                   <SelectContent className="border-border hover:border-primary transition-colors duration-300">
                      {classes.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
@@ -226,19 +226,19 @@ export default function GradebookPage() {
 
          <Card>
             <CardHeader>
-               <CardTitle>Résumé des performances des élèves</CardTitle>
+               <CardTitle>Student Performance Summary</CardTitle>
             </CardHeader>
             <CardContent>
                <div className="rounded-md border overflow-x-auto">
                   <Table>
                      <TableHeader className="bg-muted/50">
                         <TableRow>
-                           <TableHead className="w-[120px]">N° d'étudiant</TableHead>
-                           <TableHead className="min-w-[180px]">Nom</TableHead>
+                           <TableHead className="w-[120px]">Student ID</TableHead>
+                           <TableHead className="min-w-[180px]">Name</TableHead>
                            {exams.map(examName => (
                               <TableHead key={examName} className="text-center">{examName}</TableHead>
                            ))}
-                           <TableHead className="text-right font-bold">Moyenne</TableHead>
+                           <TableHead className="text-right font-bold">Average</TableHead>
                         </TableRow>
                      </TableHeader>
                      <TableBody>
@@ -268,7 +268,7 @@ export default function GradebookPage() {
                         }) : (
                            <TableRow>
                               <TableCell colSpan={exams.length + 3} className="h-24 text-center text-muted-foreground">
-                                 Sélectionnez une classe pour afficher les données de performance.
+                                 Select a class to view performance data.
                               </TableCell>
                            </TableRow>
                         )}

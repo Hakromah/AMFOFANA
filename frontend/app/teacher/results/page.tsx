@@ -38,7 +38,7 @@ const exportGradebookPDF = (
   schoolName = '2CS COMPLEXE SCOLAIRE CAMARA SALEMATOU',
 ) => {
   if (reportData.length === 0) {
-    toast.error('Aucune donnée du carnet de notes à exporter.');
+    toast.error('No gradebook data to export.');
     return;
   }
   try {
@@ -56,8 +56,8 @@ const exportGradebookPDF = (
     doc.setFont('Helvetica', 'normal');
     doc.setFontSize(8);
     doc.setTextColor(156, 163, 175);
-    doc.text('Rapport officiel de notes  •  Système de gestion des résultats', 14, 17);
-    doc.text(`Généré le : ${date}`, 14, 22);
+    doc.text('Official Grade Report  •  Results Management System', 14, 17);
+    doc.text(`Generated: ${date}`, 14, 22);
 
     // Class badge (right side)
     doc.setFillColor(37, 99, 235);
@@ -71,17 +71,17 @@ const exportGradebookPDF = (
     doc.setTextColor(15, 23, 42);
     doc.setFont('Helvetica', 'bold');
     doc.setFontSize(11);
-    doc.text('MATRICE DES PERFORMANCES ACADÉMIQUES', 14, 38);
+    doc.text('ACADEMIC PERFORMANCE MATRIX', 14, 38);
     doc.setFont('Helvetica', 'normal');
     doc.setFontSize(8);
     doc.setTextColor(100, 116, 139);
-    doc.text(`Nombre total d'élèves: ${reportData.length}   |   Nombre total d'évaluations: ${exams.length}`, 14, 44);
+    doc.text(`Total students: ${reportData.length}   |   Total assessments: ${exams.length}`, 14, 44);
 
     // Table columns
     const head = [[
-      '#', 'Nom de l\'étudiant', 'Identifiant de l\'étudiant',
+      '#', 'Student Name', 'Student ID',
       ...exams.map((e: any) => `${e?.name || '?'}\n(${e?.weight ?? 0}%)`),
-      'Moyenne pondérée', 'Note',
+      'Weighted Average', 'Grade',
     ]];
 
     const body = reportData.map((student: any, idx: number) => {
@@ -160,15 +160,15 @@ const exportGradebookPDF = (
     doc.setTextColor(156, 163, 175);
     doc.setFont('Helvetica', 'normal');
     doc.text(
-      `${schoolName}  |  Rapport officiel de notes pour ${className}  |  ${date}  |  Confidentiel`,
+      `${schoolName}  |  Official grade report for ${className}  |  ${date}  |  Confidential`,
       pageW / 2, footerY + 5, { align: 'center' }
     );
 
     doc.save(`GradeReport_${className.replace(/\s+/g, '_')}_${new Date().getFullYear()}.pdf`);
-    toast.success('Rapport de notes PDF exporté avec succès!');
+    toast.success('Grade report PDF exported successfully!');
   } catch (err) {
-    console.error('La génération du PDF a échoué:', err);
-    toast.error('Échec de l\'exportation. Veuillez réessayer.');
+    console.error('PDF generation failed:', err);
+    toast.error('Export failed. Please try again.');
   }
 };
 
@@ -190,7 +190,7 @@ export default function TeacherResultsPage() {
     try {
       const response = await api.get('/teacher/classes');
       setClasses(response.data);
-    } catch (error) { toast.error('Échec de la récupération des classes'); console.log(error) }
+    } catch (error) { toast.error('Failed to fetch classes'); console.log(error) }
   };
 
   const fetchResultsList = useCallback(async () => {
@@ -218,15 +218,7 @@ export default function TeacherResultsPage() {
       setExams(classExams);
 
       const studentMap: any = {};
-      // resultsRes.data?.forEach((r: any) => {
-      // const sId = r.student.userId;
-      // if (!studentMap[sId]) {
-      // studentMap[sId] = { id: r?.student?.id || '--', name: r?.student?.name || '--', userId: sId, marks: {} };
-      // }
-      //  studentMap[sId].marks[r.exam.id] = { val: r?.marks || '--', resultId: r.id, isLocked: r?.exam?.locked || 'N/A' };
-      //  });
-
-      // 2. Safe loop with fallbacks for missing student or exam profiles
+      
       resultsRes.data?.forEach((r: any) => {
         // Safe extraction or fallback to a unique string placeholder if empty
         const sId = r?.student?.userId || r?.student?.id || `unknown-${r?.id}`;
@@ -254,7 +246,7 @@ export default function TeacherResultsPage() {
       });
 
       setReportData(Object.values(studentMap));
-    } catch (error) { toast.error('Échec du chargement du cahier de notes'); console.log(error) }
+    } catch (error) { toast.error('Failed to load gradebook'); console.log(error) }
   }, [selectedClassId]);
 
   useEffect(() => {
@@ -287,16 +279,16 @@ export default function TeacherResultsPage() {
   const handleSubmitResults = async () => {
     const draftResultIds = results.filter(r => r.status === 'DRAFT' && r?.exam && !r.exam.locked).map(r => r.id);
     if (draftResultIds.length === 0) {
-      toast.info('Aucun résultat brouillon éditable à soumettre.');
+      toast.info('No editable draft results to submit.');
       return;
     }
-    const toastId = toast.loading('Publication des résultats...');
+    const toastId = toast.loading('Publishing results...');
     try {
       await api.post('/teacher/results/submit', draftResultIds);
-      toast.success('Résultats publiés!', { id: toastId });
+      toast.success('Results published!', { id: toastId });
       fetchResultsList();
       fetchGradebookData();
-    } catch (error) { toast.error('Échec de la soumission', { id: toastId }); console.log(error) }
+    } catch (error) { toast.error('Submission failed', { id: toastId }); console.log(error) }
   };
 
   const saveBulk = async () => {
@@ -316,7 +308,7 @@ export default function TeacherResultsPage() {
     }
 
     // 2. Start the loading state
-    const tid = toast.loading("Mise à jour de la base de données...");
+    const tid = toast.loading("Updating database...");
 
     try {
       // 3. Make the API call
@@ -328,7 +320,7 @@ export default function TeacherResultsPage() {
 
       // 5. Show the specific success message
       toast.success(
-        `Carnet de notes mis à jour : ${created} nouvelles entrées, ${updated} modifications enregistrées.`,
+        `Gradebook updated: ${created} new entries, ${updated} edits saved.`,
         { id: tid }
       );
 
@@ -341,7 +333,7 @@ export default function TeacherResultsPage() {
       fetchGradebookData();
 
     } catch (error) {
-      toast.error("Échec de la saisie groupée. Veuillez vérifier les autorisations.", { id: tid });
+      toast.error("Bulk entry failed. Please check permissions.", { id: tid });
       console.error("Bulk save error:", error);
     }
   };
@@ -364,21 +356,21 @@ export default function TeacherResultsPage() {
     <div className="p-[clamp(1.3rem,1vw+0.5rem,2rem)] space-y-[clamp(1.3rem,1vw+0.5rem,2rem)]">
       <div className="flex justify-between items-start flex-wrap gap-5">
         <div>
-          <h1 className="text-[clamp(1.3rem,1vw+0.5rem,2rem)] font-bold">Carnet de notes</h1>
-          <p className="text-muted-foreground font-medium">Gérer les notes d'évaluation et l'agrégation semestrielle.</p>
+          <h1 className="text-[clamp(1.3rem,1vw+0.5rem,2rem)] font-bold">Gradebook</h1>
+          <p className="text-muted-foreground font-medium">Manage assessment grades and semester aggregation.</p>
         </div>
         <div className="flex gap-3">
           <Select value={selectedClassId} onValueChange={setSelectedClassId}>
-            <SelectTrigger className="w-48 border-border hover:border-primary transition-colors duration-300"><SelectValue placeholder="Sélectionner une classe" /></SelectTrigger>
+            <SelectTrigger className="w-48 border-border hover:border-primary transition-colors duration-300"><SelectValue placeholder="Select a class" /></SelectTrigger>
             <SelectContent className="border-border hover:border-primary transition-colors duration-300">
-              <SelectItem value="all">Toutes les classes</SelectItem>
+              <SelectItem value="all">All classes</SelectItem>
               {classes.map(c => <SelectItem key={c.id} value={String(c.id)}>{c?.name || 'N/A'}</SelectItem>)}
             </SelectContent>
           </Select>
-          <Button onClick={() => { setEditingResult(null); setIsDialogOpen(true) }}>Ajouter une entrée</Button>
+          <Button onClick={() => { setEditingResult(null); setIsDialogOpen(true) }}>Add Entry</Button>
           {hasDrafts && (
             <Button variant="secondary" onClick={handleSubmitResults} className="bg-orange-100 text-orange-700 hover:bg-orange-200 border-orange-200">
-              <Send className="w-4 h-4 mr-2" /> Publier les brouillons
+              <Send className="w-4 h-4 mr-2" /> Publish drafts
             </Button>
           )}
         </div>
@@ -389,7 +381,7 @@ export default function TeacherResultsPage() {
           <CardHeader className="flex flex-row items-center flex-wrap justify-between pb-2">
             <div className="flex items-center gap-3">
               <TrendingUp className="w-5 h-5 text-primary" />
-              <CardTitle>Analyse : {selectedStudentForChart?.name || 'N/A'}</CardTitle>
+              <CardTitle>Analysis: {selectedStudentForChart?.name || 'N/A'}</CardTitle>
             </div>
             <Button variant="ghost" size="sm" onClick={() => setSelectedStudentForChart(null)}><X className="w-4 h-4" /></Button>
           </CardHeader>
@@ -411,16 +403,16 @@ export default function TeacherResultsPage() {
 
       <Tabs defaultValue="list" className="w-full">
         <TabsList className="grid w-full grid-cols-3 max-w-md">
-          <TabsTrigger value="list" className="gap-2 hover:text-primary hover:bg-white/50 transition-all duration-300"><ListFilter className="w-4 h-4" /> Liste</TabsTrigger>
-          <TabsTrigger value="gradebook" className="gap-2 hover:text-primary hover:bg-white/50 transition-all duration-300"><LayoutGrid className="w-4 h-4" /> Carnet de notes</TabsTrigger>
-          <TabsTrigger value="bulk" className="gap-2 hover:text-primary hover:bg-white/50 transition-all duration-300"><FileSpreadsheet className="w-4 h-4" /> Saisie groupée</TabsTrigger>
+          <TabsTrigger value="list" className="gap-2 hover:text-primary hover:bg-white/50 transition-all duration-300"><ListFilter className="w-4 h-4" /> List</TabsTrigger>
+          <TabsTrigger value="gradebook" className="gap-2 hover:text-primary hover:bg-white/50 transition-all duration-300"><LayoutGrid className="w-4 h-4" /> Gradebook</TabsTrigger>
+          <TabsTrigger value="bulk" className="gap-2 hover:text-primary hover:bg-white/50 transition-all duration-300"><FileSpreadsheet className="w-4 h-4" /> Bulk Entry</TabsTrigger>
         </TabsList>
 
         <TabsContent value="list" className="space-y-4">
           <div className="relative max-w-xs">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher par ID étudiant..."
+              placeholder="Search by student ID..."
               className="pl-9"
               value={filterStudentId}
               onChange={(e) => setFilterStudentId(e.target.value)}
@@ -432,13 +424,13 @@ export default function TeacherResultsPage() {
               <Table>
                 <TableHeader className="bg-slate-50 sticky top-0 z-10">
                   <TableRow>
-                    <TableHead>Classe</TableHead>
-                    <TableHead>Étudiant</TableHead>
-                    <TableHead>Évaluation (Terme)</TableHead>
-                    <TableHead className="text-center">Poids</TableHead>
+                    <TableHead>Class</TableHead>
+                    <TableHead>Student</TableHead>
+                    <TableHead>Assessment (Term)</TableHead>
+                    <TableHead className="text-center">Weight</TableHead>
                     <TableHead className="text-center">Score</TableHead>
-                    <TableHead className="text-center">Note</TableHead>
-                    <TableHead>Statut</TableHead>
+                    <TableHead className="text-center">Grade</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -466,17 +458,17 @@ export default function TeacherResultsPage() {
                           <span className={`px-2 py-0.5 rounded-full text-[9px] font-black text-center w-fit ${r.status === 'DRAFT' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
                             {r.status}
                           </span>
-                          {r?.exam?.locked && <span className="flex items-center gap-1 text-[9px] font-bold text-slate-400"><Lock className="w-2.5 h-2.5" /> VERROUILLÉ</span>}
+                          {r?.exam?.locked && <span className="flex items-center gap-1 text-[9px] font-bold text-slate-400"><Lock className="w-2.5 h-2.5" /> LOCKED</span>}
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
                         {r?.exam?.locked ? <BadgeCheck className="w-5 h-5 ml-auto text-slate-300" /> :
-                          <Button variant="ghost" size="sm" onClick={() => { setEditingResult(r); setIsDialogOpen(true) }}>Modifier</Button>}
+                          <Button variant="ghost" size="sm" onClick={() => { setEditingResult(r); setIsDialogOpen(true) }}>Edit</Button>}
                       </TableCell>
                     </TableRow>
                   )) : (
                     <TableRow><TableCell colSpan={8} className="text-center py-10 text-muted-foreground italic">
-                      {filterStudentId.trim() ? `Aucun résultat ne correspond à "${filterStudentId}".` : 'Aucun résultat trouvé.'}
+                      {filterStudentId.trim() ? `No results match "${filterStudentId}".` : 'No results found.'}
                     </TableCell></TableRow>
                   )}
                 </TableBody>
@@ -485,9 +477,9 @@ export default function TeacherResultsPage() {
             {/* Row count footer */}
             {displayedResults.length > 0 && (
               <div className="border-t px-4 py-2 bg-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest flex justify-between">
-                <span>Affichage de {displayedResults.length} résultat{displayedResults.length !== 1 ? 's' : ''}{filterStudentId.trim() ? ` correspondant à "${filterStudentId}"` : ''}</span>
+                <span>Showing {displayedResults.length} result{displayedResults.length !== 1 ? 's' : ''}{filterStudentId.trim() ? ` matching "${filterStudentId}"` : ''}</span>
                 {filterStudentId.trim() && results.length !== displayedResults.length && (
-                  <span>{results.length - displayedResults.length} caché{results.length - displayedResults.length !== 1 ? 's' : ''} par le filtre</span>
+                  <span>{results.length - displayedResults.length} hidden{results.length - displayedResults.length !== 1 ? '' : ''} by filter</span>
                 )}
               </div>
             )}
@@ -497,7 +489,7 @@ export default function TeacherResultsPage() {
         <TabsContent value="gradebook">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <div><CardTitle>Matrice de Performance</CardTitle></div>
+              <div><CardTitle>Performance Matrix</CardTitle></div>
               {selectedClassId !== 'all' && reportData.length > 0 && (
                 <Button
                   variant="outline"
@@ -513,14 +505,14 @@ export default function TeacherResultsPage() {
               )}
             </CardHeader>
             <CardContent>
-              {selectedClassId === 'all' ? <p className="text-center py-20 text-muted-foreground italic">Sélectionnez une classe pour afficher la matrice.</p> : (
+              {selectedClassId === 'all' ? <p className="text-center py-20 text-muted-foreground italic">Select a class to view the matrix.</p> : (
                 <div className="rounded-md border overflow-x-auto">
                   <Table>
                     <TableHeader className="bg-slate-50">
                       <TableRow>
-                        <TableHead>Étudiant</TableHead>
+                        <TableHead>Student</TableHead>
                         {exams.map(e => <TableHead key={e.id} className="text-center">{e?.name || 'N/A'} ({e.weight}%)</TableHead>)}
-                        <TableHead className="text-right font-black">Moyenne Pondérée</TableHead>
+                        <TableHead className="text-right font-black">Weighted Average</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -554,25 +546,25 @@ export default function TeacherResultsPage() {
         <TabsContent value="bulk">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle> Saisie groupée</CardTitle>
+              <CardTitle> Bulk Entry</CardTitle>
               <div className="flex gap-2">
                 {isEditMode ? (
                   <>
-                    <Button variant="ghost" onClick={() => { setIsEditMode(false); setPendingChanges({}); }}><X className="w-4 h-4 mr-2" /> Annuler</Button>
-                    <Button className="bg-green-600 hover:bg-green-700" onClick={saveBulk}><Save className="w-4 h-4 mr-2" /> Sauvegarder les brouillons</Button>
+                    <Button variant="ghost" onClick={() => { setIsEditMode(false); setPendingChanges({}); }}><X className="w-4 h-4 mr-2" /> Cancel</Button>
+                    <Button className="bg-green-600 hover:bg-green-700" onClick={saveBulk}><Save className="w-4 h-4 mr-2" /> Save drafts</Button>
                   </>
                 ) : (
-                  <Button onClick={() => setIsEditMode(true)} disabled={selectedClassId === 'all'}><Edit3 className="w-4 h-4 mr-2" /> Démarrer l'édition</Button>
+                  <Button onClick={() => setIsEditMode(true)} disabled={selectedClassId === 'all'}><Edit3 className="w-4 h-4 mr-2" /> Start editing</Button>
                 )}
               </div>
             </CardHeader>
             <CardContent>
-              {selectedClassId === 'all' ? <p className="text-center py-20 text-muted-foreground italic">Sélectionnez une classe pour activer la saisie groupée.</p> : (
+              {selectedClassId === 'all' ? <p className="text-center py-20 text-muted-foreground italic">Select a class to enable bulk entry.</p> : (
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader className="bg-slate-50">
                       <TableRow>
-                        <TableHead>Étudiant</TableHead>
+                        <TableHead>Student</TableHead>
                         {exams.map(e => <TableHead key={e.id} className="text-center">{e?.name || 'N/A'}</TableHead>)}
                       </TableRow>
                     </TableHeader>
@@ -610,7 +602,7 @@ export default function TeacherResultsPage() {
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>{editingResult ? 'Modifier l\'évaluation' : 'Nouvelle entrée de notes'}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editingResult ? 'Edit Assessment' : 'New Grade Entry'}</DialogTitle></DialogHeader>
           <ResultForm
             result={editingResult}
             existingResults={results}

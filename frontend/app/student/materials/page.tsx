@@ -34,8 +34,8 @@ export default function StudentMaterialsPage() {
         const res = await api.get('/student/classes');
         setClasses(res.data || []);
       } catch (err) {
-        console.error("Echec de connexion", err);
-        toast.error("Impossible de se connecter aux serveurs");
+        console.error("Connection Failed", err);
+        toast.error("Unable to connect to the servers");
       } finally {
         setLoading(false);
       }
@@ -53,8 +53,8 @@ export default function StudentMaterialsPage() {
       const res = await api.get(`/student/materials/${classId}`);
       setMaterials(res.data);
     } catch (error: any) {
-      console.error("Echec de connexion", error);
-      toast.error("Impossible de se connecter aux serveurs");
+      console.error("Connection Failed", error);
+      toast.error("Unable to connect to the servers");
       setMaterials([]);
     } finally {
       setFetchingMaterials(false);
@@ -100,7 +100,7 @@ export default function StudentMaterialsPage() {
       const fullUrl = getFullUrl(mat.fileUrl);
       // 1. Fetch the file data directly
       const response = await fetch(fullUrl);
-      if (!response.ok) throw new Error('La réponse du serveur n\'était pas valide');
+      if (!response.ok) throw new Error('Server response was not valid');
 
       const blob = await response.blob();
 
@@ -122,9 +122,9 @@ export default function StudentMaterialsPage() {
       // 4. Cleanup
       link.parentNode?.removeChild(link);
       window.URL.revokeObjectURL(url);
-      toast.success("Connexion interrompue,Téléchargement lancé", { id: tid });
+      toast.success("Download started", { id: tid });
     } catch (err) {
-      console.error("Echec de connexion:", err);
+      console.error("Connection Failed:", err);
       // Fallback: just open the URL in a new tab if fetch fails
       const fullUrl = getFullUrl(mat.fileUrl);
       window.open(fullUrl, '_blank');
@@ -139,16 +139,16 @@ export default function StudentMaterialsPage() {
       <header className="md:max-w-6xl mx-auto flex flex-col md:flex-row justify-between md:items-end gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-indigo-600 font-black text-[10px] uppercase tracking-[0.4em]">
-            <Archive size={14} /> Répertoire des connaissances
+            <Archive size={14} /> Knowledge Repository
           </div>
           <h1 className="text-[clamp(1.2rem,2.5vw+1rem,3rem)] font-black text-slate-900 tracking-tighter sm:text-7xl italic uppercase">
-            Ressources <span className="text-indigo-600">pédagogiques.</span>
+            Learning <span className="text-indigo-600">Resources.</span>
           </h1>
         </div>
 
         <Select onValueChange={handleClassChange}>
           <SelectTrigger className="w-72 h-16 rounded-4xl bg-white border border-slate-100 md:hover:border-primary shadow-xl font-black italic uppercase text-xs px-8 ring-offset-indigo-600 focus:ring-indigo-600 transition-all duration-500">
-            <SelectValue placeholder="CHOISIR LE GROUPE DE SUJETS" />
+            <SelectValue placeholder="CHOOSE SUBJECT GROUP" />
           </SelectTrigger>
           <SelectContent className="rounded-2xl border-none shadow-2xl">
             {classes.length > 0 ? (
@@ -159,7 +159,7 @@ export default function StudentMaterialsPage() {
               ))
             ) : (
               <div className="p-4 text-xs font-bold text-slate-400 uppercase italic text-center">
-                Aucune classe inscrite trouvée
+                No enrolled class found
               </div>
             )}
           </SelectContent>
@@ -171,7 +171,7 @@ export default function StudentMaterialsPage() {
         {fetchingMaterials ? (
           <div className="h-64 flex flex-col items-center justify-center gap-4">
             <Loader2 className="animate-spin text-indigo-300" size={40} />
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 italic">Accès aux archives...</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 italic">Accessing archives...</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -182,7 +182,7 @@ export default function StudentMaterialsPage() {
                   animate={{ opacity: 1, scale: 1 }}
                   className="col-span-full h-96 flex flex-col items-center justify-center bg-white rounded-[4rem] border-2 border-dashed border-slate-100 md:hover:border-primary duration-500 transition-colors italic font-black text-slate-200 uppercase tracking-tighter text-4xl"
                 >
-                  Aucune ressource pédagogique trouvée
+                  No learning resources found
                 </motion.div>
               )}
 
@@ -217,12 +217,12 @@ export default function StudentMaterialsPage() {
                            {mat.title}
                          </h3>
                          <p className="text-slate-400 font-bold text-[11px] leading-snug italic line-clamp-2">
-                           {mat.description || "Ressource pédagogique officielle."}
+                           {mat.description || "Official learning resource."}
                          </p>
                        </div>
 
                        <div className="text-[10px] font-bold text-slate-400 flex items-center gap-2 mt-2.5 mb-4">
-                         <span>Prof: {mat.uploadedBy?.name || "Enseignant"}</span>
+                         <span>Teacher: {mat.uploadedBy?.name || "Teacher"}</span>
                        </div>
 
                        <div className="flex gap-2">
@@ -230,7 +230,7 @@ export default function StudentMaterialsPage() {
                            variant="outline"
                            onClick={() => {
                              if (!mat.fileUrl) {
-                               toast.error("L'URL du fichier est manquante pour ce matériel.");
+                               toast.error("File URL is missing for this material.");
                                return;
                              }
                              const isPdf = mat.fileType?.includes('pdf') || mat.fileName?.toLowerCase().endsWith('.pdf');
@@ -242,14 +242,14 @@ export default function StudentMaterialsPage() {
                            }}
                            className="flex-1 h-8 rounded-lg border-slate-100 text-slate-700 font-bold text-[9px] uppercase hover:bg-slate-50 transition-all"
                          >
-                           <Eye size={12} className="mr-1" /> Aperçu
+                           <Eye size={12} className="mr-1" /> Preview
                          </Button>
 
                          <Button
                            onClick={() => handleDownload(mat)}
                            className="flex-1 h-8 rounded-lg bg-rose-600 text-white font-bold text-[9px] uppercase hover:bg-rose-700 transition-all shadow-sm"
                          >
-                           <Download size={12} className="mr-1" /> Obtenir
+                           <Download size={12} className="mr-1" /> Download
                          </Button>
                        </div>
                      </div>

@@ -19,15 +19,15 @@ import { Button } from '@/components/ui/button';
 
 const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
 
-// French display labels — backend always receives the English key
+// English display labels — backend always receives the English key
 const DAY_LABELS: Record<string, string> = {
-  MONDAY:    'LUNDI',
-  TUESDAY:   'MARDI',
-  WEDNESDAY: 'MERCREDI',
-  THURSDAY:  'JEUDI',
-  FRIDAY:    'VENDREDI',
-  SATURDAY:  'SAMEDI',
-  SUNDAY:    'DIMANCHE',
+  MONDAY:    'MONDAY',
+  TUESDAY:   'TUESDAY',
+  WEDNESDAY: 'WEDNESDAY',
+  THURSDAY:  'THURSDAY',
+  FRIDAY:    'FRIDAY',
+  SATURDAY:  'SATURDAY',
+  SUNDAY:    'SUNDAY',
 };
 
 interface TimetableEntry {
@@ -68,13 +68,13 @@ export default function UserTimetablePage() {
          semester = 1;
       }
 
-      // Get the current month name in French (e.g., "juin")
-      const monthName = currentDate.toLocaleDateString('fr-FR', { month: 'long' });
+      // Get the current month name in English (e.g., "June")
+      const monthName = currentDate.toLocaleDateString('en-US', { month: 'long' });
 
-      // Capitalize the first letter of the month name (e.g., "Juin")
+      // Capitalize the first letter of the month name (e.g., "June")
       const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
 
-      return `Semestre ${semester}, ${capitalizedMonth} - Année ${year}`;
+      return `Semester ${semester}, ${capitalizedMonth} - Year ${year}`;
    };
 
    useEffect(() => {
@@ -114,10 +114,10 @@ export default function UserTimetablePage() {
          <header className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>
                <Badge className="bg-blue-600/10 text-primary hover:bg-blue-600/10 border-none px-4 py-1 mb-4 rounded-full text-[10px] font-black uppercase tracking-widest">
-                  Registre actif • {semesterText || 'Chargement...'}
+                  Active registry • {semesterText || 'Loading...'}
                </Badge>
                <h1 className="text-[clamp(1.2rem,2.5vw+1rem,3rem)] font-black text-slate-900 tracking-tighter">
-                  Emploi du temps <span className="text-primary italic">hebdomadaire.</span>
+                  Weekly <span className="text-primary italic">timetable.</span>
                </h1>
             </div>
 
@@ -126,8 +126,8 @@ export default function UserTimetablePage() {
                   <Calendar size={20} />
                </div>
                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Date d&apos;aujourd&apos;hui</p>
-                  <p className="font-bold text-slate-700">{new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Today&apos;s Date</p>
+                  <p className="font-bold text-slate-700">{new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long' })}</p>
                </div>
             </div>
          </header>
@@ -196,7 +196,7 @@ export default function UserTimetablePage() {
                                              </span>
                                              <span className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest">
                                                 <MapPin size={14} className="text-blue-500" />
-                                                Bâtiment principal
+                                                Main building
                                              </span>
                                           </div>
                                        </div>
@@ -222,10 +222,10 @@ export default function UserTimetablePage() {
                      <div className="w-24 h-24 bg-primary rounded-3xl flex items-center justify-center mb-8">
                         <Calendar className="text-white" size={48} />
                      </div>
-                     <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-3">EMPLOI DU TEMPS VIDE</h3>
+                     <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-3">EMPTY TIMETABLE</h3>
                      <p className="text-slate-400 font-bold max-w-sm text-sm uppercase tracking-widest leading-loose">
-                        Aucune classe enregistrée pour le {(DAY_LABELS[activeDay] ?? activeDay).toLowerCase()}.
-                        Profitez de votre pause académique.
+                        No class registered for {(DAY_LABELS[activeDay] ?? activeDay).toLowerCase()}.
+                        Enjoy your academic break.
                      </p>
                   </motion.div>
                )}

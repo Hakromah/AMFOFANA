@@ -71,7 +71,7 @@ export default function BulkGradebookPage() {
          });
          setReportData(Object.values(studentMap));
       } catch (error) {
-         toast.error('Échec du chargement des données du carnet de notes');
+         toast.error('Failed to load gradebook data');
          console.log(error)
       }
    };
@@ -90,7 +90,7 @@ export default function BulkGradebookPage() {
 
       // Prevent invalid numbers reaching state
       if (value !== "" && (numValue < 0 || numValue > 100)) {
-         toast.error("Les notes doivent être comprises entre 0 et 100", { duration: 1500 });
+         toast.error("Grades must be between 0 and 100", { duration: 1500 });
          return;
       }
 
@@ -116,15 +116,15 @@ export default function BulkGradebookPage() {
          return;
       }
 
-      const tid = toast.loading("Enregistrement des mises à jour groupées sur le serveur...");
+      const tid = toast.loading("Saving bulk updates to server...");
       try {
          await api.post('/teacher/results/bulk', payload);
-         toast.success("Succès! Carnet de notes mis à jour.", { id: tid });
+         toast.success("Success! Gradebook updated.", { id: tid });
          setPendingChanges({});
          setIsEditMode(false);
          fetchData(); // Refresh table to show saved data
       } catch (e) {
-         toast.error("Erreur: Impossible d'enregistrer les résultats groupés", { id: tid });
+         toast.error("Error: Unable to save bulk results", { id: tid });
          console.log(e);
       }
    };
@@ -134,8 +134,8 @@ export default function BulkGradebookPage() {
          {/* HEADER SECTION */}
          <div className="flex justify-between items-center">
             <div>
-               <h1 className="text-[clamp(1.3rem,1vw+0.5rem,2rem)] font-bold tracking-tight">Saisie groupée des notes</h1>
-               <p className="text-muted-foreground">Entrez rapidement les notes pour toute la classe.</p>
+               <h1 className="text-[clamp(1.3rem,1vw+0.5rem,2rem)] font-bold tracking-tight">Bulk Grade Entry</h1>
+               <p className="text-muted-foreground">Quickly enter grades for the whole class.</p>
             </div>
 
             <div className="flex gap-3">
@@ -143,15 +143,15 @@ export default function BulkGradebookPage() {
                   <>
                      {!isEditMode ? (
                         <Button onClick={() => setIsEditMode(true)} className="gap-2">
-                           <Edit3 className="w-4 h-4" /> Mode d'édition
+                           <Edit3 className="w-4 h-4" /> Edit Mode
                         </Button>
                      ) : (
                         <>
                            <Button variant="ghost" onClick={() => { setIsEditMode(false); setPendingChanges({}); }}>
-                              <X className="w-4 h-4" /> Annuler
+                              <X className="w-4 h-4" /> Cancel
                            </Button>
                            <Button onClick={saveBulk} className="gap-2 bg-green-600 hover:bg-green-700">
-                              <Save className="w-4 h-4" /> Tout Sauvegarder
+                              <Save className="w-4 h-4" /> Save All
                            </Button>
                         </>
                      )}
@@ -160,7 +160,7 @@ export default function BulkGradebookPage() {
 
                <Select onValueChange={setSelectedClassId}>
                   <SelectTrigger className="w-[220px] border-border hover:border-primary transition-colors duration-300">
-                     <SelectValue placeholder="Sélectionner une classe" />
+                     <SelectValue placeholder="Select a class" />
                   </SelectTrigger>
                   <SelectContent className="border-border hover:border-primary transition-colors duration-300">
                      {classes.map((c) => (
@@ -178,7 +178,7 @@ export default function BulkGradebookPage() {
                   <Table>
                      <TableHeader className="bg-muted/50 py-3">
                         <TableRow>
-                           <TableHead className="w-[200px]">Détails des étudiants</TableHead>
+                           <TableHead className="w-[200px]">Student Details</TableHead>
                            {exams.map((e) => (
                               <TableHead key={e.id} className="text-center min-w-[120px]">
                                  {e.name}
@@ -233,7 +233,7 @@ export default function BulkGradebookPage() {
                         )) : (
                            <TableRow>
                               <TableCell colSpan={exams.length + 1} className="h-32 text-center text-muted-foreground">
-                                 Veuillez sélectionner une classe pour commencer à saisir les notes.
+                                 Please select a class to start entering grades.
                               </TableCell>
                            </TableRow>
                         )}

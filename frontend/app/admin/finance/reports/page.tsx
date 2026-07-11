@@ -25,7 +25,7 @@ export default function FinancialReports() {
       const res = await api.get('/financial-reports?populate=*');
       setReports(res.data?.data || res.data || []);
     } catch (e: any) {
-      toast.error('Échec du chargement de l\'historique des rapports');
+      toast.error('Failed to load report history');
     } finally {
       setLoading(false);
     }
@@ -36,7 +36,7 @@ export default function FinancialReports() {
   }, []);
 
   const handleGenerateReport = async () => {
-    const tid = toast.loading('Compilation des écritures du grand livre...');
+    const tid = toast.loading('Compiling ledger entries...');
     try {
       // Create new report entry in db
       const statsRes = await api.get('/school-finance/stats');
@@ -61,10 +61,10 @@ export default function FinancialReports() {
       };
 
       await api.post('/financial-reports', { data: newReport });
-      toast.success('Rapport compilé avec succès', { id: tid });
+      toast.success('Report compiled successfully', { id: tid });
       fetchReports();
     } catch (e: any) {
-      toast.error('La génération du rapport a échoué', { id: tid });
+      toast.error('Report generation failed', { id: tid });
     }
   };
 
@@ -88,7 +88,7 @@ export default function FinancialReports() {
     a.href = url;
     a.download = `Report-${actual.reportNumber}.csv`;
     a.click();
-    toast.success('La feuille CSV a été exportée avec succès');
+    toast.success('CSV sheet exported successfully');
   };
 
   return (
@@ -96,8 +96,8 @@ export default function FinancialReports() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h1 className="text-3xl font-black tracking-tight text-slate-900 italic uppercase">Rapports financiers & Exportations</h1>
-          <p className="text-sm text-slate-500 font-medium">Compiler les audits trimestriels/annuels des profits et pertes, les dettes impayées et l'analyse des revenus</p>
+          <h1 className="text-3xl font-black tracking-tight text-slate-900 italic uppercase">Financial Reports & Exports</h1>
+          <p className="text-sm text-slate-500 font-medium">Compile quarterly/annual profit & loss audits, outstanding debt, and revenue analysis</p>
         </div>
       </div>
 
@@ -105,25 +105,25 @@ export default function FinancialReports() {
       <Card className="border-0 shadow-lg shadow-slate-100 bg-white rounded-3xl p-6">
         <div className="flex flex-col md:flex-row md:items-end gap-4">
           <div className="space-y-1.5 flex-1">
-            <label className="text-xs font-black uppercase text-slate-400">Type de catégorie de rapport</label>
+            <label className="text-xs font-black uppercase text-slate-400">Report Category Type</label>
             <Select value={reportType} onValueChange={setReportType}>
               <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-slate-100">
-                <SelectValue placeholder="Catégorie" />
+                <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="MONTHLY">Bilan Mensuel</SelectItem>
-                <SelectItem value="YEARLY">Audit Annuel</SelectItem>
-                <SelectItem value="REVENUE">Analyse des revenus</SelectItem>
-                <SelectItem value="DEBT">Rapport sur les dettes impayées</SelectItem>
+                <SelectItem value="MONTHLY">Monthly Statement</SelectItem>
+                <SelectItem value="YEARLY">Annual Audit</SelectItem>
+                <SelectItem value="REVENUE">Revenue Analysis</SelectItem>
+                <SelectItem value="DEBT">Unpaid Debt Report</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-1.5 flex-1">
-            <label className="text-xs font-black uppercase text-slate-400">Intervalle de période</label>
+            <label className="text-xs font-black uppercase text-slate-400">Period Interval</label>
             <Select value={period} onValueChange={setPeriod}>
               <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-slate-100">
-                <SelectValue placeholder="Période" />
+                <SelectValue placeholder="Period" />
               </SelectTrigger>
               <SelectContent>
                 {['2026-06', '2026-07', '2026-08', '2026'].map((p) => (
@@ -137,7 +137,7 @@ export default function FinancialReports() {
             onClick={handleGenerateReport}
             className="h-11 px-6 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold uppercase tracking-wider text-xs duration-300"
           >
-            <BarChart3 className="w-4 h-4 mr-2" /> Compiler le Nouveau Rapport
+            <BarChart3 className="w-4 h-4 mr-2" /> Compile New Report
           </Button>
         </div>
       </Card>
@@ -145,7 +145,7 @@ export default function FinancialReports() {
       {/* Report list */}
       <Card className="border-0 shadow-xl shadow-slate-100/50 bg-white rounded-3xl overflow-hidden">
         <CardHeader className="px-6 py-5 border-b border-slate-50 flex flex-row items-center justify-between">
-          <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500">Historique des Déclarations</CardTitle>
+          <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500">Statement History</CardTitle>
           <button
             onClick={fetchReports}
             className="p-2 hover:bg-slate-50 border rounded-xl text-slate-400 hover:text-slate-600 transition-all"
@@ -155,17 +155,17 @@ export default function FinancialReports() {
         </CardHeader>
         <CardContent className="p-0">
           {loading ? (
-            <div className="p-12 text-center text-slate-400 font-bold uppercase text-xs tracking-widest animate-pulse">Synchronisation des archives...</div>
+            <div className="p-12 text-center text-slate-400 font-bold uppercase text-xs tracking-widest animate-pulse">Synchronizing archives...</div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Numéro de rapport</TableHead>
-                  <TableHead>Catégorie</TableHead>
-                  <TableHead>Période</TableHead>
-                  <TableHead>Revenu (GNF)</TableHead>
-                  <TableHead>Dépenses (GNF)</TableHead>
-                  <TableHead>Bénéfice Net (GNF)</TableHead>
+                  <TableHead>Report Number</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Period</TableHead>
+                  <TableHead>Revenue (GNF)</TableHead>
+                  <TableHead>Expenses (GNF)</TableHead>
+                  <TableHead>Net Profit (GNF)</TableHead>
                   <TableHead className="text-right">Export</TableHead>
                 </TableRow>
               </TableHeader>

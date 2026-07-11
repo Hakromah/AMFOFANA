@@ -53,13 +53,13 @@ export default function AdminDashboard() {
       semester = 1;
     }
 
-    // Get the current month name in French (e.g., "juin")
-    const monthName = currentDate.toLocaleDateString('fr-FR', { month: 'long' });
+    // Get the current month name in English
+    const monthName = currentDate.toLocaleDateString('en-US', { month: 'long' });
 
-    // Capitalize the first letter of the month name (e.g., "Juin")
+    // Capitalize the first letter of the month name (e.g., "June")
     const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
 
-    return `Semestre ${semester}, ${capitalizedMonth} - Année ${year}`;
+    return `Semester ${semester}, ${capitalizedMonth} - Year ${year}`;
   };
 
   useEffect(() => {
@@ -80,7 +80,7 @@ export default function AdminDashboard() {
         setRecentLogs(sortedLogs);
         setSemesterText(getDynamicSemester());
       } catch (error) {
-        toast.error('Données administratives non synchronisées.');
+        toast.error('Administrative data not synchronized.');
       } finally {
         setLoading(false);
       }
@@ -100,7 +100,7 @@ export default function AdminDashboard() {
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-          <p className="font-bold text-slate-500 animate-pulse">Synchronisation du registre mondial...</p>
+          <p className="font-bold text-slate-500 animate-pulse">Synchronizing global register...</p>
         </div>
       </div>
     );
@@ -112,9 +112,9 @@ export default function AdminDashboard() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
           <h1 className="text-[clamp(1.2rem,2vw+1rem,2rem)] font-black text-slate-900 tracking-tight flex items-center gap-3">
-            Console administrative <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            Administrative Console <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
           </h1>
-          <p className="text-slate-500 font-medium">Tableau de bord administratif • <span className="text-emerald-500">Actif</span> • {semesterText || 'Chargement...'}</p>
+          <p className="text-slate-500 font-medium">Administrative Dashboard • <span className="text-emerald-500">Active</span> • {semesterText || 'Loading...'}</p>
         </motion.div>
 
         <div className="flex items-center gap-4">
@@ -127,37 +127,37 @@ export default function AdminDashboard() {
             )}
           </a>
           <div className="flex items-center gap-2 px-4 py-2 bg-white text-slate-700 rounded-2xl border border-slate-200 shadow-sm font-bold text-sm">
-            <Globe className="w-4 h-4 text-blue-500" /> Système : En ligne
+            <Globe className="w-4 h-4 text-blue-500" /> System: Online
           </div>
           <div className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-2xl border border-slate-800 shadow-lg font-bold text-sm">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" /> Root Vérifié
+            <ShieldCheck className="w-4 h-4 text-emerald-400" /> Root Verified
           </div>
         </div>
       </div>
 
       {/* PRIMARY STATS GRID */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Inscription" value={report?.totalStudents} icon={Users} color="blue" sub="Élèves actifs" />
-        <StatCard title="Corps enseignant" value={report?.totalTeachers} icon={UserCog} color="emerald" sub="Corps enseignant" />
-        <StatCard title="Classes" value={report?.totalClasses} icon={School} color="amber" sub="Classes actives" />
-        <StatCard title="Évaluations" value={report?.totalExams} icon={BookOpen} color="rose" sub="Total des examens" />
+        <StatCard title="Enrollment" value={report?.totalStudents} icon={Users} color="blue" sub="Active students" />
+        <StatCard title="Teachers" value={report?.totalTeachers} icon={UserCog} color="emerald" sub="Teaching staff" />
+        <StatCard title="Classes" value={report?.totalClasses} icon={School} color="amber" sub="Active classes" />
+        <StatCard title="Assessments" value={report?.totalExams} icon={BookOpen} color="rose" sub="Total exams" />
       </div>
 
       {/* QUICK LINKS GRID */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-        <QuickDashboardLink href="/admin/families" label="Familles" icon={Users} color="blue" />
+        <QuickDashboardLink href="/admin/families" label="Families" icon={Users} color="blue" />
         <QuickDashboardLink href="/admin/parents" label="Parents" icon={UserCheck} color="emerald" />
         <QuickDashboardLink href="/admin/transport" label="Transport" icon={Bus} color="indigo" />
-        <QuickDashboardLink href="/admin/calendar" label="Calendrier" icon={CalendarIcon} color="amber" />
-        <QuickDashboardLink href="/admin/notifications" label="Alertes" icon={Bell} color="rose" />
-        <QuickDashboardLink href="/admin/audit" label="Journal d'audit" icon={Activity} color="violet" />
+        <QuickDashboardLink href="/admin/calendar" label="Calendar" icon={CalendarIcon} color="amber" />
+        <QuickDashboardLink href="/admin/notifications" label="Alerts" icon={Bell} color="rose" />
+        <QuickDashboardLink href="/admin/audit" label="Audit Log" icon={Activity} color="violet" />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-[clamp(1.2rem,2vw+1rem,2rem)]">
         {/* ANALYTICS: USER DISTRIBUTION */}
         <Card className="lg:col-span-1 py-3 border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm rounded-3xl overflow-hidden bg-white">
           <CardHeader className="border-b border-slate-50">
-            <CardTitle className="text-lg font-bold">Matrice des utilisateurs</CardTitle>
+            <CardTitle className="text-lg font-bold">User Matrix</CardTitle>
           </CardHeader>
           <CardContent className="pt-6">
             <div className="h-[280px] w-full">
@@ -196,7 +196,7 @@ export default function AdminDashboard() {
         {/* BAR CHART - INFRASTRUCTURE */}
         <Card className="lg:col-span-2 border py-3 border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm rounded-3xl overflow-hidden bg-white">
           <CardHeader className="border-b border-slate-50">
-            <CardTitle className="text-lg font-bold">Infrastructure académique</CardTitle>
+            <CardTitle className="text-lg font-bold">Academic Infrastructure</CardTitle>
           </CardHeader>
           <CardContent className="pt-8">
             <div className="h-[380px] w-full">
@@ -223,8 +223,8 @@ export default function AdminDashboard() {
         <Card className="border border-slate-100 shadow-sm rounded-3xl overflow-hidden bg-white">
           <CardHeader className="border-b border-slate-50 p-6 flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-lg font-black uppercase tracking-wider text-slate-800">Journal d'audit en direct</CardTitle>
-              <CardDescription className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-0.5">Enregistreur de mutations d'état</CardDescription>
+              <CardTitle className="text-lg font-black uppercase tracking-wider text-slate-800">Live Audit Log</CardTitle>
+              <CardDescription className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-0.5">State mutation logger</CardDescription>
             </div>
             <Activity className="text-slate-400" size={20} />
           </CardHeader>
@@ -243,12 +243,12 @@ export default function AdminDashboard() {
                       <p className="text-xs font-bold text-slate-800">{log.notes || `${log.entityName} mutation`}</p>
                     </div>
                     <span className="text-[10px] text-slate-400 font-black uppercase tracking-wider">
-                      {log.performedBy?.username || 'Système'}
+                      {log.performedBy?.username || 'System'}
                     </span>
                   </div>
                 ))
               ) : (
-                <p className="text-center py-10 text-slate-400 font-bold uppercase tracking-widest text-xs">Aucune activité récente</p>
+                <p className="text-center py-10 text-slate-400 font-bold uppercase tracking-widest text-xs">No recent activity</p>
               )}
             </div>
           </CardContent>
@@ -260,13 +260,13 @@ export default function AdminDashboard() {
         >
           <ArrowUpRight className="absolute right-[-20px] top-[-20px] w-48 h-48 opacity-10 rotate-12" />
           <div className="relative z-10">
-            <h3 className="text-2xl font-black mb-4">Intégrité du registre</h3>
+            <h3 className="text-2xl font-black mb-4">Registry Integrity</h3>
             <p className="text-indigo-100 mb-8 leading-relaxed max-w-sm">
-              Tous les dossiers académiques sont actuellement vérifiés et synchronisés avec le grand livre cloud sécurisé.
+              All academic records are currently verified and synchronized with the secure cloud ledger.
             </p>
             <div className="flex flex-wrap gap-3">
               <div className="px-4 py-2 bg-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-white/20 backdrop-blur-sm">
-                Base de données : 100% synchronisée
+                Database: 100% synchronized
               </div>
             </div>
           </div>

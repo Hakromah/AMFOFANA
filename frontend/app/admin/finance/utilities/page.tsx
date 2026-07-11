@@ -27,7 +27,7 @@ export default function AccountingUtilities() {
       const res = await api.get('/school-finance/audit-logs');
       setLogs(res.data);
     } catch (e: any) {
-      toast.error('Erreur de synchro des données d\'audit immuables.');
+      toast.error('Error syncing immutable audit data.');
     } finally {
       setLoading(false);
     }
@@ -39,13 +39,13 @@ export default function AccountingUtilities() {
 
   const handleRecalculate = async () => {
     setRecalculating(true);
-    const tid = toast.loading('Moteur de recalculation en cours...');
+    const tid = toast.loading('Running recalculation engine...');
     try {
       const res = await api.post('/school-finance/recalculate');
-      toast.success(`Ledger réparé en toute sécurité! Incohérences corrigées : ${res.data.correctedRecords}.`, { id: tid });
+      toast.success(`Ledger safely repaired! Inconsistencies corrected: ${res.data.correctedRecords}.`, { id: tid });
       fetchLogs();
     } catch (e: any) {
-      toast.error('Le moteur de recalculation a rencontré une erreur de base de données', { id: tid });
+      toast.error('Recalculation engine encountered a database error', { id: tid });
     } finally {
       setRecalculating(false);
     }
@@ -61,8 +61,8 @@ export default function AccountingUtilities() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h1 className="text-3xl font-black tracking-tight text-slate-900 italic uppercase">Outils comptables système</h1>
-          <p className="text-sm text-slate-500 font-medium">Réparation automatique du grand livre, recalcul des statistiques et pistes d'audit immuables</p>
+          <h1 className="text-3xl font-black tracking-tight text-slate-900 italic uppercase">System Accounting Utilities</h1>
+          <p className="text-sm text-slate-500 font-medium">Automatic ledger repair, statistics recalculation, and immutable audit trails</p>
         </div>
       </div>
 
@@ -72,10 +72,10 @@ export default function AccountingUtilities() {
           <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="space-y-2 max-w-md">
               <h3 className="text-lg font-black text-slate-900 uppercase tracking-wide flex items-center gap-2">
-                <Database className="w-5 h-5 text-blue-600" /> Recalculation du solde global
+                <Database className="w-5 h-5 text-blue-600" /> Global Balance Recalculation
               </h3>
               <p className="text-xs text-slate-500 font-semibold leading-relaxed">
-                Parcourt les factures des étudiants, les registres de paiement approuvés et les relevés de salaire pour réparer les incohérences de solde, rafraîchir les totaux statistiques et synchroniser les statuts des débiteurs.
+                Scans student invoices, approved payment registries, and salary statements to fix balance inconsistencies, refresh statistical totals, and sync debtor statuses.
               </p>
             </div>
             <Button
@@ -95,9 +95,9 @@ export default function AccountingUtilities() {
               <ShieldAlert className="w-6 h-6" />
             </div>
             <div className="space-y-1">
-              <h4 className="text-xs font-black uppercase text-slate-400">Avis de sécurité</h4>
+              <h4 className="text-xs font-black uppercase text-slate-400">Security Advisory</h4>
               <p className="text-[10px] text-slate-500 font-bold leading-relaxed">
-                Toutes les modifications du grand livre sont capturées de manière immuable dans la matrice des journaux d'audit. Les factures approuvées et les registres de paie ne peuvent pas être modifiés sans déclencheurs de réparation automatique.
+                All ledger modifications are captured immutably in the audit log matrix. Approved invoices and payroll records cannot be edited without auto-repair triggers.
               </p>
             </div>
           </div>
@@ -108,7 +108,7 @@ export default function AccountingUtilities() {
       <Card className="border-0 shadow-xl shadow-slate-100/50 bg-white rounded-3xl overflow-hidden mt-8">
         <CardHeader className="px-6 py-5 border-b border-slate-50 flex flex-row items-center justify-between">
           <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-500 flex items-center gap-2">
-            <History className="w-4 h-4 text-slate-400" /> Journaux d'audit immuables du grand livre
+            <History className="w-4 h-4 text-slate-400" /> Immutable Ledger Audit Logs
           </CardTitle>
           <button
             onClick={fetchLogs}
@@ -119,15 +119,15 @@ export default function AccountingUtilities() {
         </CardHeader>
         <CardContent className="p-0">
           {loading ? (
-            <div className="p-12 text-center text-slate-400 font-bold uppercase text-xs tracking-widest animate-pulse">Synchronisation des audits du grand livre...</div>
+            <div className="p-12 text-center text-slate-400 font-bold uppercase text-xs tracking-widest animate-pulse">Synchronizing ledger audits...</div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Horodatage</TableHead>
-                  <TableHead>Type d'action</TableHead>
-                  <TableHead>Entité cible</TableHead>
-                  <TableHead>Effectué par</TableHead>
+                  <TableHead>Timestamp</TableHead>
+                  <TableHead>Action Type</TableHead>
+                  <TableHead>Target Entity</TableHead>
+                  <TableHead>Performed By</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead className="text-right">Inspection</TableHead>
                 </TableRow>
@@ -167,13 +167,13 @@ export default function AccountingUtilities() {
         <DialogContent className="max-w-2xl bg-white rounded-3xl max-h-[85vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="text-md font-black uppercase tracking-wide flex items-center gap-2">
-              <Info className="w-5 h-5 text-blue-600" /> Inspecteur des différences : {selectedLog?.actionType} (ID: {selectedLog?.id})
+              <Info className="w-5 h-5 text-blue-600" /> Diff Inspector: {selectedLog?.actionType} (ID: {selectedLog?.id})
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 overflow-y-auto space-y-4 py-3 pr-1 text-xs">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <span className="text-[10px] font-black uppercase text-slate-400">Valeurs précédentes</span>
+                <span className="text-[10px] font-black uppercase text-slate-400">Previous Values</span>
                 <pre className="p-4 bg-slate-50 border rounded-2xl max-h-[350px] overflow-y-auto text-[10px] text-slate-600 font-mono">
                   {selectedLog?.previousValues
                     ? JSON.stringify(selectedLog.previousValues, null, 2)
@@ -182,7 +182,7 @@ export default function AccountingUtilities() {
               </div>
 
               <div className="space-y-1.5">
-                <span className="text-[10px] font-black uppercase text-slate-400">Valeurs actuelles</span>
+                <span className="text-[10px] font-black uppercase text-slate-400">Current Values</span>
                 <pre className="p-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl max-h-[350px] overflow-y-auto text-[10px] text-emerald-800 font-mono">
                   {selectedLog?.newValues
                     ? JSON.stringify(selectedLog.newValues, null, 2)

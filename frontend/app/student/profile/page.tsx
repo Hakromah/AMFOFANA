@@ -23,17 +23,17 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
 const profileSchema = z.object({
-   name: z.string().min(1, 'Le nom d\'identité est requis'),
-   email: z.string().email('E-mail institutionnel requis'),
-   phoneNumber: z.string().min(5, 'Un numéro de contact est requis'),
-   address: z.string().min(5, 'Une adresse complète est requise'),
-   birthCity: z.string().min(1, 'La ville de naissance est requise'),
-   birthCountry: z.string().min(1, 'Le pays de naissance est requis'),
+   name: z.string().min(1, 'Identity name is required'),
+   email: z.string().email('Institutional email is required'),
+   phoneNumber: z.string().min(5, 'Contact number is required'),
+   address: z.string().min(5, 'Complete address is required'),
+   birthCity: z.string().min(1, 'Birth city is required'),
+   birthCountry: z.string().min(1, 'Birth country is required'),
 });
 
 const passwordSchema = z.object({
-   currentPassword: z.string().min(1, 'La clé actuelle est requise'),
-   newPassword: z.string().min(6, '6 caractères minimum'),
+   currentPassword: z.string().min(1, 'Current password is required'),
+   newPassword: z.string().min(6, 'Minimum 6 characters'),
 });
 
 export default function RedesignedStudentProfile() {
@@ -66,7 +66,7 @@ export default function RedesignedStudentProfile() {
                birthCountry: res.data.birthCountry || '',
             });
          } catch (e) {
-            toast.error("La synchronisation du profil a échoué");
+            toast.error("Profile sync failed");
          } finally {
             setLoading(false);
          }
@@ -75,30 +75,30 @@ export default function RedesignedStudentProfile() {
    }, [profileForm]);
 
    const onUpdate = async (values: z.infer<typeof profileSchema>) => {
-      const tid = toast.loading("Synchronisation des dossiers...");
+      const tid = toast.loading("Syncing records...");
       try {
          await api.put('/student/profile/update', values);
-         toast.success("L'identité a été mise à jour", { id: tid });
+         toast.success("Identity updated successfully", { id: tid });
       } catch (e) {
-         toast.error("La mise à jour a échoué", { id: tid });
+         toast.error("Update failed", { id: tid });
       }
    };
 
    const onPwdSubmit = async (values: z.infer<typeof passwordSchema>) => {
-      const tid = toast.loading('Sécurisation du compte...');
+      const tid = toast.loading('Securing account...');
       try {
          await api.put('/student/profile/change-password', values);
-         toast.success('La clé de sécurité a été mise à jour', { id: tid });
+         toast.success('Security password updated successfully', { id: tid });
          pwdForm.reset();
       } catch (e) {
-         toast.error('La mise à jour a échoué. Vérifiez le mot de passe actuel.', { id: tid });
+         toast.error('Update failed. Please verify current password.', { id: tid });
       }
    };
 
    if (loading) return (
       <div className="h-screen flex flex-col items-center justify-center bg-[#F8FAFC]">
          <Loader2 className="animate-spin text-indigo-600" size={40} />
-         <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Chargement du portfolio numérique...</p>
+         <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Loading digital portfolio...</p>
       </div>
    );
 
@@ -122,9 +122,9 @@ export default function RedesignedStudentProfile() {
 
                   <div className="text-center md:text-left space-y-4">
                      <div className="flex flex-wrap justify-center md:justify-start gap-3">
-                        <Badge className="bg-indigo-50 text-indigo-600 border-none font-black text-[10px] px-4 tracking-widest uppercase italic">Étudiant enr</Badge>
+                        <Badge className="bg-indigo-50 text-indigo-600 border-none font-black text-[10px] px-4 tracking-widest uppercase italic">Student</Badge>
                         <Badge variant="outline" className="border-emerald-500 text-emerald-600 font-black text-[10px] px-4 italic uppercase flex gap-1 items-center">
-                           <BadgeCheck size={12} />  Compte vérifié
+                           <BadgeCheck size={12} /> Verified Account
                         </Badge>
                      </div>
                      <h1 className="text-[clamp(1.2rem,2.5vw+1rem,3rem)] font-black text-slate-900 tracking-tighter italic uppercase">{studentData?.name}</h1>
@@ -143,22 +143,22 @@ export default function RedesignedStudentProfile() {
                   <Card className="rounded-[2.5rem] border shadow-sm bg-white p-8 space-y-8 border-slate-100 md:hover:border-primary duration-500 transition-colors">
                      <div className="flex items-center gap-2 text-slate-400">
                         <Info size={16} />
-                        <span className="text-[10px] font-black uppercase tracking-widest">Dossier permanent</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest">Permanent Record</span>
                      </div>
 
                      <div className="space-y-6">
-                        <MetadataItem label="Genre" value={studentData?.gender} icon={User} />
-                        <MetadataItem label="Date de naissance" value={studentData?.birthDate} icon={Calendar} />
-                        <MetadataItem label="Pays de naissance" value={studentData?.birthCountry} icon={Flag} />
-                        <MetadataItem label="Créé par le système" value={new Date(studentData?.createdAt).toLocaleDateString()} icon={BadgeCheck} />
+                        <MetadataItem label="Gender" value={studentData?.gender} icon={User} />
+                        <MetadataItem label="Date of Birth" value={studentData?.birthDate} icon={Calendar} />
+                        <MetadataItem label="Country of Birth" value={studentData?.birthCountry} icon={Flag} />
+                        <MetadataItem label="System Created" value={new Date(studentData?.createdAt).toLocaleDateString()} icon={BadgeCheck} />
                      </div>
 
                      <Separator className="bg-slate-50" />
 
                      <div className="bg-indigo-50/50 rounded-3xl p-6 border border-indigo-100">
-                        <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2 italic">Note institutionnelle</p>
+                        <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2 italic">Institutional note</p>
                         <p className="text-[11px] text-indigo-600 font-bold leading-relaxed">
-                           Les données du registre sont synchronisées avec le Ministère de l'Éducation. Contactez l'administration pour toute correction d'identité.
+                           Registry data is synchronized with the Ministry of Education. Contact administration for identity corrections.
                         </p>
                      </div>
                   </Card>
@@ -170,22 +170,22 @@ export default function RedesignedStudentProfile() {
                      <CardContent className="p-10">
                         <div className="flex items-center gap-3 mb-10">
                            <div className="h-2 w-10 bg-indigo-600 rounded-full" />
-                           <h2 className="text-2xl font-black italic uppercase text-slate-900 tracking-tight">Synchronisation des données de l'étudiant</h2>
+                           <h2 className="text-2xl font-black italic uppercase text-slate-900 tracking-tight">Sync Student Data</h2>
                         </div>
 
                         <Form {...profileForm}>
                            <form onSubmit={profileForm.handleSubmit(onUpdate)} className="space-y-10">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                 <ProfileField form={profileForm} name="name" label="Identité légale" icon={User} />
-                                 <ProfileField form={profileForm} name="email" label="Email institutionnel" icon={Mail} />
-                                 <ProfileField form={profileForm} name="phoneNumber" label="Contact mobile" icon={Phone} />
-                                 <ProfileField form={profileForm} name="birthCity" label="Ville natale" icon={Landmark} />
-                                 <ProfileField form={profileForm} name="birthCountry" label="Pays de naissance" icon={Globe} />
-                                 <ProfileField form={profileForm} name="address" label="Adresse résidentielle" icon={MapPin} fullWidth />
+                                 <ProfileField form={profileForm} name="name" label="Legal Identity" icon={User} />
+                                 <ProfileField form={profileForm} name="email" label="Institutional Email" icon={Mail} />
+                                 <ProfileField form={profileForm} name="phoneNumber" label="Mobile Contact" icon={Phone} />
+                                 <ProfileField form={profileForm} name="birthCity" label="Birth City" icon={Landmark} />
+                                 <ProfileField form={profileForm} name="birthCountry" label="Country of Birth" icon={Globe} />
+                                 <ProfileField form={profileForm} name="address" label="Residential Address" icon={MapPin} fullWidth />
                               </div>
 
                               <Button type="submit" className="w-full h-16 bg-slate-900 md:hover:bg-primary text-white font-black rounded-[clamp(1rem,2vw+1rem,3rem)] transition-all duration-500 shadow-xl uppercase text-[11px] tracking-[0.2em]">
-                                 <Save className="mr-3" size={18} /> Mise à jour du portfolio académique
+                                 <Save className="mr-3" size={18} /> Update Academic Portfolio
                               </Button>
                            </form>
                         </Form>
@@ -195,14 +195,14 @@ export default function RedesignedStudentProfile() {
                         <div className="space-y-8">
                            <div className="flex items-center gap-3">
                               <ShieldCheck className="text-rose-600" />
-                              <h2 className="text-2xl font-black italic uppercase text-slate-900 tracking-tight">Sécurité d'accès</h2>
+                              <h2 className="text-2xl font-black italic uppercase text-slate-900 tracking-tight">Access Security</h2>
                            </div>
 
                            <Form {...pwdForm}>
                               <form onSubmit={pwdForm.handleSubmit(onPwdSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
                                  <FormField control={pwdForm.control} name="currentPassword" render={({ field }) => (
                                     <FormItem>
-                                       <FormLabel className="text-[10px] font-black uppercase text-slate-400 ml-1">Mot de passe actuel</FormLabel>
+                                       <FormLabel className="text-[10px] font-black uppercase text-slate-400 ml-1">Current password</FormLabel>
                                        <div className="relative">
                                           <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
                                           <FormControl><Input type={showCurrentPwd ? "text" : "password"} {...field} className="h-14 pl-12 pr-12 rounded-[clamp(1rem,2vw+1rem,2rem)] bg-slate-50 border-none font-bold md:hover:bg-indigo-50/50 md:hover:ring-2 md:hover:ring-indigo-600/20 transition-all duration-300" /></FormControl>
@@ -215,7 +215,7 @@ export default function RedesignedStudentProfile() {
 
                                  <FormField control={pwdForm.control} name="newPassword" render={({ field }) => (
                                     <FormItem>
-                                       <FormLabel className="text-[10px] font-black uppercase text-slate-400 ml-1">Nouveau mot de passe</FormLabel>
+                                       <FormLabel className="text-[10px] font-black uppercase text-slate-400 ml-1">New password</FormLabel>
                                        <div className="relative">
                                           <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
                                           <FormControl><Input type={showNewPwd ? "text" : "password"} {...field} className="h-14 pl-12 pr-12 rounded-[clamp(1rem,2vw+1rem,2rem)] bg-slate-50 border-none font-bold md:hover:bg-indigo-50/50 md:hover:ring-2 md:hover:ring-indigo-600/20 transition-all duration-300" /></FormControl>
@@ -227,7 +227,7 @@ export default function RedesignedStudentProfile() {
                                  )} />
 
                                  <Button type="submit" className="md:col-span-2 h-14 bg-rose-600 md:hover:bg-primary text-white font-black rounded-[clamp(1rem,2vw+1rem,2rem)] transition-all duration-500 uppercase text-[10px] tracking-widest">
-                                    Révision des identifiants de sécurité
+                                    Update Security Credentials
                                  </Button>
                               </form>
                            </Form>

@@ -19,13 +19,13 @@ import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const profileFormSchema = z.object({
-  name: z.string().min(1, { message: 'Nom est requis' }),
-  email: z.string().email({ message: 'Adresse email invalide' }),
+  name: z.string().min(1, { message: 'Name is required' }),
+  email: z.string().email({ message: 'Invalid email address' }),
 });
 
 const passwordFormSchema = z.object({
-  currentPassword: z.string().min(1, { message: 'Mot de passe actuel est requis' }),
-  newPassword: z.string().min(6, { message: 'Mot de passe doit contenir au moins 6 caracteres' }),
+  currentPassword: z.string().min(1, { message: 'Current password is required' }),
+  newPassword: z.string().min(6, { message: 'Password must contain at least 6 characters' }),
 });
 
 interface UserDTO {
@@ -59,7 +59,7 @@ export default function TeacherProfilePage() {
           email: response.data.email,
         });
       } catch (error) {
-        toast.error('Échec de la récupération des données utilisateur');
+        toast.error('Failed to fetch user data');
         console.log(error);
       }
     };
@@ -69,9 +69,9 @@ export default function TeacherProfilePage() {
   const onProfileSubmit = async (values: z.infer<typeof profileFormSchema>) => {
     try {
       await api.put('/teacher/profile', values);
-      toast.success('Profil mis à jour avec succès');
+      toast.success('Profile updated successfully');
     } catch (error) {
-      toast.error('Échec de la mise à jour du profil');
+      toast.error('Failed to update profile');
       console.log(error);
     }
   };
@@ -79,21 +79,21 @@ export default function TeacherProfilePage() {
   const onPasswordSubmit = async (values: z.infer<typeof passwordFormSchema>) => {
     try {
       await api.put('/teacher/change-password', values);
-      toast.success('Mot de passe modifié avec succès');
+      toast.success('Password changed successfully');
       passwordForm.reset();
     } catch (error) {
-      toast.error('Échec de la modification du mot de passe');
+      toast.error('Failed to change password');
       console.log(error);
     }
   };
 
   return (
     <div className="p-[clamp(1.2rem,2vw+1rem,2rem)] space-y-[clamp(1.2rem,2vw+1rem,2rem)]">
-      <h1 className="text-[clamp(1.2rem,2vw+1rem,2rem)] font-bold"> Mon profil</h1>
+      <h1 className="text-[clamp(1.2rem,2vw+1rem,2rem)] font-bold"> My Profile</h1>
 
       <Card className="border border-slate-200 md:hover:border-primary py-4 duration-500 transition-colors shadow-sm">
         <CardHeader>
-          <CardTitle> Mise à jour du profil</CardTitle>
+          <CardTitle> Profile Update</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...profileForm}>
@@ -103,9 +103,9 @@ export default function TeacherProfilePage() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nom</FormLabel>
+                    <FormLabel>Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Votre nom" {...field} />
+                      <Input placeholder="Your name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -118,13 +118,13 @@ export default function TeacherProfilePage() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="Votre email" {...field} />
+                      <Input placeholder="Your email" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit">Mettre à jour le profil</Button>
+              <Button type="submit">Update Profile</Button>
             </form>
           </Form>
         </CardContent>
@@ -132,7 +132,7 @@ export default function TeacherProfilePage() {
 
       <Card className="border border-slate-200 py-4 md:hover:border-primary duration-500 transition-colors shadow-sm">
         <CardHeader>
-          <CardTitle> Modification du mot de passe</CardTitle>
+          <CardTitle> Change Password</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...passwordForm}>
@@ -142,7 +142,7 @@ export default function TeacherProfilePage() {
                 name="currentPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Mot de passe actuel</FormLabel>
+                    <FormLabel>Current Password</FormLabel>
                     <FormControl>
                       <Input type="password" {...field} />
                     </FormControl>
@@ -155,7 +155,7 @@ export default function TeacherProfilePage() {
                 name="newPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nouveau mot de passe</FormLabel>
+                    <FormLabel>New Password</FormLabel>
                     <FormControl>
                       <Input type="password" {...field} />
                     </FormControl>
@@ -163,7 +163,7 @@ export default function TeacherProfilePage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit">Changer le mot de passe</Button>
+              <Button type="submit">Change Password</Button>
             </form>
           </Form>
         </CardContent>

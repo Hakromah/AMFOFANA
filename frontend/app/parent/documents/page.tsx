@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, Download, Loader2, Landmark, ShieldCheck, UserCircle2 } from 'lucide-react';
 import api from '@/lib/api';
 import { toast } from 'sonner';
+import { SCHOOL_CONFIG } from '@/lib/school-config';
+import { CIRCULAR_LOGO, getCircularLogo } from '@/lib/logo-base64';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import QRCode from 'qrcode';
@@ -99,19 +101,28 @@ export default function ParentDocumentsPage() {
       const qrCodeUrl = await QRCode.toDataURL(qrString, { margin: 2, scale: 4 });
 
       const doc = new jsPDF() as any;
+      await getCircularLogo();
 
       // Header Branding
       doc.setFillColor(15, 23, 42);
       doc.rect(0, 0, 210, 45, 'F');
+      
+      // Draw school logo
+      try {
+        doc.addImage(CIRCULAR_LOGO, 'PNG', 14, 10, 25, 25);
+      } catch (e) {
+        console.error("Failed to add logo to transcript", e);
+      }
+
       doc.setTextColor(255, 255, 255);
       doc.setFont('Helvetica', 'bold');
       doc.setFontSize(20);
-      doc.text((sch.name || 'School').toUpperCase(), 14, 18);
+      doc.text((sch.name || 'AMFOFANA ACADEMY').toUpperCase(), 45, 18);
       doc.setFont('Helvetica', 'normal');
       doc.setFontSize(9);
       doc.setTextColor(156, 163, 175);
-      doc.text(`Official Academic Transcript • Registries System`, 14, 25);
-      doc.text(`Address: ${sch.address || ''} | Email: ${sch.email || ''} | Phone: ${sch.phone || ''}`, 14, 32);
+      doc.text(`Official Transcript • Registries System`, 45, 25);
+      doc.text(`Address: ${sch.address || ''} | Email: ${sch.email || ''} | Phone: ${sch.phone || ''}`, 45, 32);
 
       // Title
       doc.setTextColor(15, 23, 42);
@@ -196,7 +207,7 @@ export default function ParentDocumentsPage() {
       doc.text(typeof sum.gpa === 'number' ? sum.gpa.toFixed(2) : '0.00', 135, currentY + 18);
 
       // Signatures & QR
-      const sigY = currentY + 42;
+      const sigY = Math.max(235, currentY + 36);
       doc.setTextColor(100, 116, 139);
       doc.setFont('Helvetica', 'bold');
       doc.setFontSize(8);
@@ -228,6 +239,7 @@ export default function ParentDocumentsPage() {
     const toastId = toast.loading('Compiling ledger statement...');
     try {
       const doc = new jsPDF();
+      await getCircularLogo();
       doc.setDrawColor(59, 130, 246);
       doc.setLineWidth(1.5);
       doc.rect(5, 5, 200, 287);
@@ -235,15 +247,23 @@ export default function ParentDocumentsPage() {
       // Header Banner
       doc.setFillColor(15, 23, 42);
       doc.rect(5, 5, 200, 45, 'F');
+      
+      // Draw school logo
+      try {
+        doc.addImage(CIRCULAR_LOGO, 'PNG', 15, 12, 30, 30);
+      } catch (e) {
+        console.error("Failed to add logo to statement", e);
+      }
+
       doc.setTextColor(255, 255, 255);
       doc.setFont('Helvetica', 'bold');
       doc.setFontSize(18);
-      doc.text('AMFOFANA ACADEMY', 15, 22);
+      doc.text('AMFOFANA ACADEMY', 52, 22);
       doc.setFontSize(10);
       doc.setFont('Helvetica', 'normal');
-      doc.text('STATEMENT OF ACCOUNT', 15, 30);
-      doc.text('Conakry, Guinea | billing@amfofana.edu', 15, 37);
-      doc.text(`Generated: ${new Date().toLocaleDateString()}`, 130, 22);
+      doc.text('STATEMENT OF ACCOUNT', 52, 30);
+      doc.text('Conakry, Guinea | billing@amfofana.edu', 52, 37);
+      doc.text(`Generated: ${new Date().toLocaleDateString()}`, 196, 22, { align: 'right' });
 
       // Student info
       doc.setTextColor(15, 23, 42);
@@ -349,6 +369,7 @@ export default function ParentDocumentsPage() {
     const toastId = toast.loading('Compiling payment receipt...');
     try {
       const doc = new jsPDF();
+      await getCircularLogo();
       doc.setDrawColor(59, 130, 246);
       doc.setLineWidth(1.5);
       doc.rect(5, 5, 200, 287);
@@ -356,14 +377,22 @@ export default function ParentDocumentsPage() {
       // Header Banner
       doc.setFillColor(15, 23, 42);
       doc.rect(5, 5, 200, 45, 'F');
+
+      // Draw school logo
+      try {
+        doc.addImage(CIRCULAR_LOGO, 'PNG', 15, 12, 30, 30);
+      } catch (e) {
+        console.error("Failed to add logo to receipt", e);
+      }
+
       doc.setTextColor(255, 255, 255);
       doc.setFont('Helvetica', 'bold');
       doc.setFontSize(22);
-      doc.text('AMFOFANA ACADEMY', 15, 23);
+      doc.text('AMFOFANA ACADEMY', 52, 23);
       doc.setFontSize(9);
       doc.setFont('Helvetica', 'normal');
-      doc.text('ENTERPRISE FINANCIAL LEDGER RECEIPT', 15, 30);
-      doc.text('Conakry, Guinea | billing@amfofana.edu', 15, 36);
+      doc.text('ENTERPRISE FINANCIAL LEDGER RECEIPT', 52, 30);
+      doc.text('Conakry, Guinea | billing@amfofana.edu', 52, 36);
 
       doc.setTextColor(15, 23, 42);
       doc.setFontSize(20);

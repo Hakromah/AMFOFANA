@@ -40,8 +40,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 const formSchema = z.object({
-  studentId: z.string().min(1, { message: "Choisir un étudiant pour l'inscription" }),
-  classId: z.string().min(1, { message: 'Veuillez sélectionner une classe cible' }),
+  studentId: z.string().min(1, { message: "Choose a student for enrollment" }),
+  classId: z.string().min(1, { message: "Please select a target class" }),
 });
 
 export default function AdvancedAssignStudentPage() {
@@ -64,7 +64,7 @@ export default function AdvancedAssignStudentPage() {
       setStudents(studentsRes.data);
       setClasses(classesRes.data);
     } catch (error) {
-      toast.error("Échec de la synchronisation du registre des étudiants");
+      toast.error("Failed to sync student registry");
       console.log(error);
     } finally {
       setDataLoading(false);
@@ -75,17 +75,17 @@ export default function AdvancedAssignStudentPage() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    const tid = toast.loading("Traitement de l'inscription...");
+    const tid = toast.loading("Processing enrollment...");
     try {
       await api.post('/admin/assign-student', {
         studentId: parseInt(values.studentId),
         classId: parseInt(values.classId),
       });
-      toast.success("Inscription finalisée", { id: tid });
+      toast.success("Enrollment finalized", { id: tid });
       form.reset();
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Inscription rejetée par le système.";
-      toast.error("Inscription échouée", {
+      const errorMessage = error.response?.data?.message || "Enrollment rejected by the system.";
+      toast.error("Enrollment failed", {
         id: tid,
         description: <span className="text-rose-500 font-bold">{errorMessage}</span>,
       });
@@ -97,7 +97,7 @@ export default function AdvancedAssignStudentPage() {
   if (dataLoading) return (
     <div className="h-screen flex flex-col items-center justify-center gap-4 bg-[#f8fafc]">
       <Loader2 className="animate-spin text-primary" size={40} />
-      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Chargement des données académiques...</p>
+      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Loading academic data...</p>
     </div>
   );
 
@@ -111,13 +111,13 @@ export default function AdvancedAssignStudentPage() {
           className="flex items-center justify-center gap-2 text-primary"
         >
           <ShieldCheck size={18} />
-          <span className="text-[10px] font-black uppercase tracking-[0.4em]">L'autorité d'enregistrement</span>
+          <span className="text-[10px] font-black uppercase tracking-[0.4em]">Registration Authority</span>
         </motion.div>
         <h1 className="text-[clamp(1.2rem,3.5vw,4rem)] font-black text-slate-900 tracking-tighter italic uppercase">
-          Inscription <span className="text-primary">des étudiants</span>
+          Student <span className="text-primary">Enrollment</span>
         </h1>
         <p className="text-slate-400 font-bold text-sm uppercase tracking-widest max-w-2xl mx-auto leading-loose">
-          Attribuer des étudiants à leurs groupes universitaires respectifs pour activer la synchronisation des horaires et le suivi des notes.
+          Assign students to their respective study groups to enable timetable synchronization and grade tracking.
         </p>
       </header>
 
@@ -132,7 +132,7 @@ export default function AdvancedAssignStudentPage() {
           <Card className="rounded-[clamp(1rem,2vw+1rem,2rem)] border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-2xl overflow-hidden bg-white h-full">
             <CardContent className="p-[clamp(0rem,2vw+1rem,2rem)] space-y-[clamp(0rem,2vw+1rem,2rem)]">
               <div className="space-y-2">
-                <h2 className="text-[clamp(1rem,3vw,4rem)]  font-black text-slate-900 italic tracking-tight uppercase">Console d'inscription</h2>
+                <h2 className="text-[clamp(1rem,3vw,4rem)]  font-black text-slate-900 italic tracking-tight uppercase">Enrollment Console</h2>
                 <div className="h-1.5 w-16 bg-blue-600 rounded-full" />
               </div>
 
@@ -143,11 +143,11 @@ export default function AdvancedAssignStudentPage() {
                     name="studentId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Identifier l'étudiant</FormLabel>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Identify Student</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger className="h-16 rounded-2xl bg-slate-50 border-none font-bold text-slate-700 shadow-sm transition-all focus:ring-2 focus:ring-blue-600/20">
-                              <SelectValue placeholder="Rechercher dans le registre des étudiants..." />
+                              <SelectValue placeholder="Search in student registry..." />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent className="rounded-2xl max-md:rounded-xl border-slate-100 shadow-2xl">
@@ -179,11 +179,11 @@ export default function AdvancedAssignStudentPage() {
                     name="classId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Finance et investissement</FormLabel>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Select Target Class</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger className="h-16 rounded-2xl max-md:rounded-xl bg-slate-50 border-none font-bold text-slate-700 shadow-sm transition-all focus:ring-2 focus:ring-blue-600/20">
-                              <SelectValue placeholder="Identifier le groupe cible..." />
+                              <SelectValue placeholder="Identify target group..." />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent className="rounded-2xl max-md:rounded-xl border-slate-100 shadow-2xl">
@@ -208,7 +208,7 @@ export default function AdvancedAssignStudentPage() {
                       <Loader2 className="animate-spin" />
                     ) : (
                       <>
-                        VALIDER L'INSCRIPTION
+                        CONFIRM ENROLLMENT
                         <UserPlus className="ml-2 group-hover:scale-110 transition-transform" size={18} />
                       </>
                     )}
@@ -228,26 +228,26 @@ export default function AdvancedAssignStudentPage() {
           <div className="bg-white rounded-[clamp(1rem,2vw+1rem,2rem)] p-[clamp(0rem,2vw+1rem,2rem)] border border-slate-100 md:hover:border-primary duration-500 transition-colors shadow-sm flex-1 flex flex-col justify-between">
             <div className="space-y-[clamp(0rem,2vw+1rem,2rem)]">
               <div className="flex items-center justify-between">
-                <h2 className="text-[clamp(1rem,3vw,4rem)]  font-black text-slate-900 italic tracking-tight uppercase leading-none">Le centre d'intelligence</h2>
-                <Badge className="bg-blue-100 text-primary border-none font-black text-[9px] px-3 tracking-[0.2em] uppercase">Système vérifié</Badge>
+                <h2 className="text-[clamp(1rem,3vw,4rem)]  font-black text-slate-900 italic tracking-tight uppercase leading-none">Intelligence Center</h2>
+                <Badge className="bg-blue-100 text-primary border-none font-black text-[9px] px-3 tracking-[0.2em] uppercase">System Verified</Badge>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-2 group md:hover:bg-primary transition-all duration-500">
                   <GraduationCap className="text-primary group-hover:text-white transition-colors" size={28} />
                   <p className="text-4xl font-black text-slate-900 tracking-tighter italic group-hover:text-white transition-colors">{students.length}</p>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-blue-100 transition-colors">Total Etudiants</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-blue-100 transition-colors">Total Students</p>
                 </div>
                 <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-2 group md:hover:bg-primary transition-all duration-500">
                   <Landmark className="text-primary group-hover:text-white transition-colors" size={28} />
                   <p className="text-4xl font-black text-slate-900 tracking-tighter italic group-hover:text-white transition-colors">{classes.length}</p>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-blue-100 transition-colors">Groupes d'etudes</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-blue-100 transition-colors">Study Groups</p>
                 </div>
               </div>
 
               <div className="space-y-4">
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-2 flex items-center gap-2">
-                  <Info size={14} /> Permissions d'allocation
+                  <Info size={14} /> Allocation Permissions
                 </p>
                 <div className="grid gap-3">
                   {[
@@ -277,8 +277,8 @@ export default function AdvancedAssignStudentPage() {
                   <Users2 className="text-blue-400" size={28} />
                 </div>
                 <div>
-                  <p className="font-black italic text-xl leading-none">Protocole de sécurité</p>
-                  <p className="text-[9px] opacity-60 font-bold uppercase tracking-[0.2em] mt-1">Personnel autorisé uniquement</p>
+                  <p className="font-black italic text-xl leading-none">Security Protocol</p>
+                  <p className="text-[9px] opacity-60 font-bold uppercase tracking-[0.2em] mt-1">Authorized Personnel Only</p>
                 </div>
               </div>
             </div>
