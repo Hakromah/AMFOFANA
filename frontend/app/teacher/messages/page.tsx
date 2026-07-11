@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -240,8 +241,8 @@ export default function TeacherMessagesPage() {
                   >
                     <div className="flex justify-between items-start pr-4">
                       <span className="text-xs font-black text-slate-900 tracking-tight">
-                        {tab === 'inbox' 
-                          ? (msg.sender?.name || msg.sender?.username || 'System') 
+                        {tab === 'inbox'
+                          ? (msg.sender?.name || msg.sender?.username || 'System')
                           : (msg.recipient?.name || msg.recipient?.username || 'User')}
                       </span>
                       <span className="text-[8px] font-bold text-slate-400">

@@ -7,7 +7,7 @@ import {
   Search, Plus, Check, X, FileText, Download, Edit, Trash2,
   DollarSign, Clock, UserCircle2, ChevronDown
 } from 'lucide-react';
-import { CIRCULAR_LOGO, getCircularLogo } from '@/lib/logo-base64';
+import {  getCircularLogo } from '@/lib/logo-base64';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

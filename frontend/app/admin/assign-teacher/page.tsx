@@ -1,25 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
+import api from '@/lib/api';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { motion } from 'framer-motion';
+import {
+  ArrowRight,
+  Briefcase,
+  CheckCircle2,
+  Landmark,
+  Loader2,
+  ShieldCheck,
+  UserPlus,
+  Users
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import {
-  UserPlus,
-  ShieldCheck,
-  Users,
-  Landmark,
-  ArrowRight,
-  Loader2,
-  CheckCircle2,
-  Briefcase
-} from 'lucide-react';
-import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import api from '@/lib/api';
+import * as z from 'zod';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -35,8 +37,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 
 const formSchema = z.object({
   teacherId: z.string().min(1, { message: 'Please select an instructor' }),

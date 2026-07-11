@@ -4,10 +4,10 @@
 import { useEffect, useState } from 'react';
 import {
   FileText, Printer, Download,
-  RefreshCcw, Loader2, GraduationCap, Building2, Phone, Mail, UserCheck,
+  RefreshCcw, Loader2, GraduationCap, Building2, Phone, Mail,
   Eye, ArrowLeft
 } from 'lucide-react';
-import { CIRCULAR_LOGO, getCircularLogo } from '@/lib/logo-base64';
+import { getCircularLogo } from '@/lib/logo-base64';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import api from '@/lib/api';
@@ -16,12 +16,13 @@ import autoTable from 'jspdf-autotable';
 import QRCode from 'qrcode';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import Image from 'next/image';
 
 export default function StudentTranscriptsPage() {
-  const [currentUser, setCurrentUser] = useState<any | null>(null);
+  const [ setCurrentUser] = useState<any | null>(null);
   const [transcripts, setTranscripts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTranscriptId, setSelectedTranscriptId] = useState<string | null>(null);
@@ -88,7 +89,7 @@ export default function StudentTranscriptsPage() {
       const qrString = `AMFOFANA ACADEMY\n` +
         `Reference: ${qrData.referenceNumber}\n` +
         `Student: ${qrData.name}\n` +
-        `Matricule: ${qrData.studentId}\n` +
+        `Matriculate: ${qrData.studentId}\n` +
         `Academic Year: ${qrData.academicYear}\n` +
         `Status: ${qrData.status}`;
 
@@ -378,7 +379,9 @@ export default function StudentTranscriptsPage() {
                 <div className="mx-auto p-5 bg-white border border-slate-100 shadow-xl rounded-3xl mb-6 text-slate-400 w-fit">
                   <FileText size={40} />
                 </div>
-                <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">No Transcripts Issued</h3>
+                <CardHeader>
+                  <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight">No Transcripts Issued</CardTitle>
+                </CardHeader>
                 <p className="text-slate-400 text-xs font-bold uppercase tracking-wider text-center mt-2 max-w-md mx-auto leading-relaxed">
                   The academic registry does not contain any official transcripts generated for your account. Transcripts are compiled and registered by administration.
                 </p>
@@ -558,7 +561,7 @@ export default function StudentTranscriptsPage() {
                     <div className="flex flex-col items-center justify-center space-y-1.5 p-2 bg-slate-50 border border-slate-100 rounded-2xl print:bg-white print:border-none">
                       {qrCodeUrl ? (
                         <>
-                          <img src={qrCodeUrl} alt="Transcript Verification QR" className="w-20 h-20 object-contain mix-blend-multiply" />
+                          <Image src={qrCodeUrl} alt="Transcript Verification QR" className="w-20 h-20 object-contain mix-blend-multiply" />
                           <p className="text-[8px] font-black tracking-widest text-slate-500">TRANSCRIPT AUTHENTICITY</p>
                           <p className="text-[7px] font-mono text-slate-400 select-all">{transcriptData.metadata.referenceNumber}</p>
                         </>

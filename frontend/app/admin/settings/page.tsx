@@ -1,39 +1,39 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import api from '@/lib/api';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { motion } from 'framer-motion';
 import {
-  User,
-  Lock,
-  Mail,
-  ShieldCheck,
-  Save,
-  KeyRound,
+  BadgeCheck,
+  BellRing,
   Eye,
   EyeOff,
-  BadgeCheck,
+  KeyRound,
+  Lock,
+  Mail,
+  Save,
   Settings2,
-  BellRing
+  ShieldCheck,
+  User
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import api from '@/lib/api';
+import * as z from 'zod';
 
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
 const profileFormSchema = z.object({

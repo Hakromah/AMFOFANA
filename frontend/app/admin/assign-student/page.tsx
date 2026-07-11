@@ -1,26 +1,28 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import api from '@/lib/api';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { motion } from 'framer-motion';
 import {
-  UserPlus,
-  GraduationCap,
-  Landmark,
   ArrowRight,
+  CheckCircle2,
+  GraduationCap,
+  Info,
+  Landmark,
   Loader2,
   ShieldCheck,
-  CheckCircle2,
-  Users2,
-  Info
+  UserPlus,
+  Users2
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import api from '@/lib/api';
+import * as z from 'zod';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -36,8 +38,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 
 const formSchema = z.object({
   studentId: z.string().min(1, { message: "Choose a student for enrollment" }),

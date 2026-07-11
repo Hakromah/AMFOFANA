@@ -1,28 +1,38 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
-import {
-  FileText, Search, Printer, Download,
-  RefreshCcw, Loader2, BookOpen,
-  Award, GraduationCap, CheckSquare, Square,
-  Building2, Phone, Mail, UserCheck, Eye, ArrowLeft, Plus
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'sonner';
 import api from '@/lib/api';
+import { getCircularLogo } from '@/lib/logo-base64';
+import { AnimatePresence, motion } from 'framer-motion';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import {
+  ArrowLeft,
+  Building2,
+  CheckSquare,
+  Download,
+  Eye,
+  FileText,
+  GraduationCap,
+  Loader2,
+  Mail,
+  Phone,
+  Plus,
+  RefreshCcw,
+  Search,
+  Square,
+  UserCheck
+} from 'lucide-react';
 import QRCode from 'qrcode';
-import { CIRCULAR_LOGO, getCircularLogo } from '@/lib/logo-base64';
+import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import Image from 'next/image';
 
 export default function AdminTranscriptsPage() {

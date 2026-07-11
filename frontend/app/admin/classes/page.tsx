@@ -25,7 +25,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Dialog, DialogContent, DialogHeader,
-  DialogTitle, DialogDescription
+  DialogTitle,
 } from '@/components/ui/dialog';
 import {
   FormControl, FormField, FormItem,

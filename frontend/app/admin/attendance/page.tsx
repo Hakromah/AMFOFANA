@@ -1,39 +1,52 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '@/components/ui/table';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { toast } from 'sonner';
 import {
-  Calendar, CheckCircle2, XCircle, Clock, Users, Loader2,
-  ClipboardList, BarChart2, Trash2, ShieldAlert, TrendingUp, RefreshCw, BookOpen, FileEdit, X, Download
-} from 'lucide-react';
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from '@/components/ui/table';
 import api from '@/lib/api';
+import { SCHOOL_CONFIG } from '@/lib/school-config';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { SCHOOL_CONFIG } from '@/lib/school-config';
 import {
-  ResponsiveContainer,
-  PieChart as RechartsPieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend,
-  BarChart as RechartsBarChart,
+  BarChart2,
+  BookOpen,
+  Calendar, CheckCircle2,
+  ClipboardList,
+  Clock,
+  Download,
+  FileEdit,
+  Loader2,
+  RefreshCw,
+  ShieldAlert,
+  Trash2,
+  TrendingUp,
+  Users,
+  X,
+  XCircle
+} from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import {
   Bar,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Pie,
+  BarChart as RechartsBarChart,
+  PieChart as RechartsPieChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
 } from 'recharts';
+import { toast } from 'sonner';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface AttendanceSession {
@@ -158,7 +171,7 @@ export default function AdminAttendancePage() {
       s.lateCount,
       `${s.attendanceRate}%`
     ]);
-    const csvContent = "data:text/csv;charset=utf-8," 
+    const csvContent = "data:text/csv;charset=utf-8,"
       + [headers.join(','), ...rows.map(e => e.map(val => `"${val}"`).join(","))].join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");

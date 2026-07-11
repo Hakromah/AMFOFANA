@@ -2,29 +2,39 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from 'sonner';
 import {
-  Search, GraduationCap, Loader2, Lock, CheckCircle2, AlertCircle,
-  LayoutGrid, ListFilter, Download, UserCircle, BookOpen, RefreshCcw, TrendingUp, X,
-} from 'lucide-react';
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import api from '@/lib/api';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import {
+  AlertCircle,
+  BookOpen,
+  CheckCircle2,
+  Download,
+  GraduationCap,
+  LayoutGrid, ListFilter,
+  Loader2, Lock,
+  RefreshCcw,
+  Search,
+  TrendingUp,
+  UserCircle,
+  X,
+} from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
   CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
+import { toast } from 'sonner';
 
 // ── Grade helpers ─────────────────────────────────────────────────────────────
 const calculateLetterGrade = (marks: number | string): string => {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -242,8 +243,8 @@ export default function AdminMessagesPage() {
                   >
                     <div className="flex justify-between items-start pr-4">
                       <span className="text-xs font-black text-slate-900 tracking-tight">
-                        {tab === 'inbox' 
-                          ? (msg.sender?.firstName && msg.sender?.lastName ? `${msg.sender.firstName} ${msg.sender.lastName}` : msg.sender?.username || 'System') 
+                        {tab === 'inbox'
+                          ? (msg.sender?.firstName && msg.sender?.lastName ? `${msg.sender.firstName} ${msg.sender.lastName}` : msg.sender?.username || 'System')
                           : (msg.recipient?.firstName && msg.recipient?.lastName ? `${msg.recipient.firstName} ${msg.recipient.lastName}` : msg.recipient?.username || 'User')}
                       </span>
                       <span className="text-[8px] font-bold text-slate-400">

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -125,7 +126,7 @@ export default function FamilyManagement() {
   const handleLinkUser = async () => {
     if (!selectedFamily || !selectedUserId) return toast.error('Please select a user');
     const endpoint = `/admin/families/${selectedFamily.id}/${linkType === 'PARENT' ? 'parents' : 'students'}`;
-    
+
     try {
       await api.post(endpoint, { userId: Number(selectedUserId) });
       toast.success(`${linkType === 'PARENT' ? 'Parent' : 'Student'} linked successfully`);

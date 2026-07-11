@@ -21,13 +21,13 @@ const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
 
 // English display labels — backend always receives the English key
 const DAY_LABELS: Record<string, string> = {
-  MONDAY:    'MONDAY',
-  TUESDAY:   'TUESDAY',
-  WEDNESDAY: 'WEDNESDAY',
-  THURSDAY:  'THURSDAY',
-  FRIDAY:    'FRIDAY',
-  SATURDAY:  'SATURDAY',
-  SUNDAY:    'SUNDAY',
+   MONDAY: 'MONDAY',
+   TUESDAY: 'TUESDAY',
+   WEDNESDAY: 'WEDNESDAY',
+   THURSDAY: 'THURSDAY',
+   FRIDAY: 'FRIDAY',
+   SATURDAY: 'SATURDAY',
+   SUNDAY: 'SUNDAY',
 };
 
 interface TimetableEntry {

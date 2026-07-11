@@ -1,22 +1,25 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Activity, Search, FileDown, ShieldAlert, CheckCircle, Info, Clock,
-  User, Database, TableIcon, Calendar as CalendarIcon, ArrowLeftRight
-} from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
-} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from '@/components/ui/select';
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
+} from '@/components/ui/table';
 import api from '@/lib/api';
+import {
+  Activity,
+  Clock,
+  FileDown,
+  Search,
+  User
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function AuditLogs() {
@@ -47,7 +50,7 @@ export default function AuditLogs() {
 
   const handleExportCSV = () => {
     if (logs.length === 0) return toast.error('No audit logs to export');
-    
+
     const headers = ['ID', 'Action Type', 'Entity Name', 'Entity ID', 'Performed By', 'Timestamp', 'Notes'];
     const rows = logs.map((log) => [
       log.id,
@@ -59,9 +62,9 @@ export default function AuditLogs() {
       log.notes || ''
     ]);
 
-    const csvContent = "data:text/csv;charset=utf-8," 
+    const csvContent = "data:text/csv;charset=utf-8,"
       + [headers.join(','), ...rows.map(e => e.map(val => `"${val.replace(/"/g, '""')}"`).join(","))].join("\n");
-    
+
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -78,7 +81,7 @@ export default function AuditLogs() {
       (log.entityName || '').toLowerCase().includes(search.toLowerCase()) ||
       (log.performedBy?.username || log.performedBy?.name || '').toLowerCase().includes(search.toLowerCase()) ||
       (log.notes || '').toLowerCase().includes(search.toLowerCase());
-    
+
     const matchesAction = actionFilter === 'ALL' || log.actionType === actionFilter;
     return matchesSearch && matchesAction;
   });

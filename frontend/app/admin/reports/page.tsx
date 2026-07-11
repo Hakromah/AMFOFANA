@@ -2,34 +2,43 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useEffect, useState } from 'react';
-import {
-  Users, School, BookOpen, FileText,
-  TrendingUp, ShieldCheck, Briefcase,
-  GraduationCap, Download, RefreshCcw,
-  PieChart as LucidePieChart, Activity, Loader2
-} from 'lucide-react';
-import { motion } from 'framer-motion';
-import { toast } from 'sonner';
 import api from '@/lib/api';
+import { motion } from 'framer-motion';
+import {
+  Activity,
+  BookOpen,
+  Briefcase,
+  Download,
+  FileText,
+  GraduationCap,
+  Loader2,
+  PieChart as LucidePieChart,
+  RefreshCcw,
+  School,
+  ShieldCheck,
+  TrendingUp,
+  Users
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { SCHOOL_CONFIG } from '@/lib/school-config';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { SCHOOL_CONFIG } from '@/lib/school-config';
 import {
-  BarChart,
   Bar,
-  XAxis,
-  YAxis,
+  BarChart,
   CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
   Cell,
-  PieChart as RechartsPieChart,
+  Legend,
   Pie,
-  Legend
+  PieChart as RechartsPieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
 } from 'recharts';
 
 interface ReportDTO {

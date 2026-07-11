@@ -5,7 +5,7 @@ import { useEffect, useState, useMemo } from 'react';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import {
   Calendar, CheckCircle2, XCircle, Clock, ShieldAlert, Loader2,
   Download, Printer, TrendingUp, BookOpen, AlertTriangle,
+  CheckSquare,
 } from 'lucide-react';
 import api from '@/lib/api';
 import { jsPDF } from 'jspdf';
@@ -38,7 +39,7 @@ type AStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED' | 'SICK';
 
 const STATUS_DISPLAY: Record<AStatus, { label: string; icon: any; bg: string; text: string; border: string }> = {
   PRESENT: { label: 'Present',  icon: BookOpen,     bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-  ABSENT:  { label: 'Absent',   icon: X,            bg: 'bg-rose-50',    text: 'text-rose-700',    border: 'border-rose-200'    },
+  ABSENT:  { label: 'Absent',   icon: XCircle,      bg: 'bg-rose-50',    text: 'text-rose-700',    border: 'border-rose-200'    },
   LATE:    { label: 'Late',     icon: Clock,        bg: 'bg-amber-50',   text: 'text-amber-700',   border: 'border-amber-200'   },
   EXCUSED: { label: 'Excused',  icon: ShieldAlert,  bg: 'bg-blue-50',    text: 'text-blue-700',    border: 'border-blue-200'    },
   SICK:    { label: 'Sick',     icon: ShieldAlert,  bg: 'bg-purple-50',  text: 'text-purple-700',  border: 'border-purple-200'  },

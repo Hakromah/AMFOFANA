@@ -195,64 +195,64 @@ export default function StudentMaterialsPage() {
                   exit={{ opacity: 0, scale: 0.95 }}
                 >
                   <Card className="rounded-2xl p-4.5 bg-white border border-slate-100 md:hover:border-primary shadow-sm hover:shadow-md transition-all duration-300 group relative overflow-hidden h-full flex flex-col justify-between">
-                     <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-600/10 group-hover:bg-blue-600 transition-colors" />
+                    <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-600/10 group-hover:bg-blue-600 transition-colors" />
 
-                     <div className="pl-1.5">
-                       <div className="flex justify-between items-center mb-3">
-                         <div className="bg-blue-50 p-2.5 rounded-xl text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner">
-                           {getFileIcon(mat.fileUrl)}
-                         </div>
-                         <div className="flex flex-col items-end">
-                           <span className="text-[9px] font-black text-blue-500 uppercase italic flex items-center gap-1">
-                             <Layers size={10} /> {formatBytes(mat.fileSize)}
-                           </span>
-                           <span className="text-[9px] font-bold text-slate-350 uppercase mt-0.5">
-                             {new Date(mat.createdAt).toLocaleDateString()}
-                           </span>
-                         </div>
-                       </div>
+                    <div className="pl-1.5">
+                      <div className="flex justify-between items-center mb-3">
+                        <div className="bg-blue-50 p-2.5 rounded-xl text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner">
+                          {getFileIcon(mat.fileUrl)}
+                        </div>
+                        <div className="flex flex-col items-end">
+                          <span className="text-[9px] font-black text-blue-500 uppercase italic flex items-center gap-1">
+                            <Layers size={10} /> {formatBytes(mat.fileSize)}
+                          </span>
+                          <span className="text-[9px] font-bold text-slate-350 uppercase mt-0.5">
+                            {new Date(mat.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
 
-                       <div className="space-y-1">
-                         <h3 className="text-sm font-black italic uppercase tracking-tight text-slate-900 group-hover:text-blue-600 transition-colors truncate">
-                           {mat.title}
-                         </h3>
-                         <p className="text-slate-400 font-bold text-[11px] leading-snug italic line-clamp-2">
-                           {mat.description || "Official learning resource."}
-                         </p>
-                       </div>
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-black italic uppercase tracking-tight text-slate-900 group-hover:text-blue-600 transition-colors truncate">
+                          {mat.title}
+                        </h3>
+                        <p className="text-slate-400 font-bold text-[11px] leading-snug italic line-clamp-2">
+                          {mat.description || "Official learning resource."}
+                        </p>
+                      </div>
 
-                       <div className="text-[10px] font-bold text-slate-400 flex items-center gap-2 mt-2.5 mb-4">
-                         <span>Teacher: {mat.uploadedBy?.name || "Teacher"}</span>
-                       </div>
+                      <div className="text-[10px] font-bold text-slate-400 flex items-center gap-2 mt-2.5 mb-4">
+                        <span>Teacher: {mat.uploadedBy?.name || "Teacher"}</span>
+                      </div>
 
-                       <div className="flex gap-2">
-                         <Button
-                           variant="outline"
-                           onClick={() => {
-                             if (!mat.fileUrl) {
-                               toast.error("File URL is missing for this material.");
-                               return;
-                             }
-                             const isPdf = mat.fileType?.includes('pdf') || mat.fileName?.toLowerCase().endsWith('.pdf');
-                             let previewUrl = mat.fileUrl.replace('/upload/', '/upload/f_auto/');
-                             if (isPdf && !previewUrl.toLowerCase().endsWith('.pdf')) {
-                               previewUrl += '.pdf';
-                             }
-                             window.open(getFullUrl(previewUrl), "_blank", 'noopener,noreferrer');
-                           }}
-                           className="flex-1 h-8 rounded-lg border-slate-100 text-slate-700 font-bold text-[9px] uppercase hover:bg-slate-50 transition-all"
-                         >
-                           <Eye size={12} className="mr-1" /> Preview
-                         </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            if (!mat.fileUrl) {
+                              toast.error("File URL is missing for this material.");
+                              return;
+                            }
+                            const isPdf = mat.fileType?.includes('pdf') || mat.fileName?.toLowerCase().endsWith('.pdf');
+                            let previewUrl = mat.fileUrl.replace('/upload/', '/upload/f_auto/');
+                            if (isPdf && !previewUrl.toLowerCase().endsWith('.pdf')) {
+                              previewUrl += '.pdf';
+                            }
+                            window.open(getFullUrl(previewUrl), "_blank", 'noopener,noreferrer');
+                          }}
+                          className="flex-1 h-8 rounded-lg border-slate-100 text-slate-700 font-bold text-[9px] uppercase hover:bg-slate-50 transition-all"
+                        >
+                          <Eye size={12} className="mr-1" /> Preview
+                        </Button>
 
-                         <Button
-                           onClick={() => handleDownload(mat)}
-                           className="flex-1 h-8 rounded-lg bg-rose-600 text-white font-bold text-[9px] uppercase hover:bg-rose-700 transition-all shadow-sm"
-                         >
-                           <Download size={12} className="mr-1" /> Download
-                         </Button>
-                       </div>
-                     </div>
+                        <Button
+                          onClick={() => handleDownload(mat)}
+                          className="flex-1 h-8 rounded-lg bg-rose-600 text-white font-bold text-[9px] uppercase hover:bg-rose-700 transition-all shadow-sm"
+                        >
+                          <Download size={12} className="mr-1" /> Download
+                        </Button>
+                      </div>
+                    </div>
                   </Card>
                 </motion.div>
               ))}

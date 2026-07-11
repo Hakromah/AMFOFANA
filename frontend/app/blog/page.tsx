@@ -1,7 +1,6 @@
-import React from "react";
 import BlogPage from "@/app/pages-sections/blog/page";
-import type { Metadata } from "next";
 import { fetchBlogPosts } from "@/lib/strapi-api";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
     title: "Blog",

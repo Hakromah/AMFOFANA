@@ -218,7 +218,7 @@ export default function TeacherResultsPage() {
       setExams(classExams);
 
       const studentMap: any = {};
-      
+
       resultsRes.data?.forEach((r: any) => {
         // Safe extraction or fallback to a unique string placeholder if empty
         const sId = r?.student?.userId || r?.student?.id || `unknown-${r?.id}`;

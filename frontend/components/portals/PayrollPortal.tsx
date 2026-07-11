@@ -1,23 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  CreditCard, Download, UserCheck, LogOut, School,
-  Activity, UserCircle, RefreshCw, Wallet, AlertCircle, Calendar, Bell
-} from 'lucide-react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import api from '@/lib/api';
-import { toast } from 'sonner';
+import { CIRCULAR_LOGO, getCircularLogo } from '@/lib/logo-base64';
+import { SCHOOL_CONFIG } from '@/lib/school-config';
+import Cookies from 'js-cookie';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import {
+  Activity,
+  AlertCircle,
+  CreditCard, Download,
+  LogOut,
+  RefreshCw,
+  UserCheck,
+  UserCircle,
+  Wallet
+} from 'lucide-react';
 import QRCode from 'qrcode';
-import Cookies from 'js-cookie';
-import { SCHOOL_CONFIG } from '@/lib/school-config';
-import { CIRCULAR_LOGO, getCircularLogo } from '@/lib/logo-base64';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 interface PayrollPortalProps {
   role: 'DRIVER' | 'WORKER';

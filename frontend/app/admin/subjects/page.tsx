@@ -1,36 +1,44 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
+import api from '@/lib/api';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  BookOpen,
+  Box,
+  GraduationCap,
+  Library,
+  Loader2,
+  MoreVertical, Pencil,
+  Plus, Search,
+  Sparkles,
+  Trash2
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import {
-  BookOpen, Plus, Search, MoreVertical, Pencil,
-  Trash2, Library, GraduationCap, Box,
-  Loader2, Sparkles
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import api from '@/lib/api';
+import * as z from 'zod';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
-  Dialog, DialogContent, DialogHeader,
-  DialogTitle, DialogDescription
+  Dialog, DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle
 } from '@/components/ui/dialog';
-import {
-  Form, FormControl, FormField,
-  FormItem, FormLabel, FormMessage
-} from '@/components/ui/form';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
+import {
+  Form, FormControl, FormField,
+  FormItem, FormLabel, FormMessage
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 
 const formSchema = z.object({
   name: z.string().min(1, { message: 'Subject name is required' }),

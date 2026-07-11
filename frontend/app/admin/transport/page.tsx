@@ -1,21 +1,25 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Bus, UserPlus, Trash2, Edit2, Search, Plus, X, ShieldAlert,
-  CheckCircle, Info, Landmark, Link, Clock, MapPin, DollarSign
-} from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import api from '@/lib/api';
+import {
+  Bus,
+  Edit2,
+  MapPin,
+  Plus,
+  Search,
+  Trash2
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function TransportManagement() {
@@ -78,7 +82,7 @@ export default function TransportManagement() {
 
   const formatTimeForStrapi = (timeStr: string) => {
     if (!timeStr || timeStr.trim() === '') return null;
-    let cleaned = timeStr.trim();
+    const cleaned = timeStr.trim();
     if (cleaned.toLowerCase().includes('am') || cleaned.toLowerCase().includes('pm')) {
       const isPM = cleaned.toLowerCase().includes('pm');
       const timeOnly = cleaned.replace(/(am|pm)/i, '').trim();
