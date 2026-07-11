@@ -358,7 +358,7 @@ export default function StudentTranscriptsPage() {
                                 {pubDate}
                               </TableCell>
                               <TableCell className="text-right pr-6 py-4">
-                                Button
+                                <Button
                                   onClick={() => setSelectedTranscriptId(String(t.id))}
                                   className="h-10 bg-slate-900 hover:bg-blue-600 text-white rounded-xl font-bold uppercase text-[9px] tracking-wider transition-all"
                                 >
