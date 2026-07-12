@@ -1754,6 +1754,7 @@ export interface ApiSalaryRecordSalaryRecord
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    currency: Schema.Attribute.String & Schema.Attribute.DefaultTo<'GNF'>;
     deductions: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
@@ -2277,6 +2278,7 @@ export interface ApiStudentPaymentStudentPayment
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    currency: Schema.Attribute.String & Schema.Attribute.DefaultTo<'GNF'>;
     invoice: Schema.Attribute.Relation<
       'manyToOne',
       'api::student-invoice.student-invoice'

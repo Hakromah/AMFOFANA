@@ -122,6 +122,7 @@ interface FlatInvoice {
   items: any[];
   dueDate: string;
   rejectionReason?: string;
+  currency?: string;
   // Flat student fields embedded by backend
   studentId: number | null;
   studentDocumentId: string | null;
@@ -141,6 +142,9 @@ interface FlatPayment {
   status: string;
   notes: string;
   rejectionReason?: string;
+  currency?: string;
+  originalAmount?: number;
+  exchangeRate?: number;
   // Flat invoice fields
   invoiceId: number | null;
   invoiceDocumentId: string | null;
@@ -195,6 +199,9 @@ export default function StudentFinance() {
   const [chargeItems, setChargeItems] = useState<any[]>([
     { description: 'Tuition', amount: 500000, category: 'TUITION' }
   ]);
+  const [invoiceCurrency, setInvoiceCurrency] = useState<string>('GNF');
+  const [showCustomInvoiceCurrency, setShowCustomInvoiceCurrency] = useState<boolean>(false);
+  const [customInvoiceCurrency, setCustomInvoiceCurrency] = useState<string>('');
 
   // Payment Form State (Receive & Edit)
   const [editingPayment, setEditingPayment] = useState<FlatPayment | null>(null);
@@ -204,6 +211,10 @@ export default function StudentFinance() {
   const [paymentMethod, setPaymentMethod] = useState<string>('MOBILE_MONEY');
   const [paymentCategory, setPaymentCategory] = useState<string>('TUITION');
   const [paymentNotes, setPaymentNotes] = useState<string>('');
+  const [paymentCurrency, setPaymentCurrency] = useState<string>('GNF');
+  const [showCustomPaymentCurrency, setShowCustomPaymentCurrency] = useState<boolean>(false);
+  const [customPaymentCurrency, setCustomPaymentCurrency] = useState<string>('');
+  const [exchangeRate, setExchangeRate] = useState<number>(1);
 
   // ─── Data Fetching ─────────────────────────────────────────────────────────
   const fetchAllData = async () => {
@@ -299,6 +310,7 @@ export default function StudentFinance() {
       return;
     }
 
+    const currencyPayload = showCustomInvoiceCurrency ? customInvoiceCurrency : invoiceCurrency;
     const tid = toast.loading(editingInvoice ? 'Saving changes...' : 'Generating invoice...');
     try {
       if (editingInvoice) {
@@ -308,6 +320,7 @@ export default function StudentFinance() {
           year: Number(invoiceYear),
           notes: invoiceNotes,
           items: chargeItems,
+          currency: currencyPayload,
         });
         toast.success('Invoice updated successfully', { id: tid });
       } else {
@@ -317,6 +330,7 @@ export default function StudentFinance() {
           year: Number(invoiceYear),
           notes: invoiceNotes,
           items: chargeItems,
+          currency: currencyPayload,
           dueDate: new Date(new Date().setDate(new Date().getDate() + 14)).toISOString().split('T')[0]
         });
         toast.success('Invoice created successfully', { id: tid });
@@ -328,6 +342,9 @@ export default function StudentFinance() {
       setInvoiceNotes('');
       setChargeItems([{ description: 'Tuition fee', amount: 500000, category: 'TUITION' }]);
       setSelectedInvoiceIds([]);
+      setInvoiceCurrency('GNF');
+      setShowCustomInvoiceCurrency(false);
+      setCustomInvoiceCurrency('');
       fetchAllData();
     } catch (e: any) {
       toast.error(e.response?.data?.error?.message || 'Invoice creation failed', { id: tid });
@@ -342,6 +359,18 @@ export default function StudentFinance() {
     setInvoiceYear(Number(inv.year));
     setInvoiceNotes(inv.notes || '');
     setChargeItems(inv.items?.length ? inv.items : [{ description: 'Tuition fee', amount: 500000, category: 'TUITION' }]);
+    
+    const cur = (inv as any).currency || 'GNF';
+    if (cur === 'GNF' || cur === 'USD') {
+      setInvoiceCurrency(cur);
+      setShowCustomInvoiceCurrency(false);
+      setCustomInvoiceCurrency('');
+    } else {
+      setInvoiceCurrency('CUSTOM');
+      setShowCustomInvoiceCurrency(true);
+      setCustomInvoiceCurrency(cur);
+    }
+    
     setIsInvoiceOpen(true);
   };
 
@@ -384,6 +413,11 @@ export default function StudentFinance() {
     }
 
     const inv = invoices.find(i => String(i.id) === selectedInvoiceId);
+    const invCurrency = (inv as any)?.currency || 'GNF';
+    const payCurrency = showCustomPaymentCurrency ? customPaymentCurrency : paymentCurrency;
+    const isMismatch = invCurrency !== payCurrency;
+    const rateToUse = isMismatch ? Number(exchangeRate) : 1;
+    const calculatedAmount = Number(paymentAmount) * rateToUse;
 
     const tid = toast.loading(editingPayment ? 'Saving changes...' : 'Recording payment...');
     try {
@@ -391,20 +425,26 @@ export default function StudentFinance() {
         await api.put(`/school-finance/payments/${editingPayment.id}/update`, {
           invoiceId: Number(selectedInvoiceId),
           studentId: inv?.studentId,
-          amount: Number(paymentAmount),
+          amount: calculatedAmount,
+          originalAmount: Number(paymentAmount),
+          exchangeRate: rateToUse,
           paymentMethod,
           paymentCategory,
-          notes: paymentNotes
+          notes: paymentNotes,
+          currency: payCurrency,
         });
         toast.success('Payment updated successfully', { id: tid });
       } else {
         await api.post('/school-finance/payments', {
           invoiceId: Number(selectedInvoiceId),
           studentId: inv?.studentId,
-          amount: Number(paymentAmount),
+          amount: calculatedAmount,
+          originalAmount: Number(paymentAmount),
+          exchangeRate: rateToUse,
           paymentMethod,
           paymentCategory,
-          notes: paymentNotes
+          notes: paymentNotes,
+          currency: payCurrency,
         });
         toast.success('Payment recorded as DRAFT', { id: tid });
       }
@@ -415,6 +455,10 @@ export default function StudentFinance() {
       setPaymentNotes('');
       setSelectedInvoiceId('');
       setSelectedPaymentIds([]);
+      setPaymentCurrency('GNF');
+      setShowCustomPaymentCurrency(false);
+      setCustomPaymentCurrency('');
+      setExchangeRate(1);
       fetchAllData();
     } catch (e: any) {
       toast.error('Failed to record payment', { id: tid });
@@ -424,10 +468,23 @@ export default function StudentFinance() {
   const startEditPayment = (pay: FlatPayment) => {
     setEditingPayment(pay);
     setSelectedInvoiceId(String(pay.invoiceId || ''));
-    setPaymentAmount(pay.amount);
+    setPaymentAmount((pay as any).originalAmount || pay.amount);
     setPaymentMethod(pay.paymentMethod);
     setPaymentCategory(pay.paymentCategory);
     setPaymentNotes(pay.notes || '');
+    setExchangeRate((pay as any).exchangeRate || 1);
+    
+    const cur = (pay as any).currency || 'GNF';
+    if (cur === 'GNF' || cur === 'USD') {
+      setPaymentCurrency(cur);
+      setShowCustomPaymentCurrency(false);
+      setCustomPaymentCurrency('');
+    } else {
+      setPaymentCurrency('CUSTOM');
+      setShowCustomPaymentCurrency(true);
+      setCustomPaymentCurrency(cur);
+    }
+    
     setIsPaymentOpen(true);
   };
 
@@ -545,10 +602,14 @@ export default function StudentFinance() {
       const studentEmail = pay.studentEmail || 'N/A';
       const invoiceNumber = pay.invoiceNumber || 'N/A';
       const remainingBalance = pay.invoiceRemainingBalance ?? 0;
+      // Look up matched invoice for its base currency (remaining balance is always in invoice currency)
+      const matchedInvoice = invoices.find(i => i.id === pay.invoiceId);
+      const invoiceCurrency = (matchedInvoice as any)?.currency || 'GNF';
 
+      const cur = (pay as any).currency || 'GNF';
       // Try to fetch receipt number — gracefully fall back if not found
       let receiptNumber = `REC-TEMP-${paymentId}`;
-      let qrContent = `AMFOFANA ACADEMY\nInvoice: ${invoiceNumber}\nStudent: ${studentName}\nID: ${studentUserId}\nAmount: ${Number(pay.amount).toLocaleString()} GNF`;
+      let qrContent = `AMFOFANA ACADEMY\nInvoice: ${invoiceNumber}\nStudent: ${studentName}\nID: ${studentUserId}\nAmount: ${Number(pay.amount).toLocaleString()} ${cur}`;
       try {
         const rcRes = await api.get(`/receipts?filters[studentPayment][id][$eq]=${paymentId}&fields[0]=receiptNumber&fields[1]=qrCode`);
         const receiptArr = rcRes.data?.data || rcRes.data || [];
@@ -609,6 +670,10 @@ export default function StudentFinance() {
       doc.text(`ID: ${studentUserId}`, 120, 94);
       doc.text(`Email: ${studentEmail}`, 120, 101);
 
+      const originalAmt = (pay as any).originalAmount || pay.amount;
+      const hasConversion = (pay as any).originalAmount && Number((pay as any).originalAmount) !== Number(pay.amount);
+      const displayAmt = `${Number(originalAmt).toLocaleString()} ${cur}` + (hasConversion ? ` (Equiv. ${Number(pay.amount).toLocaleString()} GNF)` : '');
+
       autoTable(doc, {
         startY: 115,
         head: [['Category', 'Method', 'Description', 'Amount Paid']],
@@ -616,7 +681,7 @@ export default function StudentFinance() {
           pay.paymentCategory || 'Fee',
           pay.paymentMethod || 'Cash',
           pay.notes || 'Payment received',
-          `${Number(pay.amount || 0).toLocaleString()} GNF`
+          displayAmt
         ]],
         theme: 'grid',
         headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255] },
@@ -627,8 +692,8 @@ export default function StudentFinance() {
       doc.setFont('Helvetica', 'bold');
       doc.text('Ledger Status:', 15, finalY + 20);
       doc.setFont('Helvetica', 'normal');
-      doc.text(`Total Amount Collected: ${Number(pay.amount || 0).toLocaleString()} GNF`, 15, finalY + 28);
-      doc.text(`Remaining Invoice Balance: ${Number(remainingBalance).toLocaleString()} GNF`, 15, finalY + 35);
+      doc.text(`Total Amount Collected: ${displayAmt}`, 15, finalY + 28);
+      doc.text(`Remaining Invoice Balance: ${Number(remainingBalance).toLocaleString()} ${invoiceCurrency}`, 15, finalY + 35);
 
       // Generate QR code — anchored to bottom-right corner of the page
       const qrDataUrl = await QRCode.toDataURL(qrContent);
@@ -698,6 +763,7 @@ export default function StudentFinance() {
       doc.text(`ID: ${studentUserId}`, 15, 73);
       doc.text(`Email: ${studentEmail}`, 15, 80);
 
+      const cur = (data.invoices && data.invoices[0]?.currency) || 'GNF';
       // Summary box
       doc.setDrawColor(203, 213, 225);
       doc.setLineWidth(0.5);
@@ -706,9 +772,9 @@ export default function StudentFinance() {
       doc.setFont('Helvetica', 'bold');
       doc.text('Account Summary', 125, 62);
       doc.setFont('Helvetica', 'normal');
-      doc.text(`Total Billed: ${Number(data.totalInvoiced || 0).toLocaleString()} GNF`, 125, 70);
-      doc.text(`Total Paid:   ${Number(data.totalPaid || 0).toLocaleString()} GNF`, 125, 77);
-      doc.text(`Outstanding:  ${Number(data.outstandingBalance || 0).toLocaleString()} GNF`, 125, 84);
+      doc.text(`Total Billed: ${Number(data.totalInvoiced || 0).toLocaleString()} ${cur}`, 125, 70);
+      doc.text(`Total Paid:   ${Number(data.totalPaid || 0).toLocaleString()} ${cur}`, 125, 77);
+      doc.text(`Outstanding:  ${Number(data.outstandingBalance || 0).toLocaleString()} ${cur}`, 125, 84);
 
       // Merge and sort activities chronologically
       const activities: any[] = [];
@@ -729,11 +795,13 @@ export default function StudentFinance() {
       });
 
       (data.payments || []).forEach((pay: any) => {
+        const hasConversion = pay.originalAmount && Number(pay.originalAmount) !== Number(pay.amount);
+        const descSuffix = hasConversion ? ` [Received ${pay.originalAmount} ${pay.currency}]` : '';
         activities.push({
           date: pay.paymentDate || pay.createdAt,
           ref: pay.paymentNumber,
           type: 'PAYMENT',
-          description: `${pay.paymentCategory || 'Fee'} — ${pay.paymentMethod || 'N/A'}`,
+          description: `${pay.paymentCategory || 'Fee'} — ${pay.paymentMethod || 'N/A'}${descSuffix}`,
           billed: 0,
           paid: Number(pay.amount || 0)
         });
@@ -755,9 +823,9 @@ export default function StudentFinance() {
           act.ref,
           act.type,
           act.description,
-          act.billed > 0 ? `${act.billed.toLocaleString()} GNF` : '—',
-          act.paid > 0 ? `${act.paid.toLocaleString()} GNF` : '—',
-          `${currentBal.toLocaleString()} GNF`
+          act.billed > 0 ? `${act.billed.toLocaleString()} ${cur}` : '—',
+          act.paid > 0 ? `${act.paid.toLocaleString()} ${cur}` : '—',
+          `${currentBal.toLocaleString()} ${cur}`
         ];
       });
 
@@ -979,9 +1047,9 @@ export default function StudentFinance() {
                       </div>
                     </TableCell>
                     <TableCell className="font-medium text-slate-600">{inv.month} {inv.year}</TableCell>
-                    <TableCell className="font-black text-slate-900">{Number(inv.subtotal || 0).toLocaleString()} GNF</TableCell>
-                    <TableCell className="font-semibold text-emerald-600">{Number(inv.totalPaid || 0).toLocaleString()} GNF</TableCell>
-                    <TableCell className="font-semibold text-rose-600">{Number(inv.remainingBalance || 0).toLocaleString()} GNF</TableCell>
+                    <TableCell className="font-black text-slate-900">{Number(inv.subtotal || 0).toLocaleString()} {(inv as any).currency || 'GNF'}</TableCell>
+                    <TableCell className="font-semibold text-emerald-600">{Number(inv.totalPaid || 0).toLocaleString()} {(inv as any).currency || 'GNF'}</TableCell>
+                    <TableCell className="font-semibold text-rose-600">{Number(inv.remainingBalance || 0).toLocaleString()} {(inv as any).currency || 'GNF'}</TableCell>
                     <TableCell>
                       <Badge className={statusBadgeClass(inv.status)}>{inv.status}</Badge>
                     </TableCell>
@@ -1107,7 +1175,21 @@ export default function StudentFinance() {
                     </TableCell>
                     <TableCell>{p.paymentMethod}</TableCell>
                     <TableCell><Badge variant="secondary">{p.paymentCategory}</Badge></TableCell>
-                    <TableCell className="font-black">{Number(p.amount).toLocaleString()} GNF</TableCell>
+                    {(() => {
+                      const inv = invoices.find(i => i.id === p.invoiceId);
+                      const invCurrency = inv?.currency || 'GNF';
+                      const hasConversion = (p as any).originalAmount && (p as any).originalAmount !== p.amount;
+                      return (
+                        <TableCell className="font-black">
+                          {Number((p as any).originalAmount || p.amount).toLocaleString()} {(p as any).currency || 'GNF'}
+                          {hasConversion && (
+                            <span className="text-[10px] text-slate-400 block font-normal">
+                              ({Number(p.amount).toLocaleString()} {invCurrency})
+                            </span>
+                          )}
+                        </TableCell>
+                      );
+                    })()}
                     <TableCell>
                       <Badge className={p.status === 'REJECTED' ? 'bg-rose-500' : 'bg-amber-500'}>{p.status}</Badge>
                     </TableCell>
@@ -1214,7 +1296,21 @@ export default function StudentFinance() {
                     </TableCell>
                     <TableCell>{p.paymentMethod}</TableCell>
                     <TableCell><Badge variant="secondary">{p.paymentCategory}</Badge></TableCell>
-                    <TableCell className="font-black">{Number(p.amount).toLocaleString()} GNF</TableCell>
+                    {(() => {
+                      const inv = invoices.find(i => i.id === p.invoiceId);
+                      const invCurrency = inv?.currency || 'GNF';
+                      const hasConversion = (p as any).originalAmount && (p as any).originalAmount !== p.amount;
+                      return (
+                        <TableCell className="font-black">
+                          {Number((p as any).originalAmount || p.amount).toLocaleString()} {(p as any).currency || 'GNF'}
+                          {hasConversion && (
+                            <span className="text-[10px] text-slate-400 block font-normal">
+                              ({Number(p.amount).toLocaleString()} {invCurrency})
+                            </span>
+                          )}
+                        </TableCell>
+                      );
+                    })()}
                     <TableCell className="text-xs text-slate-500 max-w-[100px] truncate" title={p.notes || ''}>
                       {p.notes ? <span className="italic">{p.notes}</span> : <span className="text-slate-300">—</span>}
                     </TableCell>
@@ -1446,6 +1542,37 @@ export default function StudentFinance() {
                 className="h-11 rounded-xl bg-slate-50"
               />
             </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-black uppercase text-slate-400">Devise (Currency)</label>
+              <div className="flex gap-2">
+                <Select value={invoiceCurrency} onValueChange={(val) => {
+                  setInvoiceCurrency(val);
+                  if (val === 'CUSTOM') {
+                    setShowCustomInvoiceCurrency(true);
+                  } else {
+                    setShowCustomInvoiceCurrency(false);
+                  }
+                }}>
+                  <SelectTrigger className="h-11 rounded-xl bg-slate-50 flex-1">
+                    <SelectValue placeholder="Choose currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="GNF">GNF</SelectItem>
+                    <SelectItem value="USD">USD</SelectItem>
+                    <SelectItem value="CUSTOM">Add currency...</SelectItem>
+                  </SelectContent>
+                </Select>
+                {showCustomInvoiceCurrency && (
+                  <Input
+                    placeholder="Enter currency..."
+                    value={customInvoiceCurrency}
+                    onChange={(e) => setCustomInvoiceCurrency(e.target.value.toUpperCase())}
+                    className="h-11 rounded-xl bg-slate-50 w-1/2"
+                  />
+                )}
+              </div>
+            </div>
           </div>
           <DialogFooter>
             <Button
@@ -1506,7 +1633,7 @@ export default function StudentFinance() {
                     const studentUID = inv.studentUserId ? ` (${inv.studentUserId})` : '';
                     return (
                       <SelectItem key={inv.id} value={String(inv.id)}>
-                        {inv.invoiceNumber} — {studentName}{studentUID} ({Number(inv.remainingBalance).toLocaleString()} GNF due)
+                        {inv.invoiceNumber} — {studentName}{studentUID} ({Number(inv.remainingBalance).toLocaleString()} {inv.currency || 'GNF'} due)
                       </SelectItem>
                     );
                   })}
@@ -1514,15 +1641,45 @@ export default function StudentFinance() {
               </Select>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-black uppercase text-slate-400">Amount Disbursed (GNF)</label>
-              <Input
-                type="number"
-                value={paymentAmount || ''}
-                onChange={(e) => setPaymentAmount(Number(e.target.value))}
-                className="h-11 rounded-xl bg-slate-50 font-black text-lg"
-              />
-            </div>
+            {/* Computed variables for currency conversion */}
+            {(() => {
+              const matchedInvoice = invoices.find(i => String(i.id) === selectedInvoiceId);
+              const invCurrency = matchedInvoice?.currency || 'GNF';
+              const payCurrency = showCustomPaymentCurrency ? customPaymentCurrency : paymentCurrency;
+              const isMismatch = !!selectedInvoiceId && invCurrency !== payCurrency;
+
+              return (
+                <>
+                  <div className="space-y-1">
+                    <label className="text-xs font-black uppercase text-slate-400">Amount Received ({payCurrency})</label>
+                    <Input
+                      type="number"
+                      value={paymentAmount || ''}
+                      onChange={(e) => setPaymentAmount(Number(e.target.value))}
+                      className="h-11 rounded-xl bg-slate-50 font-black text-lg"
+                    />
+                  </div>
+
+                  {isMismatch && (
+                    <>
+                      <div className="space-y-1">
+                        <label className="text-xs font-black uppercase text-slate-400">Exchange Rate (1 {payCurrency} = x {invCurrency})</label>
+                        <Input
+                          type="number"
+                          value={exchangeRate || ''}
+                          onChange={(e) => setExchangeRate(Number(e.target.value))}
+                          className="h-11 rounded-xl bg-slate-50 font-bold"
+                          placeholder={`Enter rate to ${invCurrency}...`}
+                        />
+                      </div>
+                      <div className="p-3 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-700 font-semibold">
+                        Conversion: {paymentAmount.toLocaleString()} {payCurrency} × {exchangeRate} = {(paymentAmount * exchangeRate).toLocaleString()} {invCurrency} deducted from bill.
+                      </div>
+                    </>
+                  )}
+                </>
+              );
+            })()}
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
@@ -1565,6 +1722,37 @@ export default function StudentFinance() {
                 placeholder="Txn ID, references, details..."
                 className="h-11 rounded-xl bg-slate-50"
               />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-black uppercase text-slate-400">Devise (Currency)</label>
+              <div className="flex gap-2">
+                <Select value={paymentCurrency} onValueChange={(val) => {
+                  setPaymentCurrency(val);
+                  if (val === 'CUSTOM') {
+                    setShowCustomPaymentCurrency(true);
+                  } else {
+                    setShowCustomPaymentCurrency(false);
+                  }
+                }}>
+                  <SelectTrigger className="h-11 rounded-xl bg-slate-50 flex-1">
+                    <SelectValue placeholder="Choose currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="GNF">GNF</SelectItem>
+                    <SelectItem value="USD">USD</SelectItem>
+                    <SelectItem value="CUSTOM">Add currency...</SelectItem>
+                  </SelectContent>
+                </Select>
+                {showCustomPaymentCurrency && (
+                  <Input
+                    placeholder="Enter currency..."
+                    value={customPaymentCurrency}
+                    onChange={(e) => setCustomPaymentCurrency(e.target.value.toUpperCase())}
+                    className="h-11 rounded-xl bg-slate-50 w-1/2"
+                  />
+                )}
+              </div>
             </div>
           </div>
           <DialogFooter>

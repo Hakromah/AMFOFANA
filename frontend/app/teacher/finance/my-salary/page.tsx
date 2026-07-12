@@ -179,7 +179,7 @@ export default function TeacherSalaryPage() {
                       {rec.paymentDate ? new Date(rec.paymentDate).toLocaleDateString() : '—'}
                     </TableCell>
                     <TableCell className="text-right font-bold text-slate-700 text-xs">
-                      {currency} {rec.baseSalary.toLocaleString()}
+                      {rec.currency || 'GNF'} {rec.baseSalary.toLocaleString()}
                     </TableCell>
                     <TableCell className="text-right font-bold text-emerald-600 text-xs">
                       + {rec.allowances.toLocaleString()}
@@ -188,7 +188,7 @@ export default function TeacherSalaryPage() {
                       - {rec.deductions.toLocaleString()}
                     </TableCell>
                     <TableCell className="text-right font-black text-slate-900 text-xs">
-                      {currency} {rec.netSalary.toLocaleString()}
+                      {rec.currency || 'GNF'} {rec.netSalary.toLocaleString()}
                     </TableCell>
                     <TableCell className="text-center">
                       <Badge className={`uppercase text-[9px] font-black border-none rounded-full px-2.5 py-0.5 ${
