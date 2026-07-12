@@ -439,79 +439,79 @@ export default function UserManagement() {
                <Table>
                   <TableHeader className="bg-slate-50 sticky top-0 z-10 shadow-sm">
                      <TableRow className="border-slate-100 hover:bg-transparent bg-slate-50">
-                     <TableHead className="w-12"></TableHead>
-                     <TableHead className="font-black uppercase text-[10px] tracking-widest text-slate-400">Identity Profile</TableHead>
-                     <TableHead className="font-black uppercase text-[10px] tracking-widest text-slate-400">Fingerprint Identifier</TableHead>
-                     <TableHead className="font-black uppercase text-[10px] tracking-widest text-slate-400">Access Level</TableHead>
-                     <TableHead className="font-black uppercase text-[10px] tracking-widest text-slate-400">Gender</TableHead>
-                     <TableHead className="text-right font-black uppercase text-[10px] tracking-widest text-slate-400">Actions</TableHead>
-                  </TableRow>
-               </TableHeader>
-               <TableBody>
-                  <AnimatePresence mode="popLayout">
-                     {loading ? (
-                        <TableRow key="loading">
-                           <TableCell colSpan={6} className="text-center py-24 text-slate-400 font-black animate-pulse uppercase tracking-widest">
-                              Synchronizing Encrypted Ledger...
-                           </TableCell>
-                        </TableRow>
-                     ) : (
-                        filteredUsers.map((user) => (
-                           <motion.tr key={user.id} variants={itemVars} className="group hover:bg-slate-50/80 transition-colors border-slate-50">
-                              <TableCell>
-                                 <div className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm"><Fingerprint size={20} /></div>
+                        <TableHead className="w-12"></TableHead>
+                        <TableHead className="font-black uppercase text-[10px] tracking-widest text-slate-400">Identity Profile</TableHead>
+                        <TableHead className="font-black uppercase text-[10px] tracking-widest text-slate-400">Fingerprint Identifier</TableHead>
+                        <TableHead className="font-black uppercase text-[10px] tracking-widest text-slate-400">Access Level</TableHead>
+                        <TableHead className="font-black uppercase text-[10px] tracking-widest text-slate-400">Gender</TableHead>
+                        <TableHead className="text-right font-black uppercase text-[10px] tracking-widest text-slate-400">Actions</TableHead>
+                     </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                     <AnimatePresence mode="popLayout">
+                        {loading ? (
+                           <TableRow key="loading">
+                              <TableCell colSpan={6} className="text-center py-24 text-slate-400 font-black animate-pulse uppercase tracking-widest">
+                                 Synchronizing Encrypted Ledger...
                               </TableCell>
-                              <TableCell>
-                                 <div className="flex flex-col">
-                                    <span className="font-bold text-slate-800 tracking-tight">{user.name}</span>
-                                    <span className="text-xs text-slate-400 flex items-center gap-1 font-medium"><Mail size={12} /> {user.email}</span>
-                                 </div>
-                              </TableCell>
-                              <TableCell><code className="text-[10px] font-black bg-slate-100 px-2 py-1 rounded text-slate-600 uppercase tracking-tighter">{user.userId}</code></TableCell>
-                              <TableCell>{getRoleBadge(user.role)}</TableCell>
-                              <TableCell className="text-xs font-bold text-slate-500 uppercase">{user.gender || '—'}</TableCell>
-                              <TableCell className="text-right">
-                                 <div className="flex items-center justify-end gap-2">
-                                    <Popover>
-                                       <PopoverTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-blue-50"><Info size={18} /></Button></PopoverTrigger>
-                                       <PopoverContent className="w-80 rounded-3xl p-5 shadow-2xl border-slate-100">
-                                          <div className="space-y-4">
-                                             <div className="flex items-center justify-between border-b pb-2">
-                                                <h4 className="font-black text-[10px] uppercase text-slate-400 tracking-widest">Metadata</h4>
-                                                <Badge variant="outline" className="text-[10px] font-mono">{user.userId}</Badge>
+                           </TableRow>
+                        ) : (
+                           filteredUsers.map((user) => (
+                              <motion.tr key={user.id} variants={itemVars} className="group hover:bg-slate-50/80 transition-colors border-slate-50">
+                                 <TableCell>
+                                    <div className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm"><Fingerprint size={20} /></div>
+                                 </TableCell>
+                                 <TableCell>
+                                    <div className="flex flex-col">
+                                       <span className="font-bold text-slate-800 tracking-tight">{user.name}</span>
+                                       <span className="text-xs text-slate-400 flex items-center gap-1 font-medium"><Mail size={12} /> {user.email}</span>
+                                    </div>
+                                 </TableCell>
+                                 <TableCell><code className="text-[10px] font-black bg-slate-100 px-2 py-1 rounded text-slate-600 uppercase tracking-tighter">{user.userId}</code></TableCell>
+                                 <TableCell>{getRoleBadge(user.role)}</TableCell>
+                                 <TableCell className="text-xs font-bold text-slate-500 uppercase">{user.gender || '—'}</TableCell>
+                                 <TableCell className="text-right">
+                                    <div className="flex items-center justify-end gap-2">
+                                       <Popover>
+                                          <PopoverTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-blue-50"><Info size={18} /></Button></PopoverTrigger>
+                                          <PopoverContent className="w-80 rounded-3xl p-5 shadow-2xl border-slate-100">
+                                             <div className="space-y-4">
+                                                <div className="flex items-center justify-between border-b pb-2">
+                                                   <h4 className="font-black text-[10px] uppercase text-slate-400 tracking-widest">Metadata</h4>
+                                                   <Badge variant="outline" className="text-[10px] font-mono">{user.userId}</Badge>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                   <InfoBox icon={<CalendarIcon size={12} />} label="Date of Birth" value={user.birthDate} />
+                                                   <InfoBox icon={<MapPin size={12} />} label="City of Birth" value={user.birthCity} />
+                                                   <InfoBox icon={<Globe size={12} />} label="Country" value={user.birthCountry} />
+                                                   <InfoBox icon={<Phone size={12} />} label="Contact" value={user.phoneNumber} />
+                                                </div>
+                                                <div className="pt-3 border-t">
+                                                   <InfoBox icon={<Home size={12} />} label="Residential Address" value={user.address} />
+                                                </div>
                                              </div>
-                                             <div className="grid grid-cols-2 gap-4">
-                                                <InfoBox icon={<CalendarIcon size={12} />} label="Date of Birth" value={user.birthDate} />
-                                                <InfoBox icon={<MapPin size={12} />} label="City of Birth" value={user.birthCity} />
-                                                <InfoBox icon={<Globe size={12} />} label="Country" value={user.birthCountry} />
-                                                <InfoBox icon={<Phone size={12} />} label="Contact" value={user.phoneNumber} />
-                                             </div>
-                                             <div className="pt-3 border-t">
-                                                <InfoBox icon={<Home size={12} />} label="Residential Address" value={user.address} />
-                                             </div>
-                                          </div>
-                                       </PopoverContent>
-                                    </Popover>
-                                    <DropdownMenu>
-                                       <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreVertical size={18} /></Button></DropdownMenuTrigger>
-                                       <DropdownMenuContent align="end" className="w-52 rounded-2xl p-2 shadow-2xl">
-                                          <DropdownMenuItem onClick={() => { setSelectedUser(user); setIsEditOpen(true); }} className="rounded-xl flex gap-2 py-2 cursor-pointer focus:bg-blue-50">
-                                             <Edit size={16} className="text-blue-500" /> Modify Credentials
-                                          </DropdownMenuItem>
-                                          <DropdownMenuSeparator />
-                                          <DropdownMenuItem onClick={() => { setSelectedUser(user); setIsDeleteOpen(true); }} className="rounded-xl flex gap-2 py-2 text-rose-600 font-black uppercase text-[10px] tracking-widest focus:bg-rose-50">
-                                             <Trash2 size={16} /> Delete Identity
-                                          </DropdownMenuItem>
-                                       </DropdownMenuContent>
-                                    </DropdownMenu>
-                                 </div>
-                              </TableCell>
-                           </motion.tr>
-                        ))
-                     )}
-                  </AnimatePresence>
-               </TableBody>
-            </Table>
+                                          </PopoverContent>
+                                       </Popover>
+                                       <DropdownMenu>
+                                          <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreVertical size={18} /></Button></DropdownMenuTrigger>
+                                          <DropdownMenuContent align="end" className="w-52 rounded-2xl p-2 shadow-2xl">
+                                             <DropdownMenuItem onClick={() => { setSelectedUser(user); setIsEditOpen(true); }} className="rounded-xl flex gap-2 py-2 cursor-pointer focus:bg-blue-50">
+                                                <Edit size={16} className="text-blue-500" /> Modify Credentials
+                                             </DropdownMenuItem>
+                                             <DropdownMenuSeparator />
+                                             <DropdownMenuItem onClick={() => { setSelectedUser(user); setIsDeleteOpen(true); }} className="rounded-xl flex gap-2 py-2 text-rose-600 font-black uppercase text-[10px] tracking-widest focus:bg-rose-50">
+                                                <Trash2 size={16} /> Delete Identity
+                                             </DropdownMenuItem>
+                                          </DropdownMenuContent>
+                                       </DropdownMenu>
+                                    </div>
+                                 </TableCell>
+                              </motion.tr>
+                           ))
+                        )}
+                     </AnimatePresence>
+                  </TableBody>
+               </Table>
             </div>
          </Card>
 
@@ -705,7 +705,7 @@ export default function UserManagement() {
                         </motion.div>
 
                      ) : (
-                          <motion.div key="report" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center py-6 space-y-6">
+                        <motion.div key="report" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center py-6 space-y-6">
                            <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner shadow-emerald-200">
                               <ShieldCheck size={48} />
                            </div>

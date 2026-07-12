@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { School, Users, Calendar, ArrowRight, BookOpen, Activity } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { toast } from 'sonner';
+import { Card, CardContent } from '@/components/ui/card';
 import api from '@/lib/api';
+import { motion } from 'framer-motion';
+import { Activity, ArrowRight, BookOpen, Calendar, School, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 interface Class {
   id: number;

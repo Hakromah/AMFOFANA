@@ -1,26 +1,38 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
-import Papa from 'papaparse';
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
-import api from '@/lib/api';
+import { Progress } from '@/components/ui/progress';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import {
-  Calendar, Users, ClipboardCheck, Loader2, Save, History,
-  PlusCircle, Search, CheckCheck, X, Clock, UserCheck,
-  ShieldCheck, BookOpen, FileEdit,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from '@/components/ui/table';
+import api from '@/lib/api';
+import {
+  BookOpen,
+  Calendar,
+  CheckCheck,
+  ClipboardCheck,
+  Clock,
+  FileEdit,
+  History,
+  Loader2,
+  PlusCircle,
+  Save,
+  Search,
+  ShieldCheck,
+  UserCheck,
+  Users,
+  X,
 } from 'lucide-react';
+import Papa from 'papaparse';
+import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED' | 'SICK';
@@ -59,11 +71,11 @@ interface HistorySession {
 }
 
 const STATUS_CONFIG: Record<AttendanceStatus, { label: string; bg: string; text: string; dot: string }> = {
-  PRESENT: { label: 'Present',  bg: 'bg-emerald-50 border-emerald-200', text: 'text-emerald-700', dot: 'bg-emerald-500' },
-  ABSENT:  { label: 'Absent',   bg: 'bg-rose-50 border-rose-200',       text: 'text-rose-700',    dot: 'bg-rose-500'   },
-  LATE:    { label: 'Late',     bg: 'bg-amber-50 border-amber-200',     text: 'text-amber-700',   dot: 'bg-amber-500'  },
-  EXCUSED: { label: 'Excused', bg: 'bg-blue-50 border-blue-200',       text: 'text-blue-700',    dot: 'bg-blue-500'   },
-  SICK:    { label: 'Sick',     bg: 'bg-purple-50 border-purple-200',   text: 'text-purple-700',  dot: 'bg-purple-500' },
+  PRESENT: { label: 'Present', bg: 'bg-emerald-50 border-emerald-200', text: 'text-emerald-700', dot: 'bg-emerald-500' },
+  ABSENT: { label: 'Absent', bg: 'bg-rose-50 border-rose-200', text: 'text-rose-700', dot: 'bg-rose-500' },
+  LATE: { label: 'Late', bg: 'bg-amber-50 border-amber-200', text: 'text-amber-700', dot: 'bg-amber-500' },
+  EXCUSED: { label: 'Excused', bg: 'bg-blue-50 border-blue-200', text: 'text-blue-700', dot: 'bg-blue-500' },
+  SICK: { label: 'Sick', bg: 'bg-purple-50 border-purple-200', text: 'text-purple-700', dot: 'bg-purple-500' },
 };
 
 const STATUS_CYCLE: AttendanceStatus[] = ['PRESENT', 'ABSENT', 'LATE', 'EXCUSED', 'SICK'];
@@ -93,23 +105,23 @@ function StatPill({ label, value, color }: { label: string; value: number; color
 
 // ═════════════════════════════════════════════════════════════════════════════
 export default function TeacherAttendancePage() {
-  const [classes, setClasses]                   = useState<any[]>([]);
-  const [students, setStudents]                 = useState<Student[]>([]);
-  const [subjects, setSubjects]                 = useState<Subject[]>([]);
-  const [selectedClass, setSelectedClass]       = useState<string>('');
-  const [selectedSubject, setSelectedSubject]   = useState<string>('');  // 'none' | 'other' | '<id>'
-  const [otherNote, setOtherNote]               = useState<string>('');  // custom text when "other"
-  const [sessionTime, setSessionTime]           = useState<string>('');
-  const [attendance, setAttendance]             = useState<AttendanceRecord[]>([]);
-  const [view, setView]                         = useState<'mark' | 'history'>('mark');
-  const [history, setHistory]                   = useState<HistorySession[]>([]);
-  const [search, setSearch]                     = useState('');
-  const [sessionDate, setSessionDate]           = useState(new Date().toISOString().split('T')[0]);
-  const [isEditing, setIsEditing]               = useState(false);
+  const [classes, setClasses] = useState<any[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [selectedClass, setSelectedClass] = useState<string>('');
+  const [selectedSubject, setSelectedSubject] = useState<string>('');  // 'none' | 'other' | '<id>'
+  const [otherNote, setOtherNote] = useState<string>('');  // custom text when "other"
+  const [sessionTime, setSessionTime] = useState<string>('');
+  const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
+  const [view, setView] = useState<'mark' | 'history'>('mark');
+  const [history, setHistory] = useState<HistorySession[]>([]);
+  const [search, setSearch] = useState('');
+  const [sessionDate, setSessionDate] = useState(new Date().toISOString().split('T')[0]);
+  const [isEditing, setIsEditing] = useState(false);
   const [currentSessionId, setCurrentSessionId] = useState<number | null>(null);
-  const [submitting, setSubmitting]             = useState(false);
-  const [loadingStudents, setLoadingStudents]   = useState(false);
-  const [loadingSubjects, setLoadingSubjects]   = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [loadingStudents, setLoadingStudents] = useState(false);
+  const [loadingSubjects, setLoadingSubjects] = useState(false);
 
   const isOtherSelected = selectedSubject === 'other';
 
@@ -125,16 +137,16 @@ export default function TeacherAttendancePage() {
     () => students.filter(s => {
       const q = search.toLowerCase();
       return (s.username || s.name || '').toLowerCase().includes(q)
-          || (s.userId || '').toLowerCase().includes(q);
+        || (s.userId || '').toLowerCase().includes(q);
     }),
     [students, search]
   );
 
   // ── Live analytics ──────────────────────────────────────────────────────────
-  const presentCount  = attendance.filter(a => a.status === 'PRESENT').length;
-  const absentCount   = attendance.filter(a => a.status === 'ABSENT').length;
-  const lateCount     = attendance.filter(a => a.status === 'LATE').length;
-  const excusedCount  = attendance.filter(a => a.status === 'EXCUSED' || a.status === 'SICK').length;
+  const presentCount = attendance.filter(a => a.status === 'PRESENT').length;
+  const absentCount = attendance.filter(a => a.status === 'ABSENT').length;
+  const lateCount = attendance.filter(a => a.status === 'LATE').length;
+  const excusedCount = attendance.filter(a => a.status === 'EXCUSED' || a.status === 'SICK').length;
   const attendanceRate = students.length > 0
     ? Math.round(((presentCount + lateCount) / students.length) * 100) : 0;
 
@@ -402,17 +414,15 @@ export default function TeacherAttendancePage() {
                 fetchSubjects(selectedClass);
               }
             }}
-            className={`rounded-2xl font-black text-[10px] uppercase tracking-widest px-6 h-10 gap-2 transition-all ${
-              view === 'mark' ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-400'
-            }`}
+            className={`rounded-2xl font-black text-[10px] uppercase tracking-widest px-6 h-10 gap-2 transition-all ${view === 'mark' ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-400'
+              }`}
           >
             <PlusCircle size={13} /> {isEditing ? '✎ Editing in progress' : 'New Session'}
           </Button>
           <Button
             onClick={() => { setView('history'); fetchHistory(selectedClass); }}
-            className={`rounded-2xl font-black text-[10px] uppercase tracking-widest px-6 h-10 gap-2 transition-all ${
-              view === 'history' ? 'bg-primary text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-400'
-            }`}
+            className={`rounded-2xl font-black text-[10px] uppercase tracking-widest px-6 h-10 gap-2 transition-all ${view === 'history' ? 'bg-primary text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-400'
+              }`}
           >
             <History size={13} /> History
           </Button>
@@ -439,11 +449,11 @@ export default function TeacherAttendancePage() {
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm px-6 py-4">
             <div className="flex flex-wrap items-center justify-between gap-6">
               <div className="flex flex-wrap gap-6">
-                <StatPill label="Total"   value={students.length} color="text-slate-900" />
-                <StatPill label="Present" value={presentCount}    color="text-emerald-600" />
-                <StatPill label="Absent"  value={absentCount}     color="text-rose-600" />
-                <StatPill label="Late"    value={lateCount}       color="text-amber-600" />
-                <StatPill label="Excused" value={excusedCount}    color="text-blue-600" />
+                <StatPill label="Total" value={students.length} color="text-slate-900" />
+                <StatPill label="Present" value={presentCount} color="text-emerald-600" />
+                <StatPill label="Absent" value={absentCount} color="text-rose-600" />
+                <StatPill label="Late" value={lateCount} color="text-amber-600" />
+                <StatPill label="Excused" value={excusedCount} color="text-blue-600" />
               </div>
               <div className="flex items-center gap-3 min-w-[160px]">
                 <span className={`text-2xl font-black ${attendanceRate >= 75 ? 'text-emerald-600' : 'text-rose-500'}`}>
@@ -703,7 +713,7 @@ export default function TeacherAttendancePage() {
                 <Button variant="ghost"
                   className="rounded-xl font-bold text-slate-400 text-xs hover:text-rose-500"
                   onClick={cancelEdit}>
-                Annuler
+                  Annuler
                 </Button>
               )}
               <Button
@@ -734,90 +744,90 @@ export default function TeacherAttendancePage() {
             </div>
           ) : (
             <div
-            className="overflow-y-auto pr-1"
-            style={{ maxHeight: '488px' }}
-          >
-            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-              {history.map((session, idx) => {
-                const rate = session.totalCount > 0
-                  ? Math.round(((session.presentCount + session.lateCount) / session.totalCount) * 100) : 0;
-                const timeDisplay = session.sessionTime
-                  ? new Date(`2000-01-01T${session.sessionTime}`).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
-                  : null;
-                const eventLabel = session.notes || session.subjectName;
-                const isOtherEvent = !!session.notes;
+              className="overflow-y-auto pr-1"
+              style={{ maxHeight: '488px' }}
+            >
+              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {history.map((session, idx) => {
+                  const rate = session.totalCount > 0
+                    ? Math.round(((session.presentCount + session.lateCount) / session.totalCount) * 100) : 0;
+                  const timeDisplay = session.sessionTime
+                    ? new Date(`2000-01-01T${session.sessionTime}`).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+                    : null;
+                  const eventLabel = session.notes || session.subjectName;
+                  const isOtherEvent = !!session.notes;
 
-                return (
-                  <Card key={session.id} className="border border-slate-100 hover:border-primary/40 duration-200 transition-all shadow-sm rounded-2xl bg-white p-3 group hover:shadow-md">
-                    {/* Top row: icon + rate */}
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="w-8 h-8 bg-slate-50 rounded-xl flex items-center justify-center group-hover:bg-blue-50 transition-colors flex-shrink-0">
-                        <Calendar size={15} className="text-slate-400 group-hover:text-primary transition-colors" />
+                  return (
+                    <Card key={session.id} className="border border-slate-100 hover:border-primary/40 duration-200 transition-all shadow-sm rounded-2xl bg-white p-3 group hover:shadow-md">
+                      {/* Top row: icon + rate */}
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="w-8 h-8 bg-slate-50 rounded-xl flex items-center justify-center group-hover:bg-blue-50 transition-colors flex-shrink-0">
+                          <Calendar size={15} className="text-slate-400 group-hover:text-primary transition-colors" />
+                        </div>
+                        <div className="text-right">
+                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${rate >= 75 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-600'}`}>
+                            {rate}%
+                          </span>
+                          <p className="text-[8px] font-black text-slate-300 uppercase tracking-wider mt-0.5">#{idx + 1}</p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${rate >= 75 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-600'}`}>
-                          {rate}%
-                        </span>
-                        <p className="text-[8px] font-black text-slate-300 uppercase tracking-wider mt-0.5">#{idx + 1}</p>
+
+                      {/* Date */}
+                      <h4 className="text-[11px] font-black text-slate-900 tracking-tight leading-tight mb-1">
+                        {new Date(session.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </h4>
+
+                      {/* Subject / Event + Time badges */}
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {eventLabel && (
+                          <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full flex items-center gap-0.5 max-w-full ${isOtherEvent ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-blue-700'}`}>
+                            {isOtherEvent ? <FileEdit size={7} /> : <BookOpen size={7} />}
+                            <span className="truncate max-w-[80px]">{eventLabel}</span>
+                          </span>
+                        )}
+                        {timeDisplay && (
+                          <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 flex items-center gap-0.5">
+                            <Clock size={7} /> {timeDisplay}
+                          </span>
+                        )}
                       </div>
-                    </div>
 
-                    {/* Date */}
-                    <h4 className="text-[11px] font-black text-slate-900 tracking-tight leading-tight mb-1">
-                      {new Date(session.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </h4>
-
-                    {/* Subject / Event + Time badges */}
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {eventLabel && (
-                        <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full flex items-center gap-0.5 max-w-full ${isOtherEvent ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-blue-700'}`}>
-                          {isOtherEvent ? <FileEdit size={7} /> : <BookOpen size={7} />}
-                          <span className="truncate max-w-[80px]">{eventLabel}</span>
-                        </span>
-                      )}
-                      {timeDisplay && (
-                        <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 flex items-center gap-0.5">
-                          <Clock size={7} /> {timeDisplay}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Stats row — abbreviated */}
-                    <div className="flex flex-wrap gap-1.5 mb-2">
-                      <span className="text-[8px] font-black text-slate-500 flex items-center gap-0.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />{session.presentCount}P
-                      </span>
-                      <span className="text-[8px] font-black text-slate-500 flex items-center gap-0.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />{session.absentCount}A
-                      </span>
-                      {session.lateCount > 0 && (
+                      {/* Stats row — abbreviated */}
+                      <div className="flex flex-wrap gap-1.5 mb-2">
                         <span className="text-[8px] font-black text-slate-500 flex items-center gap-0.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />{session.lateCount}L
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />{session.presentCount}P
                         </span>
-                      )}
-                      {session.excusedCount > 0 && (
                         <span className="text-[8px] font-black text-slate-500 flex items-center gap-0.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />{session.excusedCount}E
+                          <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />{session.absentCount}A
                         </span>
-                      )}
-                    </div>
+                        {session.lateCount > 0 && (
+                          <span className="text-[8px] font-black text-slate-500 flex items-center gap-0.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />{session.lateCount}L
+                          </span>
+                        )}
+                        {session.excusedCount > 0 && (
+                          <span className="text-[8px] font-black text-slate-500 flex items-center gap-0.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />{session.excusedCount}E
+                          </span>
+                        )}
+                      </div>
 
-                    <Progress value={rate} className="h-1 mb-2 bg-slate-100" />
+                      <Progress value={rate} className="h-1 mb-2 bg-slate-100" />
 
-                    <Button
-                      className="w-full h-7 rounded-lg bg-slate-900 text-white font-black text-[8px] uppercase tracking-widest hover:bg-primary transition-all"
-                      onClick={() => handleEditSession(session)}
-                    >
-                      Edit
-                    </Button>
-                  </Card>
-                );
-              })}
+                      <Button
+                        className="w-full h-7 rounded-lg bg-slate-900 text-white font-black text-[8px] uppercase tracking-widest hover:bg-primary transition-all"
+                        onClick={() => handleEditSession(session)}
+                      >
+                        Edit
+                      </Button>
+                    </Card>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
-      </div>
-    )}
-  </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

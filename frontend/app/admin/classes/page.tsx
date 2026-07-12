@@ -1,45 +1,45 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useEffect, useState, useCallback, useRef, startTransition } from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
+import api from '@/lib/api';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
+  ChevronRight,
   Landmark,
-  Plus,
-  Search,
+  Loader2,
   MoreVertical,
   Pencil,
-  Trash2,
-  Users2,
+  Plus,
+  Search,
   Shapes,
-  Loader2,
-  ChevronRight
+  Trash2,
+  Users2
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { startTransition, useCallback, useEffect, useRef, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import api from '@/lib/api';
+import * as z from 'zod';
 
+import DeleteClassAlert from '@/components/forms/DeleteClassAlert';
+import EditClassForm from '@/components/forms/EditClassForm';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Dialog, DialogContent, DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  FormControl, FormField, FormItem,
-  FormLabel, FormMessage
-} from '@/components/ui/form';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
-import DeleteClassAlert from '@/components/forms/DeleteClassAlert';
-import EditClassForm from '@/components/forms/EditClassForm';
+import {
+  FormControl, FormField, FormItem,
+  FormLabel, FormMessage
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 
 const formSchema = z.object({
   name: z.string().min(1, { message: 'Class name is required' }),

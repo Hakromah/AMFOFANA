@@ -1,24 +1,36 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useEffect, useState, useMemo, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Plus, Check, X, Download, DollarSign, UserCheck, Clock, UserCircle2, Edit, Trash2, CreditCard, Search, ChevronDown
-} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import api from '@/lib/api';
-import { toast } from 'sonner';
+import { getCircularLogo } from '@/lib/logo-base64';
+import { SCHOOL_CONFIG } from '@/lib/school-config';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import {
+  Check,
+  ChevronDown,
+  Clock,
+  CreditCard,
+  DollarSign,
+  Download,
+  Edit,
+  Plus,
+  Search,
+  Trash2,
+  UserCheck,
+  UserCircle2,
+  X
+} from 'lucide-react';
 import QRCode from 'qrcode';
-import { CIRCULAR_LOGO, getCircularLogo } from '@/lib/logo-base64';
-import { SCHOOL_CONFIG } from '@/lib/school-config';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 // ─── Searchable Staff Combobox ────────────────────────────────────────────────────
 function StaffCombobox({ staff, value, onChange }: {

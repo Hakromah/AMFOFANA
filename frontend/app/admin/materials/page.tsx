@@ -1,19 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useEffect, useState } from 'react';
-import api from '@/lib/api';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import api from '@/lib/api';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-   Trash2, Download, Eye, Search, HardDrive,
-   BarChart3, User, Loader2, Calendar, FileText, Image as ImageIcon,
+   BarChart3,
+   Download, Eye,
+   FileText,
+   HardDrive,
+   Image as ImageIcon,
+   Loader2,
+   Search,
+   Trash2,
    TrendingUp
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AdminMaterialsPage() {
    const [materials, setMaterials] = useState<any[]>([]);
@@ -179,88 +185,88 @@ export default function AdminMaterialsPage() {
                   <Loader2 className="animate-spin text-rose-600" size={40} />
                </div>
             ) : (
-            <div className="max-h-[920px] overflow-y-auto pr-1 p-2">
-               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <AnimatePresence mode="popLayout">
-                     {materials.map(m => {
-                        const isPdf = m.fileName?.toLowerCase().endsWith('.pdf') || m.fileType?.includes('pdf');
+               <div className="max-h-[920px] overflow-y-auto pr-1 p-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                     <AnimatePresence mode="popLayout">
+                        {materials.map(m => {
+                           const isPdf = m.fileName?.toLowerCase().endsWith('.pdf') || m.fileType?.includes('pdf');
 
-                        return (
-                           <motion.div
-                              key={m.id}
-                              layout
-                              initial={{ opacity: 0, scale: 0.9 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              exit={{ opacity: 0, scale: 0.9 }}
-                           >
-                              <Card className="rounded-xl p-4 border border-slate-100 md:hover:border-primary duration-500 shadow-sm bg-white hover:shadow-md transition-all group flex flex-col justify-between h-full relative overflow-hidden">
-                                 <div className="absolute top-0 left-0 w-1.5 h-full bg-rose-600/10 group-hover:bg-rose-600 transition-colors" />
+                           return (
+                              <motion.div
+                                 key={m.id}
+                                 layout
+                                 initial={{ opacity: 0, scale: 0.9 }}
+                                 animate={{ opacity: 1, scale: 1 }}
+                                 exit={{ opacity: 0, scale: 0.9 }}
+                              >
+                                 <Card className="rounded-xl p-4 border border-slate-100 md:hover:border-primary duration-500 shadow-sm bg-white hover:shadow-md transition-all group flex flex-col justify-between h-full relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 w-1.5 h-full bg-rose-600/10 group-hover:bg-rose-600 transition-colors" />
 
-                                 <div className="pl-1.5">
-                                    <div className="flex justify-between items-center mb-2.5">
-                                       <Badge className="bg-slate-955 text-[9px] font-black uppercase tracking-widest italic rounded px-2 py-0.5">
-                                          ID: #{m.id}
-                                       </Badge>
-                                       <div className="flex items-center gap-1.5">
-                                          {(m.targetClasses || (m.classe ? [m.classe] : [])).map((c: any) => (
-                                             <Badge key={c.id || 'no-class'} className="bg-blue-50 text-blue-600 border-none font-bold text-[9px] uppercase px-1.5 py-0.5 rounded">
-                                                {c.name || 'Unassigned'}
-                                             </Badge>
-                                          ))}
-                                          {!(m.targetClasses?.length || m.classe) && (
-                                             <Badge className="bg-slate-50 text-slate-400 border-none font-bold text-[9px] uppercase px-1.5 py-0.5 rounded">
-                                                No Classes
-                                             </Badge>
-                                          )}
+                                    <div className="pl-1.5">
+                                       <div className="flex justify-between items-center mb-2.5">
+                                          <Badge className="bg-slate-955 text-[9px] font-black uppercase tracking-widest italic rounded px-2 py-0.5">
+                                             ID: #{m.id}
+                                          </Badge>
+                                          <div className="flex items-center gap-1.5">
+                                             {(m.targetClasses || (m.classe ? [m.classe] : [])).map((c: any) => (
+                                                <Badge key={c.id || 'no-class'} className="bg-blue-50 text-blue-600 border-none font-bold text-[9px] uppercase px-1.5 py-0.5 rounded">
+                                                   {c.name || 'Unassigned'}
+                                                </Badge>
+                                             ))}
+                                             {!(m.targetClasses?.length || m.classe) && (
+                                                <Badge className="bg-slate-50 text-slate-400 border-none font-bold text-[9px] uppercase px-1.5 py-0.5 rounded">
+                                                   No Classes
+                                                </Badge>
+                                             )}
+                                             <Button
+                                                onClick={() => deleteMaterial(m.id)}
+                                                variant="ghost"
+                                                size="icon"
+                                                className="text-slate-300 hover:text-rose-600 rounded-full h-7 w-7 transition-colors ml-1"
+                                             >
+                                                <Trash2 size={14} />
+                                             </Button>
+                                          </div>
+                                       </div>
+
+                                       <div className="flex items-start gap-2 mb-1.5">
+                                          {isPdf ? <FileText className="text-rose-600 shrink-0 mt-0.5" size={15} /> : <ImageIcon className="text-indigo-600 shrink-0 mt-0.5" size={15} />}
+                                          <div className="min-w-0">
+                                             <h3 className="text-xs font-black italic uppercase text-slate-900 truncate tracking-tight" title={m.fileName}>
+                                                {m.fileName}
+                                             </h3>
+                                             <p className="text-slate-400 font-bold text-[10px] mt-0.5 line-clamp-1">{m.title}</p>
+                                          </div>
+                                       </div>
+
+                                       <div className="text-[10px] font-bold text-slate-400 flex flex-wrap items-center gap-1.5 mt-2 mb-3.5">
+                                          <span>Par: {m.uploadedBy?.name || 'Admin'}</span>
+                                          <span>•</span>
+                                          <span>{new Date(m.createdAt).toLocaleDateString()}</span>
+                                       </div>
+
+                                       <div className="flex gap-2">
                                           <Button
-                                             onClick={() => deleteMaterial(m.id)}
-                                             variant="ghost"
-                                             size="icon"
-                                             className="text-slate-300 hover:text-rose-600 rounded-full h-7 w-7 transition-colors ml-1"
+                                             onClick={() => handlePreview(m)}
+                                             className="flex-1 h-8 rounded-lg bg-white border border-slate-100 text-slate-700 font-bold uppercase text-[9px] hover:bg-slate-50 transition-all"
                                           >
-                                             <Trash2 size={14} />
+                                             <Eye size={12} className="mr-1" /> Preview
+                                          </Button>
+                                          <Button
+                                             onClick={() => handleDownload(m)}
+                                             className="flex-1 h-8 rounded-lg bg-rose-600 text-white font-bold uppercase text-[9px] hover:bg-rose-700 transition-all shadow-sm"
+                                          >
+                                             <Download size={12} className="mr-1" /> Download
                                           </Button>
                                        </div>
                                     </div>
-
-                                    <div className="flex items-start gap-2 mb-1.5">
-                                       {isPdf ? <FileText className="text-rose-600 shrink-0 mt-0.5" size={15} /> : <ImageIcon className="text-indigo-600 shrink-0 mt-0.5" size={15} />}
-                                       <div className="min-w-0">
-                                          <h3 className="text-xs font-black italic uppercase text-slate-900 truncate tracking-tight" title={m.fileName}>
-                                             {m.fileName}
-                                          </h3>
-                                          <p className="text-slate-400 font-bold text-[10px] mt-0.5 line-clamp-1">{m.title}</p>
-                                       </div>
-                                    </div>
-
-                                    <div className="text-[10px] font-bold text-slate-400 flex flex-wrap items-center gap-1.5 mt-2 mb-3.5">
-                                       <span>Par: {m.uploadedBy?.name || 'Admin'}</span>
-                                       <span>•</span>
-                                       <span>{new Date(m.createdAt).toLocaleDateString()}</span>
-                                    </div>
-
-                                    <div className="flex gap-2">
-                                       <Button
-                                          onClick={() => handlePreview(m)}
-                                          className="flex-1 h-8 rounded-lg bg-white border border-slate-100 text-slate-700 font-bold uppercase text-[9px] hover:bg-slate-50 transition-all"
-                                       >
-                                          <Eye size={12} className="mr-1" /> Preview
-                                       </Button>
-                                       <Button
-                                          onClick={() => handleDownload(m)}
-                                          className="flex-1 h-8 rounded-lg bg-rose-600 text-white font-bold uppercase text-[9px] hover:bg-rose-700 transition-all shadow-sm"
-                                       >
-                                          <Download size={12} className="mr-1" /> Download
-                                       </Button>
-                                    </div>
-                                 </div>
-                              </Card>
-                           </motion.div>
-                        )
-                     })}
-                  </AnimatePresence>
+                                 </Card>
+                              </motion.div>
+                           )
+                        })}
+                     </AnimatePresence>
+                  </div>
                </div>
-            </div>
             )}
          </main>
       </div>

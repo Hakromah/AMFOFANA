@@ -1,26 +1,36 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
-import {
-  FileText, Search, Printer, Download,
-  RefreshCcw, Loader2, GraduationCap, Building2, Phone, Mail,
-  Eye, ArrowLeft, UserCheck
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'sonner';
 import api from '@/lib/api';
+import { getCircularLogo } from '@/lib/logo-base64';
+import { AnimatePresence, motion } from 'framer-motion';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import {
+  ArrowLeft,
+  Building2,
+  Download,
+  Eye,
+  FileText,
+  GraduationCap,
+  Loader2,
+  Mail,
+  Phone,
+  Printer,
+  RefreshCcw,
+  Search,
+  UserCheck
+} from 'lucide-react';
 import QRCode from 'qrcode';
-import { CIRCULAR_LOGO, getCircularLogo } from '@/lib/logo-base64';
+import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 
 export default function TeacherTranscriptsPage() {
   // --- STATE ---

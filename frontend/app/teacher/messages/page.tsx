@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useMessages } from '@/lib/hooks/useMessages';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader2, Mail, Send, Inbox, Trash2, Reply, Plus, X } from 'lucide-react';
-import { toast } from 'sonner';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import api from '@/lib/api';
+import { useMessages } from '@/lib/hooks/useMessages';
+import { Inbox, Loader2, Mail, Plus, Reply, Send, Trash2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 import {
   Dialog,
@@ -198,17 +198,15 @@ export default function TeacherMessagesPage() {
       <div className="flex gap-3">
         <Button
           onClick={() => { setTab('inbox'); setSelectedMessage(null); }}
-          className={`rounded-2xl font-black text-[10px] uppercase tracking-widest px-6 h-10 gap-2 transition-all cursor-pointer ${
-            tab === 'inbox' ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'
-          }`}
+          className={`rounded-2xl font-black text-[10px] uppercase tracking-widest px-6 h-10 gap-2 transition-all cursor-pointer ${tab === 'inbox' ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'
+            }`}
         >
           <Inbox size={13} /> Inbox {unreadCount > 0 && <Badge className="bg-rose-500 text-white">{unreadCount}</Badge>}
         </Button>
         <Button
           onClick={() => { setTab('sent'); setSelectedMessage(null); }}
-          className={`rounded-2xl font-black text-[10px] uppercase tracking-widest px-6 h-10 gap-2 transition-all cursor-pointer ${
-            tab === 'sent' ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'
-          }`}
+          className={`rounded-2xl font-black text-[10px] uppercase tracking-widest px-6 h-10 gap-2 transition-all cursor-pointer ${tab === 'sent' ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'
+            }`}
         >
           <Send size={13} /> Sent
         </Button>
@@ -235,9 +233,8 @@ export default function TeacherMessagesPage() {
                   <div
                     key={msg.id}
                     onClick={() => handleSelectMessage(msg)}
-                    className={`p-6 cursor-pointer hover:bg-slate-50 transition-colors relative flex flex-col gap-2 ${
-                      isUnread ? 'bg-blue-50/20 font-black' : ''
-                    } ${selectedMessage?.id === msg.id ? 'bg-slate-50 border-r-4 border-primary' : ''}`}
+                    className={`p-6 cursor-pointer hover:bg-slate-50 transition-colors relative flex flex-col gap-2 ${isUnread ? 'bg-blue-50/20 font-black' : ''
+                      } ${selectedMessage?.id === msg.id ? 'bg-slate-50 border-r-4 border-primary' : ''}`}
                   >
                     <div className="flex justify-between items-start pr-4">
                       <span className="text-xs font-black text-slate-900 tracking-tight">

@@ -1,22 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Users, UserPlus, Trash2, Edit2, Search, Plus, X, Mail, Phone,
-  MapPin, ShieldAlert, CheckCircle, Info, Landmark, Link, UserCheck
-} from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import api from '@/lib/api';
+import {
+  Edit2,
+  Plus,
+  Search,
+  Trash2,
+  UserCheck
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function ParentManagement() {
@@ -217,60 +219,60 @@ export default function ParentManagement() {
               <Table>
                 <TableHeader className="bg-slate-50 sticky top-0 z-10 shadow-sm">
                   <TableRow className="bg-slate-50 hover:bg-slate-50/50">
-                  <TableHead className="font-bold text-slate-500 uppercase text-[10px] tracking-wider pl-6">Profile</TableHead>
-                  <TableHead className="font-bold text-slate-500 uppercase text-[10px] tracking-wider">Authentication</TableHead>
-                  <TableHead className="font-bold text-slate-500 uppercase text-[10px] tracking-wider">Contact</TableHead>
-                  <TableHead className="font-bold text-slate-500 uppercase text-[10px] tracking-wider">Linked Families</TableHead>
-                  <TableHead className="font-bold text-slate-500 uppercase text-[10px] tracking-wider">Gender</TableHead>
-                  <TableHead className="font-bold text-slate-500 uppercase text-[10px] tracking-wider pr-6 text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredParents.map((p) => (
-                  <TableRow key={p.id} className="hover:bg-slate-50/50 transition-colors">
-                    <TableCell className="pl-6 py-4">
-                      <p className="font-bold text-slate-900">{p.firstName || ''} {p.lastName || ''}</p>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">{p.userId || 'No ID'}</p>
-                    </TableCell>
-                    <TableCell>
-                      <p className="text-xs font-bold text-slate-700">{p.username}</p>
-                      <p className="text-[10px] text-slate-400 mt-0.5">{p.email}</p>
-                    </TableCell>
-                    <TableCell>
-                      <p className="text-xs text-slate-700 font-medium">{p.phoneNumber || 'N/A'}</p>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">{p.address || 'No Address'}</p>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {(p.familyMemberships || []).map((fam: any) => (
-                          <Badge key={fam.id} className="bg-blue-50 text-primary border border-blue-100 text-[10px] font-medium">
-                            {fam.familyName} ({fam.familyCode})
-                          </Badge>
-                        ))}
-                        {(p.familyMemberships || []).length === 0 && (
-                          <span className="text-xs text-slate-400 font-medium">Unassigned</span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={`text-[10px] font-black uppercase tracking-wider ${p.gender === 'Female' ? 'text-pink-600 border-pink-100 bg-pink-50/50' : 'text-blue-600 border-blue-100 bg-blue-50/50'}`}>
-                        {p.gender || 'Male'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="pr-6 py-4 text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button size="icon" variant="ghost" onClick={() => openEdit(p)} className="text-slate-500 hover:text-slate-900">
-                          <Edit2 size={16} />
-                        </Button>
-                        <Button size="icon" variant="ghost" onClick={() => handleDelete(p.id)} className="text-red-500 hover:text-red-700">
-                          <Trash2 size={16} />
-                        </Button>
-                      </div>
-                    </TableCell>
+                    <TableHead className="font-bold text-slate-500 uppercase text-[10px] tracking-wider pl-6">Profile</TableHead>
+                    <TableHead className="font-bold text-slate-500 uppercase text-[10px] tracking-wider">Authentication</TableHead>
+                    <TableHead className="font-bold text-slate-500 uppercase text-[10px] tracking-wider">Contact</TableHead>
+                    <TableHead className="font-bold text-slate-500 uppercase text-[10px] tracking-wider">Linked Families</TableHead>
+                    <TableHead className="font-bold text-slate-500 uppercase text-[10px] tracking-wider">Gender</TableHead>
+                    <TableHead className="font-bold text-slate-500 uppercase text-[10px] tracking-wider pr-6 text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredParents.map((p) => (
+                    <TableRow key={p.id} className="hover:bg-slate-50/50 transition-colors">
+                      <TableCell className="pl-6 py-4">
+                        <p className="font-bold text-slate-900">{p.firstName || ''} {p.lastName || ''}</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">{p.userId || 'No ID'}</p>
+                      </TableCell>
+                      <TableCell>
+                        <p className="text-xs font-bold text-slate-700">{p.username}</p>
+                        <p className="text-[10px] text-slate-400 mt-0.5">{p.email}</p>
+                      </TableCell>
+                      <TableCell>
+                        <p className="text-xs text-slate-700 font-medium">{p.phoneNumber || 'N/A'}</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">{p.address || 'No Address'}</p>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {(p.familyMemberships || []).map((fam: any) => (
+                            <Badge key={fam.id} className="bg-blue-50 text-primary border border-blue-100 text-[10px] font-medium">
+                              {fam.familyName} ({fam.familyCode})
+                            </Badge>
+                          ))}
+                          {(p.familyMemberships || []).length === 0 && (
+                            <span className="text-xs text-slate-400 font-medium">Unassigned</span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={`text-[10px] font-black uppercase tracking-wider ${p.gender === 'Female' ? 'text-pink-600 border-pink-100 bg-pink-50/50' : 'text-blue-600 border-blue-100 bg-blue-50/50'}`}>
+                          {p.gender || 'Male'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="pr-6 py-4 text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button size="icon" variant="ghost" onClick={() => openEdit(p)} className="text-slate-500 hover:text-slate-900">
+                            <Edit2 size={16} />
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={() => handleDelete(p.id)} className="text-red-500 hover:text-red-700">
+                            <Trash2 size={16} />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           )}
         </CardContent>

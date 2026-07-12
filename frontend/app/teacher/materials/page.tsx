@@ -1,24 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useState, useEffect } from 'react';
-import {
-  FileUp, FileText, Trash2, Layers, BookOpen,
-  Loader2, Plus, X, Monitor, Download, Calendar,
-  Eye
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'sonner';
 import api from '@/lib/api';
-
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Dialog, DialogContent, DialogHeader,
-  DialogTitle, DialogDescription, DialogFooter
+  Download,
+  Eye,
+  FileText,
+  FileUp,
+  Loader2,
+  Monitor,
+  Plus,
+  Trash2
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import {
+  Dialog, DialogContent,
+  DialogDescription, DialogFooter,
+  DialogHeader,
+  DialogTitle
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 
 export default function TeacherMaterialsPage() {
   const [materials, setMaterials] = useState<any[]>([]);
