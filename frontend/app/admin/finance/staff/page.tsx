@@ -1023,6 +1023,7 @@ export default function StaffFinance() {
                   onChange={(e) => setPayoutAmount(Number(e.target.value))}
                   className="h-11 rounded-xl bg-slate-50 font-black text-lg text-blue-600"
                 />
+              </div>
 
               <div className="space-y-1">
                 <label className="text-xs font-black uppercase text-slate-400">Payment Method</label>

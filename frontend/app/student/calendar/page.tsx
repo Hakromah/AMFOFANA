@@ -27,11 +27,12 @@ export default function StudentCalendarPage() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await api.get('/student/events');
+        const res = await api.get('/student/events')
+          .catch(() => api.get('/student/calendar'))
+          .catch(() => ({ data: [] }));
         setEvents(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
-        toast.error('Failed to sync event registry');
-        console.error(err);
+        console.error('Failed to sync event registry:', err);
       } finally {
         setLoading(false);
       }

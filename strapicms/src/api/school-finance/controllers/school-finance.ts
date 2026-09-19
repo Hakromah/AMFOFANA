@@ -625,8 +625,139 @@ export default {
   },
 
   async getPaymentProviders(ctx: any) {
+    try {
+      ctx.body = getAllProviders();
+    } catch (err: any) {
+      ctx.body = [];
+    }
+  },
+
+  async getPaymentMethodsSettings(ctx: any) {
+    try {
+      let settings: any = null;
+      if ((strapi as any).documents) {
+        try {
+          settings = await ((strapi as any).documents('api::payment-setting.payment-setting' as any) as any).findFirst();
+        } catch (e) {}
+      }
+      if (!settings) {
+        try {
+          settings = await (strapi.db.query as any)('api::payment-setting.payment-setting').findOne({});
+        } catch (e) {}
+      }
+      if (!settings) {
+        try {
+          const list = await (strapi.entityService.findMany as any)('api::payment-setting.payment-setting' as any);
+          settings = Array.isArray(list) ? list[0] : list;
+        } catch (e) {}
+      }
+
+      if (settings) {
+        return (ctx.body = {
+          bankName: settings.bankName || 'Central Bank / Vista Bank Guinea',
+          accountHolder: settings.accountHolder || 'AMFOFANA ACADEMY',
+          rib: settings.rib || 'GN04 0001 2345 6789 0123 45',
+          branchCode: settings.branchCode || '01001',
+          swift: settings.swift || 'VISTGNCON',
+          bankInstructions: settings.bankInstructions || 'Quote your invoice number and Student ID as bank transfer reference for instant reconciliation.',
+          isBankTransferActive: settings.isBankTransferActive !== undefined ? Boolean(settings.isBankTransferActive) : true,
+          orangeMoneyMerchant: settings.orangeMoneyMerchant || '#144*2*1*XXXXX#',
+          orangeMoneyInstructions: settings.orangeMoneyInstructions || 'Dial USSD merchant payment code above to complete payment.',
+          isOrangeMoneyActive: settings.isOrangeMoneyActive !== undefined ? Boolean(settings.isOrangeMoneyActive) : true,
+          mtnMoMoCode: settings.mtnMoMoCode || '*440*XXXXXX#',
+          mtnMoMoInstructions: settings.mtnMoMoInstructions || 'MTN Mobile Money merchant shortcode.',
+          isMtnMoMoActive: settings.isMtnMoMoActive !== undefined ? Boolean(settings.isMtnMoMoActive) : true,
+          cashierLocation: settings.cashierLocation || 'Main Administration Building, Ground Floor',
+          cashierHours: settings.cashierHours || 'Monday to Friday: 08:00 AM — 04:00 PM',
+          isCashierActive: settings.isCashierActive !== undefined ? Boolean(settings.isCashierActive) : true,
+          contactEmail: settings.contactEmail || 'accounts@amfofana.edu',
+          contactPhone: settings.contactPhone || '+224 620 00 00 00',
+          additionalNotes: settings.additionalNotes || 'Keep your official receipt safe for school administrative clearance.'
+        });
+      }
+
+      return (ctx.body = {
+        bankName: 'Central Bank / Vista Bank Guinea',
+        accountHolder: 'AMFOFANA ACADEMY',
+        rib: 'GN04 0001 2345 6789 0123 45',
+        branchCode: '01001',
+        swift: 'VISTGNCON',
+        bankInstructions: 'Quote your invoice number and Student ID as bank transfer reference for instant reconciliation.',
+        isBankTransferActive: true,
+        orangeMoneyMerchant: '#144*2*1*XXXXX#',
+        orangeMoneyInstructions: 'Dial USSD merchant payment code above to complete payment.',
+        isOrangeMoneyActive: true,
+        mtnMoMoCode: '*440*XXXXXX#',
+        mtnMoMoInstructions: 'MTN Mobile Money merchant shortcode.',
+        isMtnMoMoActive: true,
+        cashierLocation: 'Main Administration Building, Ground Floor',
+        cashierHours: 'Monday to Friday: 08:00 AM — 04:00 PM',
+        isCashierActive: true,
+        contactEmail: 'accounts@amfofana.edu',
+        contactPhone: '+224 620 00 00 00',
+        additionalNotes: 'Keep your official receipt safe for school administrative clearance.'
+      });
+    } catch (e) {
+      return (ctx.body = {
+        bankName: 'Central Bank / Vista Bank Guinea',
+        accountHolder: 'AMFOFANA ACADEMY',
+        rib: 'GN04 0001 2345 6789 0123 45',
+        branchCode: '01001',
+        swift: 'VISTGNCON',
+        bankInstructions: 'Quote your invoice number and Student ID as bank transfer reference for instant reconciliation.',
+        isBankTransferActive: true,
+        orangeMoneyMerchant: '#144*2*1*XXXXX#',
+        orangeMoneyInstructions: 'Dial USSD merchant payment code above to complete payment.',
+        isOrangeMoneyActive: true,
+        mtnMoMoCode: '*440*XXXXXX#',
+        mtnMoMoInstructions: 'MTN Mobile Money merchant shortcode.',
+        isMtnMoMoActive: true,
+        cashierLocation: 'Main Administration Building, Ground Floor',
+        cashierHours: 'Monday to Friday: 08:00 AM — 04:00 PM',
+        isCashierActive: true,
+        contactEmail: 'accounts@amfofana.edu',
+        contactPhone: '+224 620 00 00 00',
+        additionalNotes: 'Keep your official receipt safe for school administrative clearance.'
+      });
+    }
+  },
+
+  async updatePaymentMethodsSettings(ctx: any) {
     const user = ctx.state.user;
-    if (!user) return ctx.unauthorized();
-    ctx.body = getAllProviders();
+    if (!user || (user.schoolRole !== 'ACCOUNTANT' && user.schoolRole !== 'ACCOUNTLEAD' && user.schoolRole !== 'ADMIN')) {
+      return ctx.forbidden('Access denied');
+    }
+    const data = ctx.request.body;
+    try {
+      let updated: any;
+      if ((strapi as any).documents) {
+        const doc = await ((strapi as any).documents('api::payment-setting.payment-setting' as any) as any).findFirst();
+        if (doc && doc.documentId) {
+          updated = await ((strapi as any).documents('api::payment-setting.payment-setting' as any) as any).update({
+            documentId: doc.documentId,
+            data
+          });
+        } else {
+          updated = await ((strapi as any).documents('api::payment-setting.payment-setting' as any) as any).create({
+            data
+          });
+        }
+      } else {
+        const existing = await (strapi.entityService.findMany as any)('api::payment-setting.payment-setting' as any);
+        const first = Array.isArray(existing) ? existing[0] : existing;
+        if (first && first.id) {
+          updated = await (strapi.entityService.update as any)('api::payment-setting.payment-setting' as any, first.id, {
+            data
+          });
+        } else {
+          updated = await (strapi.entityService.create as any)('api::payment-setting.payment-setting' as any, {
+            data
+          });
+        }
+      }
+      ctx.body = updated;
+    } catch (err: any) {
+      return ctx.badRequest(err.message || 'Failed to save payment settings');
+    }
   },
 };

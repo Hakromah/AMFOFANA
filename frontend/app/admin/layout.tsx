@@ -23,6 +23,7 @@ export default function AdminLayout({
     { name: 'Transport Management', href: '/admin/transport' },
     { name: 'Messages', href: '/admin/messages' },
     { name: 'Reports', href: '/admin/reports' },
+    { name: 'Academic Config', href: '/admin/academic' },
     { name: 'Transcripts', href: '/admin/transcripts' },
     { name: 'Settings', href: '/admin/settings' },
   ];
