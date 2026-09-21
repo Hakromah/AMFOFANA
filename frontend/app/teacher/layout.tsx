@@ -18,6 +18,7 @@ export default function TeacherLayout({
     { name: 'Student Transcripts', href: '/teacher/transcripts' },
     { name: 'Messages', href: '/teacher/messages' },
     { name: 'My Salary', href: '/teacher/finance/my-salary' },
+    { name: 'My Certificates', href: '/teacher/certificates' },
     { name: 'Profile', href: '/teacher/profile' },
   ];
 

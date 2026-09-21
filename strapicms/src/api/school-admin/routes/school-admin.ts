@@ -70,6 +70,7 @@ export default {
     { method: 'PUT',    path: '/admin/semester/finalize',          handler: 'school-admin.finalizeSemester' },
     { method: 'GET',    path: '/admin/transcripts/generate',       handler: 'school-admin.generateTranscript' },
     { method: 'GET',    path: '/admin/transcripts/student/:studentId', handler: 'school-admin.getStudentTranscriptsList' },
+    { method: 'DELETE', path: '/admin/transcripts/:id',            handler: 'school-admin.deleteTranscript', config: { auth: false } },
 
     // Profile & Password
     { method: 'PUT',    path: '/admin/profile',                    handler: 'school-admin.updateProfile' },
@@ -128,5 +129,17 @@ export default {
     { method: 'POST',   path: '/admin/academic-periods',                      handler: 'school-admin.createAcademicPeriod' },
     { method: 'PUT',    path: '/admin/academic-periods/:id',                  handler: 'school-admin.updateAcademicPeriod' },
     { method: 'DELETE', path: '/admin/academic-periods/:id',                  handler: 'school-admin.deleteAcademicPeriod' },
+
+    // ─── Certificates (auth:false + manual JWT) ────────────────────────────
+    { method: 'GET',    path: '/admin/certificates',              handler: 'school-admin.getAllCertificates',    config: { auth: false } },
+    { method: 'POST',   path: '/admin/certificates',              handler: 'school-admin.createCertificate',    config: { auth: false } },
+    { method: 'PUT',    path: '/admin/certificates/:id/revoke',   handler: 'school-admin.revokeCertificate',    config: { auth: false } },
+
+    // Certificate types & mentions (public read)
+    { method: 'GET',    path: '/admin/certificate-types',         handler: 'school-admin.getCertificateTypes',  config: { auth: false } },
+    { method: 'GET',    path: '/admin/certificate-mentions',      handler: 'school-admin.getCertificateMentions', config: { auth: false } },
+
+    // Student / Parent / Teacher: fetch their own certificates
+    { method: 'GET',    path: '/my/certificates',                 handler: 'school-admin.getMyCertificates',    config: { auth: false } },
   ],
 };

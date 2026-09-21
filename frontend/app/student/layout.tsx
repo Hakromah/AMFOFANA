@@ -15,6 +15,7 @@ export default function StudentLayout({
     { name: 'Exam Results', href: '/student/results' },
     { name: 'Materials', href: '/student/materials' },
     { name: 'Transcripts', href: '/student/transcripts' },
+    { name: 'Certificates', href: '/student/certificates' },
     { name: 'Finance', href: '/student/finance' },
     { name: 'Transport', href: '/student/transport' },
     { name: 'Calendar', href: '/student/calendar' },

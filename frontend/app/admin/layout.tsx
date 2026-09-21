@@ -25,6 +25,7 @@ export default function AdminLayout({
     { name: 'Reports', href: '/admin/reports' },
     { name: 'Academic Config', href: '/admin/academic' },
     { name: 'Transcripts', href: '/admin/transcripts' },
+    { name: 'Certificates', href: '/admin/certificates' },
     { name: 'Settings', href: '/admin/settings' },
   ];
 

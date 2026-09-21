@@ -1,0 +1,18 @@
+{
+  "kind": "collectionType",
+  "collectionName": "certificate_types",
+  "info": {
+    "singularName": "certificate-type",
+    "pluralName": "certificate-types",
+    "displayName": "Type de Certificat",
+    "description": "Types de certificats configurables (Diplôme, Attestation, etc.)"
+  },
+  "options": { "draftAndPublish": false },
+  "pluginOptions": {},
+  "attributes": {
+    "name":             { "type": "string", "required": true, "unique": true },
+    "isGraduation":     { "type": "boolean", "default": false },
+    "defaultProgramme": { "type": "string" },
+    "displayOrder":     { "type": "integer", "default": 0 }
+  }
+}
