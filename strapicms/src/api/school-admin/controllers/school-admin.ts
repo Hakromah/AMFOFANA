@@ -62,20 +62,44 @@ export default {
 
   async assignTeacher(ctx: any) {
     const { teacherId, classId } = ctx.request.body;
-    await strapi.service('api::school-admin.school-admin').assignTeacherToClass(teacherId, classId);
-    ctx.body = {};
+    const result = await strapi.service('api::school-admin.school-admin').assignTeacherToClass(teacherId, classId);
+    ctx.body = result || {};
   },
 
   async assignStudent(ctx: any) {
     const { studentId, classId } = ctx.request.body;
-    await strapi.service('api::school-admin.school-admin').assignStudentToClass(studentId, classId);
-    ctx.body = {};
+    const result = await strapi.service('api::school-admin.school-admin').assignStudentToClass(studentId, classId);
+    ctx.body = result || {};
   },
 
   async getClassesForStudent(ctx: any) {
     ctx.body = await strapi.service('api::school-admin.school-admin').getClassesForStudent(
       Number(ctx.params.studentId),
     );
+  },
+
+  async getClassesForTeacher(ctx: any) {
+    ctx.body = await strapi.service('api::school-admin.school-admin').getClassesForTeacher(
+      Number(ctx.params.teacherId),
+    );
+  },
+
+  async unassignTeacher(ctx: any) {
+    const { teacherId, classId } = ctx.request.body;
+    await strapi.service('api::school-admin.school-admin').unassignTeacherFromClass(
+      Number(teacherId),
+      Number(classId),
+    );
+    ctx.body = {};
+  },
+
+  async unassignStudent(ctx: any) {
+    const { studentId, classId } = ctx.request.body;
+    await strapi.service('api::school-admin.school-admin').unassignStudentFromClass(
+      Number(studentId),
+      Number(classId),
+    );
+    ctx.body = {};
   },
 
   // ─── Subjects ──────────────────────────────────────────────────────
