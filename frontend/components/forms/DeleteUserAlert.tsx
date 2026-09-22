@@ -32,24 +32,19 @@ export default function DeleteUserAlert({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async (e: React.MouseEvent) => {
-    // Prevent the dialog from closing immediately if we want to handle the state
     e.preventDefault();
     setIsDeleting(true);
 
     try {
       await api.delete(`/admin/users/${userId}`);
-      toast.success('Identité purgée du registre');
-
-      // Close dialog first
+      toast.success('Identity removed from registry');
       onOpenChange(false);
-
-      // Execute parent refresh (awaited because of the Promise<void> requirement)
       await onFinished();
     } catch (error: any) {
       if (error.response?.status === 409) {
-        toast.error('Erreur d\'intégrité : L\'utilisateur est toujours lié à des classes actives.');
+        toast.error('Integrity Error: User is still linked to active classes.');
       } else {
-        toast.error('La purge du registre a échoué. Lien système actif.');
+        toast.error('Failed to delete user. Active system link detected.');
       }
     } finally {
       setIsDeleting(false);
@@ -64,16 +59,16 @@ export default function DeleteUserAlert({
             <Trash2 className="text-rose-600" size={24} />
           </div>
           <AlertDialogTitle className="text-xl font-black tracking-tight">
-            Confirmation de Suppression
+            Confirm Deletion
           </AlertDialogTitle>
           <AlertDialogDescription className="text-slate-500 font-medium">
-            Cette action supprimera définitivement cette identité du registre AMF.
-            Les données historiques comme les notes peuvent être archivées, mais le compte sera inaccessible.
+            This action will permanently remove this identity from the AMF registry.
+            Historical records may be preserved in archive, but the account will no longer be accessible.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="mt-6">
           <AlertDialogCancel className="rounded-xl border-slate-200 font-bold">
-            Annuler
+            Cancel
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
@@ -83,10 +78,10 @@ export default function DeleteUserAlert({
             {isDeleting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Suppression...
+                Deleting...
               </>
             ) : (
-              'Confirmation de Suppression'
+              'Confirm Deletion'
             )}
           </AlertDialogAction>
         </AlertDialogFooter>
@@ -94,4 +89,3 @@ export default function DeleteUserAlert({
     </AlertDialog>
   );
 }
-
