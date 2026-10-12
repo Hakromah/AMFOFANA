@@ -108,22 +108,23 @@ interface StudentUser {
   email?: string;
 }
 
-// ─── Guinean Standard 20-point Scale Defaults ─────────────────────────────────
-const DEFAULT_GUINEA_GRADES: GradeTier[] = [
-  { min: 18.0, max: 20.0, letter: 'A+', point: 4.0, remark: 'Excellent (Félicitations)' },
-  { min: 16.0, max: 17.99, letter: 'A', point: 3.7, remark: 'Très Bien (Tableau d\'Honneur)' },
-  { min: 14.0, max: 15.99, letter: 'B+', point: 3.3, remark: 'Bien (Encouragements)' },
-  { min: 12.0, max: 13.99, letter: 'B', point: 3.0, remark: 'Assez Bien' },
-  { min: 10.0, max: 11.99, letter: 'C', point: 2.0, remark: 'Passable (Admis)' },
-  { min: 8.0, max: 9.99, letter: 'D', point: 1.0, remark: 'Insuffisant (Rattrapage)' },
-  { min: 0.0, max: 7.99, letter: 'F', point: 0.0, remark: 'Échec (Non admis)' },
+// ─── Liberian Standard 100-point Scale Defaults ──────────────────────────────
+const DEFAULT_LIBERIA_GRADES: GradeTier[] = [
+  { min: 95.0, max: 100.0, letter: 'A+', point: 4.0, remark: 'Superior (Highest Honors)' },
+  { min: 90.0, max: 94.99, letter: 'A', point: 3.8, remark: 'Excellent (Honors)' },
+  { min: 85.0, max: 89.99, letter: 'B+', point: 3.4, remark: 'Very Good' },
+  { min: 80.0, max: 84.99, letter: 'B', point: 3.0, remark: 'Good / Commendable' },
+  { min: 75.0, max: 79.99, letter: 'C+', point: 2.5, remark: 'Fair / Satisfactory' },
+  { min: 70.0, max: 74.99, letter: 'C', point: 2.0, remark: 'Passing / Average' },
+  { min: 60.0, max: 69.99, letter: 'D', point: 1.0, remark: 'Conditional Pass / Minimum' },
+  { min: 0.0, max: 59.99, letter: 'F', point: 0.0, remark: 'Failing (Did not pass)' },
 ];
 
 const STANDARD_CATEGORY_PRESETS = [
-  { name: 'Contrôles Continus & Devoirs', code: 'QUIZ', description: 'Évaluations régulières, devoirs sur table et interrogations écrites' },
-  { name: 'Examen de Synthèse / Partiel', code: 'EXAM', description: 'Examens de fin de trimestre/semestre ou épreuves standardisées' },
-  { name: 'Travaux Pratiques & Projets', code: 'PROJECT', description: 'Travaux dirigés, travaux pratiques, exposés et projets scolaires' },
-  { name: 'Assiduité & Participation', code: 'PART', description: 'Engagement oral, travail personnel et discipline en classe' },
+  { name: 'Quizzes & Continuous Assessments', code: 'QUIZ', description: 'Periodic quizzes, weekly tests, and classroom continuous assessments' },
+  { name: 'Terminal / Semester Examinations', code: 'EXAM', description: 'Comprehensive end-of-term / semester examinations' },
+  { name: 'Projects & Practical Work', code: 'PROJECT', description: 'Assignments, research papers, laboratory experiments, and presentations' },
+  { name: 'Class Participation & Attendance', code: 'PART', description: 'Class engagement, attendance punctuality, oral contribution, and discipline' },
 ];
 
 // Universal normalizing helper that handles:
@@ -329,11 +330,11 @@ export default function AcademicManagementPage() {
                   Academic Configuration & Assessment Engine
                 </h1>
                 <Badge variant="secondary" className="bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 font-medium">
-                  Guinean National System (Scale of 20)
+                  Liberian National Curriculum (100% Scale)
                 </Badge>
               </div>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                Manage academic years, evaluation periods, assessment categories, weighting blueprints, and Guinean /20 grading schemes.
+                Manage academic years, evaluation periods, assessment categories, weighting blueprints, and Liberian 100% grading schemes.
               </p>
             </div>
           </div>
@@ -380,7 +381,7 @@ export default function AcademicManagementPage() {
               {academicYears.length}
             </div>
             <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium mt-0.5">
-              {currentAcademicYear ? `En cours: ${currentAcademicYear.name}` : 'None active'}
+              {currentAcademicYear ? `Current: ${currentAcademicYear.name}` : 'None active'}
             </div>
           </div>
 
@@ -392,12 +393,12 @@ export default function AcademicManagementPage() {
             <div className="text-xl font-bold text-slate-900 dark:text-white mt-1">
               {periods.length}
             </div>
-            <div className="text-[11px] text-slate-500 mt-0.5">Pour l&apos;année sélectionnée</div>
+            <div className="text-[11px] text-slate-500 mt-0.5">For selected year</div>
           </div>
 
           <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-slate-500">Catégories d&apos;Éval.</span>
+              <span className="text-xs font-medium text-slate-500">Assessment Categories</span>
               <BookOpen className="w-4 h-4 text-purple-500" />
             </div>
             <div className="text-xl font-bold text-slate-900 dark:text-white mt-1">
@@ -425,7 +426,7 @@ export default function AcademicManagementPage() {
             <div className="text-xl font-bold text-slate-900 dark:text-white mt-1">
               {gradingSchemes.length || 1}
             </div>
-            <div className="text-[11px] text-rose-600 dark:text-rose-400 mt-0.5">National /20 Scale</div>
+            <div className="text-[11px] text-rose-600 dark:text-rose-400 mt-0.5">National 100% Scale</div>
           </div>
         </div>
       </div>
@@ -437,7 +438,7 @@ export default function AcademicManagementPage() {
           { id: 'periods', label: 'Periods & Semesters', icon: Clock, count: periods.length },
           { id: 'categories', label: 'Assessment Categories', icon: BookOpen, count: categories.length },
           { id: 'blueprints', label: 'Weighting Blueprints', icon: Layers, count: blueprints.length },
-          { id: 'schemes', label: 'Grading Schemes (/20)', icon: Award, count: gradingSchemes.length },
+          { id: 'schemes', label: 'Grading Schemes (100%)', icon: Award, count: gradingSchemes.length },
           { id: 'recalculate', label: 'Recalculate & Sync', icon: Calculator, highlight: true },
         ].map(tab => {
           const Icon = tab.icon;
@@ -619,24 +620,24 @@ function AcademicYearsTab({
       setDialogOpen(false);
       onRefresh();
     } catch (err: any) {
-      toast.error(err.response?.data?.error?.message || err.message || "Erreur lors de l'enregistrement");
+      toast.error(err.response?.data?.error?.message || err.message || "Error saving academic year");
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (year: AcademicYear) => {
-    if (!confirm(`Delete academic year "${year.name}" ? Toutes les données associées peuvent être impactées.`)) return;
+    if (!confirm(`Delete academic year "${year.name}"? All associated periods, classes, and records may be impacted.`)) return;
     try {
       try {
         await api.delete(`/admin/academic-years/${year.id}`);
       } catch {
         await api.delete(`/academic-years/${year.id}`);
       }
-      toast.success("Academic year deleted");
+      toast.success("Academic year deleted successfully");
       onRefresh();
     } catch (err: any) {
-      toast.error(err.response?.data?.error?.message || err.message || "Erreur de suppression");
+      toast.error(err.response?.data?.error?.message || err.message || "Error deleting academic year");
     }
   };
 
@@ -689,7 +690,7 @@ function AcademicYearsTab({
                     </CardTitle>
                     <CardDescription className="text-xs mt-1">
                       {year.startDate && year.endDate
-                        ? `${new Date(year.startDate).toLocaleDateString('fr-FR')} → ${new Date(year.endDate).toLocaleDateString('fr-FR')}`
+                        ? `${new Date(year.startDate).toLocaleDateString('en-US')} → ${new Date(year.endDate).toLocaleDateString('en-US')}`
                         : 'Dates not specified'}
                     </CardDescription>
                   </div>
@@ -758,7 +759,7 @@ function AcademicYearsTab({
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label>Nom de l&apos;année scolaire <span className="text-red-500">*</span></Label>
+              <Label>Academic Year Name <span className="text-red-500">*</span></Label>
               <Input
                 placeholder="e.g. 2025-2026 or 2026-2027"
                 value={name}
@@ -796,7 +797,7 @@ function AcademicYearsTab({
               />
               <Label htmlFor="isCurrentYear" className="cursor-pointer text-xs leading-relaxed">
                 <span className="font-semibold text-slate-800 dark:text-slate-200 block">Set as current active academic year</span>
-                <span className="text-slate-500">Cette année sera sélectionnée par défaut sur l&apos;ensemble du portail.</span>
+                <span className="text-slate-500">This year will be selected by default across the entire portal.</span>
               </Label>
             </div>
 
@@ -847,7 +848,7 @@ function AcademicPeriodsTab({
 
   const openCreate = () => {
     setEditingPeriod(null);
-    setName(`Semestre ${periods.length + 1}`);
+    setName(`Semester ${periods.length + 1}`);
     setPeriodType('SEMESTER');
     setOrder(String(periods.length + 1));
     setStartDate('');
@@ -869,7 +870,7 @@ function AcademicPeriodsTab({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !yearId) {
-      toast.error("Veuillez renseigner le nom et l'année scolaire");
+      toast.error("Please enter the period name and select an academic year");
       return;
     }
 
@@ -902,24 +903,24 @@ function AcademicPeriodsTab({
       setDialogOpen(false);
       onRefresh();
     } catch (err: any) {
-      toast.error(err.response?.data?.error?.message || err.message || "Erreur d'enregistrement");
+      toast.error(err.response?.data?.error?.message || err.message || "Error saving academic period");
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (period: Period) => {
-    if (!confirm(`Delete period "${period.name}" ?`)) return;
+    if (!confirm(`Delete period "${period.name}"?`)) return;
     try {
       try {
         await api.delete(`/admin/academic-periods/${period.id}`);
       } catch {
         await api.delete(`/semesters/${period.id}`);
       }
-      toast.success("Period deleted");
+      toast.success("Period deleted successfully");
       onRefresh();
     } catch (err: any) {
-      toast.error(err.response?.data?.error?.message || err.message || "Erreur de suppression");
+      toast.error(err.response?.data?.error?.message || err.message || "Error deleting period");
     }
   };
 
@@ -964,7 +965,7 @@ function AcademicPeriodsTab({
                   </div>
                   <div className="flex items-center gap-2 mt-1.5">
                     <Badge className="bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800 text-xs">
-                      {period.periodType === 'SEMESTER' ? 'Semestre' : period.periodType === 'TERM' ? 'Trimestre' : period.periodType === 'QUARTER' ? 'Quart' : 'Module'}
+                      {period.periodType === 'SEMESTER' ? 'Semester' : period.periodType === 'TERM' ? 'Term' : period.periodType === 'QUARTER' ? 'Quarter' : 'Module'}
                     </Badge>
                     <span className="text-xs text-slate-400">
                       {period.academicYear?.name || 'Active year'}
@@ -988,7 +989,7 @@ function AcademicPeriodsTab({
                 <Clock className="w-3.5 h-3.5 text-slate-400" />
                 <span>
                   {period.startDate && period.endDate
-                    ? `${new Date(period.startDate).toLocaleDateString('fr-FR')} → ${new Date(period.endDate).toLocaleDateString('fr-FR')}`
+                    ? `${new Date(period.startDate).toLocaleDateString('en-US')} → ${new Date(period.endDate).toLocaleDateString('en-US')}`
                     : 'Period dates not defined'}
                 </span>
               </div>
@@ -1005,7 +1006,7 @@ function AcademicPeriodsTab({
             </p>
             <Button onClick={openCreate} size="sm" className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white">
               <Plus className="w-4 h-4 mr-1.5" />
-              Create un semestre
+              Create a Semester
             </Button>
           </div>
         )}
@@ -1094,7 +1095,7 @@ function AcademicPeriodsTab({
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
               <Button type="submit" disabled={saving} className="bg-indigo-600 hover:bg-indigo-700 text-white">
-                {saving ? 'Saving...' : editingPeriod ? 'Update' : 'Create la période'}
+                {saving ? 'Saving...' : editingPeriod ? 'Update' : 'Create Period'}
               </Button>
             </DialogFooter>
           </form>
@@ -1143,7 +1144,7 @@ function AssessmentCategoriesTab({
   };
 
   const handleInitPresets = async () => {
-    if (!confirm("Initialiser les catégories de notation standards nationales (Contrôles, Examens, TP, Participation) ?")) return;
+    if (!confirm("Initialize standard assessment categories (Quizzes, Exams, Projects, Participation)?")) return;
     try {
       for (const p of STANDARD_CATEGORY_PRESETS) {
         const exists = categories.some(c => c.code.toUpperCase() === p.code.toUpperCase());
@@ -1167,17 +1168,17 @@ function AssessmentCategoriesTab({
           }
         }
       }
-      toast.success("Catégories nationales initialisées avec succès");
+      toast.success("Standard assessment categories initialized successfully");
       onRefresh();
     } catch (err: any) {
-      toast.error("Erreur lors de l'initialisation des catégories");
+      toast.error("Error initializing assessment categories");
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !code.trim()) {
-      toast.error("Le nom et le code court sont obligatoires");
+      toast.error("Category name and short code are required");
       return;
     }
 
@@ -1208,14 +1209,14 @@ function AssessmentCategoriesTab({
       setDialogOpen(false);
       onRefresh();
     } catch (err: any) {
-      toast.error(err.response?.data?.error?.message || err.message || "Erreur d'enregistrement");
+      toast.error(err.response?.data?.error?.message || err.message || "Error saving assessment category");
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (cat: AssessmentCategory) => {
-    if (!confirm(`Supprimer la catégorie "${cat.name}" (${cat.code}) ?`)) return;
+    if (!confirm(`Delete category "${cat.name}" (${cat.code})?`)) return;
     try {
       try {
         await api.delete(`/admin/assessment-categories/${cat.id}`);
@@ -1225,7 +1226,7 @@ function AssessmentCategoriesTab({
       toast.success("Category deleted");
       onRefresh();
     } catch (err: any) {
-      toast.error(err.response?.data?.error?.message || err.message || "Erreur de suppression");
+      toast.error(err.response?.data?.error?.message || err.message || "Error deleting category");
     }
   };
 
@@ -1237,7 +1238,7 @@ function AssessmentCategoriesTab({
             Assessment & Exam Typology
           </h2>
           <p className="text-xs text-slate-500">
-            Définit les natures d&apos;épreuves pédagogiques utilisées pour construire les coefficients et grilles de notation.
+            Defines assessment types used to construct weighting blueprints and grade evaluations.
           </p>
         </div>
 
@@ -1280,7 +1281,7 @@ function AssessmentCategoriesTab({
             </CardHeader>
             <CardContent className="pt-0 text-xs text-slate-500 dark:text-slate-400 space-y-2">
               <p className="line-clamp-2 min-h-[32px]">
-                {cat.description || "Aucune description renseignée."}
+                {cat.description || "No description provided."}
               </p>
               <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
                 <span className="text-[11px] text-slate-400">Status:</span>
@@ -1296,9 +1297,9 @@ function AssessmentCategoriesTab({
         {categories.length === 0 && (
           <div className="col-span-full text-center py-12 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
             <BookOpen className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-            <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200">Aucune catégorie d&apos;évaluation</h3>
+            <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200">No assessment categories found</h3>
             <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-              Ajoutez les catégories d&apos;épreuves (Devoirs, Examens, TP) ou chargez les modèles prédéfinis.
+              Add assessment categories (Quizzes, Exams, Projects) or load standard presets.
             </p>
             <div className="flex items-center justify-center gap-2 mt-4">
               <Button onClick={handleInitPresets} variant="outline" size="sm">
@@ -1307,7 +1308,7 @@ function AssessmentCategoriesTab({
               </Button>
               <Button onClick={openCreate} size="sm" className="bg-purple-600 hover:bg-purple-700 text-white">
                 <Plus className="w-4 h-4 mr-1.5" />
-                Create manuellement
+                Create Manually
               </Button>
             </div>
           </div>
@@ -1318,9 +1319,9 @@ function AssessmentCategoriesTab({
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{editingCat ? "Edit Category" : "New Category d'Évaluation"}</DialogTitle>
+            <DialogTitle>{editingCat ? "Edit Category" : "New Assessment Category"}</DialogTitle>
             <DialogDescription>
-              Configurez le code court et les détails de cette catégorie d&apos;épreuve.
+              Configure the short code and pedagogical details of this assessment category.
             </DialogDescription>
           </DialogHeader>
 
@@ -1336,7 +1337,7 @@ function AssessmentCategoriesTab({
             </div>
 
             <div className="space-y-1.5">
-              <Label>Code court (identifiant d&apos;épreuve) <span className="text-red-500">*</span></Label>
+              <Label>Short Code (Identifier) <span className="text-red-500">*</span></Label>
               <Input
                 placeholder="e.g. CC, QUIZ, EXAM, TEST, PRACTICAL"
                 value={code}
@@ -1372,7 +1373,7 @@ function AssessmentCategoriesTab({
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
               <Button type="submit" disabled={saving} className="bg-purple-600 hover:bg-purple-700 text-white">
-                {saving ? 'Saving...' : editingCat ? 'Update' : 'Create la catégorie'}
+                {saving ? 'Saving...' : editingCat ? 'Update' : 'Create Category'}
               </Button>
             </DialogFooter>
           </form>
@@ -1383,7 +1384,7 @@ function AssessmentCategoriesTab({
 }
 
 // ═════════════════════════════════════════════════════════════════════════════════
-// 4. ASSESSMENT BLUEPRINTS TAB (GRILLES DE PONDÉRATION)
+// 4. ASSESSMENT BLUEPRINTS TAB (WEIGHTING BLUEPRINTS)
 // ═════════════════════════════════════════════════════════════════════════════════
 function AssessmentBlueprintsTab({
   academicYears,
@@ -1427,7 +1428,7 @@ function AssessmentBlueprintsTab({
 
   const openCreate = () => {
     setEditingBp(null);
-    setName(`Grille de Pondération ${academicYears.find(y => String(y.id) === selectedYearId)?.name || ''}`);
+    setName(`Weighting Blueprint ${academicYears.find(y => String(y.id) === selectedYearId)?.name || ''}`);
     setYearId(selectedYearId);
     setSemesterId('');
     setClassId('');
@@ -1439,12 +1440,12 @@ function AssessmentBlueprintsTab({
     const examCat = categories.find(c => c.code === 'EXAM');
     if (quizCat && examCat) {
       setWeights([
-        { categoryId: String(quizCat.id), weight: 40, maxScore: 20 },
-        { categoryId: String(examCat.id), weight: 60, maxScore: 20 },
+        { categoryId: String(quizCat.id), weight: 40, maxScore: 100 },
+        { categoryId: String(examCat.id), weight: 60, maxScore: 100 },
       ]);
     } else if (categories.length > 0) {
       setWeights([
-        { categoryId: String(categories[0].id), weight: 100, maxScore: 20 }
+        { categoryId: String(categories[0].id), weight: 100, maxScore: 100 }
       ]);
     } else {
       setWeights([]);
@@ -1464,7 +1465,7 @@ function AssessmentBlueprintsTab({
       (bp.categoryWeights || []).map(cw => ({
         categoryId: String(cw.categoryId),
         weight: Number(cw.weight || 0),
-        maxScore: Number(cw.maxScore || 20),
+        maxScore: Number(cw.maxScore || 100),
       }))
     );
     setDialogOpen(true);
@@ -1473,7 +1474,7 @@ function AssessmentBlueprintsTab({
   const addWeightRow = () => {
     const unselected = categories.find(c => !weights.some(w => w.categoryId === String(c.id)));
     const targetCatId = unselected ? String(unselected.id) : (categories[0]?.id ? String(categories[0].id) : '');
-    setWeights(prev => [...prev, { categoryId: targetCatId, weight: 0, maxScore: 20 }]);
+    setWeights(prev => [...prev, { categoryId: targetCatId, weight: 0, maxScore: 100 }]);
   };
 
   const updateWeightRow = (idx: number, field: string, value: any) => {
@@ -1491,17 +1492,17 @@ function AssessmentBlueprintsTab({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !yearId) {
-      toast.error("Le nom et l'année scolaire sont requis");
+      toast.error("Name and academic year are required");
       return;
     }
 
     if (weights.length === 0) {
-      toast.error("Veuillez ajouter au moins une composante de notation");
+      toast.error("Please add at least one assessment component");
       return;
     }
 
     if (Math.abs(totalWeight - 100) > 0.01) {
-      toast.error(`Le total des pondérations doit être exactement égal à 100% (actuellement ${totalWeight}%)`);
+      toast.error(`Total weighting must equal exactly 100% (currently ${totalWeight}%)`);
       return;
     }
 
@@ -1512,9 +1513,9 @@ function AssessmentBlueprintsTab({
         return {
           categoryId: Number(w.categoryId),
           categoryCode: cat?.code || 'EXAM',
-          categoryName: cat?.name || 'Évaluation',
+          categoryName: cat?.name || 'Assessment',
           weight: Number(w.weight),
-          maxScore: Number(w.maxScore || 20),
+          maxScore: Number(w.maxScore || 100),
         };
       });
 
@@ -1547,14 +1548,14 @@ function AssessmentBlueprintsTab({
       setDialogOpen(false);
       onRefresh();
     } catch (err: any) {
-      toast.error(err.response?.data?.error?.message || err.message || "Erreur d'enregistrement");
+      toast.error(err.response?.data?.error?.message || err.message || "Failed to save blueprint");
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (bp: AssessmentBlueprint) => {
-    if (!confirm(`Supprimer la grille de pondération "${bp.name}" ?`)) return;
+    if (!confirm(`Delete weighting blueprint "${bp.name}"?`)) return;
     try {
       try {
         await api.delete(`/admin/assessment-blueprints/${bp.id}`);
@@ -1564,7 +1565,7 @@ function AssessmentBlueprintsTab({
       toast.success("Blueprint deleted");
       onRefresh();
     } catch (err: any) {
-      toast.error(err.response?.data?.error?.message || err.message || "Erreur de suppression");
+      toast.error(err.response?.data?.error?.message || err.message || "Failed to delete blueprint");
     }
   };
 
@@ -1598,7 +1599,7 @@ function AssessmentBlueprintsTab({
                     </CardTitle>
                     {bp.isDefault && (
                       <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 text-[10px]">
-                        Défaut
+                        Default
                       </Badge>
                     )}
                   </div>
@@ -1632,7 +1633,7 @@ function AssessmentBlueprintsTab({
                     >
                       <span className="text-slate-700 dark:text-slate-300">{cw.categoryName || cw.categoryCode}:</span>
                       <strong className="text-amber-600 dark:text-amber-400">{cw.weight}%</strong>
-                      <span className="text-[10px] text-slate-400">(/ {cw.maxScore || 20}pts)</span>
+                      <span className="text-[10px] text-slate-400">(/ {cw.maxScore || 100}pts)</span>
                     </span>
                   ))}
                 </div>
@@ -1641,7 +1642,7 @@ function AssessmentBlueprintsTab({
               {bp.gradingScheme && (
                 <div className="flex items-center gap-1.5 text-xs text-slate-500">
                   <Award className="w-3.5 h-3.5 text-rose-500" />
-                  <span>Barème: <strong>{bp.gradingScheme.name}</strong></span>
+                  <span>Grading Scheme: <strong>{bp.gradingScheme.name}</strong></span>
                 </div>
               )}
             </CardContent>
@@ -1657,7 +1658,7 @@ function AssessmentBlueprintsTab({
             </p>
             <Button onClick={openCreate} size="sm" className="mt-4 bg-amber-600 hover:bg-amber-700 text-white">
               <Plus className="w-4 h-4 mr-1.5" />
-              Create une grille de pondération
+              Create Weighting Blueprint
             </Button>
           </div>
         )}
@@ -1669,7 +1670,7 @@ function AssessmentBlueprintsTab({
           <DialogHeader>
             <DialogTitle>{editingBp ? "Edit Weighting Blueprint" : "Assessment Weighting Blueprint Builder"}</DialogTitle>
             <DialogDescription>
-              Ajustez les pourcentages par composante d&apos;évaluation. Le total doit valoir strictement 100%.
+              Adjust percentage weights per assessment component. Total must equal exactly 100%.
             </DialogDescription>
           </DialogHeader>
 
@@ -1703,7 +1704,7 @@ function AssessmentBlueprintsTab({
                 <Label>Period / Semester (optional)</Label>
                 <Select value={semesterId || '__all__'} onValueChange={v => setSemesterId(v === '__all__' ? '' : v)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Toutes les périodes" />
+                    <SelectValue placeholder="All evaluation periods" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__all__">Apply to all evaluation periods</SelectItem>
@@ -1718,10 +1719,10 @@ function AssessmentBlueprintsTab({
                 <Label>Specific Class (optional)</Label>
                 <Select value={classId || '__all__'} onValueChange={v => setClassId(v === '__all__' ? '' : v)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Toutes les classes" />
+                    <SelectValue placeholder="All classes" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__all__">Toutes les classes de l&apos;école</SelectItem>
+                    <SelectItem value="__all__">All school classes</SelectItem>
                     {classes.map(c => (
                       <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
                     ))}
@@ -1733,10 +1734,10 @@ function AssessmentBlueprintsTab({
                 <Label>Linked Grading Scheme</Label>
                 <Select value={gradingSchemeId || '__default__'} onValueChange={v => setGradingSchemeId(v === '__default__' ? '' : v)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="National /20 Scale (Default)" />
+                    <SelectValue placeholder="Liberian National (100% Scale) (Default)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__default__">Official National /20 Scale</SelectItem>
+                    <SelectItem value="__default__">Official Liberian (100% Scale)</SelectItem>
                     {gradingSchemes.map(s => (
                       <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
                     ))}
@@ -1776,7 +1777,7 @@ function AssessmentBlueprintsTab({
                     <div className="flex-1">
                       <Select value={row.categoryId} onValueChange={v => updateWeightRow(idx, 'categoryId', v)}>
                         <SelectTrigger className="h-8 text-xs">
-                          <SelectValue placeholder="Catégorie d'évaluation..." />
+                          <SelectValue placeholder="Select assessment category..." />
                         </SelectTrigger>
                         <SelectContent>
                           {categories.map(c => (
@@ -1796,7 +1797,7 @@ function AssessmentBlueprintsTab({
                         value={row.weight}
                         onChange={e => updateWeightRow(idx, 'weight', Number(e.target.value))}
                         className="h-8 text-xs font-bold text-right"
-                        placeholder="Poids"
+                        placeholder="Weight"
                       />
                       <span className="text-xs font-semibold text-slate-500">%</span>
                     </div>
@@ -1809,9 +1810,9 @@ function AssessmentBlueprintsTab({
                         value={row.maxScore}
                         onChange={e => updateWeightRow(idx, 'maxScore', Number(e.target.value))}
                         className="h-8 text-xs text-right"
-                        placeholder="Note Max"
+                        placeholder="Max Score"
                       />
-                      <span className="text-xs text-slate-400">/20</span>
+                      <span className="text-xs text-slate-400">/100</span>
                     </div>
 
                     <Button
@@ -1872,7 +1873,7 @@ function AssessmentBlueprintsTab({
 }
 
 // ═════════════════════════════════════════════════════════════════════════════════
-// 5. GRADING SCHEMES TAB (BARÈMES DE NOTATION SUR 20)
+// 5. GRADING SCHEMES TAB (100% SCALE)
 // ═════════════════════════════════════════════════════════════════════════════════
 function GradingSchemesTab({
   schemes,
@@ -1888,32 +1889,32 @@ function GradingSchemesTab({
 
   // Form state
   const [name, setName] = useState('');
-  const [passingScore, setPassingScore] = useState('10');
+  const [passingScore, setPassingScore] = useState('70');
   const [isDefault, setIsDefault] = useState(false);
-  const [tiers, setTiers] = useState<GradeTier[]>(DEFAULT_GUINEA_GRADES);
+  const [tiers, setTiers] = useState<GradeTier[]>(DEFAULT_LIBERIA_GRADES);
 
   const openCreate = () => {
     setEditingScheme(null);
-    setName('Barème National Guinéen (Sur 20)');
-    setPassingScore('10.0');
+    setName('Official Liberian Grading Scale (100% Scale)');
+    setPassingScore('70.0');
     setIsDefault(schemes.length === 0);
-    setTiers([...DEFAULT_GUINEA_GRADES]);
+    setTiers([...DEFAULT_LIBERIA_GRADES]);
     setDialogOpen(true);
   };
 
   const openEdit = (scheme: GradingScheme) => {
     setEditingScheme(scheme);
     setName(scheme.name);
-    setPassingScore(String(scheme.passingScore || 10));
+    setPassingScore(String(scheme.passingScore || 70));
     setIsDefault(Boolean(scheme.isDefault));
-    setTiers(scheme.grades?.length ? scheme.grades : [...DEFAULT_GUINEA_GRADES]);
+    setTiers(scheme.grades?.length ? scheme.grades : [...DEFAULT_LIBERIA_GRADES]);
     setDialogOpen(true);
   };
 
   const addTierRow = () => {
     setTiers(prev => [
       ...prev,
-      { min: 0, max: 20, letter: 'N/A', point: 0.0, remark: 'Observation' }
+      { min: 0, max: 100, letter: 'N/A', point: 0.0, remark: 'Remark' }
     ]);
   };
 
@@ -1929,36 +1930,36 @@ function GradingSchemesTab({
     setTiers(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleInitGuineaStandard = async () => {
+  const handleInitLiberiaStandard = async () => {
     try {
       try {
         await api.post('/admin/grading-schemes', {
-          name: 'Barème National Officiel (Guinée - sur 20)',
+          name: 'Official Liberian Grading Scale (100% Scale)',
           isDefault: true,
-          passingScore: 10.0,
-          grades: DEFAULT_GUINEA_GRADES,
+          passingScore: 70.0,
+          grades: DEFAULT_LIBERIA_GRADES,
         });
       } catch {
         await api.post('/grading-schemes', {
           data: {
-            name: 'Barème National Officiel (Guinée - sur 20)',
+            name: 'Official Liberian Grading Scale (100% Scale)',
             isDefault: true,
-            passingScore: 10.0,
-            grades: DEFAULT_GUINEA_GRADES,
+            passingScore: 70.0,
+            grades: DEFAULT_LIBERIA_GRADES,
           }
         });
       }
-      toast.success("Barème national officiel sur 20 configuré avec succès");
+      toast.success("Official Liberian 100% grading scheme configured successfully");
       onRefresh();
     } catch (err: any) {
-      toast.error("Erreur lors de la création du barème");
+      toast.error("Failed to initialize grading scheme");
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      toast.error("Veuillez saisir le nom du barème");
+      toast.error("Please enter a name for the grading scheme");
       return;
     }
 
@@ -1966,7 +1967,7 @@ function GradingSchemesTab({
     try {
       const payload = {
         name: name.trim(),
-        passingScore: Number(passingScore) || 10.0,
+        passingScore: Number(passingScore) || 70.0,
         isDefault,
         grades: tiers.map(t => ({
           min: Number(t.min),
@@ -1995,14 +1996,14 @@ function GradingSchemesTab({
       setDialogOpen(false);
       onRefresh();
     } catch (err: any) {
-      toast.error(err.response?.data?.error?.message || err.message || "Erreur d'enregistrement");
+      toast.error(err.response?.data?.error?.message || err.message || "Failed to save grading scheme");
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (scheme: GradingScheme) => {
-    if (!confirm(`Supprimer le barème "${scheme.name}" ?`)) return;
+    if (!confirm(`Delete grading scheme "${scheme.name}"?`)) return;
     try {
       try {
         await api.delete(`/admin/grading-schemes/${scheme.id}`);
@@ -2012,7 +2013,7 @@ function GradingSchemesTab({
       toast.success("Grading scheme deleted");
       onRefresh();
     } catch (err: any) {
-      toast.error(err.response?.data?.error?.message || err.message || "Erreur de suppression");
+      toast.error(err.response?.data?.error?.message || err.message || "Failed to delete grading scheme");
     }
   };
 
@@ -2021,18 +2022,18 @@ function GradingSchemesTab({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
         <div>
           <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            Grading Schemes & Honors (Scale of 20)
+            Grading Schemes & Honors (100% Scale)
           </h2>
           <p className="text-xs text-slate-500">
-            Defines grade brackets from 0 to 20, passing grade (10.00 / 20), GPA grade points, and academic honors.
+            Defines grade brackets from 0% to 100%, passing threshold (70.00%), GPA grade points (4.0 scale), and academic honors.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           {schemes.length === 0 && (
-            <Button variant="outline" size="sm" onClick={handleInitGuineaStandard} className="text-xs gap-1.5 border-rose-200 text-rose-700 dark:border-rose-800 dark:text-rose-300">
+            <Button variant="outline" size="sm" onClick={handleInitLiberiaStandard} className="text-xs gap-1.5 border-rose-200 text-rose-700 dark:border-rose-800 dark:text-rose-300">
               <Sparkles className="w-3.5 h-3.5" />
-              Initialize National Scheme
+              Initialize National 100% Scheme
             </Button>
           )}
           <Button onClick={openCreate} className="bg-rose-600 hover:bg-rose-700 text-white gap-2 shadow-sm">
@@ -2045,13 +2046,13 @@ function GradingSchemesTab({
       <div className="grid gap-4">
         {(schemes.length > 0 ? schemes : [{
           id: 0,
-          name: 'Barème National Officiel (Guinée - sur 20) - Système Intégré',
+          name: 'Official Liberian Grading Scale (100% Scale) - Integrated Standard',
           isDefault: true,
-          passingScore: 10.0,
-          grades: DEFAULT_GUINEA_GRADES
+          passingScore: 70.0,
+          grades: DEFAULT_LIBERIA_GRADES
         }]).map(scheme => {
           const isExpanded = expandedSchemeId === scheme.id;
-          const displayGrades = scheme.grades?.length ? scheme.grades : DEFAULT_GUINEA_GRADES;
+          const displayGrades = scheme.grades?.length ? scheme.grades : DEFAULT_LIBERIA_GRADES;
 
           return (
             <Card key={scheme.id} className="border-l-4 border-l-rose-500 overflow-hidden">
@@ -2071,7 +2072,7 @@ function GradingSchemesTab({
                           </Badge>
                         )}
                         <Badge variant="outline" className="text-xs bg-white dark:bg-slate-900">
-                          Seuil d&apos;admission: <strong className="ml-1 text-emerald-600 font-bold">{Number(scheme.passingScore || 10).toFixed(2)} / 20</strong>
+                          Passing Threshold: <strong className="ml-1 text-emerald-600 font-bold">{Number(scheme.passingScore || 70).toFixed(1)}%</strong>
                         </Badge>
                       </div>
                     </div>
@@ -2098,7 +2099,7 @@ function GradingSchemesTab({
                     <table className="w-full text-xs text-left">
                       <thead className="bg-slate-100 dark:bg-slate-800/70 text-slate-500 border-y border-slate-200 dark:border-slate-800">
                         <tr>
-                          <th className="px-4 py-2 font-semibold">Score Bracket (/20)</th>
+                          <th className="px-4 py-2 font-semibold">Score Bracket (100%)</th>
                           <th className="px-4 py-2 font-semibold">Grade Letter</th>
                           <th className="px-4 py-2 font-semibold">GPA Points</th>
                           <th className="px-4 py-2 font-semibold">Honor / Remark</th>
@@ -2107,11 +2108,11 @@ function GradingSchemesTab({
                       </thead>
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                         {displayGrades.map((tier, idx) => {
-                          const isPass = tier.min >= (scheme.passingScore || 10);
+                          const isPass = tier.min >= (scheme.passingScore || 70);
                           return (
                             <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/30">
                               <td className="px-4 py-2.5 font-mono font-medium text-slate-800 dark:text-slate-200">
-                                {tier.min.toFixed(2)} — {tier.max.toFixed(2)}
+                                {tier.min.toFixed(1)}% — {tier.max.toFixed(1)}%
                               </td>
                               <td className="px-4 py-2.5">
                                 <span className={`inline-block font-bold px-2 py-0.5 rounded text-xs ${
@@ -2154,7 +2155,7 @@ function GradingSchemesTab({
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingScheme ? "Edit Grading Scheme" : "New Grading Scheme de Notation sur 20"}</DialogTitle>
+            <DialogTitle>{editingScheme ? "Edit Grading Scheme" : "New Grading Scheme (100% Scale)"}</DialogTitle>
             <DialogDescription>
               Customize grade brackets, GPA points, and official honors remarks.
             </DialogDescription>
@@ -2165,7 +2166,7 @@ function GradingSchemesTab({
               <div className="space-y-1.5 sm:col-span-2">
                 <Label>Scheme Name <span className="text-red-500">*</span></Label>
                 <Input
-                  placeholder="e.g. Guinean National Grading Scale"
+                  placeholder="e.g. Liberian National Grading Scale (100%)"
                   value={name}
                   onChange={e => setName(e.target.value)}
                   required
@@ -2173,12 +2174,12 @@ function GradingSchemesTab({
               </div>
 
               <div className="space-y-1.5">
-                <Label>Seuil d&apos;admission (/20) <span className="text-red-500">*</span></Label>
+                <Label>Passing Threshold (%) <span className="text-red-500">*</span></Label>
                 <Input
                   type="number"
                   step="0.1"
                   min="0"
-                  max="20"
+                  max="100"
                   value={passingScore}
                   onChange={e => setPassingScore(e.target.value)}
                   required
@@ -2206,7 +2207,7 @@ function GradingSchemesTab({
                         type="number"
                         step="0.01"
                         min="0"
-                        max="20"
+                        max="100"
                         value={t.min}
                         onChange={e => updateTier(i, 'min', Number(e.target.value))}
                         className="h-7 text-xs"
@@ -2218,7 +2219,7 @@ function GradingSchemesTab({
                         type="number"
                         step="0.01"
                         min="0"
-                        max="20"
+                        max="100"
                         value={t.max}
                         onChange={e => updateTier(i, 'max', Number(e.target.value))}
                         className="h-7 text-xs"
@@ -2250,7 +2251,7 @@ function GradingSchemesTab({
                         value={t.remark}
                         onChange={e => updateTier(i, 'remark', e.target.value)}
                         className="h-7 text-xs"
-                        placeholder="Mention"
+                        placeholder="Remark"
                       />
                     </div>
                     <div className="col-span-1 text-right">
@@ -2279,14 +2280,14 @@ function GradingSchemesTab({
                 className="w-4 h-4 rounded text-rose-600 focus:ring-rose-500"
               />
               <Label htmlFor="isDefaultScheme" className="cursor-pointer text-xs font-medium">
-                Définir comme barème national par défaut sur l&apos;ensemble de la plateforme
+                Set as platform-wide default national grading scheme
               </Label>
             </div>
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
               <Button type="submit" disabled={saving} className="bg-rose-600 hover:bg-rose-700 text-white">
-                {saving ? 'Saving...' : editingScheme ? 'Update' : 'Create le barème'}
+                {saving ? 'Saving...' : editingScheme ? 'Update' : 'Create Grading Scheme'}
               </Button>
             </DialogFooter>
           </form>
@@ -2323,17 +2324,17 @@ function RecalculationTab({
 
   const handleRunRecalculate = async () => {
     if (!yearId) {
-      toast.error("Veuillez sélectionner une année scolaire");
+      toast.error("Please select an academic year");
       return;
     }
 
     if (mode === 'class' && !targetClassId) {
-      toast.error("Veuillez sélectionner une classe à recalculer");
+      toast.error("Please select a class to recalculate");
       return;
     }
 
     if (mode === 'student' && !targetStudentId) {
-      toast.error("Veuillez sélectionner un élève");
+      toast.error("Please select a student");
       return;
     }
 
@@ -2345,24 +2346,24 @@ function RecalculationTab({
         setResultSummary({
           type: 'class',
           data: res.data,
-          className: classes.find(c => String(c.id) === targetClassId)?.name || 'Classe',
-          timestamp: new Date().toLocaleTimeString('fr-FR')
+          className: classes.find(c => String(c.id) === targetClassId)?.name || 'Class',
+          timestamp: new Date().toLocaleTimeString('en-US')
         });
         toast.success("Class recalculation completed successfully");
       } else {
         const res = await api.post(`/admin/recalculate/student/${targetStudentId}?academicYearId=${yearId}`);
         const student = students.find(s => String(s.id) === targetStudentId);
-        const name = student?.firstName && student?.lastName ? `${student.firstName} ${student.lastName}` : (student?.username || 'Élève');
+        const name = student?.firstName && student?.lastName ? `${student.firstName} ${student.lastName}` : (student?.username || 'Student');
         setResultSummary({
           type: 'student',
           data: res.data,
           studentName: name,
-          timestamp: new Date().toLocaleTimeString('fr-FR')
+          timestamp: new Date().toLocaleTimeString('en-US')
         });
         toast.success("Student recalculation completed successfully");
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.error?.message || err.message || "Erreur lors du recalcul des notes");
+      toast.error(err.response?.data?.error?.message || err.message || "Failed to recalculate grades");
     } finally {
       setCalculating(false);
     }
@@ -2390,7 +2391,7 @@ function RecalculationTab({
         <CardContent className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>Academic Year de référence</Label>
+              <Label>Reference Academic Year</Label>
               <Select value={yearId} onValueChange={setYearId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select academic year..." />
@@ -2444,7 +2445,7 @@ function RecalculationTab({
             </div>
           ) : (
             <div className="space-y-1.5">
-              <Label>Sélectionner l&apos;élève</Label>
+              <Label>Select Student</Label>
               <Select value={targetStudentId} onValueChange={setTargetStudentId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select student..." />
@@ -2466,7 +2467,7 @@ function RecalculationTab({
           <div className="p-3.5 bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 rounded-xl text-xs text-blue-800 dark:text-blue-300 flex items-start gap-2.5">
             <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
             <p>
-              Le moteur parcourt l&apos;ensemble des épreuves notées, calcule les moyennes pondérées sur 20, détermine les mentions et met à jour instantanément les relevés de notes dans le registre d&apos;archivage.
+              The academic engine processes all graded assessments, computes weighted averages on the 100% scale, evaluates letter grades and GPA points, and automatically synchronizes student transcript records in the archive registry.
             </p>
           </div>
 
