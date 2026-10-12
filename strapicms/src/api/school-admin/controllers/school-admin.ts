@@ -44,6 +44,26 @@ export default {
     ctx.body = await strapi.service('api::school-admin.school-admin').getAllClasses();
   },
 
+  async getClassById(ctx: any) {
+    const cls = await strapi.service('api::school-admin.school-admin').getClassById(Number(ctx.params.id));
+    if (!cls) {
+      ctx.status = 404;
+      ctx.body = { error: 'Class not found' };
+      return;
+    }
+    ctx.body = cls;
+  },
+
+  async getClassOverview(ctx: any) {
+    const overview = await strapi.service('api::school-admin.school-admin').getClassOverview(Number(ctx.params.id));
+    if (!overview) {
+      ctx.status = 404;
+      ctx.body = { error: 'Class not found' };
+      return;
+    }
+    ctx.body = overview;
+  },
+
   async createClass(ctx: any) {
     ctx.body = await strapi.service('api::school-admin.school-admin').createClass(ctx.request.body);
   },
@@ -61,30 +81,45 @@ export default {
   },
 
   async assignTeacher(ctx: any) {
+    // Route is auth:false, so the caller must be checked here.
+    const user = await _verifyAdmin(ctx);
+    if (!user) return;
     const { teacherId, classId } = ctx.request.body;
     const result = await strapi.service('api::school-admin.school-admin').assignTeacherToClass(teacherId, classId);
     ctx.body = result || {};
   },
 
   async assignStudent(ctx: any) {
+    // Route is auth:false, so the caller must be checked here.
+    const user = await _verifyAdmin(ctx);
+    if (!user) return;
     const { studentId, classId } = ctx.request.body;
     const result = await strapi.service('api::school-admin.school-admin').assignStudentToClass(studentId, classId);
     ctx.body = result || {};
   },
 
   async getClassesForStudent(ctx: any) {
+    // Route is auth:false, so the caller must be checked here.
+    const user = await _verifyAdmin(ctx);
+    if (!user) return;
     ctx.body = await strapi.service('api::school-admin.school-admin').getClassesForStudent(
       Number(ctx.params.studentId),
     );
   },
 
   async getClassesForTeacher(ctx: any) {
+    // Route is auth:false, so the caller must be checked here.
+    const user = await _verifyAdmin(ctx);
+    if (!user) return;
     ctx.body = await strapi.service('api::school-admin.school-admin').getClassesForTeacher(
       Number(ctx.params.teacherId),
     );
   },
 
   async unassignTeacher(ctx: any) {
+    // Route is auth:false, so the caller must be checked here.
+    const user = await _verifyAdmin(ctx);
+    if (!user) return;
     const { teacherId, classId } = ctx.request.body;
     await strapi.service('api::school-admin.school-admin').unassignTeacherFromClass(
       Number(teacherId),
@@ -94,6 +129,9 @@ export default {
   },
 
   async unassignStudent(ctx: any) {
+    // Route is auth:false, so the caller must be checked here.
+    const user = await _verifyAdmin(ctx);
+    if (!user) return;
     const { studentId, classId } = ctx.request.body;
     await strapi.service('api::school-admin.school-admin').unassignStudentFromClass(
       Number(studentId),
@@ -101,6 +139,7 @@ export default {
     );
     ctx.body = {};
   },
+
 
   // ─── Subjects ──────────────────────────────────────────────────────
   async getAllSubjects(ctx: any) {
@@ -269,6 +308,35 @@ export default {
       studentQuery,
       classId ? Number(classId) : undefined,
     );
+  },
+
+  async createResult(ctx: any) {
+    ctx.body = await strapi.service('api::school-admin.school-admin').saveResult(ctx.request.body);
+  },
+
+  async updateResult(ctx: any) {
+    ctx.body = await strapi.service('api::school-admin.school-admin').updateResult(
+      Number(ctx.params.id), ctx.request.body
+    );
+  },
+
+  async deleteResult(ctx: any) {
+    await strapi.service('api::school-admin.school-admin').deleteResult(Number(ctx.params.id));
+    ctx.body = { success: true };
+  },
+
+  async saveBulkResults(ctx: any) {
+    await strapi.service('api::school-admin.school-admin').saveBulkResults(ctx.request.body);
+    ctx.body = { message: 'Bulk marks saved successfully' };
+  },
+
+  async submitResults(ctx: any) {
+    await strapi.service('api::school-admin.school-admin').submitResults(ctx.request.body);
+    ctx.body = { success: true };
+  },
+
+  async getStudentsByClass(ctx: any) {
+    ctx.body = await strapi.service('api::school-admin.school-admin').getStudentsByClass(Number(ctx.params.id));
   },
 
   async getSummaryReport(ctx: any) {
@@ -692,76 +760,62 @@ export default {
     ctx.body = { deleted: true };
   },
 
-  // ─── Certificates ────────────────────────────────────────────────────────
+  // ─── Certificates ────────────────────────────────────────────────────────────
   async getAllCertificates(ctx: any) {
-    try {
-      ctx.body = await strapi.service('api::school-admin.school-admin').getAllCertificates();
-    } catch (err: any) {
-      ctx.status = 500;
-      ctx.body = { error: err.message };
-    }
+    // Route is auth:false, so the caller must be checked here.
+    const user = await _verifyAdmin(ctx);
+    if (!user) return;
+    ctx.body = await strapi.service('api::school-admin.school-admin').getAllCertificates();
   },
 
   async createCertificate(ctx: any) {
+    // Route is auth:false, so the caller must be checked here.
+    const user = await _verifyAdmin(ctx);
+    if (!user) return;
     try {
       ctx.body = await strapi.service('api::school-admin.school-admin').createCertificate(ctx.request.body);
     } catch (err: any) {
-      ctx.status = 500;
-      ctx.body = { error: err.message };
+      ctx.status = 400;
+      ctx.body = { error: { message: err.message } };
     }
   },
 
   async revokeCertificate(ctx: any) {
-    try {
-      ctx.body = await strapi.service('api::school-admin.school-admin').revokeCertificate(Number(ctx.params.id));
-    } catch (err: any) {
-      ctx.status = 500;
-      ctx.body = { error: err.message };
-    }
+    // Route is auth:false, so the caller must be checked here.
+    const user = await _verifyAdmin(ctx);
+    if (!user) return;
+    const { id } = ctx.params;
+    ctx.body = await strapi.service('api::school-admin.school-admin').revokeCertificate(Number(id));
   },
 
   async getCertificateTypes(ctx: any) {
-    try {
-      ctx.body = await strapi.service('api::school-admin.school-admin').getCertificateTypes();
-    } catch (err: any) {
-      ctx.status = 500;
-      ctx.body = { error: err.message };
-    }
+    // Route is auth:false, so the caller must be checked here.
+    const user = await _verifyAdmin(ctx);
+    if (!user) return;
+    ctx.body = await strapi.service('api::school-admin.school-admin').getCertificateTypes();
   },
 
   async getCertificateMentions(ctx: any) {
-    try {
-      ctx.body = await strapi.service('api::school-admin.school-admin').getCertificateMentions();
-    } catch (err: any) {
-      ctx.status = 500;
-      ctx.body = { error: err.message };
-    }
+    // Route is auth:false, so the caller must be checked here.
+    const user = await _verifyAdmin(ctx);
+    if (!user) return;
+    ctx.body = await strapi.service('api::school-admin.school-admin').getCertificateMentions();
   },
 
   async getMyCertificates(ctx: any) {
+    const authHeader = ctx.request.headers.authorization || '';
+    const token = authHeader.replace('Bearer ', '').trim();
+    if (!token) { ctx.status = 401; ctx.body = { error: 'Non authentifié' }; return; }
     try {
-      let userId: number | undefined = ctx.state?.user?.id;
-      if (!userId) {
-        const authHeader = ctx.request.header?.authorization || '';
-        const token = authHeader.replace('Bearer ', '').trim();
-        if (token) {
-          try {
-            const decoded = await strapi.plugin('users-permissions').service('jwt').verify(token);
-            userId = decoded?.id;
-          } catch { /**/ }
-        }
-      }
-      if (!userId) {
-        ctx.status = 401;
-        ctx.body = { error: 'Unauthorized' };
-        return;
-      }
+      const decoded: any = await strapi.plugins['users-permissions'].services.jwt.verify(token);
+      const userId = decoded.id;
       ctx.body = await strapi.service('api::school-admin.school-admin').getMyCertificates(userId);
-    } catch (err: any) {
-      ctx.status = 500;
-      ctx.body = { error: err.message };
+    } catch {
+      ctx.status = 401;
+      ctx.body = { error: 'Token invalide' };
     }
   },
+
 };
 
 // ─── Helper: verify admin from JWT (for auth:false routes) ────────────────

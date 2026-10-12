@@ -171,8 +171,12 @@ export default () => ({
       if (trm) termName = (trm as any).name;
     }
 
+    const maxScoreVal = data.maxScore !== undefined && data.maxScore !== null ? Number(data.maxScore) : 20;
+    const weightVal = data.weight !== undefined && data.weight !== null ? Number(data.weight) : 1;
+
     const payload = {
       ...data,
+      name: data.name || 'Évaluation',
       teacher: teacherId,
       classe: data.classe?.id || data.classe,
       subject: data.subject?.id || data.subject,
@@ -181,21 +185,41 @@ export default () => ({
       academicYear: data.academicYear?.id || data.academicYear,
       semesterRel: data.semesterRel?.id || data.semesterRel,
       termRel: data.termRel?.id || data.termRel,
+      assessmentCategory: data.assessmentCategory?.id || data.assessmentCategory || null,
+      blueprint: data.blueprint?.id || data.blueprint || null,
+      maxScore: maxScoreVal,
+      weight: weightVal,
+      examStatus: data.examStatus || (data.closed ? 'CLOSED' : 'PUBLISHED'),
+      dueDate: data.dueDate || data.date || null,
     };
     return strapi.entityService.create('api::school-exam.school-exam', {
       data: payload,
     });
   },
 
-  async getExamsByTeacher(teacherId: number) {
+  async getAllExams() {
     return strapi.entityService.findMany('api::school-exam.school-exam', {
-      filters: { teacher: { id: teacherId } },
-      populate: ['classe', 'subject', 'academicYear', 'semesterRel', 'termRel'] as any,
+      populate: ['classe', 'subject', 'academicYear', 'semesterRel', 'termRel', 'assessmentCategory', 'blueprint'] as any,
+      sort: [{ date: 'desc' }, { id: 'desc' }] as any,
+    });
+  },
+
+  async getExamsByTeacher(teacherId?: number) {
+    if (!teacherId) return this.getAllExams();
+    return strapi.entityService.findMany('api::school-exam.school-exam', {
+      filters: {
+        $or: [
+          { teacher: { id: teacherId } },
+          { classe: { teachers: { id: teacherId } } },
+        ],
+      },
+      populate: ['classe', 'subject', 'academicYear', 'semesterRel', 'termRel', 'assessmentCategory', 'blueprint'] as any,
+      sort: [{ date: 'desc' }, { id: 'desc' }] as any,
     });
   },
 
   async updateExam(examId: number, data: any, teacherId: number) {
-    const exam = await strapi.entityService.findOne('api::school-exam.school-exam', examId, { populate: ['teacher'] }) as any;
+    const exam = await strapi.entityService.findOne('api::school-exam.school-exam', examId, { populate: ['teacher', 'assessmentCategory', 'blueprint'] }) as any;
     if (exam.teacher?.id !== teacherId) throw new Error('Unauthorized');
     if (exam.locked) throw new Error('This exam is locked by admin');
 
@@ -211,6 +235,9 @@ export default () => ({
       if (trm) termName = (trm as any).name;
     }
     
+    const maxScoreVal = data.maxScore !== undefined && data.maxScore !== null ? Number(data.maxScore) : (exam.maxScore || 20);
+    const weightVal = data.weight !== undefined && data.weight !== null ? Number(data.weight) : (exam.weight || 1);
+
     const payload = {
       ...data,
       classe: data.classe?.id || data.classe,
@@ -220,6 +247,12 @@ export default () => ({
       academicYear: data.academicYear?.id || data.academicYear,
       semesterRel: data.semesterRel?.id || data.semesterRel,
       termRel: data.termRel?.id || data.termRel,
+      assessmentCategory: data.assessmentCategory !== undefined ? (data.assessmentCategory?.id || data.assessmentCategory || null) : exam.assessmentCategory?.id,
+      blueprint: data.blueprint !== undefined ? (data.blueprint?.id || data.blueprint || null) : exam.blueprint?.id,
+      maxScore: maxScoreVal,
+      weight: weightVal,
+      examStatus: data.examStatus || (data.closed !== undefined ? (data.closed ? 'CLOSED' : 'PUBLISHED') : exam.examStatus),
+      dueDate: data.dueDate || data.date || exam.dueDate,
     };
     
     return strapi.entityService.update('api::school-exam.school-exam', examId, { data: payload });
@@ -233,7 +266,7 @@ export default () => ({
 
   async toggleExamStatus(examId: number, closed: boolean) {
     return strapi.entityService.update('api::school-exam.school-exam', examId, {
-      data: { closed },
+      data: { closed, examStatus: closed ? 'CLOSED' : 'PUBLISHED' },
     });
   },
 
@@ -241,23 +274,37 @@ export default () => ({
 
   async getGradebookByClass(teacherId: number, classId: number) {
     return strapi.entityService.findMany('api::exam-result.exam-result', {
-      filters: { exam: { classe: { id: classId }, teacher: { id: teacherId } } },
+      filters: { exam: { classe: { id: classId } } },
       populate: ['exam', 'exam.subject', 'student'],
     });
   },
 
   async saveResult(teacherId: number, data: any) {
-    const exam = await strapi.entityService.findOne('api::school-exam.school-exam', data.exam?.id || data.examId || data.exam, { populate: ['teacher'] }) as any;
-    if (exam?.teacher?.id !== teacherId) throw new Error('Unauthorized');
+    const examId = data.exam?.id || data.examId || data.exam;
+    const studentId = data.student?.id || data.studentId || data.student;
+    const exam = await strapi.entityService.findOne('api::school-exam.school-exam', examId, { populate: ['teacher', 'classe', 'classe.teachers'] }) as any;
+    const isAuthorized = !teacherId || !exam?.teacher || exam?.teacher?.id === teacherId || (exam?.classe?.teachers || []).some((t: any) => t.id === teacherId);
+    if (!isAuthorized) throw new Error('Unauthorized');
 
-    const letterGrade = _computeLetterGrade(data.marks);
+    const letterGrade = _computeLetterGrade(data.marks, exam?.maxScore || 20);
     const payload = {
       ...data,
-      exam: data.exam?.id || data.exam,
-      student: data.student?.id || data.student,
+      exam: examId,
+      student: studentId,
       letterGrade,
-      status: 'DRAFT'
+      status: data.status || 'DRAFT',
     };
+
+    const existing = await strapi.entityService.findMany('api::exam-result.exam-result', {
+      filters: { exam: { id: examId }, student: { id: studentId } },
+    }) as any[];
+
+    if (existing && existing.length > 0) {
+      return strapi.entityService.update('api::exam-result.exam-result', existing[0].id, {
+        data: payload,
+      });
+    }
+
     return await strapi.entityService.create('api::exam-result.exam-result', {
       data: payload,
     });
@@ -277,12 +324,14 @@ export default () => ({
   },
 
   async saveBulkResults(teacherId: number, results: any[]) {
-    await Promise.all(results.map((r) => {
+    await Promise.all(results.map(async (r) => {
+      const examId = r.exam?.id || r.exam;
+      const studentId = r.student?.id || r.student;
       const letterGrade = _computeLetterGrade(r.marks);
       const payload = {
         ...r,
-        exam: r.exam?.id || r.exam,
-        student: r.student?.id || r.student,
+        exam: examId,
+        student: studentId,
         letterGrade
       };
       if (r.id) {
@@ -290,6 +339,16 @@ export default () => ({
           data: payload,
         });
       }
+      const existing = await strapi.entityService.findMany('api::exam-result.exam-result', {
+        filters: { exam: { id: examId }, student: { id: studentId } },
+      }) as any[];
+
+      if (existing && existing.length > 0) {
+        return strapi.entityService.update('api::exam-result.exam-result', existing[0].id, {
+          data: payload,
+        });
+      }
+
       return strapi.entityService.create('api::exam-result.exam-result', {
         data: { ...payload, status: 'DRAFT' },
       });
@@ -304,9 +363,18 @@ export default () => ({
     ));
   },
 
-  async getResultsByTeacher(teacherId: number) {
+  async getResultsByTeacher(teacherId?: number) {
+    const filters: any = {};
+    if (teacherId) {
+      filters.exam = {
+        $or: [
+          { teacher: { id: teacherId } },
+          { classe: { teachers: { id: teacherId } } },
+        ],
+      };
+    }
     return strapi.entityService.findMany('api::exam-result.exam-result', {
-      filters: { exam: { teacher: { id: teacherId } } },
+      filters,
       populate: ['exam', 'exam.subject', 'exam.classe', 'student'],
     });
   },
@@ -478,14 +546,17 @@ export default () => ({
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function _computeLetterGrade(marks: number): string {
-  if (marks >= 90) return 'A';
-  if (marks >= 87) return 'A-';
-  if (marks >= 83) return 'B+';
-  if (marks >= 80) return 'B';
-  if (marks >= 77) return 'B-';
-  if (marks >= 73) return 'C+';
-  if (marks >= 70) return 'C';
-  if (marks >= 60) return 'D';
+function _computeLetterGrade(marks: number, maxScore: number = 20): string {
+  if (marks === null || marks === undefined || isNaN(marks)) return 'F';
+  const num = Number(marks);
+  // If score is out of 20 (or normalized to 20):
+  const score20 = (num > 20 || maxScore > 20) ? (num / (maxScore || 100)) * 20 : num;
+
+  if (score20 >= 18) return 'A+';
+  if (score20 >= 16) return 'A';
+  if (score20 >= 14) return 'B+';
+  if (score20 >= 12) return 'B';
+  if (score20 >= 10) return 'C';
+  if (score20 >= 8) return 'D';
   return 'F';
 }

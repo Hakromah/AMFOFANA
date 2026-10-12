@@ -13,7 +13,10 @@ export default {
     { method: 'DELETE', path: '/admin/users/:id',                  handler: 'school-admin.deleteUser' },
 
     // Classes
-    { method: 'GET',    path: '/admin/classes',                    handler: 'school-admin.getAllClasses' },
+    { method: 'GET',    path: '/admin/classes',                    handler: 'school-admin.getAllClasses', config: { auth: false } },
+    { method: 'GET',    path: '/admin/classes/:id',                handler: 'school-admin.getClassById', config: { auth: false } },
+    { method: 'GET',    path: '/admin/classes/:id/overview',       handler: 'school-admin.getClassOverview', config: { auth: false } },
+    { method: 'GET',    path: '/admin/classes/:id/students',       handler: 'school-admin.getStudentsByClass', config: { auth: false } },
     { method: 'POST',   path: '/admin/classes',                    handler: 'school-admin.createClass' },
     { method: 'PUT',    path: '/admin/classes/:id',                handler: 'school-admin.updateClass' },
     { method: 'DELETE', path: '/admin/classes/:id',                handler: 'school-admin.deleteClass' },
@@ -37,7 +40,7 @@ export default {
     { method: 'GET',    path: '/admin/materials/analytics',        handler: 'school-admin.getMaterialAnalytics' },
 
     // Timetables
-    { method: 'GET',    path: '/admin/timetables',                 handler: 'school-admin.getAllTimetables' },
+    { method: 'GET',    path: '/admin/timetables',                 handler: 'school-admin.getAllTimetables', config: { auth: false } },
     { method: 'POST',   path: '/admin/timetables',                 handler: 'school-admin.createTimetable' },
     { method: 'PUT',    path: '/admin/timetables/:id',             handler: 'school-admin.updateTimetable' },
     { method: 'DELETE', path: '/admin/timetables/:id',             handler: 'school-admin.deleteTimetable' },
@@ -63,11 +66,16 @@ export default {
     { method: 'DELETE', path: '/admin/time-slots/:id',             handler: 'school-admin.deleteTimeSlot' },
 
     // Exams
-    { method: 'GET',    path: '/admin/exams',                      handler: 'school-admin.getExams' },
-    { method: 'PATCH',  path: '/admin/exams/lock-semester',        handler: 'school-admin.lockSemesterExams' },
+    { method: 'GET',    path: '/admin/exams',                      handler: 'school-admin.getExams', config: { auth: false } },
+    { method: 'PATCH',  path: '/admin/exams/lock-semester',        handler: 'school-admin.lockSemesterExams', config: { auth: false } },
 
     // Results & Reports
-    { method: 'GET',    path: '/admin/results/filter',             handler: 'school-admin.filterResults' },
+    { method: 'GET',    path: '/admin/results/filter',             handler: 'school-admin.filterResults', config: { auth: false } },
+    { method: 'POST',   path: '/admin/results',                    handler: 'school-admin.createResult', config: { auth: false } },
+    { method: 'PUT',    path: '/admin/results/:id',                handler: 'school-admin.updateResult', config: { auth: false } },
+    { method: 'DELETE', path: '/admin/results/:id',                handler: 'school-admin.deleteResult', config: { auth: false } },
+    { method: 'POST',   path: '/admin/results/bulk',               handler: 'school-admin.saveBulkResults', config: { auth: false } },
+    { method: 'POST',   path: '/admin/results/submit',             handler: 'school-admin.submitResults', config: { auth: false } },
     { method: 'GET',    path: '/admin/reports/summary',            handler: 'school-admin.getSummaryReport' },
     { method: 'GET',    path: '/admin/reports/semester-summary',   handler: 'school-admin.getSemesterGPA' },
     { method: 'PUT',    path: '/admin/semester/finalize',          handler: 'school-admin.finalizeSemester' },
@@ -80,65 +88,64 @@ export default {
     { method: 'PUT',    path: '/admin/change-password',            handler: 'school-admin.changePassword' },
 
     // Attendance (admin read-only + analytics)
-    // auth:false + manual ADMIN check so these work without Strapi panel permission grants
     { method: 'GET',    path: '/admin/attendance',           handler: 'school-admin.getAttendanceSessions',   config: { auth: false } },
     { method: 'GET',    path: '/admin/attendance/analytics', handler: 'school-admin.getAttendanceAnalytics',  config: { auth: false } },
+
     // Parents & Notifications
     { method: 'GET',    path: '/admin/parents',                    handler: 'school-admin.getAllParents' },
     { method: 'POST',   path: '/admin/parents',                    handler: 'school-admin.createParent' },
     { method: 'POST',   path: '/admin/notifications/send',         handler: 'school-admin.sendAdminNotification' },
     { method: 'POST',   path: '/admin/notifications/broadcast',    handler: 'school-admin.broadcastAdminAnnouncement' },
 
-    // ─── Assessment Engine ─────────────────────────────────────────────────────
-    // Auto-transcript (no semesterIds needed — discovers everything from academicYearId)
-    { method: 'GET',    path: '/admin/transcripts/auto',                     handler: 'school-admin.generateTranscriptAuto' },
+    // Assessment Engine — Auto-transcript
+    { method: 'GET',    path: '/admin/transcripts/auto',                     handler: 'school-admin.generateTranscriptAuto', config: { auth: false } },
 
     // Assessment Categories
-    { method: 'GET',    path: '/admin/assessment-categories',                handler: 'school-admin.getAssessmentCategories' },
-    { method: 'POST',   path: '/admin/assessment-categories',                handler: 'school-admin.createAssessmentCategory' },
-    { method: 'PUT',    path: '/admin/assessment-categories/:id',             handler: 'school-admin.updateAssessmentCategory' },
-    { method: 'DELETE', path: '/admin/assessment-categories/:id',             handler: 'school-admin.deleteAssessmentCategory' },
+    { method: 'GET',    path: '/admin/assessment-categories',                handler: 'school-admin.getAssessmentCategories', config: { auth: false } },
+    { method: 'POST',   path: '/admin/assessment-categories',                handler: 'school-admin.createAssessmentCategory', config: { auth: false } },
+    { method: 'PUT',    path: '/admin/assessment-categories/:id',             handler: 'school-admin.updateAssessmentCategory', config: { auth: false } },
+    { method: 'DELETE', path: '/admin/assessment-categories/:id',             handler: 'school-admin.deleteAssessmentCategory', config: { auth: false } },
 
     // Assessment Blueprints
-    { method: 'GET',    path: '/admin/assessment-blueprints',                 handler: 'school-admin.getAssessmentBlueprints' },
-    { method: 'POST',   path: '/admin/assessment-blueprints',                 handler: 'school-admin.createAssessmentBlueprint' },
-    { method: 'PUT',    path: '/admin/assessment-blueprints/:id',              handler: 'school-admin.updateAssessmentBlueprint' },
-    { method: 'DELETE', path: '/admin/assessment-blueprints/:id',              handler: 'school-admin.deleteAssessmentBlueprint' },
+    { method: 'GET',    path: '/admin/assessment-blueprints',                 handler: 'school-admin.getAssessmentBlueprints', config: { auth: false } },
+    { method: 'POST',   path: '/admin/assessment-blueprints',                 handler: 'school-admin.createAssessmentBlueprint', config: { auth: false } },
+    { method: 'PUT',    path: '/admin/assessment-blueprints/:id',              handler: 'school-admin.updateAssessmentBlueprint', config: { auth: false } },
+    { method: 'DELETE', path: '/admin/assessment-blueprints/:id',              handler: 'school-admin.deleteAssessmentBlueprint', config: { auth: false } },
 
     // Grading Schemes
-    { method: 'GET',    path: '/admin/grading-schemes',                       handler: 'school-admin.getGradingSchemes' },
-    { method: 'POST',   path: '/admin/grading-schemes',                       handler: 'school-admin.createGradingScheme' },
-    { method: 'PUT',    path: '/admin/grading-schemes/:id',                   handler: 'school-admin.updateGradingScheme' },
-    { method: 'DELETE', path: '/admin/grading-schemes/:id',                   handler: 'school-admin.deleteGradingScheme' },
+    { method: 'GET',    path: '/admin/grading-schemes',                       handler: 'school-admin.getGradingSchemes', config: { auth: false } },
+    { method: 'POST',   path: '/admin/grading-schemes',                       handler: 'school-admin.createGradingScheme', config: { auth: false } },
+    { method: 'PUT',    path: '/admin/grading-schemes/:id',                   handler: 'school-admin.updateGradingScheme', config: { auth: false } },
+    { method: 'DELETE', path: '/admin/grading-schemes/:id',                   handler: 'school-admin.deleteGradingScheme', config: { auth: false } },
 
-    // Academic Results (calculated snapshots)
-    { method: 'GET',    path: '/admin/academic-results/student/:studentId',   handler: 'school-admin.getStudentAcademicResults' },
-    { method: 'GET',    path: '/admin/academic-results/class/:classId',       handler: 'school-admin.getClassAcademicResults' },
+    // Academic Results
+    { method: 'GET',    path: '/admin/academic-results/student/:studentId',   handler: 'school-admin.getStudentAcademicResults', config: { auth: false } },
+    { method: 'GET',    path: '/admin/academic-results/class/:classId',       handler: 'school-admin.getClassAcademicResults', config: { auth: false } },
 
     // Recalculate triggers
-    { method: 'POST',   path: '/admin/recalculate/student/:studentId',        handler: 'school-admin.recalculateStudent' },
-    { method: 'POST',   path: '/admin/recalculate/class/:classId',            handler: 'school-admin.recalculateClass' },
+    { method: 'POST',   path: '/admin/recalculate/student/:studentId',        handler: 'school-admin.recalculateStudent', config: { auth: false } },
+    { method: 'POST',   path: '/admin/recalculate/class/:classId',            handler: 'school-admin.recalculateClass', config: { auth: false } },
 
-    // Dynamic Gradebook (category-aware)
-    { method: 'GET',    path: '/admin/gradebook/:classId',                    handler: 'school-admin.getDynamicGradebook' },
+    // Dynamic Gradebook
+    { method: 'GET',    path: '/admin/gradebook/:classId',                    handler: 'school-admin.getDynamicGradebook', config: { auth: false } },
 
-    // Academic Periods (semesters) management
-    { method: 'GET',    path: '/admin/academic-years',                  handler: 'school-admin.getAllAcademicYears' },
-    { method: 'POST',   path: '/admin/academic-years',                  handler: 'school-admin.createAcademicYear' },
-    { method: 'PUT',    path: '/admin/academic-years/:id',              handler: 'school-admin.updateAcademicYear' },
-    { method: 'DELETE', path: '/admin/academic-years/:id',              handler: 'school-admin.deleteAcademicYear' },
-    
-    { method: 'GET',    path: '/admin/academic-periods',                      handler: 'school-admin.getAcademicPeriods' },
-    { method: 'POST',   path: '/admin/academic-periods',                      handler: 'school-admin.createAcademicPeriod' },
-    { method: 'PUT',    path: '/admin/academic-periods/:id',                  handler: 'school-admin.updateAcademicPeriod' },
-    { method: 'DELETE', path: '/admin/academic-periods/:id',                  handler: 'school-admin.deleteAcademicPeriod' },
+    // Academic Years & Periods
+    { method: 'GET',    path: '/admin/academic-years',                  handler: 'school-admin.getAllAcademicYears', config: { auth: false } },
+    { method: 'POST',   path: '/admin/academic-years',                  handler: 'school-admin.createAcademicYear', config: { auth: false } },
+    { method: 'PUT',    path: '/admin/academic-years/:id',              handler: 'school-admin.updateAcademicYear', config: { auth: false } },
+    { method: 'DELETE', path: '/admin/academic-years/:id',              handler: 'school-admin.deleteAcademicYear', config: { auth: false } },
 
-    // ─── Certificates (auth:false + manual JWT) ────────────────────────────
+    { method: 'GET',    path: '/admin/academic-periods',                      handler: 'school-admin.getAcademicPeriods', config: { auth: false } },
+    { method: 'POST',   path: '/admin/academic-periods',                      handler: 'school-admin.createAcademicPeriod', config: { auth: false } },
+    { method: 'PUT',    path: '/admin/academic-periods/:id',                  handler: 'school-admin.updateAcademicPeriod', config: { auth: false } },
+    { method: 'DELETE', path: '/admin/academic-periods/:id',                  handler: 'school-admin.deleteAcademicPeriod', config: { auth: false } },
+
+    // ─── Certificates (auth:false + manual JWT — same pattern as attendance) ────
     { method: 'GET',    path: '/admin/certificates',              handler: 'school-admin.getAllCertificates',    config: { auth: false } },
     { method: 'POST',   path: '/admin/certificates',              handler: 'school-admin.createCertificate',    config: { auth: false } },
     { method: 'PUT',    path: '/admin/certificates/:id/revoke',   handler: 'school-admin.revokeCertificate',    config: { auth: false } },
 
-    // Certificate types & mentions (public read)
+    // Certificate types & mentions (public read — editable from Strapi panel)
     { method: 'GET',    path: '/admin/certificate-types',         handler: 'school-admin.getCertificateTypes',  config: { auth: false } },
     { method: 'GET',    path: '/admin/certificate-mentions',      handler: 'school-admin.getCertificateMentions', config: { auth: false } },
 

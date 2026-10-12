@@ -13,11 +13,16 @@ export default () => ({
   async getAllUsers(role?: string) {
     const filters: any = {};
     if (role) filters.schoolRole = role.toUpperCase();
-    return strapi.entityService.findMany('plugin::users-permissions.user' as any, {
+    const users = await strapi.entityService.findMany('plugin::users-permissions.user' as any, {
       filters,
       fields: ['id', 'userId', 'username', 'email', 'firstName', 'lastName', 'schoolRole', 'birthDate',
         'birthCountry', 'birthCity', 'address', 'gender', 'phoneNumber', 'createdAt'] as any,
-    });
+    }) as any[];
+    if (role) {
+      const target = role.toUpperCase();
+      return (users || []).filter((u: any) => (u.schoolRole || '').toUpperCase() === target);
+    }
+    return users || [];
   },
 
   async createUser(data: any) {
@@ -124,6 +129,83 @@ export default () => ({
     return strapi.entityService.findMany('api::school-class.school-class', {
       populate: ['teachers', 'students', 'academicYear'],
     });
+  },
+
+  async getClassById(classId: number) {
+    return (strapi.entityService.findOne as any)('api::school-class.school-class', classId, {
+      populate: ['teachers', 'students', 'academicYear'],
+    });
+  },
+
+  async getClassOverview(classId: number) {
+    const cls = await (strapi.entityService.findOne as any)('api::school-class.school-class', classId, {
+      populate: ['teachers', 'students', 'academicYear'],
+    }) as any;
+    if (!cls) return null;
+
+    const timetableEntries = await (strapi.entityService.findMany as any)('api::timetable-entry.timetable-entry', {
+      filters: { classe: { id: classId } },
+      populate: ['subject', 'teacher', 'room', 'academicYear', 'semester'],
+      sort: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
+    }) as any[];
+
+    // Map teachers and their teaching courses in this class
+    const teacherMap = new Map<number, any>();
+
+    // 1. Add assigned teachers from class.teachers
+    for (const t of (cls.teachers || [])) {
+      teacherMap.set(t.id, {
+        id: t.id,
+        username: t.username,
+        name: t.username,
+        userId: t.userId,
+        email: t.email,
+        phoneNumber: t.phoneNumber,
+        gender: t.gender,
+        subjects: [],
+        sessionsCount: 0,
+      });
+    }
+
+    // 2. Correlate with timetable entries to discover subjects taught
+    for (const entry of timetableEntries) {
+      if (!entry.teacher?.id) continue;
+      let t = teacherMap.get(entry.teacher.id);
+      if (!t) {
+        t = {
+          id: entry.teacher.id,
+          username: entry.teacher.username,
+          name: entry.teacher.username,
+          userId: entry.teacher.userId,
+          email: entry.teacher.email,
+          phoneNumber: entry.teacher.phoneNumber,
+          gender: entry.teacher.gender,
+          subjects: [],
+          sessionsCount: 0,
+        };
+        teacherMap.set(entry.teacher.id, t);
+      }
+      t.sessionsCount++;
+      if (entry.subject?.id && !t.subjects.some((s: any) => s.id === entry.subject.id)) {
+        t.subjects.push({
+          id: entry.subject.id,
+          name: entry.subject.name,
+          code: entry.subject.code || null,
+        });
+      }
+    }
+
+    return {
+      class: {
+        id: cls.id,
+        name: cls.name,
+        grade: cls.grade,
+        academicYear: cls.academicYear,
+      },
+      students: cls.students || [],
+      teachers: Array.from(teacherMap.values()),
+      timetable: timetableEntries,
+    };
   },
 
   async createClass(data: any) {
@@ -532,13 +614,21 @@ export default () => ({
 
   // ─── Exam Management ──────────────────────────────────────────────
 
+  async getStudentsByClass(classId: number) {
+    const cls = await (strapi.entityService.findOne as any)('api::school-class.school-class', classId, {
+      populate: ['students'],
+    }) as any;
+    return cls?.students || [];
+  },
+
   async getExams(filters: { teacherId?: number; classId?: number }) {
     const f: any = {};
     if (filters.teacherId) f.teacher = { id: filters.teacherId };
     if (filters.classId) f.classe = { id: filters.classId };
-    return strapi.entityService.findMany('api::school-exam.school-exam', {
+    return (strapi.entityService.findMany as any)('api::school-exam.school-exam', {
       filters: f,
-      populate: ['classe', 'teacher', 'subject'],
+      populate: ['classe', 'teacher', 'subject', 'academicYear', 'semesterRel', 'termRel', 'assessmentCategory'],
+      sort: [{ date: 'desc' }, { id: 'desc' }],
     });
   },
 
@@ -560,9 +650,10 @@ export default () => ({
     const filters: any = {};
     if (classId) filters.exam = { classe: { id: classId } };
 
-    const results = await strapi.entityService.findMany('api::exam-result.exam-result', {
+    const results = await (strapi.entityService.findMany as any)('api::exam-result.exam-result', {
       filters,
-      populate: ['exam', 'exam.classe', 'exam.subject', 'student'],
+      populate: ['exam', 'exam.classe', 'exam.subject', 'exam.academicYear', 'student'],
+      sort: [{ id: 'desc' }],
     }) as any[];
 
     if (studentQuery) {
@@ -574,6 +665,96 @@ export default () => ({
       );
     }
     return results;
+  },
+
+  async saveResult(data: any) {
+    const examId = data.exam?.id || data.examId || data.exam;
+    const studentId = data.student?.id || data.studentId || data.student;
+    const exam = await (strapi.entityService.findOne as any)('api::school-exam.school-exam', examId) as any;
+
+    const letterGrade = _computeAdminGrade20(data.marks, exam?.maxScore || 20);
+    const payload = {
+      ...data,
+      exam: examId,
+      student: studentId,
+      letterGrade,
+      status: data.status || 'SUBMITTED',
+    };
+
+    const existing = await (strapi.entityService.findMany as any)('api::exam-result.exam-result', {
+      filters: { exam: { id: examId }, student: { id: studentId } },
+    }) as any[];
+
+    if (existing && existing.length > 0) {
+      return (strapi.entityService.update as any)('api::exam-result.exam-result', existing[0].id, {
+        data: payload,
+      });
+    }
+
+    return (strapi.entityService.create as any)('api::exam-result.exam-result', {
+      data: payload,
+    });
+  },
+
+  async updateResult(resultId: number, data: any) {
+    const examId = data.exam?.id || data.examId || data.exam;
+    const studentId = data.student?.id || data.studentId || data.student;
+    const letterGrade = data.marks !== undefined ? _computeAdminGrade20(data.marks, data.maxScore || 20) : undefined;
+    const payload: any = {
+      ...data,
+      ...(examId ? { exam: examId } : {}),
+      ...(studentId ? { student: studentId } : {}),
+      ...(letterGrade ? { letterGrade } : {}),
+    };
+    return (strapi.entityService.update as any)('api::exam-result.exam-result', resultId, {
+      data: payload,
+    });
+  },
+
+  async deleteResult(resultId: number) {
+    return (strapi.entityService.delete as any)('api::exam-result.exam-result', resultId);
+  },
+
+  async saveBulkResults(results: any[]) {
+    return Promise.all(results.map(async (r) => {
+      const examId = r.exam?.id || r.exam;
+      const studentId = r.student?.id || r.student;
+      const letterGrade = _computeAdminGrade20(r.marks, r.maxScore || 20);
+      const payload = {
+        ...r,
+        exam: examId,
+        student: studentId,
+        letterGrade,
+      };
+
+      if (r.id) {
+        return (strapi.entityService.update as any)('api::exam-result.exam-result', r.id, {
+          data: payload,
+        });
+      }
+
+      const existing = await (strapi.entityService.findMany as any)('api::exam-result.exam-result', {
+        filters: { exam: { id: examId }, student: { id: studentId } },
+      }) as any[];
+
+      if (existing && existing.length > 0) {
+        return (strapi.entityService.update as any)('api::exam-result.exam-result', existing[0].id, {
+          data: payload,
+        });
+      }
+
+      return (strapi.entityService.create as any)('api::exam-result.exam-result', {
+        data: { ...payload, status: 'SUBMITTED' },
+      });
+    }));
+  },
+
+  async submitResults(resultIds: number[]) {
+    return Promise.all(resultIds.map((id) =>
+      (strapi.entityService.update as any)('api::exam-result.exam-result', id, {
+        data: { status: 'SUBMITTED' },
+      })
+    ));
   },
 
   async calculateSemesterGPA(studentId: number, semester: string) {
@@ -697,19 +878,19 @@ export default () => ({
     if (!student) throw new Error('Student not found');
 
     // 2. Fetch School / Institutional Details (Contact Info + Navbar)
-    let schoolInfo = { name: 'AMFOFANA High School', address: '', email: '', phone: '' };
+    let schoolInfo = { name: '2CS COMPLEXES', address: '', email: '', phone: '' };
     try {
       const contactInfo = await strapi.entityService.findMany('api::contact-info.contact-info' as any, {
         populate: ['phones', 'email'] as any
       }) as any;
-      
+
       const realContact = Array.isArray(contactInfo) ? contactInfo[0] : contactInfo;
       if (realContact) {
         schoolInfo.address = realContact.address || '';
         schoolInfo.phone = realContact.phones?.[0]?.phones || '';
         schoolInfo.email = realContact.email?.[0]?.address || '';
       }
-      
+
       const navbar = await strapi.entityService.findMany('api::navbar.navbar' as any) as any;
       const realNavbar = Array.isArray(navbar) ? navbar[0] : navbar;
       if (realNavbar) {
@@ -761,73 +942,64 @@ export default () => ({
       }) as any[];
     }
 
-    // 4. Map results
-    const scoreToGrade = (score: number) => {
-      if (score >= 90) return { letter: 'A', remark: 'Excellent' };
-      if (score >= 85) return { letter: 'A-', remark: 'Tres Bien' };
-      if (score >= 80) return { letter: 'B+', remark: 'Bien' };
-      if (score >= 75) return { letter: 'B', remark: 'Assez Bien' };
-      if (score >= 70) return { letter: 'B-', remark: 'Satisfaisant' };
-      if (score >= 65) return { letter: 'C+', remark: 'Passable' };
-      if (score >= 60) return { letter: 'C', remark: 'Passable' };
-      if (score >= 50) return { letter: 'D', remark: 'Insuffisant' };
-      return { letter: 'F', remark: 'Echec' };
+    // 4. Map results to Guinea 20-point scale
+    const scoreToGrade20 = (score: number) => {
+      const s20 = score > 20 ? (score / 100) * 20 : score;
+      if (s20 >= 18) return { letter: 'A+', remark: 'Excellent', decision: 'Admis(e) avec Félicitations' };
+      if (s20 >= 16) return { letter: 'A',  remark: 'Très Bien',  decision: 'Admis(e) - Tableau d\'Honneur' };
+      if (s20 >= 14) return { letter: 'B',  remark: 'Bien',       decision: 'Admis(e) - Encouragements' };
+      if (s20 >= 12) return { letter: 'C',  remark: 'Assez Bien', decision: 'Admis(e)' };
+      if (s20 >= 10) return { letter: 'D',  remark: 'Passable',   decision: 'Admis(e)' };
+      if (s20 >= 8)  return { letter: 'E',  remark: 'Insuffisant', decision: 'Avertissement' };
+      return { letter: 'F', remark: 'Faible', decision: 'Blâme / Échec' };
     };
 
     const transcriptResults = (results || []).map(r => {
-      const scoreVal = r.marks != null ? Number(r.marks) : (r.rawScore != null ? Number(r.rawScore) : null);
-      const gradeInfo = scoreVal != null ? scoreToGrade(scoreVal) : { letter: 'N/A', remark: '' };
+      const rawVal = r.marks != null ? Number(r.marks) : (r.rawScore != null ? Number(r.rawScore) : null);
+      const maxS = Number(r.maxScore || r.exam?.maxScore || 20);
+      const score20 = rawVal != null ? (rawVal > 20 && maxS > 20 ? Math.round(((rawVal / maxS) * 20) * 100) / 100 : Math.round(rawVal * 100) / 100) : null;
+      const gradeInfo = score20 != null ? scoreToGrade20(score20) : { letter: 'N/A', remark: '', decision: '' };
       return {
         id: r.id,
         examId: r.exam?.id,
-        examName: r.exam?.name || 'Assessment',
+        examName: r.exam?.name || 'Évaluation',
         subjectCode: r.exam?.subject?.code || 'N/A',
         subjectName: r.exam?.subject?.name || 'N/A',
         className: r.exam?.classe?.name || (student.enrolledClasses || []).map((c: any) => c.name).join(', ') || 'N/A',
         academicYear: r.exam?.academicYear?.name || r.exam?.academicYear?.year || 'N/A',
         semester: r.exam?.semesterRel?.name || r.exam?.semester || 'N/A',
         term: r.exam?.termRel?.name || r.exam?.term || 'N/A',
-        marks: scoreVal,
+        marks: score20,
+        marks20: score20,
+        percentage: score20 != null ? Math.round((score20 / 20) * 100 * 100) / 100 : null,
+        coefficient: 1,
+        totalPoints: score20 != null ? score20 : 0,
         letterGrade: r.letterGrade || gradeInfo.letter,
-        weight: Number(r.exam?.weight || 0),
-        remarks: r.remarks || gradeInfo.remark
+        weight: Number(r.exam?.weight || 1),
+        remarks: r.remarks || gradeInfo.remark,
+        decision: gradeInfo.decision
       };
     });
 
-    // 5. Calculate GPA and Average
-    let totalWeightedScore = 0;
+    // 5. Calculate Average on 20
+    let totalWeightedScore20 = 0;
     let totalWeight = 0;
-    let totalScore = 0;
+    let totalScore20 = 0;
     let scoreCount = 0;
 
-    // standard GPA mapping on a 4.0 scale
-    const scoreToGPA = (score: number) => {
-      if (score >= 90) return 4.0;
-      if (score >= 85) return 3.7;
-      if (score >= 80) return 3.3;
-      if (score >= 75) return 3.0;
-      if (score >= 70) return 2.7;
-      if (score >= 65) return 2.3;
-      if (score >= 60) return 2.0;
-      if (score >= 50) return 1.0;
-      return 0.0;
-    };
-
-    let totalGPA = 0;
     for (const r of transcriptResults) {
       if (r.marks != null && !isNaN(r.marks)) {
         const w = r.weight > 0 ? r.weight : 1;
-        totalWeightedScore += r.marks * w;
+        totalWeightedScore20 += r.marks * w;
         totalWeight += w;
-        totalScore += r.marks;
-        totalGPA += scoreToGPA(r.marks);
+        totalScore20 += r.marks;
         scoreCount++;
       }
     }
 
-    const averageScore = scoreCount > 0 ? parseFloat((totalScore / scoreCount).toFixed(2)) : 0;
-    const weightedAverageScore = totalWeight > 0 ? parseFloat((totalWeightedScore / totalWeight).toFixed(2)) : 0;
-    const gpa = scoreCount > 0 ? parseFloat((totalGPA / scoreCount).toFixed(2)) : 0;
+    const averageScore = scoreCount > 0 ? parseFloat((totalScore20 / scoreCount).toFixed(2)) : 0;
+    const weightedAverageScore = totalWeight > 0 ? parseFloat((totalWeightedScore20 / totalWeight).toFixed(2)) : 0;
+    const gi = scoreToGrade20(weightedAverageScore);
 
     // Save/Update in DB dynamically ONLY if saveToLedger is true
     const sortedSemesterIds = (filters.semesterIds || []).slice().sort((a: number, b: number) => a - b).join(',');
@@ -837,7 +1009,7 @@ export default () => ({
     const hash = crypto.createHash('md5').update(hashInput).digest('hex').substring(0, 8).toUpperCase();
     const referenceNumber = `TR-${student.userId || student.id}-${hash}`;
     const generationDate = new Date().toISOString(); // ISO datetime
-    const friendlyDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const friendlyDate = new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
 
     if (saveToLedger) {
       try {
@@ -848,7 +1020,7 @@ export default () => ({
         const transcriptPayload: any = {
           referenceNumber,
           generationDate,
-          gpa: gpa,
+          gpa: weightedAverageScore,
           averageScore: weightedAverageScore,
           student: studentId,
           academicYear: filters.academicYearId || null,
@@ -871,11 +1043,18 @@ export default () => ({
       }
     }
 
+    const studentFullName = (student.firstName && student.lastName)
+      ? `${student.firstName} ${student.lastName}`
+      : (student.name || student.username || 'Élève');
+
     return {
       student: {
         id: student.id,
         userId: student.userId,
-        name: student.username,
+        name: studentFullName,
+        username: student.username,
+        firstName: student.firstName,
+        lastName: student.lastName,
         email: student.email,
         birthDate: student.birthDate,
         phoneNumber: student.phoneNumber,
@@ -887,8 +1066,15 @@ export default () => ({
         averageScore,
         weightedAverageScore,
         annualAverage: weightedAverageScore,
-        gpa,
-        annualGPA: gpa,
+        annualAverageDisplay: `${Number(weightedAverageScore || 0).toFixed(2)} / 20`,
+        gpa: weightedAverageScore,
+        annualGPA: weightedAverageScore,
+        annualGrade: gi.letter,
+        annualRemark: gi.remark,
+        annualDecision: gi.decision,
+        isPassing: weightedAverageScore >= 10.0,
+        scale: 20,
+        passingGrade: 10.0,
         totalSubjectsCount: scoreCount,
         totalSubjects: scoreCount
       },
@@ -1134,4 +1320,65 @@ export default () => ({
     }));
   },
 
+  // ─── Academic Years ─────────────────────────────────────────────────────────
+
+  async getAllAcademicYears() {
+    return (strapi.entityService.findMany as any)('api::academic-year.academic-year', {
+      populate: ['semesters', 'classes'],
+      sort: [{ createdAt: 'desc' }],
+    });
+  },
+
+  async createAcademicYear(data: any) {
+    if (data.isCurrent) {
+      // Unset isCurrent for all other academic years if this one is current
+      const allYears = await (strapi.entityService.findMany as any)('api::academic-year.academic-year', {
+        filters: { isCurrent: true }
+      }) as any[];
+      for (const y of allYears) {
+        await (strapi.entityService.update as any)('api::academic-year.academic-year', y.id, { data: { isCurrent: false } });
+      }
+    }
+    return (strapi.entityService.create as any)('api::academic-year.academic-year', {
+      data,
+      populate: ['semesters', 'classes'],
+    });
+  },
+
+  async updateAcademicYear(id: number, data: any) {
+    if (data.isCurrent) {
+      const allYears = await (strapi.entityService.findMany as any)('api::academic-year.academic-year', {
+        filters: { isCurrent: true }
+      }) as any[];
+      for (const y of allYears) {
+        if (y.id !== id) {
+          await (strapi.entityService.update as any)('api::academic-year.academic-year', y.id, { data: { isCurrent: false } });
+        }
+      }
+    }
+    return (strapi.entityService.update as any)('api::academic-year.academic-year', id, {
+      data,
+      populate: ['semesters', 'classes'],
+    });
+  },
+
+  async deleteAcademicYear(id: number) {
+    return (strapi.entityService.delete as any)('api::academic-year.academic-year', id);
+  },
+
 });
+
+function _computeAdminGrade20(marks: number, maxScore: number = 20): string {
+  if (marks === null || marks === undefined || isNaN(marks)) return 'F';
+  const num = Number(marks);
+  const score20 = (num > 20 || maxScore > 20) ? (num / (maxScore || 100)) * 20 : num;
+  if (score20 >= 18) return 'A+';
+  if (score20 >= 16) return 'A';
+  if (score20 >= 14) return 'B+';
+  if (score20 >= 12) return 'B';
+  if (score20 >= 10) return 'C';
+  if (score20 >= 8) return 'D';
+  return 'F';
+}
+
+

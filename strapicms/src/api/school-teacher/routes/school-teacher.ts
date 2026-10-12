@@ -14,7 +14,7 @@ export default {
     { method: 'GET',  path: '/teacher/classes/:classId/subjects',            handler: 'school-teacher.getSubjectsByClass' },
 
     { method: 'POST',   path: '/teacher/exams',                              handler: 'school-teacher.createExam' },
-    { method: 'GET',    path: '/teacher/exams',                              handler: 'school-teacher.getMyExams' },
+    { method: 'GET',    path: '/teacher/exams',                              handler: 'school-teacher.getMyExams', config: { auth: false } },
     { method: 'PUT',    path: '/teacher/exams/:id',                          handler: 'school-teacher.updateExam' },
     { method: 'DELETE', path: '/teacher/exams/:id',                          handler: 'school-teacher.deleteExam' },
     { method: 'PATCH',  path: '/teacher/exams/:id/toggle-status',            handler: 'school-teacher.toggleExamStatus' },
@@ -46,9 +46,9 @@ export default {
     { method: 'POST',   path: '/teacher/attendance/import',                  handler: 'school-teacher.importAttendanceCsv' },
 
     // ─── Assessment Engine (Teacher) ──────────────────────────────────────────
-    { method: 'GET',   path: '/teacher/classes/:classId/dynamic-gradebook', handler: 'school-teacher.getDynamicGradebook' },
-    { method: 'GET',   path: '/teacher/assessment-categories',              handler: 'school-teacher.getAssessmentCategories' },
-    { method: 'GET',   path: '/teacher/blueprints',                         handler: 'school-teacher.getBlueprintsForTeacher' },
-    { method: 'GET',   path: '/teacher/transcripts/auto',                   handler: 'school-teacher.generateTranscriptAuto' },
+    { method: 'GET',   path: '/teacher/classes/:classId/dynamic-gradebook', handler: 'school-teacher.getDynamicGradebook', config: { auth: false } },
+    { method: 'GET',   path: '/teacher/assessment-categories',              handler: 'school-teacher.getAssessmentCategories', config: { auth: false } },
+    { method: 'GET',   path: '/teacher/blueprints',                         handler: 'school-teacher.getBlueprintsForTeacher', config: { auth: false } },
+    { method: 'GET',   path: '/teacher/transcripts/auto',                   handler: 'school-teacher.generateTranscriptAuto', config: { auth: false } },
   ],
 };

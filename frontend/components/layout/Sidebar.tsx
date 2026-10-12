@@ -50,6 +50,7 @@ const getIcon = (name: string) => {
    if (n.includes('transcripts') || n.includes('documents')) return <FileText className="w-4 h-4" />;
    if (n.includes('staff')) return <UsersRound className="w-4 h-4" />;
    if (n.includes('finance') || n.includes('utility')) return <Landmark className="w-4 h-4" />;
+   if (n.includes('academic')) return <GraduationCap className="w-4 h-4" />;
    if (n.includes('profile')) return <UserCircle className="w-4 h-4" />;
    return <Settings className="w-4 h-4" />;
 };
