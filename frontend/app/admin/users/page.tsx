@@ -40,7 +40,7 @@ import DeleteUserAlert from '@/components/forms/DeleteUserAlert';
 const userFormSchema = z.object({
    firstName: z.string().min(1, 'First name is required'),
    lastName: z.string().min(1, 'Last name is required'),
-   email: z.string().email('Invalid email address'),
+   email: z.string().optional(),
    password: z.string().min(6, 'Minimum 6 characters'),
    role: z.enum(['STUDENT', 'TEACHER', 'ADMIN', 'ACCOUNTANT', 'ACCOUNTLEAD', 'DRIVER', 'WORKER', 'PARENT']),
    birthDate: z.string().optional(),
@@ -149,15 +149,34 @@ export default function UserManagement() {
 
    useEffect(() => { fetchUsers(); }, []);
 
+   const watchedFirstName = form.watch('firstName');
+   const watchedLastName = form.watch('lastName');
+
+   const previewUserId = useMemo(() => {
+      const fi = (watchedFirstName?.trim()?.[0] ?? 'X').toUpperCase().replace(/[^A-Z]/g, 'X');
+      const li = (watchedLastName?.trim()?.[0] ?? 'X').toUpperCase().replace(/[^A-Z]/g, 'X');
+      const yy = String(new Date().getFullYear()).slice(-2);
+      const prefix = `${fi}${li}${yy}`;
+      let maxSeq = 0;
+      for (const u of users) {
+         if (u.userId && String(u.userId).toUpperCase().startsWith(prefix)) {
+            const seq = parseInt(String(u.userId).slice(4), 10);
+            if (!isNaN(seq) && seq > maxSeq) maxSeq = seq;
+         }
+      }
+      return `${prefix}${String(maxSeq + 1).padStart(5, '0')}`;
+   }, [watchedFirstName, watchedLastName, users]);
+
+   const previewEmail = `${previewUserId.toLowerCase()}@2cscomplexes.com`;
+
    // --- HANDLERS ---
    const handleCreateSubmit = async (values: z.infer<typeof userFormSchema>) => {
-      if (emailDuplicate) {
-         toast.error(`Cannot create user: Email "${values.email}" is already registered.`);
-         return;
-      }
       setIsSubmitting(true);
       try {
-         await api.post('/admin/users', values);
+         await api.post('/admin/users', {
+            ...values,
+            email: previewEmail,
+         });
          toast.success('Identity generated and registered in ledger');
          setIsCreateOpen(false);
          form.reset();
@@ -166,7 +185,7 @@ export default function UserManagement() {
       } catch (error: any) {
          const msg = error?.response?.data?.error?.message
             || error?.response?.data?.message
-            || 'Generation failed — verify email address';
+            || 'Generation failed';
          toast.error(msg);
       } finally {
          setIsSubmitting(false);
@@ -637,37 +656,29 @@ export default function UserManagement() {
                            )} />
                         </div>
 
-                        {/* ── Row 2: Institutional Email (full width) ── */}
-                        <FormField control={form.control} name="email" render={({ field }) => (
+                        {/* ── Row 2: Auto-generated Institutional Email & Username Preview (full width) ── */}
+                        <FormField control={form.control} name="email" render={() => (
                            <FormItem>
-                              <FormLabel className="text-[10px] font-black uppercase text-slate-400">Institutional Email Address</FormLabel>
+                              <FormLabel className="text-[10px] font-black uppercase text-slate-400">
+                                 Institutional Email Address (Auto-Generated)
+                              </FormLabel>
                               <FormControl>
                                  <div className="relative">
                                     <Input
-                                       placeholder="email@amfofana.edu"
-                                       className={`rounded-xl bg-slate-50 border h-11 px-4 transition-colors ${emailDuplicate ? 'border-rose-400 bg-rose-50 focus-visible:ring-rose-300' : 'border-transparent'}`}
-                                       {...field}
-                                       onChange={(e) => {
-                                          field.onChange(e);
-                                          checkEmailDuplicate(e.target.value);
-                                       }}
+                                       value={watchedFirstName || watchedLastName ? previewEmail : ''}
+                                       readOnly
+                                       placeholder="e.g. kb2600003@2cscomplexes.com (auto-generated from User ID)"
+                                       className="rounded-xl bg-slate-100/80 border border-slate-200/80 h-11 px-4 font-mono text-xs text-slate-700 cursor-default"
                                     />
-                                    {emailDuplicate && (
-                                       <AlertCircle size={15} className="absolute right-3 top-3.5 text-rose-500" />
-                                    )}
                                  </div>
                               </FormControl>
-                              <FormMessage />
-                              {emailDuplicate && (
-                                 <div className="flex items-start gap-2 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2 mt-1">
-                                    <AlertCircle size={14} className="text-rose-500 shrink-0 mt-0.5" />
-                                    <p className="text-[11px] font-bold text-rose-700 leading-snug">
-                                       This email address is already registered for{' '}
-                                       <span className="font-black">{emailDuplicate.name}</span>{' '}
-                                       <span className="bg-rose-100 text-rose-600 px-1.5 py-0.5 rounded font-black text-[9px] uppercase">{emailDuplicate.role}</span>
-                                    </p>
-                                 </div>
-                              )}
+                              <p className="text-[10px] font-bold text-slate-400">
+                                 Strapi Username:{' '}
+                                 <span className="text-slate-700 font-black">
+                                    {[watchedFirstName?.trim(), watchedLastName?.trim()].filter(Boolean).join(' ') || 'First Last'}
+                                 </span>{' '}
+                                 • Generated ID: <span className="font-mono text-blue-600 font-black">{previewUserId}</span>
+                              </p>
                            </FormItem>
                         )} />
 
